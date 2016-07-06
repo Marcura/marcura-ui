@@ -1,0 +1,172 @@
+/*Base*/
+html {
+    margin: 0;
+}
+
+strong, b {
+    font-weight: bold;
+}
+
+/*.*/
+
+/*Headers*/
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4,
+h5, .h5 {
+    font-weight: 100;
+    font-family: arial, sans-serif;
+    color: #111111;
+}
+
+h1, .h1 {
+    font-size: 34px;
+    line-height: 38px;
+}
+
+h2, .h2 {
+    font-size: 28px;
+    line-height: 32px;
+}
+
+h3, .h3 {
+    font-size: 24px;
+    line-height: 28px;
+}
+
+h4, .h4 {
+    font-size: 20px;
+    line-height: 24px;
+}
+
+h5, .h5 {
+    font-size: 16px;
+    line-height: 20px;
+}
+
+/*.*/
+
+/*Links*/
+a:link, a:visited, a:active {
+    color: #1364C4;
+    text-decoration: none;
+    font: inherit;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/*.*/
+
+/*Page*/
+.ap-page {
+    color: #2A2A2A;
+}
+
+.ap-page__body {
+    margin: 0;
+    font: 14px arial, sans-serif;
+}
+
+.ap-page__inner {
+    padding: 20px;
+}
+
+.ap-page__header {
+    padding: 20px;
+    border-bottom: 1px solid #cccccc;
+}
+
+/*.*/
+
+/*Nodes*/
+/*The ">" selector is used so it is possible to include Notes blocks into each other without breaking item paddings.*/
+.ap-nodes_padding-bottom_xs > .ap-nodes__item {
+    margin-bottom: 10px;
+}
+
+.ap-nodes_padding-bottom_s > .ap-nodes__item {
+    margin-bottom: 15px;
+}
+
+.ap-nodes_padding-bottom_m > .ap-nodes__item {
+    margin-bottom: 20px;
+}
+
+.ap-nodes_padding-bottom_l > .ap-nodes__item {
+    margin-bottom: 25px;
+}
+
+.ap-nodes_padding-bottom_xl > .ap-nodes__item {
+    margin-bottom: 30px;
+}
+
+.ap-nodes__item:last-child {
+    margin-bottom: 0;
+}
+
+/*.*/
+
+/*List*/
+/*The ">" selector is used so it is possible to include Notes blocks into each other without breaking item paddings.*/
+.ap-list {
+    font: inherit;
+}
+
+.ap-list_padding-bottom_xs > .ap-list__item {
+    margin-bottom: 5px;
+}
+
+.ap-list_padding-bottom_s > .ap-list__item {
+    margin-bottom: 10px;
+}
+
+.ap-list_padding-bottom_m > .ap-list__item {
+    margin-bottom: 15px;
+}
+
+.ap-list_padding-bottom_l > .ap-list__item {
+    margin-bottom: 20px;
+}
+
+.ap-list_padding-bottom_xl > .ap-list__item {
+    margin-bottom: 25px;
+}
+
+.ap-list__item:last-child {
+    margin-bottom: 0;
+}
+
+.ap-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ap-list_type_ordered {
+    list-style-type: decimal;
+    padding: 0 0 0 20px;
+}
+
+.ap-list_type_unordered .ap-list__item {
+    position: relative;
+    padding: 0 0 0 20px;
+}
+
+.ap-list_type_unordered .ap-list__icon {
+    width: 6px;
+    height: 6px;
+    position: absolute;
+    top: 6px;
+    left: 5px;
+    border-radius: 3px;
+    background-color: #cccccc;
+}
+
+/*.*/
