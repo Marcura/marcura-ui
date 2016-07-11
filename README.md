@@ -1,4 +1,9 @@
+[npm-image]: https://img.shields.io/npm/v/marcura-ui.svg
+[npm-url]: https://npmjs.org/package/marcura-ui
+
 # Marcura UI
+
+[![NPM Version][npm-image]][npm-url]
 
 ## Dependencies
 * [Angular](https://angularjs.org/) (1.3.8).
@@ -11,6 +16,16 @@
 Download it using npm:
 
 `npm install marcura-ui --save`
+
+## Getting started
+`<script src="node_modules/marcura-ui/dest/marcura-ui.min.js"></script>`
+
+As soon as you've downloaded the package and included it in your page you need to declare a dependency on it:
+
+`angular.module('app', ['marcuraUI']);`
+
+# Documentation
+Detailed documentation about all components and services can be found [here](../../wiki).
 
 ## Development
 
