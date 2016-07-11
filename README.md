@@ -17,6 +17,16 @@ Download it using npm:
 
 `npm install marcura-ui --save`
 
+## Getting started
+`<script src="node_modules/marcura-ui/dest/marcura-ui.min.js"></script>`
+
+As soon as you've downloaded the package and included it in your page you need to declare a dependency on it:
+
+`angular.module('app', ['marcuraUI']);`
+
+# Documentation
+Detailed documentation about all components and services can be found [here](../../wiki).
+
 ## Development
 
 1. `npm install`
