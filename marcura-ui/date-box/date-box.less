@@ -1,0 +1,49 @@
+.ma-date-box {
+    display: inline-block;
+
+    &-wrapper {
+        position: relative;
+    }
+
+    &-has-time &-wrapper {
+        display: inline-block;
+        width: calc(100% - 120px);
+    }
+
+    &-date {
+        display: inline-block;
+        padding-right: 30px;
+        border-radius: 0;
+        font-size: 14px;
+    }
+
+    &-hours {
+        display: inline-block;
+        width: 60px;
+        vertical-align: top;
+    }
+
+    &-minutes {
+        display: inline-block;
+        width: 60px;
+        vertical-align: top;
+    }
+
+    &-icon {
+        position: absolute;
+        display: inline-block;
+        font-size: 14px;
+        width: 30px;
+        height: 30px;
+        vertical-align: top;
+        top: 0;
+        right: 0;
+        text-align: center;
+        cursor: pointer;
+
+        &::before {
+            top: 8px;
+            position: relative;
+        }
+    }
+}

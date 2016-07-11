@@ -1,22 +1,29 @@
 ﻿<!doctype html>
 <html lang="en" ng-app="app">
-<head class="ap-page">
+<head class="app">
     <meta charset="utf-8">
     <title>Marcura UI</title>
+    <link href="../node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet"/>
+    <link href="../node_modules/pikaday/css/pikaday.css" rel="stylesheet"/>
+    <link href="../node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
     <link href="../dest/marcura-ui.min.css" rel="stylesheet"/>
     <link href="app.css" rel="stylesheet"/>
+    <link href="date-box/date-box.css" rel="stylesheet"/>
     <script src="../node_modules/angular/angular.js"></script>
     <script src="../node_modules/angular-route/angular-route.js"></script>
+    <script src="../node_modules/moment/min/moment.min.js"></script>
+    <script src="../node_modules/pikaday/pikaday.js"></script>
     <script src="../dest/marcura-ui.js"></script>
     <script src="app.js"></script>
     <script src="home/home.js"></script>
     <script src="button/button.js"></script>
+    <script src="date-box/date-box.js"></script>
 </head>
-<body class="ap-page__body">
-<div class="ap-page__header">
+<body class="app-body">
+<div class="app-header">
     <h1>Marcura UI</h1>
 </div>
-<div class="ap-page__inner">
+<div class="app-inner">
     <div ng-view></div>
 </div>
 </body>

@@ -1,8 +1,6 @@
 angular.module('marcuraUI.components').directive('maButton', maButton);
 
 function maButton(maHelper) {
-    var blockName = 'ma-button';
-
     return {
         restrict: 'E',
         scope: {

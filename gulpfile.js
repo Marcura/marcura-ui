@@ -13,7 +13,8 @@ var paths = {
     app: {
         root: 'app/',
         html: 'app/**/*.html',
-        js: 'app/**/*.js'
+        js: 'app/**/*.js',
+        css: 'app/**/*.css'
     },
     dest: {
         root: 'dest/'
@@ -53,7 +54,8 @@ gulp.task('copy-css', function() {
         .pipe(less())
         .pipe(concat('marcura-ui.min.css'))
         .pipe(minifyCss())
-        .pipe(gulp.dest(paths.dest.root));
+        .pipe(gulp.dest(paths.dest.root))
+        .pipe(browserSync.stream());
 });
 
 gulp.task('build', function() {
@@ -76,6 +78,12 @@ gulp.task('start', function() {
         });
 
         // watch app files
+        gulp.watch(paths.app.css).on('change', function() {
+            build(browserSync.reload);
+        });
+        gulp.watch(paths.app.js).on('change', function() {
+            build(browserSync.reload);
+        });
         gulp.watch(paths.app.html).on('change', function() {
             build(browserSync.reload);
         });
