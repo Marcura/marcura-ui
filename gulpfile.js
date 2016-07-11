@@ -7,7 +7,8 @@ var gulp = require('gulp'),
     minifyCss = require('gulp-minify-css'),
     ngAnnotate = require('gulp-ng-annotate'),
     less = require('gulp-less'),
-    wrap = require('gulp-wrap');
+    wrap = require('gulp-wrap'),
+    shell = require('gulp-shell');
 
 var paths = {
     app: {
@@ -91,3 +92,7 @@ gulp.task('start', function() {
 });
 
 gulp.task('default', ['start']);
+
+// Tests
+gulp.task('unit-test', shell.task(['node node_modules/karma/bin/karma start tests/config/karma/karma.js', 'exit']));
+gulp.task('unit-test-once', shell.task(['node node_modules/karma/bin/karma start tests/config/karma/karma.js  --single-run', 'exit']));

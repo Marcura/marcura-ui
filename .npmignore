@@ -6,3 +6,4 @@ marcura-ui
 .npmignore
 gulpfile.js
 !dest
+tests

@@ -1,0 +1,318 @@
+angular.module('marcuraUI.services').factory('maDateConverter', maDateConverter);
+
+function maDateConverter(maHelper) {
+    var months = [{
+            language: 'english',
+            items: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        }, {
+            language: 'russian',
+            items: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
+        }, {
+            language: 'ukrainian',
+            items: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень']
+        }],
+        daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    var isMatch = function(date, substring) {
+        return date.match(new RegExp(substring, 'i'));
+    };
+
+    var getTotalDate = function(day, month, year) {
+        var finalMonth;
+
+        // Convert YY to YYYY according to rules
+        if (year <= 99) {
+            if (year >= 0 && year < 30) {
+                year = '20' + year;
+            } else {
+                year = '19' + year;
+            }
+        }
+
+        // Detect leap year and change amount of days in daysPerMonth for February
+        var isLeap = new Date(year, 1, 29).getMonth() === 1;
+
+        if (isLeap) {
+            daysPerMonth[1] = 29;
+        } else {
+            daysPerMonth[1] = 28;
+        }
+
+        // Convert month to number
+        if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
+            for (var j = 0; j < months.length; j++) {
+                for (var i = 0; i < months[j].items.length; i++) {
+                    if (isMatch(month, 'мая')) {
+                        finalMonth = 5;
+                        break;
+                    } else if (isMatch(month, months[j].items[i].slice(0, 3))) {
+                        finalMonth = i + 1;
+                        break;
+                    }
+                }
+            }
+
+            if (!finalMonth) {
+                return null;
+            }
+
+            month = finalMonth;
+        }
+
+        if (month > 12) {
+            return null;
+        }
+
+        if (day > daysPerMonth[month - 1]) {
+            return null;
+        }
+
+        return new Date(year, month - 1, day);
+    };
+
+    var parse = function(value) {
+        var year, month, day, splittedDate;
+
+        if (value instanceof Date) {
+            return value;
+        }
+
+        if (!angular.isString(value)) {
+            return null;
+        }
+
+        // 21-Feb-15
+        // 21 Фев 15 г.
+        // 21-February-2015
+        if (value.match(/^\d{1,2}(\/|-|\.|\s)([^\u0000-\u0080]|[a-zA-Z]){1,12}(\/|-|\.|\s)\d{2,4}\b/) !== null) {
+            splittedDate = value.split(/[-.\/\s]/);
+            day = splittedDate[0];
+            month = splittedDate[1].slice(0, 3);
+            year = splittedDate[2];
+
+            return getTotalDate(day, month, year);
+        }
+
+        // Feb 21, 15
+        // Feb 21, 2015
+        if (value.match(/([^\u0000-\u0080]|[a-zA-Z]){3}(\s)\d{1,2}(,)(\s)\d{2,4}$/) !== null) {
+            splittedDate = value.split(/[-.\/\s]/);
+            month = splittedDate[0];
+            day = splittedDate[1].substring(0, splittedDate[1].length - 1);
+            year = splittedDate[2];
+
+            return getTotalDate(day, month, year);
+        }
+
+        // 21-02
+        if (value.match(/^\d{1,2}(\/|-|\.)\d{1,2}$/) !== null) {
+            splittedDate = value.split(/[-.\/]/);
+            day = splittedDate[0];
+            month = splittedDate[1];
+            year = new Date().getFullYear();
+
+            return getTotalDate(splittedDate[0], splittedDate[1], year);
+        }
+
+        // 2015-02-21
+        if (value.match(/^\d{4}(\/|-|\.)\d{1,2}(\/|-|\.)\d{1,2}$/) !== null) {
+            splittedDate = value.split(/[-.\/]/);
+            day = splittedDate[2];
+            month = splittedDate[1];
+            year = splittedDate[0];
+
+            return getTotalDate(day, month, year);
+        }
+
+        // 21-02-15
+        // 21-02-2015
+        if (value.match(/^\d{1,2}(\/|-|\.)\d{1,2}(\/|-|\.)\d{2,4}$/) !== null) {
+            splittedDate = value.split(/[-.\/]/);
+            day = splittedDate[0];
+            month = splittedDate[1];
+            year = splittedDate[2];
+
+            // For US date format
+            if (month > 12) {
+                day = splittedDate[1];
+                month = splittedDate[0];
+            }
+
+            return getTotalDate(day, month, year);
+        }
+
+        // 2015-February-21
+        if (value.match(/^\d{4}(\/|-|\.)([^\u0000-\u0080]|[a-zA-Z]){1,12}(\/|-|\.)\d{1,2}$/) !== null) {
+            splittedDate = value.split(/[-.\/]/);
+            day = splittedDate[2];
+            month = splittedDate[1];
+            year = splittedDate[0];
+
+            return getTotalDate(day, month, year);
+        }
+
+        return null;
+    };
+
+    var format = function(date, format, culture) {
+        var languageIndex;
+
+        // Setting a culture
+        switch (culture) {
+            case 'en-US':
+                languageIndex = 0;
+                break;
+            case 'en-GB':
+                languageIndex = 0;
+                break;
+            case 'ru-RU':
+                languageIndex = 1;
+                break;
+            case 'uk-UA':
+                languageIndex = 2;
+                break;
+            default:
+                languageIndex = 0;
+                break;
+        }
+
+        // Checks
+        if (!maHelper.isDate(date)) {
+            return null;
+        }
+
+        if (!angular.isString(format)) {
+            return null;
+        }
+
+        //  Possible formats of date parts (day, month, year.
+        var datePartFormats = {
+            m: ['mm'],
+            H: ['HH'],
+            d: ['d', 'dd'],
+            M: ['M', 'MM', 'MMM', 'MMMM'],
+            y: ['yy', 'yyyy']
+        };
+
+        // Checks format string parts on conformity with available date formats
+        var checkDatePart = function(dateChar) {
+            var datePart = '';
+
+            // Try-catch construction because some sub-formats may be not listed.
+            try {
+                datePart = format.match(new RegExp(dateChar + '+', ''))[0];
+            } catch (error) {}
+
+            return datePartFormats[dateChar].indexOf(datePart);
+        };
+
+
+        var formatNumber = function(number, length) {
+            var string = '';
+
+            for (var i = 0; i < length; i++) {
+                string += '0';
+            }
+
+            return (string + number).slice(-length);
+        };
+
+        // Formats date parts
+        var formatDatePart = function(datePartFormat) {
+            var datePart = '';
+
+            switch (datePartFormat) {
+                case datePartFormats.d[0]:
+                    // d
+                    {
+                        datePart = date.getDate();
+                        break;
+                    }
+                case datePartFormats.d[1]:
+                    // dd
+                    {
+                        datePart = formatNumber(date.getDate(), 2);
+                        break;
+                    }
+                case datePartFormats.M[0]:
+                    // M
+                    {
+                        datePart = date.getMonth() + 1;
+                        break;
+                    }
+                case datePartFormats.M[1]:
+                    // MM
+                    {
+                        datePart = formatNumber(date.getMonth() + 1, 2);
+                        break;
+                    }
+                case datePartFormats.M[2]:
+                    // MMM
+                    {
+                        datePart = months[languageIndex].items[date.getMonth()].substr(0, 3);
+                        break;
+                    }
+                case datePartFormats.M[3]:
+                    // MMMM
+                    {
+                        datePart = months[languageIndex].items[date.getMonth()];
+                        break;
+                    }
+                case datePartFormats.y[0]:
+                    // yy
+                    {
+                        datePart = formatNumber(date.getFullYear(), 2);
+                        break;
+                    }
+                case datePartFormats.y[1]:
+                    // yyyy
+                    {
+                        datePart = date.getFullYear();
+                        break;
+                    }
+                case datePartFormats.H[0]:
+                    // HH
+                    {
+                        datePart = formatNumber(date.getHours(), 2);
+                        break;
+                    }
+                case datePartFormats.m[0]:
+                    // mm
+                    {
+                        datePart = formatNumber(date.getMinutes(), 2);
+                        break;
+                    }
+                default:
+                    {
+                        return '';
+                    }
+            }
+
+            return datePart;
+        };
+
+        // Check format of each part of the obtained format
+        var dateParts = {
+            days: formatDatePart(datePartFormats.d[checkDatePart('d')]),
+            months: formatDatePart(datePartFormats.M[checkDatePart('M')]),
+            years: formatDatePart(datePartFormats.y[checkDatePart('y')]),
+            hours: formatDatePart(datePartFormats.H[checkDatePart('H')]),
+            minutes: formatDatePart(datePartFormats.m[checkDatePart('m')]),
+            // Reserved
+            separator: /^\w+([^\w])/.exec(format)
+        };
+
+        // Return formatted date string
+        return format
+            .replace(/d+/, dateParts.days)
+            .replace(/y+/, dateParts.years)
+            .replace(/M+/, dateParts.months)
+            .replace(/H+/, dateParts.hours)
+            .replace(/m+/, dateParts.minutes);
+    };
+
+    return {
+        parse: parse,
+        format: format
+    };
+}
