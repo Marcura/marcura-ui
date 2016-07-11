@@ -6,11 +6,11 @@
 [![NPM Version][npm-image]][npm-url]
 
 ## Dependencies
-* [Angular](https://angularjs.org/) (1.3.8).
-* [Pikaday](https://github.com/dbushell/Pikaday) (1.3.2).
-* [Font Awesome](http://fontawesome.io/) (4.4.0 or higher).
-* [Bootstrap](http://getbootstrap.com/) (3.3.4).
-* [Moment.js](http://momentjs.com/) (2.10.2).
+* [Angular](https://angularjs.org/) (1.3.8 or higher)
+* [Pikaday](https://github.com/dbushell/Pikaday) (1.3.2 or higher)
+* [Font Awesome](http://fontawesome.io/) (4.4.0 or higher)
+* [Bootstrap](http://getbootstrap.com/) (3.3.4 or higher)
+* [Moment.js](http://momentjs.com/) (2.10.2 or higher)
 
 ## Download
 Download it using npm:
