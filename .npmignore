@@ -1,0 +1,8 @@
+node_modules
+npm-debug.log
+app
+marcura-ui
+.gitignore
+.npmignore
+gulpfile.js
+!dest
