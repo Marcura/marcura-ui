@@ -17,7 +17,8 @@ function maDateBox($timeout) {
         template: function() {
             var html = '\
             <div class="ma-date-box" ng-class="{\
-                \'ma-date-box-has-time\': hasTime\
+                    \'ma-date-box-has-time\': hasTime,\
+                    \'has-error\': (isRequired && isEmpty())\
                 }">\
                 <div class="ma-date-box-wrapper">\
                     <input class="ma-date-box-date form-control input-sm" type="text" id="{{id}}"\
@@ -39,6 +40,7 @@ function maDateBox($timeout) {
             return html;
         },
         link: function(scope, element) {
+            console.log(scope);
             var picker = null,
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
                 previousDate = null,
@@ -95,6 +97,10 @@ function maDateBox($timeout) {
             scope.format = scope.format ? scope.format : 'YYYY-MM-DD';
             scope.hoursList = getNumbers(23);
             scope.minutesList = getNumbers(59);
+
+            scope.isEmpty = function() {
+                return dateElement.val() === '';
+            };
 
             $timeout(function() {
                 picker = new Pikaday({
