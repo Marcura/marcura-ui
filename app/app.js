@@ -9,17 +9,17 @@ var app = angular.module('app', [
 app.config(['$routeProvider', '$httpProvider',
     function($routeProvider, $httpProvider) {
         $routeProvider.
-        when('/button', {
-            templateUrl: 'button/button.html',
-            controller: 'buttonController'
-        }).
-        when('/date-box', {
-            templateUrl: 'date-box/date-box.html',
-            controller: 'dateBoxController'
-        }).
         when('/home', {
             templateUrl: 'home/home.html',
             controller: 'homeController'
+        }).
+        when('/date-box', {
+            templateUrl: 'date-box-page/date-box-page.html',
+            controller: 'dateBoxPageController'
+        }).
+        when('/side-menu', {
+            templateUrl: 'side-menu-page/side-menu-page.html',
+            controller: 'sideMenuPageController'
         }).
         otherwise({
             redirectTo: '/home'

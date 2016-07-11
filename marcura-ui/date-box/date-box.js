@@ -15,7 +15,8 @@ function maDateBox($timeout) {
         },
         replace: true,
         template: function() {
-            var html = '<div class="ma-date-box" ng-class="{\
+            var html = '\
+            <div class="ma-date-box" ng-class="{\
                 \'ma-date-box-has-time\': hasTime\
                 }">\
                 <div class="ma-date-box-wrapper">\
