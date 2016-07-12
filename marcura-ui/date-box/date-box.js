@@ -124,7 +124,7 @@ function maDateBox($timeout, maDateConverter) {
 
             dateElement.on('blur', function() {
                 scope.isInvalid = false;
-                var date = dateElement.val();
+                var date = dateElement.val().trim();
 
                 if (scope.parser) {
                     date = scope.parser(date);
