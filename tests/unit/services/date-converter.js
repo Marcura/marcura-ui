@@ -1,6 +1,7 @@
 describe('maDateConverter', function() {
     var maDateConverter,
-        currentYear = new Date().getFullYear();
+        currentDate = new Date(),
+        currentYear = currentDate.getFullYear();
 
     beforeEach(module('marcuraUI.services'));
     beforeEach(inject(function(_maDateConverter_) {
@@ -8,6 +9,11 @@ describe('maDateConverter', function() {
     }));
 
     describe('parse method', function() {
+        it('parses date in dd format', function() {
+            var currentMonth = maDateConverter.format(currentDate, 'MMM');
+            expect(maDateConverter.parse('21').toString().slice(4, 15)).toEqual(currentMonth + ' 21 ' + currentYear);
+        });
+
         it('parses date in d/M format', function() {
             expect(maDateConverter.parse('1 7').toString().slice(4, 15)).toEqual('Jul 01 ' + currentYear);
             expect(maDateConverter.parse('1/7').toString().slice(4, 15)).toEqual('Jul 01 ' + currentYear);

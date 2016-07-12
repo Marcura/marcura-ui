@@ -72,6 +72,15 @@ function maDateConverter(maHelper) {
             return null;
         }
 
+        // 21
+        pattern = /^\d{1,2}$/;
+
+        if (value.match(pattern) !== null) {
+            var currentDate = new Date();
+
+            return getTotalDate(value, (currentDate.getMonth() + 1).toString(), currentDate.getFullYear());
+        }
+
         // 21-02
         pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})$/;
 
