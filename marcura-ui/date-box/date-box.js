@@ -129,7 +129,7 @@ function maDateBox($timeout, maDateConverter) {
                 if (scope.parser) {
                     date = scope.parser(date);
                 } else {
-                    date = maDateConverter.parse(date, scope.culture);
+                    date = maDateConverter.parse(date, scope.culture) || date;
                     date = getTimeZoneDate(moment(date));
                 }
 

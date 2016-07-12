@@ -62,7 +62,7 @@ function maDateConverter(maHelper) {
     };
 
     var parse = function(value, culture) {
-        var year, month, day, splittedDate, pattern;
+        var pattern, parts;
 
         if (value instanceof Date) {
             return value;
@@ -76,12 +76,9 @@ function maDateConverter(maHelper) {
         pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})$/;
 
         if (value.match(pattern) !== null) {
-            var parts = pattern.exec(value);
-            day = parts[1];
-            month = parts[3];
-            year = new Date().getFullYear();
+            parts = pattern.exec(value);
 
-            return getTotalDate(day, month, year);
+            return getTotalDate(parts[1], parts[3], new Date().getFullYear());
         }
 
         // 21 Feb 15
@@ -89,33 +86,38 @@ function maDateConverter(maHelper) {
         pattern = /^(\d{1,2})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{2,4}\b)/;
 
         if (value.match(pattern) !== null) {
-            var parts = pattern.exec(value);
-            day = parts[1];
-            month = parts[3];
-            year = parts[5];
+            parts = pattern.exec(value);
 
-            return getTotalDate(day, month, year);
+            return getTotalDate(parts[1], parts[3], parts[5]);
         }
 
         // Feb 21, 15
         // Feb 21, 2015
-        if (value.match(/([^\u0000-\u0080]|[a-zA-Z]){3}(\s)\d{1,2}(,)(\s)\d{2,4}$/) !== null) {
-            splittedDate = value.split(/[-.\/\s]/);
-            month = splittedDate[0];
-            day = splittedDate[1].substring(0, splittedDate[1].length - 1);
-            year = splittedDate[2];
+        pattern = /([^\u0000-\u0080]|[a-zA-Z]{3})(\s|)(\d{1,2})(,)(\s|)(\d{2,4})$/;
 
-            return getTotalDate(day, month, year);
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[3], parts[1], parts[6]);
+        }
+
+        // Feb 21 15
+        // February 21 2015
+        pattern = /^([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4}\b)/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[3], parts[1], parts[5]);
         }
 
         // 2015-02-21
-        if (value.match(/^\d{4}(\/|-|\.)\d{1,2}(\/|-|\.)\d{1,2}$/) !== null) {
-            splittedDate = value.split(/[-.\/]/);
-            day = splittedDate[2];
-            month = splittedDate[1];
-            year = splittedDate[0];
+        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})$/;
 
-            return getTotalDate(day, month, year);
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[5], parts[3], parts[1]);
         }
 
         // 21-02-15
@@ -123,12 +125,12 @@ function maDateConverter(maHelper) {
         pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4})$/
 
         if (value.match(pattern) !== null) {
-            var parts = pattern.exec(value);
-            day = parts[1];
-            month = parts[3];
-            year = parts[5];
+            parts = pattern.exec(value);
+            var day = parts[1],
+                month = parts[3],
+                year = parts[5];
 
-            // handle difference in en-GB and en-US formats
+            // handle difference between en-GB and en-US culture formats
             if (culture === 'en-GB' && month > 12) {
                 return null;
             }
@@ -152,13 +154,12 @@ function maDateConverter(maHelper) {
         }
 
         // 2015-February-21
-        if (value.match(/^\d{4}(\/|-|\.)([^\u0000-\u0080]|[a-zA-Z]){1,12}(\/|-|\.)\d{1,2}$/) !== null) {
-            splittedDate = value.split(/[-.\/]/);
-            day = splittedDate[2];
-            month = splittedDate[1];
-            year = splittedDate[0];
+        pattern = /^(\d{4})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})$/
 
-            return getTotalDate(day, month, year);
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[5], parts[3], parts[1]);
         }
 
         return null;
