@@ -8,7 +8,8 @@ var gulp = require('gulp'),
     ngAnnotate = require('gulp-ng-annotate'),
     less = require('gulp-less'),
     wrap = require('gulp-wrap'),
-    shell = require('gulp-shell');
+    karma = require('karma'),
+    karmaConfig = __dirname + '/tests/config/karma/karma.js';
 
 var paths = {
     app: {
@@ -91,8 +92,24 @@ gulp.task('start', function() {
     });
 });
 
-gulp.task('default', ['start']);
+gulp.task('test', function(done) {
+    new karma.Server({
+            configFile: karmaConfig,
+            action: 'run'
+        }, function() {
+            done();
+        })
+        .start();
+});
 
-// Tests
-gulp.task('unit-test', shell.task(['node node_modules/karma/bin/karma start tests/config/karma/karma.js', 'exit']));
-gulp.task('unit-test-once', shell.task(['node node_modules/karma/bin/karma start tests/config/karma/karma.js  --single-run', 'exit']));
+gulp.task('test-single', function(done) {
+    new karma.Server({
+            configFile: karmaConfig,
+            singleRun: true
+        }, function() {
+            done();
+        })
+        .start();
+});
+
+gulp.task('default', ['start']);

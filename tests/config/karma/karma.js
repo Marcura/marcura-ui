@@ -19,7 +19,6 @@ module.exports = function(config) {
             'node_modules/angular-route/angular-route.js',
             'marcura-ui/*.js',
             'marcura-ui/services/*.js',
-            'app/**/*.js',
             'tests/**/*.js'
         ]
     });

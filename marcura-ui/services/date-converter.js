@@ -2,14 +2,8 @@ angular.module('marcuraUI.services').factory('maDateConverter', maDateConverter)
 
 function maDateConverter(maHelper) {
     var months = [{
-            language: 'english',
+            language: 'en',
             items: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-        }, {
-            language: 'russian',
-            items: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
-        }, {
-            language: 'ukrainian',
-            items: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень']
         }],
         daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -42,10 +36,7 @@ function maDateConverter(maHelper) {
         if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
             for (var j = 0; j < months.length; j++) {
                 for (var i = 0; i < months[j].items.length; i++) {
-                    if (isMatch(month, 'мая')) {
-                        finalMonth = 5;
-                        break;
-                    } else if (isMatch(month, months[j].items[i].slice(0, 3))) {
+                    if (isMatch(month, months[j].items[i].slice(0, 3))) {
                         finalMonth = i + 1;
                         break;
                     }
@@ -70,7 +61,7 @@ function maDateConverter(maHelper) {
         return new Date(year, month - 1, day);
     };
 
-    var parse = function(value) {
+    var parse = function(value, culture) {
         var year, month, day, splittedDate;
 
         if (value instanceof Date) {
@@ -82,7 +73,6 @@ function maDateConverter(maHelper) {
         }
 
         // 21-Feb-15
-        // 21 Фев 15 г.
         // 21-February-2015
         if (value.match(/^\d{1,2}(\/|-|\.|\s)([^\u0000-\u0080]|[a-zA-Z]){1,12}(\/|-|\.|\s)\d{2,4}\b/) !== null) {
             splittedDate = value.split(/[-.\/\s]/);
@@ -132,8 +122,22 @@ function maDateConverter(maHelper) {
             month = splittedDate[1];
             year = splittedDate[2];
 
-            // For US date format
-            if (month > 12) {
+            // Handle difference in en-GB and en-US formats
+            if (culture === 'en-GB' && month > 12) {
+                return null;
+            }
+
+            if (culture === 'en-US') {
+                day = splittedDate[1];
+                month = splittedDate[0];
+
+                if (month > 12) {
+                    return null;
+                }
+            }
+
+            // Give priority to en-GB if culture is not set
+            if (!culture && month > 12) {
                 day = splittedDate[1];
                 month = splittedDate[0];
             }
@@ -154,29 +158,9 @@ function maDateConverter(maHelper) {
         return null;
     };
 
-    var format = function(date, format, culture) {
-        var languageIndex;
+    var format = function(date, format) {
+        var languageIndex = 0;
 
-        // Setting a culture
-        switch (culture) {
-            case 'en-US':
-                languageIndex = 0;
-                break;
-            case 'en-GB':
-                languageIndex = 0;
-                break;
-            case 'ru-RU':
-                languageIndex = 1;
-                break;
-            case 'uk-UA':
-                languageIndex = 2;
-                break;
-            default:
-                languageIndex = 0;
-                break;
-        }
-
-        // Checks
         if (!maHelper.isDate(date)) {
             return null;
         }
@@ -185,7 +169,7 @@ function maDateConverter(maHelper) {
             return null;
         }
 
-        //  Possible formats of date parts (day, month, year.
+        //  Possible formats of date parts (day, month, year)
         var datePartFormats = {
             m: ['mm'],
             H: ['HH'],
@@ -198,14 +182,13 @@ function maDateConverter(maHelper) {
         var checkDatePart = function(dateChar) {
             var datePart = '';
 
-            // Try-catch construction because some sub-formats may be not listed.
+            // Try-catch construction because some sub-formats may be not listed
             try {
                 datePart = format.match(new RegExp(dateChar + '+', ''))[0];
             } catch (error) {}
 
             return datePartFormats[dateChar].indexOf(datePart);
         };
-
 
         var formatNumber = function(number, length) {
             var string = '';
@@ -298,7 +281,6 @@ function maDateConverter(maHelper) {
             years: formatDatePart(datePartFormats.y[checkDatePart('y')]),
             hours: formatDatePart(datePartFormats.H[checkDatePart('H')]),
             minutes: formatDatePart(datePartFormats.m[checkDatePart('m')]),
-            // Reserved
             separator: /^\w+([^\w])/.exec(format)
         };
 
