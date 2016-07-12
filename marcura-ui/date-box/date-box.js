@@ -129,8 +129,6 @@ function maDateBox($timeout, maDateConverter) {
                 if (scope.parser) {
                     date = scope.parser(date);
                 } else {
-                    console.log('date:', date);
-                    console.log('culture:', scope.culture);
                     date = maDateConverter.parse(date, scope.culture);
 
                     if (date) {
