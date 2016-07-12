@@ -1,12 +1,13 @@
 angular.module('marcuraUI.components').directive('maDateBox', maDateBox);
 
-function maDateBox($timeout) {
+function maDateBox($timeout, maDateConverter) {
     return {
         restrict: 'E',
         scope: {
             id: '@',
             date: '=',
             timeZone: '=',
+            culture: '=',
             isRequired: '=',
             change: '&',
             format: '@',
@@ -40,7 +41,6 @@ function maDateBox($timeout) {
             return html;
         },
         link: function(scope, element) {
-            console.log(scope);
             var picker = null,
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
                 previousDate = null,
@@ -124,7 +124,14 @@ function maDateBox($timeout) {
 
             dateElement.on('blur', function() {
                 var date = dateElement.val();
-                date = scope.parser ? scope.parser(date) : getTimeZoneDate(moment(date));
+                // date = scope.parser ? scope.parser(date) : getTimeZoneDate(moment(date));
+
+                if (scope.parser) {
+                    date = scope.parser(date);
+                } else {
+                    date = maDateConverter.parse(date, scope.culture);
+                    date = getTimeZoneDate(moment(date));
+                }
 
                 if (!hasDateChanged(date)) {
                     return;

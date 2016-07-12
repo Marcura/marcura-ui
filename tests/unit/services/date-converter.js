@@ -1,5 +1,6 @@
 describe('maDateConverter', function() {
-    var maDateConverter;
+    var maDateConverter,
+        currentYear = new Date().getFullYear();
 
     beforeEach(module('marcuraUI.services'));
     beforeEach(inject(function(_maDateConverter_) {
@@ -7,121 +8,125 @@ describe('maDateConverter', function() {
     }));
 
     describe('parse method', function() {
-        it('supports culture', function() {
-            // Give priority to en-GB if ulture is not set
-            expect(maDateConverter.parse('21/02/2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('02/21/2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-
-            // en-GB
-            expect(maDateConverter.parse('21/02/2015', 'en-GB').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('02/21/2015', 'en-GB')).toEqual(null);
-
-            // en-US
-            expect(maDateConverter.parse('02/21/2015', 'en-US').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21/02/2015', 'en-US')).toEqual(null);
-        });
-
-        it('parses date in yyyy/MM/dd format', function() {
-            expect(maDateConverter.parse('2015/02/21').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('2015-02-21').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('2015.02.21').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-        });
-
-        it('parses date in yyyy/M/dd format', function() {
-            expect(maDateConverter.parse('2015-2-21').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('2015-2-9').toString().slice(0, 15)).toEqual('Mon Feb 09 2015');
-            expect(maDateConverter.parse('2015/2/21').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('2015.2.21').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-        });
-
-        it('parses date in yyyy-MMMM-dd format', function() {
-            expect(maDateConverter.parse('2015-February-21').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-        });
-
         it('parses date in d/M/yy format', function() {
-            expect(maDateConverter.parse('1/7/87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
-            expect(maDateConverter.parse('1/7/15').toString().slice(0, 15)).toEqual('Wed Jul 01 2015');
-            expect(maDateConverter.parse('1.7.87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
-            expect(maDateConverter.parse('1-7-87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
-
+            expect(maDateConverter.parse('1/7/87').toString().slice(4, 15)).toEqual('Jul 01 1987');
+            expect(maDateConverter.parse('1/7/15').toString().slice(4, 15)).toEqual('Jul 01 2015');
+            expect(maDateConverter.parse('1.7.87').toString().slice(4, 15)).toEqual('Jul 01 1987');
+            expect(maDateConverter.parse('1-7-87').toString().slice(4, 15)).toEqual('Jul 01 1987');
         });
 
         it('parses date in dd/M/yy format', function() {
-            expect(maDateConverter.parse('01/7/87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
-            expect(maDateConverter.parse('01-7-87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
-            expect(maDateConverter.parse('01.7.87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
+            expect(maDateConverter.parse('01/7/87').toString().slice(4, 15)).toEqual('Jul 01 1987');
+            expect(maDateConverter.parse('01-7-87').toString().slice(4, 15)).toEqual('Jul 01 1987');
+            expect(maDateConverter.parse('01.7.87').toString().slice(4, 15)).toEqual('Jul 01 1987');
         });
 
         it('parses date in d/MM/yy format', function() {
-            expect(maDateConverter.parse('1/07/87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
-            expect(maDateConverter.parse('1-07-87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
-            expect(maDateConverter.parse('1.07.87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
+            expect(maDateConverter.parse('1/07/87').toString().slice(4, 15)).toEqual('Jul 01 1987');
+            expect(maDateConverter.parse('1-07-87').toString().slice(4, 15)).toEqual('Jul 01 1987');
+            expect(maDateConverter.parse('1.07.87').toString().slice(4, 15)).toEqual('Jul 01 1987');
         });
 
         it('parses date in dd/MM/yy format', function() {
-            expect(maDateConverter.parse('01/07/87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
-            expect(maDateConverter.parse('01-07-87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
-            expect(maDateConverter.parse('01.07.87').toString().slice(0, 15)).toEqual('Wed Jul 01 1987');
+            expect(maDateConverter.parse('010787').toString().slice(4, 15)).toEqual('Jul 01 1987');
+            expect(maDateConverter.parse('01/07/87').toString().slice(4, 15)).toEqual('Jul 01 1987');
+            expect(maDateConverter.parse('01-07-87').toString().slice(4, 15)).toEqual('Jul 01 1987');
+            expect(maDateConverter.parse('01.07.87').toString().slice(4, 15)).toEqual('Jul 01 1987');
         });
 
-        // TODO: These tests fail - fix it
         it('parses date in d/M format', function() {
-            var year = new Date().getFullYear();
-
-            expect(maDateConverter.parse('1/7').toString().slice(0, 15)).toEqual('Wed Jul 01 ' + year);
-            expect(maDateConverter.parse('1.7').toString().slice(0, 15)).toEqual('Wed Jul 01 ' + year);
-            expect(maDateConverter.parse('1-7').toString().slice(0, 15)).toEqual('Wed Jul 01 ' + year);
+            expect(maDateConverter.parse('1/7').toString().slice(4, 15)).toEqual('Jul 01 ' + currentYear);
+            expect(maDateConverter.parse('1.7').toString().slice(4, 15)).toEqual('Jul 01 ' + currentYear);
+            expect(maDateConverter.parse('1-7').toString().slice(4, 15)).toEqual('Jul 01 ' + currentYear);
         });
 
         it('parses date in dd/MM/yyyy format', function() {
-            expect(maDateConverter.parse('21/02/2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('11.02.2015').toString().slice(0, 15)).toEqual('Wed Feb 11 2015');
-            expect(maDateConverter.parse('11-02-2015').toString().slice(0, 15)).toEqual('Wed Feb 11 2015');
+            expect(maDateConverter.parse('21022015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21/02/2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('11.02.2015').toString().slice(4, 15)).toEqual('Feb 11 2015');
+            expect(maDateConverter.parse('11-02-2015').toString().slice(4, 15)).toEqual('Feb 11 2015');
 
             // en-US
-            expect(maDateConverter.parse('02/21/2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('02/21/2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('02-21-2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
+            expect(maDateConverter.parse('02212015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('02/21/2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('02/21/2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('02-21-2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
         });
 
         it('parses date in dd/M/yyyy format', function() {
-            expect(maDateConverter.parse('21/2/2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21.2.2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21-2-2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
+            expect(maDateConverter.parse('21/2/2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21.2.2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21-2-2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+        });
+
+        it('parses date in dd/MMMM/yy format', function() {
+            expect(maDateConverter.parse('21February15').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21 February 15').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21-February-15').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21/February/15').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21.February.15').toString().slice(4, 15)).toEqual('Feb 21 2015');
         });
 
         it('parses date in dd/MMMM/yyyy format', function() {
-            // en-US, en-GB
-            expect(maDateConverter.parse('21 February 2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21-February-2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21/February/2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21.February.2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
+            expect(maDateConverter.parse('21February2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21 February 2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21-February-2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21/February/2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21.February.2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
         });
 
         it('parses date in dd/MMM/yyyy format', function() {
             // en-GB
-            expect(maDateConverter.parse('Feb 21, 2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
+            expect(maDateConverter.parse('Feb 21, 2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
 
             // en-US
-            expect(maDateConverter.parse('21 Feb 2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21-Feb-2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21/Feb/2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21.Feb.2015').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
+            expect(maDateConverter.parse('21Feb2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21 Feb 2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21-Feb-2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21/Feb/2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21.Feb.2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
         });
 
         it('parses date in dd/MMM/yy format', function() {
             // en-GB
-            expect(maDateConverter.parse('Feb 21, 15').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
+            expect(maDateConverter.parse('Feb 21, 15').toString().slice(4, 15)).toEqual('Feb 21 2015');
 
             // en-US
-            expect(maDateConverter.parse('21 Feb 15').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21-Feb-15').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21/Feb/15').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
-            expect(maDateConverter.parse('21.Feb.15').toString().slice(0, 15)).toEqual('Sat Feb 21 2015');
+            expect(maDateConverter.parse('21Feb15').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21 Feb 15').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21-Feb-15').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21/Feb/15').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21.Feb.15').toString().slice(4, 15)).toEqual('Feb 21 2015');
+        });
+
+        // 21-02
+        it('parses date in dd/MM format', function() {
+            expect(maDateConverter.parse('2102').toString().slice(4, 15)).toEqual('Feb 21 ' + currentYear);
+            expect(maDateConverter.parse('21 02').toString().slice(4, 15)).toEqual('Feb 21 ' + currentYear);
+            expect(maDateConverter.parse('21-02').toString().slice(4, 15)).toEqual('Feb 21 ' + currentYear);
+            expect(maDateConverter.parse('21/02').toString().slice(4, 15)).toEqual('Feb 21 ' + currentYear);
+            expect(maDateConverter.parse('21.02').toString().slice(4, 15)).toEqual('Feb 21 ' + currentYear);
+        });
+
+        it('parses date in yyyy/MM/dd format', function() {
+            expect(maDateConverter.parse('2015/02/21').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('2015-02-21').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('2015.02.21').toString().slice(4, 15)).toEqual('Feb 21 2015');
+        });
+
+        it('parses date in yyyy/M/dd format', function() {
+            expect(maDateConverter.parse('2015-2-21').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('2015-2-9').toString().slice(4, 15)).toEqual('Feb 09 2015');
+            expect(maDateConverter.parse('2015/2/21').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('2015.2.21').toString().slice(4, 15)).toEqual('Feb 21 2015');
+        });
+
+        it('parses date in yyyy-MMMM-dd format', function() {
+            expect(maDateConverter.parse('2015-February-21').toString().slice(4, 15)).toEqual('Feb 21 2015');
         });
 
         it('parses dates where day is more than 12', function() {
-            expect(maDateConverter.parse('11/22/2015').toString().slice(0, 15)).toEqual('Sun Nov 22 2015');
+            expect(maDateConverter.parse('11/22/2015').toString().slice(4, 15)).toEqual('Nov 22 2015');
         });
 
         it('returns null if it can not parse date', function() {
@@ -144,6 +149,20 @@ describe('maDateConverter', function() {
             expect(maDateConverter.parse('28 Feb 2015').toString().slice(4, 15)).toEqual('Feb 28 2015');
             expect(maDateConverter.parse('29 Feb 2012').toString().slice(4, 15)).toEqual('Feb 29 2012');
             expect(maDateConverter.parse('28 Feb 2012').toString().slice(4, 15)).toEqual('Feb 28 2012');
+        });
+
+        it('supports culture', function() {
+            // give priority to en-GB if ulture is not set
+            expect(maDateConverter.parse('21/02/2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('02/21/2015').toString().slice(4, 15)).toEqual('Feb 21 2015');
+
+            // en-GB
+            expect(maDateConverter.parse('21/02/2015', 'en-GB').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('02/21/2015', 'en-GB')).toEqual(null);
+
+            // en-US
+            expect(maDateConverter.parse('02/21/2015', 'en-US').toString().slice(4, 15)).toEqual('Feb 21 2015');
+            expect(maDateConverter.parse('21/02/2015', 'en-US')).toEqual(null);
         });
     });
 

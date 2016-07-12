@@ -14,7 +14,7 @@ function maDateConverter(maHelper) {
     var getTotalDate = function(day, month, year) {
         var finalMonth;
 
-        // Convert YY to YYYY according to rules
+        // convert YY to YYYY according to rules
         if (year <= 99) {
             if (year >= 0 && year < 30) {
                 year = '20' + year;
@@ -23,7 +23,7 @@ function maDateConverter(maHelper) {
             }
         }
 
-        // Detect leap year and change amount of days in daysPerMonth for February
+        // detect leap year and change amount of days in daysPerMonth for February
         var isLeap = new Date(year, 1, 29).getMonth() === 1;
 
         if (isLeap) {
@@ -32,7 +32,7 @@ function maDateConverter(maHelper) {
             daysPerMonth[1] = 28;
         }
 
-        // Convert month to number
+        // convert month to number
         if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
             for (var j = 0; j < months.length; j++) {
                 for (var i = 0; i < months[j].items.length; i++) {
@@ -62,7 +62,7 @@ function maDateConverter(maHelper) {
     };
 
     var parse = function(value, culture) {
-        var year, month, day, splittedDate;
+        var year, month, day, splittedDate, pattern;
 
         if (value instanceof Date) {
             return value;
@@ -72,13 +72,27 @@ function maDateConverter(maHelper) {
             return null;
         }
 
-        // 21-Feb-15
-        // 21-February-2015
-        if (value.match(/^\d{1,2}(\/|-|\.|\s)([^\u0000-\u0080]|[a-zA-Z]){1,12}(\/|-|\.|\s)\d{2,4}\b/) !== null) {
-            splittedDate = value.split(/[-.\/\s]/);
-            day = splittedDate[0];
-            month = splittedDate[1].slice(0, 3);
-            year = splittedDate[2];
+        // 21-02
+        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})$/;
+
+        if (value.match(pattern) !== null) {
+            var parts = pattern.exec(value);
+            day = parts[1];
+            month = parts[3];
+            year = new Date().getFullYear();
+
+            return getTotalDate(day, month, year);
+        }
+
+        // 21 Feb 15
+        // 21 February 2015
+        pattern = /^(\d{1,2})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{2,4}\b)/;
+
+        if (value.match(pattern) !== null) {
+            var parts = pattern.exec(value);
+            day = parts[1];
+            month = parts[3];
+            year = parts[5];
 
             return getTotalDate(day, month, year);
         }
@@ -94,16 +108,6 @@ function maDateConverter(maHelper) {
             return getTotalDate(day, month, year);
         }
 
-        // 21-02
-        if (value.match(/^\d{1,2}(\/|-|\.)\d{1,2}$/) !== null) {
-            splittedDate = value.split(/[-.\/]/);
-            day = splittedDate[0];
-            month = splittedDate[1];
-            year = new Date().getFullYear();
-
-            return getTotalDate(splittedDate[0], splittedDate[1], year);
-        }
-
         // 2015-02-21
         if (value.match(/^\d{4}(\/|-|\.)\d{1,2}(\/|-|\.)\d{1,2}$/) !== null) {
             splittedDate = value.split(/[-.\/]/);
@@ -116,30 +120,32 @@ function maDateConverter(maHelper) {
 
         // 21-02-15
         // 21-02-2015
-        if (value.match(/^\d{1,2}(\/|-|\.)\d{1,2}(\/|-|\.)\d{2,4}$/) !== null) {
-            splittedDate = value.split(/[-.\/]/);
-            day = splittedDate[0];
-            month = splittedDate[1];
-            year = splittedDate[2];
+        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4})$/
 
-            // Handle difference in en-GB and en-US formats
+        if (value.match(pattern) !== null) {
+            var parts = pattern.exec(value);
+            day = parts[1];
+            month = parts[3];
+            year = parts[5];
+
+            // handle difference in en-GB and en-US formats
             if (culture === 'en-GB' && month > 12) {
                 return null;
             }
 
             if (culture === 'en-US') {
-                day = splittedDate[1];
-                month = splittedDate[0];
+                day = parts[3];
+                month = parts[1];
 
                 if (month > 12) {
                     return null;
                 }
             }
 
-            // Give priority to en-GB if culture is not set
+            // give priority to en-GB if culture is not set
             if (!culture && month > 12) {
-                day = splittedDate[1];
-                month = splittedDate[0];
+                day = parts[3];
+                month = parts[1];
             }
 
             return getTotalDate(day, month, year);
@@ -169,7 +175,7 @@ function maDateConverter(maHelper) {
             return null;
         }
 
-        //  Possible formats of date parts (day, month, year)
+        // possible formats of date parts (day, month, year)
         var datePartFormats = {
             m: ['mm'],
             H: ['HH'],
@@ -178,11 +184,11 @@ function maDateConverter(maHelper) {
             y: ['yy', 'yyyy']
         };
 
-        // Checks format string parts on conformity with available date formats
+        // checks format string parts on conformity with available date formats
         var checkDatePart = function(dateChar) {
             var datePart = '';
 
-            // Try-catch construction because some sub-formats may be not listed
+            // try-catch construction because some sub-formats may be not listed
             try {
                 datePart = format.match(new RegExp(dateChar + '+', ''))[0];
             } catch (error) {}
@@ -200,7 +206,7 @@ function maDateConverter(maHelper) {
             return (string + number).slice(-length);
         };
 
-        // Formats date parts
+        // formats date parts
         var formatDatePart = function(datePartFormat) {
             var datePart = '';
 
@@ -274,7 +280,7 @@ function maDateConverter(maHelper) {
             return datePart;
         };
 
-        // Check format of each part of the obtained format
+        // check format of each part of the obtained format
         var dateParts = {
             days: formatDatePart(datePartFormats.d[checkDatePart('d')]),
             months: formatDatePart(datePartFormats.M[checkDatePart('M')]),
@@ -284,7 +290,7 @@ function maDateConverter(maHelper) {
             separator: /^\w+([^\w])/.exec(format)
         };
 
-        // Return formatted date string
+        // return formatted date string
         return format
             .replace(/d+/, dateParts.days)
             .replace(/y+/, dateParts.years)
