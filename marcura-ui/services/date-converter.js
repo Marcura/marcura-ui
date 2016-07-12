@@ -13,6 +13,8 @@ function maDateConverter(maHelper) {
 
     var getTotalDate = function(day, month, year) {
         var finalMonth;
+        day = day.toString();
+        month = month.toString();
 
         // convert YY to YYYY according to rules
         if (year <= 99) {
@@ -61,6 +63,36 @@ function maDateConverter(maHelper) {
         return new Date(year, month - 1, day);
     };
 
+    var getDayAndMonth = function(day, month, culture) {
+        var dayAndMonth = {
+            day: day,
+            month: month,
+            isValid: true
+        };
+
+        // handle difference between en-GB and en-US culture formats
+        if (culture === 'en-GB' && month > 12) {
+            dayAndMonth.isValid = false;
+        }
+
+        if (culture === 'en-US') {
+            dayAndMonth.day = month;
+            dayAndMonth.month = day;
+
+            if (day > 12) {
+                dayAndMonth.isValid = false;
+            }
+        }
+
+        // give priority to en-GB if culture is not set
+        if (!culture && month > 12) {
+            dayAndMonth.day = month;
+            dayAndMonth.month = day;
+        }
+
+        return dayAndMonth;
+    };
+
     var parse = function(value, culture) {
         var pattern, parts;
 
@@ -78,7 +110,7 @@ function maDateConverter(maHelper) {
         if (value.match(pattern) !== null) {
             var currentDate = new Date();
 
-            return getTotalDate(value, (currentDate.getMonth() + 1).toString(), currentDate.getFullYear());
+            return getTotalDate(value, currentDate.getMonth() + 1, currentDate.getFullYear());
         }
 
         // 21-02
@@ -86,8 +118,13 @@ function maDateConverter(maHelper) {
 
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
+            dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
 
-            return getTotalDate(parts[1], parts[3], new Date().getFullYear());
+            if (!dayAndMonth.isValid) {
+                return null;
+            }
+
+            return getTotalDate(dayAndMonth.day, dayAndMonth.month, new Date().getFullYear());
         }
 
         // 21 Feb 15
@@ -135,31 +172,13 @@ function maDateConverter(maHelper) {
 
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
-            var day = parts[1],
-                month = parts[3],
-                year = parts[5];
+            dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
 
-            // handle difference between en-GB and en-US culture formats
-            if (culture === 'en-GB' && month > 12) {
+            if (!dayAndMonth.isValid) {
                 return null;
             }
 
-            if (culture === 'en-US') {
-                day = parts[3];
-                month = parts[1];
-
-                if (month > 12) {
-                    return null;
-                }
-            }
-
-            // give priority to en-GB if culture is not set
-            if (!culture && month > 12) {
-                day = parts[3];
-                month = parts[1];
-            }
-
-            return getTotalDate(day, month, year);
+            return getTotalDate(dayAndMonth.day, dayAndMonth.month, parts[5]);
         }
 
         // 2015-February-21

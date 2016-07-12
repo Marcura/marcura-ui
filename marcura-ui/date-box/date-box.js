@@ -10,7 +10,7 @@ function maDateBox($timeout, maDateConverter) {
             culture: '=',
             isRequired: '=',
             change: '&',
-            format: '@',
+            format: '=',
             hasTime: '=',
             parser: '='
         },
@@ -19,7 +19,7 @@ function maDateBox($timeout, maDateConverter) {
             var html = '\
             <div class="ma-date-box" ng-class="{\
                     \'ma-date-box-has-time\': hasTime,\
-                    \'has-error\': (isRequired && isEmpty())\
+                    \'has-error\': ((isRequired && isEmpty()) || isInvalid)\
                 }">\
                 <div class="ma-date-box-wrapper">\
                     <input class="ma-date-box-date form-control input-sm" type="text" id="{{id}}"\
@@ -123,23 +123,31 @@ function maDateBox($timeout, maDateConverter) {
             });
 
             dateElement.on('blur', function() {
+                scope.isInvalid = false;
                 var date = dateElement.val();
-                // date = scope.parser ? scope.parser(date) : getTimeZoneDate(moment(date));
 
                 if (scope.parser) {
                     date = scope.parser(date);
                 } else {
-                    date = maDateConverter.parse(date, scope.culture) || date;
-                    date = getTimeZoneDate(moment(date));
+                    console.log('date:', date);
+                    console.log('culture:', scope.culture);
+                    date = maDateConverter.parse(date, scope.culture);
+
+                    if (date) {
+                        date = getTimeZoneDate(moment(date));
+                    }
                 }
 
                 if (!hasDateChanged(date)) {
+                    dateElement.val(date.format(scope.format));
                     return;
                 }
 
                 if (date) {
                     dateElement.val(date.format(scope.format));
                     previousDate = date;
+                } else {
+                    scope.isInvalid = true;
                 }
 
                 onChange(date);
