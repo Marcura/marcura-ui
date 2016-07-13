@@ -9,7 +9,8 @@ var gulp = require('gulp'),
     less = require('gulp-less'),
     wrap = require('gulp-wrap'),
     karma = require('karma'),
-    karmaConfig = __dirname + '/tests/config/karma/karma.js';
+    karmaConfig = __dirname + '/tests/config/karma/karma.js',
+    jshint = require('gulp-jshint');
 
 var paths = {
     app: {
@@ -28,7 +29,7 @@ var paths = {
 };
 
 var build = function(complete) {
-    runSequence('clean', ['copy-js', 'copy-and-minify-js', 'copy-css'], complete);
+    runSequence('clean', ['check-js', 'copy-js', 'copy-and-minify-js', 'copy-css'], complete);
 }
 
 gulp.task('clean', function() {
@@ -49,6 +50,12 @@ gulp.task('copy-and-minify-js', function() {
         .pipe(uglify())
         .pipe(concat('marcura-ui.min.js'))
         .pipe(gulp.dest(paths.dest.root));
+});
+
+gulp.task('check-js', function() {
+    return gulp.src(paths.source.js)
+        .pipe(jshint())
+        .pipe(jshint.reporter('default'));
 });
 
 gulp.task('copy-css', function() {

@@ -1,5 +1,5 @@
 {
-    "version": "0.0.12",
+    "version": "0.0.13",
     "name": "marcura-ui",
     "description": "Marcura UI",
     "author": "Marcura",
@@ -29,6 +29,7 @@
         "karma": "1.1.1",
         "karma-chrome-launcher": "1.0.1",
         "karma-jasmine": "1.0.2",
-        "karma-junit-reporter": "1.1.0"
+        "karma-junit-reporter": "1.1.0",
+        "gulp-jshint": "2.0.1"
     }
 }

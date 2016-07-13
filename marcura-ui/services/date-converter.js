@@ -168,7 +168,7 @@ function maDateConverter(maHelper) {
 
         // 21-02-15
         // 21-02-2015
-        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4})$/
+        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4})$/;
 
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
@@ -182,7 +182,7 @@ function maDateConverter(maHelper) {
         }
 
         // 2015-February-21
-        pattern = /^(\d{4})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})$/
+        pattern = /^(\d{4})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})$/;
 
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
