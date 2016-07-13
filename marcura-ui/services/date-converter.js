@@ -94,7 +94,7 @@ function maDateConverter(maHelper) {
     };
 
     var parse = function(value, culture) {
-        var pattern, parts;
+        var pattern, parts, dayAndMonth;
 
         if (value instanceof Date) {
             return value;

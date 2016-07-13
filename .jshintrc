@@ -1,3 +1,10 @@
 {
-    "multistr": true
+    "multistr": true,
+    "undef": true,
+    "globals": {
+        "angular": false,
+        "moment": false,
+        "console": false,
+        "Pikaday": false
+    }
 }
