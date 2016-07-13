@@ -231,9 +231,9 @@ describe('maDateConverter', function() {
             expect(maDateConverter.format(new Date(2015, 1, 7), 'yyyy-M-dd')).toEqual('2015-2-07');
         });
 
-        it('supports hours and minutes formats', function() {
-            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0), 'HH:mm')).toEqual('12:00');
-            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0), 'yy-M-dd HH.mm')).toEqual('15-2-07 12.00');
+        it('supports hours, minutes and seconds formats', function() {
+            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 00, 42), 'HH:mm:ss')).toEqual('12:00:42');
+            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 00, 7), 'yy-M-dd HH.mm.ss')).toEqual('15-2-07 12.00.07');
         });
 
         it('supports different cultures', function() {

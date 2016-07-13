@@ -206,6 +206,7 @@ function maDateConverter(maHelper) {
 
         // possible formats of date parts (day, month, year)
         var datePartFormats = {
+            s: ['ss'],
             m: ['mm'],
             H: ['HH'],
             d: ['d', 'dd'],
@@ -300,6 +301,12 @@ function maDateConverter(maHelper) {
                         datePart = formatNumber(date.getMinutes(), 2);
                         break;
                     }
+                case datePartFormats.s[0]:
+                    // ss
+                    {
+                        datePart = formatNumber(date.getSeconds(), 2);
+                        break;
+                    }
                 default:
                     {
                         return '';
@@ -316,6 +323,7 @@ function maDateConverter(maHelper) {
             years: formatDatePart(datePartFormats.y[checkDatePart('y')]),
             hours: formatDatePart(datePartFormats.H[checkDatePart('H')]),
             minutes: formatDatePart(datePartFormats.m[checkDatePart('m')]),
+            seconds: formatDatePart(datePartFormats.s[checkDatePart('s')]),
             separator: /^\w+([^\w])/.exec(format)
         };
 
@@ -325,7 +333,8 @@ function maDateConverter(maHelper) {
             .replace(/y+/, dateParts.years)
             .replace(/M+/, dateParts.months)
             .replace(/H+/, dateParts.hours)
-            .replace(/m+/, dateParts.minutes);
+            .replace(/m+/, dateParts.minutes)
+            .replace(/s+/, dateParts.seconds);
     };
 
     return {

@@ -1,6 +1,6 @@
 angular.module('marcuraUI.components').directive('maDateBox', maDateBox);
 
-function maDateBox($timeout, maDateConverter) {
+function maDateBox($timeout, maDateConverter, maHelper) {
     return {
         restrict: 'E',
         scope: {
@@ -10,6 +10,8 @@ function maDateBox($timeout, maDateConverter) {
             culture: '=',
             isRequired: '=',
             change: '&',
+            isResettable: '=',
+            displayFormat: '=',
             format: '=',
             hasTime: '=',
             parser: '='
@@ -19,12 +21,14 @@ function maDateBox($timeout, maDateConverter) {
             var html = '\
             <div class="ma-date-box" ng-class="{\
                     \'ma-date-box-has-time\': hasTime,\
-                    \'has-error\': ((isRequired && isEmpty()) || isInvalid)\
+                    \'has-error\': ((isRequired && isEmpty()) || isInvalid),\
+                    \'ma-date-box-is-resettable\': isResettable,\
                 }">\
                 <div class="ma-date-box-wrapper">\
                     <input class="ma-date-box-date form-control input-sm" type="text" id="{{id}}"\
                         ng-required="isRequired"/>\
                     <i class="ma-date-box-icon fa fa-calendar"></i>\
+                    <ma-reset-value ng-show="isResettable && date"></ma-reset-value>\
                 </div><select ui-select2="{ minimumResultsForSearch: -1 }"\
                     class="ma-date-box-hours"\
                     ng-model="hours"\
@@ -40,10 +44,13 @@ function maDateBox($timeout, maDateConverter) {
 
             return html;
         },
-        link: function(scope, element) {
+        link: function(scope, element, attributes) {
             var picker = null,
+                dateType = 'String',
+                displayFormat = scope.displayFormat ? scope.displayFormat : 'dd MMM yyyy',
                 format = scope.format ? scope.format : 'dd MMM yyyy',
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
+                resetValueElement = angular.element(element[0].querySelector('.ma-reset-value')),
                 previousDate = null,
                 getNumbers = function(count) {
                     var numbers = [];
@@ -80,12 +87,25 @@ function maDateBox($timeout, maDateConverter) {
                     }
 
                     scope.$apply(function() {
+                        scope.date = getDateInType(date);
                         scope.change({
-                            date: date,
+                            date: scope.date,
+                            momentDate: date,
                             hours: hours,
                             minutes: minutes
                         });
                     });
+                },
+                getDateInType = function(date) {
+                    if (!date) {
+                        return null;
+                    } else if (dateType === 'Date') {
+                        return date.toDate();
+                    } else if (dateType === 'Moment') {
+                        return date;
+                    } else {
+                        return maDateConverter.format(date.toDate(), format);
+                    }
                 },
                 hasDateChanged = function(date) {
                     if ((previousDate === null && date === null) || (previousDate && date && previousDate.diff(date) === 0)) {
@@ -94,8 +114,51 @@ function maDateBox($timeout, maDateConverter) {
 
                     return true;
                 },
-                formatDate = function(date) {
-                    return maDateConverter.format(date.toDate(), format);
+                formatDisplayDate = function(date) {
+                    if (!date) {
+                        return '';
+                    }
+
+                    var formattedDate = maDateConverter.format(date.toDate(), displayFormat);
+
+                    // fall back to Moment
+                    if (!formattedDate) {
+                        formattedDate = date.format(displayFormat.replace('y', 'Y').replace('d', 'D'));
+                    }
+
+                    return formattedDate;
+                },
+                parseDate = function(date) {
+                    var parsedDate = null;
+
+                    if (!date) {
+                        return null;
+                    }
+
+                    if (scope.parser) {
+                        parsedDate = scope.parser(date);
+                    } else {
+                        var parsedDate = maDateConverter.parse(date, scope.culture);
+
+                        if (!parsedDate) {
+                            // fall back to Moment
+                            parsedDate = moment(date);
+                        } else {
+                            // create Moment from string, not from JavaScript Date, for the date to be a valid ISO date
+                            parsedDate = moment(maDateConverter.format(parsedDate, 'yyyy-MM-dd'));
+                        }
+
+                        if (!isValidMomentIsoDate(parsedDate)) {
+                            return null;
+                        }
+
+                        parsedDate = getTimeZoneDate(parsedDate);
+                    }
+
+                    return parsedDate;
+                },
+                isValidMomentIsoDate = function(date) {
+                    return date && date._pf && date._pf.iso;
                 };
 
             scope.hoursList = getNumbers(23);
@@ -113,7 +176,7 @@ function maDateBox($timeout, maDateConverter) {
                     maxDate: null,
                     onSelect: function() {
                         var date = getTimeZoneDate(picker.getDate());
-                        dateElement.val(formatDate(date));
+                        dateElement.val(formatDisplayDate(date));
 
                         if (!hasDateChanged(date)) {
                             return;
@@ -125,44 +188,66 @@ function maDateBox($timeout, maDateConverter) {
                 });
             });
 
+            resetValueElement.on('click', function() {
+                previousDate = null;
+                onChange();
+            });
+
             dateElement.on('blur', function() {
                 scope.isInvalid = false;
-                var date = dateElement.val().trim();
-
-                if (scope.parser) {
-                    date = scope.parser(date);
-                } else {
-                    date = maDateConverter.parse(date, scope.culture);
-
-                    if (date) {
-                        date = getTimeZoneDate(moment(date));
-                    }
-                }
+                var date = dateElement.val().trim(),
+                    isEmptyDate = date === '',
+                    isValidDate = true;
+                date = parseDate(date);
 
                 if (!hasDateChanged(date)) {
-                    dateElement.val(formatDate(date));
+                    dateElement.val(formatDisplayDate(date));
+                    scope.$apply(function() {
+                        scope.isInvalid = false;
+                    });
+
                     return;
                 }
 
                 if (date) {
-                    dateElement.val(formatDate(date));
+                    dateElement.val(formatDisplayDate(date));
                     previousDate = date;
-                } else {
-                    scope.isInvalid = true;
                 }
 
-                onChange(date);
+                isValidDate = date !== null;
+
+                if (!isEmptyDate && !isValidDate) {
+                    scope.$apply(function() {
+                        scope.isInvalid = true;
+                    });
+
+                    return;
+                }
+
+                if (date || isEmptyDate) {
+                    scope.isInvalid = isEmptyDate && !isValidDate;
+                    onChange(date);
+                }
             });
 
             // set initial date
             if (scope.date) {
+                // determine initial date type
+                if (scope.date) {
+                    if (maHelper.isDate(scope.date)) {
+                        dateType = 'Date';
+                    } else if (scope.date.isValid && scope.date.isValid()) {
+                        dateType = 'Moment';
+                    }
+                }
+
                 var date = getTimeZoneDate(scope.date);
 
                 if (!date) {
                     return;
                 }
 
-                dateElement.val(formatDate(date));
+                dateElement.val(formatDisplayDate(date));
                 previousDate = date;
 
                 if (scope.hasTime) {
@@ -170,6 +255,27 @@ function maDateBox($timeout, maDateConverter) {
                     scope.minutes = date.format('mm');
                 }
             }
+
+            scope.$watch('date', function(newDate, oldDate) {
+                if (newDate === null && oldDate === null) {
+                    return;
+                }
+
+                var date = parseDate(newDate);
+
+                if (date === null) {
+                    previousDate = null;
+                    dateElement.val('');
+                }
+
+                if (!hasDateChanged(date)) {
+                    dateElement.val(formatDisplayDate(date));
+                    return;
+                }
+
+                dateElement.val(formatDisplayDate(date));
+                previousDate = date;
+            });
 
             // TODO: Fix time functionality
             // if (scope.hasTime) {
