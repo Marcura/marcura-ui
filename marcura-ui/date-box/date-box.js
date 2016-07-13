@@ -42,6 +42,7 @@ function maDateBox($timeout, maDateConverter) {
         },
         link: function(scope, element) {
             var picker = null,
+                format = scope.format ? scope.format : 'dd MMM yyyy',
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
                 previousDate = null,
                 getNumbers = function(count) {
@@ -92,9 +93,11 @@ function maDateBox($timeout, maDateConverter) {
                     }
 
                     return true;
+                },
+                formatDate = function(date) {
+                    return maDateConverter.format(date.toDate(), format);
                 };
 
-            scope.format = scope.format ? scope.format : 'YYYY-MM-DD';
             scope.hoursList = getNumbers(23);
             scope.minutesList = getNumbers(59);
 
@@ -110,7 +113,7 @@ function maDateBox($timeout, maDateConverter) {
                     maxDate: null,
                     onSelect: function() {
                         var date = getTimeZoneDate(picker.getDate());
-                        dateElement.val(date.format(scope.format));
+                        dateElement.val(formatDate(date));
 
                         if (!hasDateChanged(date)) {
                             return;
@@ -137,12 +140,12 @@ function maDateBox($timeout, maDateConverter) {
                 }
 
                 if (!hasDateChanged(date)) {
-                    dateElement.val(date.format(scope.format));
+                    dateElement.val(formatDate(date));
                     return;
                 }
 
                 if (date) {
-                    dateElement.val(date.format(scope.format));
+                    dateElement.val(formatDate(date));
                     previousDate = date;
                 } else {
                     scope.isInvalid = true;
@@ -151,9 +154,15 @@ function maDateBox($timeout, maDateConverter) {
                 onChange(date);
             });
 
+            // set initial date
             if (scope.date) {
                 var date = getTimeZoneDate(scope.date);
-                dateElement.val(date.format(scope.format));
+
+                if (!date) {
+                    return;
+                }
+
+                dateElement.val(formatDate(date));
                 previousDate = date;
 
                 if (scope.hasTime) {
