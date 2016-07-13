@@ -225,7 +225,7 @@ function maDateBox($timeout, maDateConverter, maHelper) {
                 }
 
                 if (date || isEmptyDate) {
-                    scope.isInvalid = isEmptyDate && !isValidDate;
+                    scope.isInvalid = scope.isRequired && isEmptyDate && !isValidDate;
                     onChange(date);
                 }
             });
