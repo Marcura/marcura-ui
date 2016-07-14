@@ -138,7 +138,7 @@ function maDateBox($timeout, maDateConverter, maHelper) {
                     if (scope.parser) {
                         parsedDate = scope.parser(date);
                     } else {
-                        var parsedDate = maDateConverter.parse(date, scope.culture);
+                        parsedDate = maDateConverter.parse(date, scope.culture);
 
                         if (!parsedDate) {
                             // fall back to Moment
@@ -276,6 +276,10 @@ function maDateBox($timeout, maDateConverter, maHelper) {
                 dateElement.val(formatDisplayDate(date));
                 previousDate = date;
             });
+
+            // move id to input
+            element.removeAttr('id');
+            dateElement.attr('id', scope.id);
 
             // TODO: Fix time functionality
             // if (scope.hasTime) {
