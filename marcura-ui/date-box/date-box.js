@@ -186,6 +186,10 @@ function maDateBox($timeout, maDateConverter, maHelper) {
                         onChange(date);
                     }
                 });
+
+                // move id to input
+                element.removeAttr('id');
+                dateElement.attr('id', scope.id);
             });
 
             resetValueElement.on('click', function() {
@@ -276,10 +280,6 @@ function maDateBox($timeout, maDateConverter, maHelper) {
                 dateElement.val(formatDisplayDate(date));
                 previousDate = date;
             });
-
-            // move id to input
-            element.removeAttr('id');
-            dateElement.attr('id', scope.id);
 
             // TODO: Fix time functionality
             // if (scope.hasTime) {
