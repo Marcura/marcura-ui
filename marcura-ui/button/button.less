@@ -1,0 +1,208 @@
+@import 'marcura-ui/less.less';
+
+.ma-button {
+    position: relative;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 20px;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    border: 0;
+    margin: 0;
+    outline: 0;
+    vertical-align: middle;
+    text-align: center;
+    color: #ffffff;
+    background-color: #36a4ff;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    .user-select(none);
+
+    &:focus:not(&-link):not(&-default),
+    &:hover:not(&-link):not(&-default) {
+        text-decoration: none;
+        color: #ffffff;
+    }
+
+    &:not(&-link):not(&-is-disabled):active {
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.225) inset;
+        text-decoration: none;
+    }
+
+    &:not(&-link):not(&-is-disabled):not(&-default):active {
+        color: #ffffff;
+    }
+
+    &-is-disabled {
+        background-color: #c3c3cd;
+        cursor: default;
+        box-shadow: none;
+    }
+
+    &-xs {
+        padding: 4px 20px 6px;
+        height: 30px;
+
+        .ma-button-text {
+            font-size: 12px;
+        }
+    }
+
+    &-xs&-has-right-icon:not(&-has-text) {
+        padding-right: 10px;
+    }
+
+    &-has-text:not(&-link) {
+        min-width: 60px;
+    }
+
+    &-icon,
+    &:not(&-link):not(&-default) &-text {
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    &-icon {
+        font-size: 16px;
+        display: block;
+        width: 20px;
+        height: 20px;
+        margin-top: -10px;
+        position: absolute;
+        top: 50%;
+    }
+
+    &-icon-left {
+        left: 10px;
+    }
+
+    &-icon-right {
+        right: 10px;
+    }
+
+    &-has-left-icon {
+        padding-left: 35px;
+
+        &:not(.ma-button-has-text) {
+            padding-left: 16px;
+        }
+
+        &:not(.ma-button-has-text) .ma-button-icon-left {
+            left: 50%;
+            margin-left: -10px;
+        }
+
+        &.ma-button-has-right-icon:not(.ma-button-has-text) .ma-button-icon-left {
+            left: 50%;
+            margin-left: -18px;
+        }
+
+        &.ma-button-has-right-icon:not(.ma-button-has-text) .ma-button-icon-right {
+            right: 50%;
+            margin-right: -18px;
+        }
+    }
+
+    &-has-right-icon {
+        padding-right: 35px;
+
+        &:not(.ma-button-has-text) .ma-button-icon-right {
+            right: 50%;
+            margin-right: -10px;
+        }
+    }
+
+    &-link {
+        color: #333;
+        background: none;
+        box-shadow: none;
+
+        &:focus,
+        &:hover {
+            color: #333;
+        }
+
+        .ma-button-text {
+            font-weight: normal;
+        }
+
+        .ma-button-icon {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            background-color: #36a4ff;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            margin-top: -15px;
+        }
+
+        .ma-button-icon-left {
+            left: 0;
+        }
+
+        .ma-button-icon-right {
+            right: 0;
+        }
+
+        .ma-button-icon .fa {
+            margin-top: 6px;
+        }
+
+        &.ma-button-has-left-icon {
+            padding-left: 40px;
+        }
+
+        &.ma-button-has-right-icon {
+            padding-right: 40px;
+        }
+
+        &.ma-button-secondary .ma-button-text {
+            color: #7d7d87;
+        }
+
+        &.ma-button-secondary .ma-button-icon {
+            background-color: #7d7d87;
+        }
+
+        &.ma-button-default .ma-button-icon {
+            background-color: #f2f2f2;
+            border: 1px solid #ccc;
+        }
+
+        &:not(.ma-button-is-disabled):active .ma-button-icon {
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.225) inset;
+        }
+    }
+
+    // For a button not to collapse vertically, if text is empty, the &nbsp; symbol is used.
+    // Extra width created by this symbol is removed with a negative margin.
+    // It is not possible to use text-intend instead of &nbsp;,
+    // because it creates invisible clickable area outside a button.
+    &:not(&-has-text) &-text {
+        margin: 0 0 0 -10px;
+    }
+
+    &-secondary:not(&-link) {
+        background-color: #7d7d87;
+    }
+
+    &-default {
+        color: #333;
+
+        &:not(.ma-button-link) {
+            background-color: #f2f2f2;
+            border: 1px solid #ccc;
+        }
+
+        .ma-button-icon {
+            color: #333333;
+        }
+
+        &.ma-button-xs.ma-button-has-right-icon:not(.ma-button-has-text) {
+            padding-right: 8px;
+        }
+
+        &.ma-button-is-disabled .ma-button-icon {
+            color: #d7d7e1;
+        }
+    }
+}

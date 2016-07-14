@@ -13,6 +13,10 @@ app.config(['$routeProvider', '$httpProvider',
             templateUrl: 'home/home.html',
             controller: 'homeController'
         }).
+        when('/button', {
+            templateUrl: 'button-page/button-page.html',
+            controller: 'buttonPageController'
+        }).
         when('/date-box', {
             templateUrl: 'date-box-page/date-box-page.html',
             controller: 'dateBoxPageController'
