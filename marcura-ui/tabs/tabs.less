@@ -1,0 +1,58 @@
+@import 'marcura-ui/less.less';
+
+.ma-tabs {
+    &-list {
+        margin: 0;
+        padding: 0;
+        border-bottom: 1px solid #c3c3cd;
+    }
+
+    &-item {
+        list-style: none;
+        float: left;
+        display: block;
+        margin-right: 2px;
+        margin-bottom: -1px;
+
+        &:last-child {
+            margin-right: 0;
+        }
+
+        &-is-selected .ma-tabs-link {
+            border-color: #c3c3cd;
+            border-bottom-color: transparent;
+            color: #333333;
+            cursor: default;
+            background-color: #fff;
+        }
+
+        &-is-disabled .ma-tabs-link {
+            color: #c3c3cd;
+            cursor: default;
+            background: none;
+            border-color: transparent;
+        }
+
+        &:not(&-is-selected):not(&-is-disabled) .ma-tabs-link:hover {
+            background-color: #fafafa;
+            cursor: pointer;
+            color: #7d7d87;
+            border-color: #fafafa;
+            margin-bottom: 1px;
+            padding-bottom: 7px;
+        }
+    }
+
+    &-link {
+        .user-select(none);
+        padding: 8px 15px;
+        border-radius: 4px 4px 0 0;
+        border: 1px solid transparent;
+        color: #7d7d87;
+        display: block;
+    }
+
+    a.ma-tabs-link {
+        text-decoration: none;
+    }
+}

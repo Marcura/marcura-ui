@@ -21,6 +21,10 @@ app.config(['$routeProvider', '$httpProvider',
             templateUrl: 'side-menu-page/side-menu-page.html',
             controller: 'sideMenuPageController'
         }).
+        when('/tabs', {
+            templateUrl: 'tabs-page/tabs-page.html',
+            controller: 'tabsPageController'
+        }).
         otherwise({
             redirectTo: '/home'
         });
