@@ -6,8 +6,7 @@ function maSideMenu($state) {
         scope: {
             items: '=',
             select: '&',
-            useState: '=',
-            itemSelector: '&'
+            useState: '='
         },
         replace: true,
         template: function() {
@@ -28,31 +27,23 @@ function maSideMenu($state) {
         },
         link: function(scope, element, attributes) {
             scope.$state = $state;
-            var useState = scope.useState === false ? false : true,
-                hasItemSelector = attributes.itemSelector !== undefined,
-                itemSelector = function(item) {
-                    if (useState) {
-                        if (item.state && item.state.name) {
-                            return $state.includes(item.state.name);
-                        }
-                    } else {
-                        return item.isSelected;
-                    }
-
-                    return false;
-                };
+            var useState = scope.useState === false ? false : true;
 
             scope.isItemSelected = function(item) {
-                if (hasItemSelector) {
-                    return scope.itemSelector({
-                        item: item,
-                        defaultItemSelector: itemSelector
-                    });
+                if (item.selector) {
+                    return item.selector();
                 }
 
-                return itemSelector(item);
-            };
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
 
+                return false;
+            };
 
             scope.onSelect = function(item) {
                 if (item.isDisabled) {
