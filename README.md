@@ -7,6 +7,7 @@
 
 ## Dependencies
 * [Angular](https://angularjs.org/) (1.3.8 or higher)
+* [Angular UI Router](https://github.com/angular-ui/ui-router/wiki) (0.2.14 or higher)
 * [Pikaday](https://github.com/dbushell/Pikaday) (1.3.2 or higher)
 * [Font Awesome](http://fontawesome.io/) (4.4.0 or higher)
 * [Bootstrap](http://getbootstrap.com/) (3.3.4 or higher)
