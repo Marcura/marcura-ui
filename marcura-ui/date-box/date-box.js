@@ -62,7 +62,7 @@ function maDateBox($timeout, maDateConverter, maHelper) {
                     return numbers;
                 },
                 getTimeZoneDate = function(date) {
-                    date = scope.timeZone ? moment(date).utcOffset(scope.timeZone) : moment(date);
+                    date = scope.timeZone ? moment(date).utcOffset(scope.timeZone) : moment(date).utc();
 
                     return date.isValid() ? date : null;
                 },
@@ -104,7 +104,7 @@ function maDateBox($timeout, maDateConverter, maHelper) {
                     } else if (dateType === 'Moment') {
                         return date;
                     } else {
-                        return maDateConverter.format(date.toDate(), format);
+                        return maDateConverter.format(date, format);
                     }
                 },
                 hasDateChanged = function(date) {
@@ -119,7 +119,7 @@ function maDateBox($timeout, maDateConverter, maHelper) {
                         return '';
                     }
 
-                    var formattedDate = maDateConverter.format(date.toDate(), displayFormat);
+                    var formattedDate = maDateConverter.format(date, displayFormat);
 
                     // fall back to Moment
                     if (!formattedDate) {
@@ -148,7 +148,7 @@ function maDateBox($timeout, maDateConverter, maHelper) {
                             parsedDate = moment(maDateConverter.format(parsedDate, 'yyyy-MM-dd'));
                         }
 
-                        if (!isValidMomentIsoDate(parsedDate)) {
+                        if (!isValidMomentDate(parsedDate)) {
                             return null;
                         }
 
@@ -157,7 +157,7 @@ function maDateBox($timeout, maDateConverter, maHelper) {
 
                     return parsedDate;
                 },
-                isValidMomentIsoDate = function(date) {
+                isValidMomentDate = function(date) {
                     return date && date._pf && date._pf.iso;
                 };
 

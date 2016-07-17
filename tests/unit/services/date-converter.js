@@ -1,11 +1,13 @@
 describe('maDateConverter', function() {
     var maDateConverter,
+        window,
         currentDate = new Date(),
         currentYear = currentDate.getFullYear();
 
     beforeEach(module('marcuraUI.services'));
-    beforeEach(inject(function(_maDateConverter_) {
+    beforeEach(inject(function(_maDateConverter_, $window) {
         maDateConverter = _maDateConverter_;
+        window = $window;
     }));
 
     describe('parse method', function() {
@@ -232,8 +234,8 @@ describe('maDateConverter', function() {
         });
 
         it('supports hours, minutes and seconds formats', function() {
-            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 00, 42), 'HH:mm:ss')).toEqual('12:00:42');
-            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 00, 7), 'yy-M-dd HH.mm.ss')).toEqual('15-2-07 12.00.07');
+            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0, 42), 'HH:mm:ss')).toEqual('12:00:42');
+            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0, 7), 'yy-M-dd HH.mm.ss')).toEqual('15-2-07 12.00.07');
         });
 
         it('supports different cultures', function() {
@@ -241,6 +243,10 @@ describe('maDateConverter', function() {
             expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0), 'yy-MMM-dd', 'en-GB')).toEqual('15-Feb-07');
             expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0), 'yy-MMMM-dd', 'en-US')).toEqual('15-February-07');
             expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0), 'yy-MMMM-dd', 'en-GB')).toEqual('15-February-07');
+        });
+
+        it('supports Moment.js', function() {
+            expect(maDateConverter.format(window.moment([2015, 1, 7, 12, 0, 7]), 'yy-M-dd HH.mm.ss')).toEqual('15-2-07 12.00.07');
         });
     });
 });

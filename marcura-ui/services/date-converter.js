@@ -194,9 +194,10 @@ function maDateConverter(maHelper) {
     };
 
     var format = function(date, format) {
-        var languageIndex = 0;
+        var languageIndex = 0,
+            isMomentDate = date && date.isValid && date.isValid();
 
-        if (!maHelper.isDate(date)) {
+        if (!maHelper.isDate(date) && !isMomentDate) {
             return null;
         }
 
@@ -236,6 +237,13 @@ function maDateConverter(maHelper) {
             return (string + number).slice(-length);
         };
 
+        var day = isMomentDate ? date.date() : date.getDate(),
+            month = isMomentDate ? date.month() : date.getMonth(),
+            year = isMomentDate ? date.year() : date.getFullYear(),
+            hours = isMomentDate ? date.hours() : date.getHours(),
+            minutes = isMomentDate ? date.minutes() : date.getMinutes(),
+            seconds = isMomentDate ? date.seconds() : date.getSeconds();
+
         // formats date parts
         var formatDatePart = function(datePartFormat) {
             var datePart = '';
@@ -244,67 +252,67 @@ function maDateConverter(maHelper) {
                 case datePartFormats.d[0]:
                     // d
                     {
-                        datePart = date.getDate();
+                        datePart = day;
                         break;
                     }
                 case datePartFormats.d[1]:
                     // dd
                     {
-                        datePart = formatNumber(date.getDate(), 2);
+                        datePart = formatNumber(day, 2);
                         break;
                     }
                 case datePartFormats.M[0]:
                     // M
                     {
-                        datePart = date.getMonth() + 1;
+                        datePart = month + 1;
                         break;
                     }
                 case datePartFormats.M[1]:
                     // MM
                     {
-                        datePart = formatNumber(date.getMonth() + 1, 2);
+                        datePart = formatNumber(month + 1, 2);
                         break;
                     }
                 case datePartFormats.M[2]:
                     // MMM
                     {
-                        datePart = months[languageIndex].items[date.getMonth()].substr(0, 3);
+                        datePart = months[languageIndex].items[month].substr(0, 3);
                         break;
                     }
                 case datePartFormats.M[3]:
                     // MMMM
                     {
-                        datePart = months[languageIndex].items[date.getMonth()];
+                        datePart = months[languageIndex].items[month];
                         break;
                     }
                 case datePartFormats.y[0]:
                     // yy
                     {
-                        datePart = formatNumber(date.getFullYear(), 2);
+                        datePart = formatNumber(year, 2);
                         break;
                     }
                 case datePartFormats.y[1]:
                     // yyyy
                     {
-                        datePart = date.getFullYear();
+                        datePart = year;
                         break;
                     }
                 case datePartFormats.H[0]:
                     // HH
                     {
-                        datePart = formatNumber(date.getHours(), 2);
+                        datePart = formatNumber(hours, 2);
                         break;
                     }
                 case datePartFormats.m[0]:
                     // mm
                     {
-                        datePart = formatNumber(date.getMinutes(), 2);
+                        datePart = formatNumber(minutes, 2);
                         break;
                     }
                 case datePartFormats.s[0]:
                     // ss
                     {
-                        datePart = formatNumber(date.getSeconds(), 2);
+                        datePart = formatNumber(seconds, 2);
                         break;
                     }
                 default:
