@@ -1,6 +1,6 @@
 angular.module('marcuraUI.components').directive('maSideMenu', maSideMenu);
 
-function maSideMenu($state, $rootScope) {
+function maSideMenu($state) {
     return {
         restrict: 'E',
         scope: {
@@ -13,7 +13,7 @@ function maSideMenu($state, $rootScope) {
             var html = '\
             <div class="ma-side-menu">\
                 <div class="ma-side-menu-item" ng-repeat="item in items" ng-class="{\
-                        \'ma-side-menu-item-is-selected\': item.isSelected,\
+                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
                         \'ma-side-menu-item-is-disabled\': item.isDisabled\
                     }"\
                     ng-click="onSelect(item)">\
@@ -26,26 +26,20 @@ function maSideMenu($state, $rootScope) {
             return html;
         },
         link: function(scope) {
-            var useState = scope.useState === false ? false : true,
-                selectItem = function(stateName) {
-                    if (!useState) {
-                        return;
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
                     }
+                } else {
+                    return item.isSelected;
+                }
 
-                    var selectedItem;
-
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-
-                        if (!item.isDisabled && item.state && stateName.indexOf(item.state.name) > -1) {
-                            selectedItem = item;
-                        }
-                    });
-
-                    if (selectedItem) {
-                        selectedItem.isSelected = true;
-                    }
-                };
+                return false;
+            };
 
             scope.onSelect = function(item) {
                 if (item.isDisabled) {
@@ -67,14 +61,6 @@ function maSideMenu($state, $rootScope) {
                     });
                 }
             };
-
-            if (useState) {
-                $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
-                    selectItem(toState.name);
-                });
-
-                selectItem($state.current.name);
-            }
         }
     };
 }

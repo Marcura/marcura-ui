@@ -6,7 +6,7 @@ var app = angular.module('app', [
     'app.controllers'
 ]);
 
-app.config(['$stateProvider', function($stateProvider) {
+app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
     $stateProvider
         .state('home', {
             url: '/home',
@@ -63,4 +63,6 @@ app.config(['$stateProvider', function($stateProvider) {
             templateUrl: 'tabs-page/tabs-page.html',
             controller: 'tabsPageController'
         });
+
+    $urlRouterProvider.otherwise('/home');
 }]);

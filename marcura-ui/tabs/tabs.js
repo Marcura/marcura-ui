@@ -1,6 +1,6 @@
 angular.module('marcuraUI.components').directive('maTabs', maTabs);
 
-function maTabs($state, $rootScope) {
+function maTabs($state) {
     return {
         restrict: 'E',
         scope: {
@@ -14,7 +14,7 @@ function maTabs($state, $rootScope) {
             <div class="ma-tabs">\
                 <ul class="ma-tabs-list clearfix">\
                     <li class="ma-tabs-item" ng-repeat="item in items" ng-class="{\
-                            \'ma-tabs-item-is-selected\': item.isSelected,\
+                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
                             \'ma-tabs-item-is-disabled\': item.isDisabled\
                         }"\
                         ng-click="onSelect(item)">\
@@ -28,26 +28,20 @@ function maTabs($state, $rootScope) {
             return html;
         },
         link: function(scope) {
-            var useState = scope.useState === false ? false : true,
-                selectItem = function(stateName) {
-                    if (!useState) {
-                        return;
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
                     }
+                } else {
+                    return item.isSelected;
+                }
 
-                    var selectedItem;
-
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-
-                        if (!item.isDisabled && item.state && stateName.indexOf(item.state.name) > -1) {
-                            selectedItem = item;
-                        }
-                    });
-
-                    if (selectedItem) {
-                        selectedItem.isSelected = true;
-                    }
-                };
+                return false;
+            };
 
             scope.onSelect = function(item) {
                 if (item.isDisabled) {
@@ -69,14 +63,6 @@ function maTabs($state, $rootScope) {
                     });
                 }
             };
-
-            if (useState) {
-                $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
-                    selectItem(toState.name);
-                });
-
-                selectItem($state.current.name);
-            }
         }
     };
 }
