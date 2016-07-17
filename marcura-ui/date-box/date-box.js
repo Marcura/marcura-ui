@@ -44,7 +44,7 @@ function maDateBox($timeout, maDateConverter, maHelper) {
 
             return html;
         },
-        link: function(scope, element, attributes) {
+        link: function(scope, element) {
             var picker = null,
                 dateType = 'String',
                 displayFormat = scope.displayFormat ? scope.displayFormat : 'dd MMM yyyy',

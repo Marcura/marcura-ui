@@ -41,4 +41,8 @@ function tabsPageController($scope) {
     $scope.select = function(item) {
         console.log('select:', item);
     };
+
+    $scope.itemSelector = function(item, defaultItemSelector) {
+        return defaultItemSelector(item);
+    };
 }

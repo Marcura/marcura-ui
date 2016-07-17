@@ -6,7 +6,8 @@ function maTabs($state) {
         scope: {
             items: '=',
             select: '&',
-            useState: '='
+            useState: '=',
+            itemSelector: '&'
         },
         replace: true,
         template: function() {
@@ -27,20 +28,31 @@ function maTabs($state) {
 
             return html;
         },
-        link: function(scope) {
+        link: function(scope, element, attributes) {
             scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
+            var useState = scope.useState === false ? false : true,
+                hasItemSelector = attributes.itemSelector !== undefined,
+                itemSelector = function(item) {
+                    if (useState) {
+                        if (item.state && item.state.name) {
+                            return $state.includes(item.state.name);
+                        }
+                    } else {
+                        return item.isSelected;
+                    }
+
+                    return false;
+                };
 
             scope.isItemSelected = function(item) {
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
+                if (hasItemSelector) {
+                    return scope.itemSelector({
+                        item: item,
+                        defaultItemSelector: itemSelector
+                    });
                 }
 
-                return false;
+                return itemSelector(item);
             };
 
             scope.onSelect = function(item) {
