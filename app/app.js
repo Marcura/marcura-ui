@@ -28,6 +28,21 @@ app.config(['$stateProvider', function($stateProvider) {
             templateUrl: 'side-menu-page/side-menu-page.html',
             controller: 'sideMenuPageController'
         })
+        .state('side-menu.das', {
+            url: '/side-menu/:id/das',
+            templateUrl: 'side-menu-page/side-menu-page.html',
+            controller: 'sideMenuPageController'
+        })
+        .state('side-menu.payments', {
+            url: '/side-menu/:id/payments',
+            templateUrl: 'side-menu-page/side-menu-page.html',
+            controller: 'sideMenuPageController'
+        })
+        .state('side-menu.port-information', {
+            url: '/side-menu/port-information',
+            templateUrl: 'side-menu-page/side-menu-page.html',
+            controller: 'sideMenuPageController'
+        })
         .state('tabs', {
             url: '/tabs',
             templateUrl: 'tabs-page/tabs-page.html',
@@ -44,7 +59,7 @@ app.config(['$stateProvider', function($stateProvider) {
             controller: 'tabsPageController'
         })
         .state('tabs.payments', {
-            url: '/tabs/:id/payments',
+            url: '/tabs/payments',
             templateUrl: 'tabs-page/tabs-page.html',
             controller: 'tabsPageController'
         });

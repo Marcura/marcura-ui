@@ -32,10 +32,7 @@ function tabsPageController($scope) {
     }, {
         text: 'Payments',
         state: {
-            name: 'tabs.payments',
-            parameters: {
-                id: 3
-            }
+            name: 'tabs.payments'
         }
     }, {
         text: 'History'
