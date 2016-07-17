@@ -1,36 +1,51 @@
 angular.module('app.controllers', []);
 
 var app = angular.module('app', [
-    'ngRoute',
+    'ui.router',
     'marcuraUI',
     'app.controllers'
 ]);
 
-app.config(['$routeProvider', '$httpProvider',
-    function($routeProvider, $httpProvider) {
-        $routeProvider.
-        when('/home', {
+app.config(['$stateProvider', function($stateProvider) {
+    $stateProvider
+        .state('home', {
+            url: '/home',
             templateUrl: 'home/home.html',
             controller: 'homeController'
-        }).
-        when('/button', {
+        })
+        .state('button', {
+            url: '/button',
             templateUrl: 'button-page/button-page.html',
             controller: 'buttonPageController'
-        }).
-        when('/date-box', {
+        })
+        .state('date-box', {
+            url: '/date-box',
             templateUrl: 'date-box-page/date-box-page.html',
             controller: 'dateBoxPageController'
-        }).
-        when('/side-menu', {
+        })
+        .state('side-menu', {
+            url: '/side-menu',
             templateUrl: 'side-menu-page/side-menu-page.html',
             controller: 'sideMenuPageController'
-        }).
-        when('/tabs', {
+        })
+        .state('tabs', {
+            url: '/tabs',
             templateUrl: 'tabs-page/tabs-page.html',
             controller: 'tabsPageController'
-        }).
-        otherwise({
-            redirectTo: '/home'
+        })
+        .state('tabs.appointment-letter', {
+            url: '/tabs/:id/appointment-letter',
+            templateUrl: 'tabs-page/tabs-page.html',
+            controller: 'tabsPageController'
+        })
+        .state('tabs.da', {
+            url: '/tabs/:id/da',
+            templateUrl: 'tabs-page/tabs-page.html',
+            controller: 'tabsPageController'
+        })
+        .state('tabs.payments', {
+            url: '/tabs/:id/payments',
+            templateUrl: 'tabs-page/tabs-page.html',
+            controller: 'tabsPageController'
         });
-    }
-]);
+}]);
