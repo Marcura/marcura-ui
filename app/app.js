@@ -74,5 +74,11 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             controller: 'tabsPageController'
         });
 
+    $stateProvider.state('progress', {
+        url: '/progress',
+        templateUrl: 'progress-page/progress-page.html',
+        controller: 'progressPageController'
+    });
+
     $urlRouterProvider.otherwise('/home');
 }]);
