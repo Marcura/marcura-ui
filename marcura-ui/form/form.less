@@ -1,0 +1,152 @@
+.form {
+    .form-group::after {
+        display: table;
+        content: ' ';
+    }
+
+    &-group {
+        margin-bottom: 10px;
+
+        &::before {
+            display: table;
+            content: ' ';
+        }
+
+        &::after {
+            clear: both;
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        & > & {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        &-labels-on-top .form-label {
+            margin-top: 0;
+            margin-bottom: 2px;
+        }
+
+        &:not(&-labels-on-top) {
+            .form-col-checkbox {
+                padding-top: 4px;
+            }
+
+            .form-col-radiobox {
+                padding-top: 4px;
+            }
+        }
+
+        &-labels-right {
+            .form-col-label.col-xs-12 {
+                margin-bottom: -8px;
+            }
+
+            .form-group-editor-text .form-label {
+                margin-top: 0;
+            }
+        }
+
+        .form-col:first-child {
+            padding-left: 0;
+        }
+
+        .form-col:last-child {
+            padding-right: 0;
+        }
+
+        &-title {
+            font-size: 18px;
+            border-bottom: 1px solid #ccc;
+            padding: 0 0 5px;
+            margin: 0 0 10px;
+        }
+
+        &-sm .form-control {
+            font-size: 14px;
+        }
+    }
+
+    &-label {
+        display: block;
+        margin-top: 5px;
+        font-weight: normal;
+
+        label {
+            font-weight: normal;
+        }
+    }
+
+    &-col {
+        padding-left: 7px;
+        padding-right: 7px;
+
+        &-empty {
+            display: none;
+        }
+
+        &-text {
+            margin-top: 5px;
+        }
+    }
+
+    &-has-subgroups {
+        .form-group {
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .form-content > .form-group:not(:last-child) {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .form-content > .form-group-has-title.form-group {
+            border-bottom: 0;
+        }
+    }
+
+    .select2-container {
+        width: 100%;
+    }
+
+    &-control {
+        border-radius: 0;
+    }
+}
+
+.input-sm {
+    font-size: 14px;
+}
+
+input.form-control,
+textarea.form-control {
+    border-radius: 0;
+}
+@media (max-width: 768px) {
+    .form-col {
+        &.col-xs-12 {
+            margin-top: 10px;
+            padding-left: 0;
+            padding-right: 0;
+
+            .form-label {
+                margin-top: 0;
+            }
+        }
+
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+}
+@media (min-width: 769px) {
+    .form-group-labels-right .form-label {
+        text-align: right;
+    }
+}
