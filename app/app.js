@@ -80,5 +80,11 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
         controller: 'progressPageController'
     });
 
+    $stateProvider.state('text-box', {
+        url: '/text-box',
+        templateUrl: 'text-box-page/text-box-page.html',
+        controller: 'textBoxPageController'
+    });
+
     $urlRouterProvider.otherwise('/home');
 }]);
