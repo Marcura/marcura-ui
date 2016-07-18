@@ -1,0 +1,82 @@
+@import 'marcura-ui/less.less';
+
+.ma-grid {
+    &-top {
+        padding-bottom: 10px;
+    }
+
+    &-header {
+        border-top: 1px solid #979797;
+        border-bottom: 1px solid #c3c3cd;
+        display: flex;
+
+        &-col {
+            font-weight: bold;
+            color: #4a4a4a;
+            border-right: 1px solid #c3c3cd;
+            padding: 10px;
+            cursor: default;
+
+            &-sortable {
+                cursor: pointer;
+
+                .ma-grid-caption {
+                    position: relative;
+                    padding-right: 16px;
+                }
+            }
+
+            &:last-child {
+                border-right: 0;
+            }
+        }
+    }
+
+    &-content {
+        color: #4a4a4a;
+        border-bottom: 1px solid #e0e0dc;
+    }
+
+    &-caption {
+        display: inline-block;
+        .user-select(none);
+    }
+
+    &-col {
+        padding: 10px;
+        border-right: solid 1px #f0f0f0;
+        border-top: 1px solid #f0f0f0;
+
+        &:last-child {
+            border-right: 0;
+        }
+    }
+
+    &-row {
+        &-inner {
+            display: flex;
+        }
+
+        &:first-child .ma-grid-col {
+            border-top: 0;
+        }
+    }
+
+    &-empty {
+        &-icon {
+            margin: 40px 0 10px;
+            text-align: center;
+
+            .fa {
+                font-size: 52px;
+                color: #9b9b9b;
+                text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        &-text {
+            text-align: center;
+            color: #7d7d87;
+        }
+    }
+}

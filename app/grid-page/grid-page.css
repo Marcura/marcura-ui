@@ -1,0 +1,29 @@
+.ma-grid-das .ma-grid-header-col-vessel,
+.ma-grid-das .ma-grid-col-vessel {
+    width: 25%
+}
+
+.ma-grid-das .ma-grid-header-col-operation,
+.ma-grid-das .ma-grid-col-operation {
+    width: 4%
+}
+
+.ma-grid-das .ma-grid-header-col-commodity,
+.ma-grid-das .ma-grid-col-commodity {
+    width: 20%
+}
+
+.ma-grid-das .ma-grid-header-col-eta,
+.ma-grid-das .ma-grid-col-eta {
+    width: 6%
+}
+
+.ma-grid-das .ma-grid-header-col-status,
+.ma-grid-das .ma-grid-col-status {
+    width: 30%
+}
+
+.ma-grid-das .ma-grid-header-col-total,
+.ma-grid-das .ma-grid-col-total {
+    width: 15%;
+}

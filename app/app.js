@@ -7,28 +7,37 @@ var app = angular.module('app', [
 ]);
 
 app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
-    $stateProvider
-        .state('home', {
-            url: '/home',
-            templateUrl: 'home/home.html',
-            controller: 'homeController'
-        })
-        .state('button', {
-            url: '/button',
-            templateUrl: 'button-page/button-page.html',
-            controller: 'buttonPageController'
-        })
-        .state('date-box', {
-            url: '/date-box',
-            templateUrl: 'date-box-page/date-box-page.html',
-            controller: 'dateBoxPageController'
-        })
-        .state('side-menu', {
-            url: '/side-menu',
-            templateUrl: 'side-menu-page/side-menu-page.html',
-            controller: 'sideMenuPageController'
-        })
-        .state('side-menu.das', {
+    $stateProvider.state('home', {
+        url: '/home',
+        templateUrl: 'home/home.html',
+        controller: 'homeController'
+    });
+
+    $stateProvider.state('button', {
+        url: '/button',
+        templateUrl: 'button-page/button-page.html',
+        controller: 'buttonPageController'
+    });
+
+    $stateProvider.state('date-box', {
+        url: '/date-box',
+        templateUrl: 'date-box-page/date-box-page.html',
+        controller: 'dateBoxPageController'
+    });
+
+    $stateProvider.state('grid', {
+        url: '/grid',
+        templateUrl: 'grid-page/grid-page.html',
+        controller: 'gridPageController'
+    });
+
+    $stateProvider.state('side-menu', {
+        url: '/side-menu',
+        templateUrl: 'side-menu-page/side-menu-page.html',
+        controller: 'sideMenuPageController'
+    });
+
+    $stateProvider.state('side-menu.das', {
             url: '/side-menu/:id/das',
             templateUrl: 'side-menu-page/side-menu-page.html',
             controller: 'sideMenuPageController'
@@ -42,8 +51,9 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             url: '/side-menu/port-information',
             templateUrl: 'side-menu-page/side-menu-page.html',
             controller: 'sideMenuPageController'
-        })
-        .state('tabs', {
+        });
+
+    $stateProvider.state('tabs', {
             url: '/tabs',
             templateUrl: 'tabs-page/tabs-page.html',
             controller: 'tabsPageController'

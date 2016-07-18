@@ -1,0 +1,26 @@
+.ma-grid-order {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    .fa {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        display: block;
+        overflow: hidden;
+        text-align: center;
+
+        &::before {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            display: block;
+        }
+    }
+
+    &-asc .fa::before {
+        top: 6px;
+    }
+}
