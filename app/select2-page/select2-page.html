@@ -1,0 +1,13 @@
+<div class="nodes nodes-padding-bottom-m">
+    <div class="nodes-item">
+        <a href="#/home">Home</a>
+    </div>
+    <div class="nodes-item">
+        <h1>Select2</h1>
+    </div>
+    <div class="nodes-item">
+        <select ui-select2="{ minimumResultsForSearch: -1 }" ng-model="currency">
+            <option ng-repeat="currency in currencies" value="{{currency}}">{{currency}}</option>
+        </select>
+    </div>
+</div>

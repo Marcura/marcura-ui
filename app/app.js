@@ -2,6 +2,7 @@ angular.module('app.controllers', []);
 
 var app = angular.module('app', [
     'ui.router',
+    'ui.select2',
     'marcuraUI',
     'app.controllers'
 ]);
@@ -84,6 +85,12 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
         url: '/text-box',
         templateUrl: 'text-box-page/text-box-page.html',
         controller: 'textBoxPageController'
+    });
+
+    $stateProvider.state('select2', {
+        url: '/select2',
+        templateUrl: 'select2-page/select2-page.html',
+        controller: 'select2PageController'
     });
 
     $urlRouterProvider.otherwise('/home');
