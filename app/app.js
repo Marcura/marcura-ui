@@ -1,9 +1,11 @@
 angular.module('app.controllers', []);
+angular.module('app.services', []);
 
 var app = angular.module('app', [
     'ui.router',
     'ui.select2',
     'marcuraUI',
+    'app.services',
     'app.controllers'
 ]);
 
@@ -91,6 +93,12 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
         url: '/select2',
         templateUrl: 'select2-page/select2-page.html',
         controller: 'select2PageController'
+    });
+
+    $stateProvider.state('costs-grid', {
+        url: '/costs-grid',
+        templateUrl: 'costs-grid-page/costs-grid-page.html',
+        controller: 'costsGridPageController'
     });
 
     $urlRouterProvider.otherwise('/home');
