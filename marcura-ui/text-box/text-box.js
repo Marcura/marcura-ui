@@ -20,7 +20,6 @@ function maTextBox($timeout) {
                 <input class="ma-text-box-value form-control input-{{_size}}"\
                     ng-disabled="isDisabled"\
                     type="text"\
-                    ng-change="onChange()"\
                     ng-model="value"/>\
             </div>';
 
@@ -36,11 +35,15 @@ function maTextBox($timeout) {
                 valueElement.attr('id', scope.id);
             });
 
-            scope.onChange = function() {
+            scope.$watch('value', function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
                 scope.change({
-                    value: scope.value
+                    value: newValue
                 });
-            };
+            });
         }
     };
 }
