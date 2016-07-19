@@ -6,14 +6,21 @@ function maTextBox($timeout) {
         scope: {
             id: '@',
             value: '=',
-            size: '='
+            size: '=',
+            change: '&',
+            isDisabled: '='
         },
         replace: true,
         template: function($timeout) {
             var html = '\
-            <div class="ma-text-box">\
+            <div class="ma-text-box"\
+                ng-class="{\
+                    \'ma-text-box-is-disabled\': isDisabled\
+                }">\
                 <input class="ma-text-box-value form-control input-{{_size}}"\
+                    ng-disabled="isDisabled"\
                     type="text"\
+                    ng-change="onChange()"\
                     ng-model="value"/>\
             </div>';
 
@@ -28,6 +35,12 @@ function maTextBox($timeout) {
                 element.removeAttr('id');
                 valueElement.attr('id', scope.id);
             });
+
+            scope.onChange = function() {
+                scope.change({
+                    value: scope.value
+                });
+            };
         }
     };
 }
