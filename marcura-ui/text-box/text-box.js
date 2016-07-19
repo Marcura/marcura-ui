@@ -27,6 +27,25 @@ function maTextBox($timeout) {
         },
         link: function(scope, element) {
             var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
+            // valueType,
+
+                // getValueInType = function(value) {
+                //     if (!value) {
+                //         return null;
+                //     } else if (dateType === 'String') {
+                //         return value.toString();
+                //     } else if (angular.isNumber(value)) {
+                //         return date;
+                //     } else {
+                //         return maDateConverter.format(date, format);
+                //     }
+                // },
+                // onChange = function (value) {
+                //     scope.change({
+                //         value: value
+                //     });
+                // };
+
             scope._size = scope.size ? scope.size : 'sm';
 
             $timeout(function() {
@@ -35,15 +54,27 @@ function maTextBox($timeout) {
                 valueElement.attr('id', scope.id);
             });
 
-            scope.$watch('value', function(newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
+            // scope.$watch('value', function(newValue, oldValue) {
+            //     if (newValue === oldValue) {
+            //         return;
+            //     }
+            //
+            //     scope.change({
+            //         value: value
+            //     });
+            // });
 
-                scope.change({
-                    value: newValue
-                });
-            });
+
+            // if (scope.value) {
+            //     // determine initial value type
+            //     if (maHelper.isString(scope.value)) {
+            //         valueType = 'String';
+            //     } else {
+            //         valueType = 'Number';
+            //     }
+            //
+            //     valueElement.val(scope.value);
+            // }
         }
     };
 }
