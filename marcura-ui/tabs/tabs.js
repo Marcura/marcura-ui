@@ -1,6 +1,4 @@
-angular.module('marcuraUI.components').directive('maTabs', maTabs);
-
-function maTabs($state) {
+angular.module('marcuraUI.components').directive('maTabs', ['$state', function($state) {
     return {
         restrict: 'E',
         scope: {
@@ -69,4 +67,4 @@ function maTabs($state) {
             };
         }
     };
-}
+}]);

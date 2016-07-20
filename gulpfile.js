@@ -5,7 +5,6 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     concat = require('gulp-concat'),
     minifyCss = require('gulp-minify-css'),
-    ngAnnotate = require('gulp-ng-annotate'),
     less = require('gulp-less'),
     wrap = require('gulp-wrap'),
     karma = require('karma'),
@@ -45,7 +44,6 @@ gulp.task('copy-js', function() {
 
 gulp.task('copy-and-minify-js', function() {
     return gulp.src(paths.source.js)
-        .pipe(ngAnnotate())
         .pipe(wrap('(function(){<%=contents%>})();'))
         .pipe(uglify())
         .pipe(concat('marcura-ui.min.js'))

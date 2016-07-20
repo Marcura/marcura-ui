@@ -1,6 +1,4 @@
-angular.module('marcuraUI.components').directive('maGridOrder', maGridOrder);
-
-function maGridOrder() {
+angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
         restrict: 'E',
         scope: {
@@ -19,4 +17,4 @@ function maGridOrder() {
             return html;
         }
     };
-}
+}]);

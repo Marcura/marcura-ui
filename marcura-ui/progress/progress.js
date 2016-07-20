@@ -1,6 +1,4 @@
-angular.module('marcuraUI.components').directive('maProgress', maProgress);
-
-function maProgress() {
+angular.module('marcuraUI.components').directive('maProgress', [function() {
     return {
         restrict: 'E',
         scope: {
@@ -62,4 +60,4 @@ function maProgress() {
             };
         }
     };
-}
+}]);

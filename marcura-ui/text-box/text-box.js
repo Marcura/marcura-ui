@@ -1,6 +1,4 @@
-angular.module('marcuraUI.components').directive('maTextBox', maTextBox);
-
-function maTextBox($timeout) {
+angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
     return {
         restrict: 'E',
         scope: {
@@ -29,22 +27,22 @@ function maTextBox($timeout) {
             var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
             // valueType,
 
-                // getValueInType = function(value) {
-                //     if (!value) {
-                //         return null;
-                //     } else if (dateType === 'String') {
-                //         return value.toString();
-                //     } else if (angular.isNumber(value)) {
-                //         return date;
-                //     } else {
-                //         return maDateConverter.format(date, format);
-                //     }
-                // },
-                // onChange = function (value) {
-                //     scope.change({
-                //         value: value
-                //     });
-                // };
+            // getValueInType = function(value) {
+            //     if (!value) {
+            //         return null;
+            //     } else if (dateType === 'String') {
+            //         return value.toString();
+            //     } else if (angular.isNumber(value)) {
+            //         return date;
+            //     } else {
+            //         return maDateConverter.format(date, format);
+            //     }
+            // },
+            // onChange = function (value) {
+            //     scope.change({
+            //         value: value
+            //     });
+            // };
 
             scope._size = scope.size ? scope.size : 'sm';
 
@@ -77,4 +75,4 @@ function maTextBox($timeout) {
             // }
         }
     };
-}
+}]);

@@ -1,6 +1,4 @@
-angular.module('marcuraUI.components').directive('maDateBox', maDateBox);
-
-function maDateBox($timeout, maDateConverter, maHelper) {
+angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDateConverter', 'maHelper', function($timeout, maDateConverter, maHelper) {
     return {
         restrict: 'E',
         scope: {
@@ -293,4 +291,4 @@ function maDateBox($timeout, maDateConverter, maHelper) {
             // }
         }
     };
-}
+}]);

@@ -1,6 +1,4 @@
-angular.module('marcuraUI.components').directive('maCostsGrid', maCostsGrid);
-
-function maCostsGrid() {
+angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
     return {
         restrict: 'E',
         scope: {
@@ -19,4 +17,4 @@ function maCostsGrid() {
             console.log('scope.costItems:', scope.costItems);
         }
     };
-}
+}]);

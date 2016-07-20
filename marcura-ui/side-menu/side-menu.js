@@ -1,6 +1,4 @@
-angular.module('marcuraUI.components').directive('maSideMenu', maSideMenu);
-
-function maSideMenu($state) {
+angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
     return {
         restrict: 'E',
         scope: {
@@ -67,4 +65,4 @@ function maSideMenu($state) {
             };
         }
     };
-}
+}]);

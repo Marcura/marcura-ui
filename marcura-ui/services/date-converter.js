@@ -1,6 +1,4 @@
-angular.module('marcuraUI.services').factory('maDateConverter', maDateConverter);
-
-function maDateConverter(maHelper) {
+angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', function(maHelper) {
     var months = [{
             language: 'en',
             items: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -349,4 +347,4 @@ function maDateConverter(maHelper) {
         parse: parse,
         format: format
     };
-}
+}]);

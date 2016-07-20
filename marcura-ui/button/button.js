@@ -1,6 +1,4 @@
-angular.module('marcuraUI.components').directive('maButton', maButton);
-
-function maButton() {
+angular.module('marcuraUI.components').directive('maButton', [function() {
     return {
         restrict: 'E',
         scope: {
@@ -56,4 +54,4 @@ function maButton() {
             };
         }
     };
-}
+}]);

@@ -1,6 +1,4 @@
-angular.module('marcuraUI.services').factory('maHelper', maHelper);
-
-function maHelper() {
+angular.module('marcuraUI.services').factory('maHelper', [function() {
     return {
         isDate: function(value) {
             if (!value) {
@@ -15,4 +13,4 @@ function maHelper() {
             return pattern.test(value);
         }
     };
-}
+}]);

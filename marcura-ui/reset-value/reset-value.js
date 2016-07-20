@@ -1,6 +1,4 @@
-angular.module('marcuraUI.components').directive('maResetValue', maResetValue);
-
-function maResetValue() {
+angular.module('marcuraUI.components').directive('maResetValue', [function() {
     return {
         restrict: 'E',
         replace: true,
@@ -13,4 +11,4 @@ function maResetValue() {
             return html;
         }
     };
-}
+}]);
