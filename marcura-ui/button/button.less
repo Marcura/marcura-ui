@@ -34,6 +34,7 @@
         color: #ffffff;
     }
 
+    &-danger&-is-disabled:not(&-link),
     &-is-disabled {
         background-color: #c3c3cd;
         cursor: default;
@@ -168,8 +169,13 @@
             background-color: #7d7d87;
         }
 
-        &.ma-button-danger .ma-button-icon {
+        &.ma-button-danger:not(.ma-button-is-disabled) .ma-button-icon {
             background-color: #c9302c;
+        }
+
+        &.ma-button-danger.ma-button-is-disabled .ma-button-icon {
+            background-color: #c3c3cd;
+            box-shadow: none;
         }
 
         &.ma-button-default .ma-button-icon {
@@ -194,7 +200,7 @@
         background-color: #7d7d87;
     }
 
-    &-danger:not(&-link) {
+    &-danger:not(&-link):not(&-is-disabled) {
         background-color: #c9302c;
     }
 
