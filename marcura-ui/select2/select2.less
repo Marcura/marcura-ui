@@ -2,14 +2,11 @@
     &-container {
         min-width: 60px;
 
-        // &.select2-container-disabled {
-        //     .select2-choice {
-        //         .select2-arrow {
-        //             background-color: #eee;
-        //             border-color: #ccc;
-        //         }
-        //     }
-        // }
+        &.select2-container-disabled .select2-choice {
+            background-color: #eee;
+            border-color: #ccc;
+            cursor: not-allowed;
+        }
 
         &-disabled .select2-choice .select2-arrow {
             opacity: 0.65;

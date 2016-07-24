@@ -1,3 +1,5 @@
+@import 'marcura-ui/less.less';
+
 .form {
     .form-group::after {
         display: table;
@@ -113,6 +115,10 @@
 
     &-control {
         border-radius: 0;
+
+        &[disabled] {
+            .box-shadow(none);
+        }
     }
 
     &-footer {
