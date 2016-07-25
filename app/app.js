@@ -101,5 +101,11 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
         controller: 'costsGridPageController'
     });
 
+    $stateProvider.state('check-box', {
+        url: '/check-box',
+        templateUrl: 'check-box-page/check-box-page.html',
+        controller: 'checkBoxPageController'
+    });
+
     $urlRouterProvider.otherwise('/home');
 }]);

@@ -1,0 +1,101 @@
+@import 'marcura-ui/less.less';
+
+.ma-check-box {
+    display: inline-block;
+    position: relative;
+    padding-left: 21px;
+    cursor: pointer;
+    .user-select(none);
+
+    &-is-disabled {
+        opacity: 0.65;
+        cursor: default;
+    }
+
+    &-text {
+        line-height: 22px;
+    }
+
+    &:not(&-has-text) {
+        padding-left: 16px;
+
+        .ma-check-box-text {
+            margin: 0 0 0 -15px;
+        }
+    }
+
+    &-inner {
+        position: absolute;
+        top: 3px;
+        left: 0;
+        width: 16px;
+        height: 16px;
+        border: 1px solid #ccc;
+    }
+
+    &-icon.fa {
+        font-size: 12px;
+        top: 5px;
+        left: 2px;
+        width: 12px;
+        height: 12px;
+        line-height: 12px;
+        text-align: initial;
+        position: absolute;
+    }
+
+    &-sm {
+        padding-left: 27px;
+
+        &:not(.ma-check-box-has-text) {
+            padding-left: 22px;
+        }
+
+        .ma-check-box-inner {
+            top: 0;
+            width: 22px;
+            height: 22px;
+        }
+
+        .ma-check-box-icon.fa {
+            font-size: 14px;
+            top: 4px;
+            left: 4px;
+            width: 14px;
+            height: 14px;
+            line-height: 14px;
+        }
+    }
+
+    &-rtl {
+        padding-left: 0;
+        padding-right: 27px;
+
+        .ma-check-box-inner {
+            left: auto;
+            right: 0;
+        }
+
+        .ma-check-box-icon.fa {
+            left: auto;
+            right: 4px;
+        }
+
+        &:not(.ma-check-box-has-text) {
+            padding-right: 0;
+        }
+
+        &.ma-check-box-xs {
+            padding-left: 0;
+            padding-right: 21px;
+
+            &:not(.ma-check-box-has-text) {
+                padding-right: 16px;
+            }
+
+            .ma-check-box-icon.fa {
+                right: 2px;
+            }
+        }
+    }
+}
