@@ -125,7 +125,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
                     // fall back to Moment
                     if (!formattedDate) {
-                        formattedDate = date.format(displayFormat.replace('y', 'Y').replace('d', 'D'));
+                        formattedDate = date.format(displayFormat.replace(/y/g, 'Y').replace(/d/g, 'D'));
                     }
 
                     return formattedDate;
