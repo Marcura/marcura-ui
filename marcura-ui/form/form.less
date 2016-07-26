@@ -180,7 +180,7 @@ input.form-control,
 textarea.form-control {
     border-radius: 0;
 }
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     .form-col {
         &.col-xs-12 {
             margin-top: 10px;
@@ -198,7 +198,40 @@ textarea.form-control {
     }
 }
 @media (min-width: 769px) {
-    .form-group-labels-right .form-label {
-        text-align: right;
+    .form-group {
+        &-labels-right .form-label {
+            text-align: right;
+        }
+
+        // form group with 3 cells per row
+        &-sm-cols-3 {
+            .form-col {
+                // first cell of each row
+                &:nth-child(3n+1) {
+                    padding-left: 0;
+
+                    &:last-child {
+                        padding-right: 7px;
+                    }
+                }
+
+                // second cell of each row
+                &:nth-child(3n+2) {
+                    &:last-child {
+                        padding-right: 7px;
+                    }
+                }
+
+                // last cell of each row
+                &:nth-child(3n+3) {
+                    padding-right: 0;
+                }
+
+                // all cells starting from the second row
+                &:nth-child(n+4) {
+                    margin-top: 10px;
+                }
+            }
+        }
     }
 }
