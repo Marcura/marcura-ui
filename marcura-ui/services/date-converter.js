@@ -9,12 +9,15 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         return date.match(new RegExp(substring, 'i'));
     };
 
-    var getTotalDate = function(day, month, year) {
+    var getTotalDate = function(year, month, day, hours, minutes, seconds) {
         var finalMonth;
         day = day.toString();
         month = month.toString();
+        hours = hours || 0;
+        minutes = minutes || 0;
+        seconds = seconds || 0;
 
-        // convert YY to YYYY according to rules
+        // Convert YY to YYYY according to rules
         if (year <= 99) {
             if (year >= 0 && year < 30) {
                 year = '20' + year;
@@ -23,7 +26,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             }
         }
 
-        // detect leap year and change amount of days in daysPerMonth for February
+        // Detect leap year and change amount of days in daysPerMonth for February
         var isLeap = new Date(year, 1, 29).getMonth() === 1;
 
         if (isLeap) {
@@ -32,7 +35,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             daysPerMonth[1] = 28;
         }
 
-        // convert month to number
+        // Convert month to number
         if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
             for (var j = 0; j < months.length; j++) {
                 for (var i = 0; i < months[j].items.length; i++) {
@@ -58,7 +61,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             return null;
         }
 
-        return new Date(year, month - 1, day);
+        return new Date(year, month - 1, day, hours, minutes, seconds);
     };
 
     var getDayAndMonth = function(day, month, culture) {
@@ -68,7 +71,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             isValid: true
         };
 
-        // handle difference between en-GB and en-US culture formats
+        // Handle difference between en-GB and en-US culture formats
         if (culture === 'en-GB' && month > 12) {
             dayAndMonth.isValid = false;
         }
@@ -82,7 +85,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             }
         }
 
-        // give priority to en-GB if culture is not set
+        // Give priority to en-GB if culture is not set
         if (!culture && month > 12) {
             dayAndMonth.day = month;
             dayAndMonth.month = day;
@@ -108,7 +111,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         if (value.match(pattern) !== null) {
             var currentDate = new Date();
 
-            return getTotalDate(value, currentDate.getMonth() + 1, currentDate.getFullYear());
+            return getTotalDate(currentDate.getFullYear(), currentDate.getMonth() + 1, value);
         }
 
         // 21-02
@@ -122,7 +125,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
                 return null;
             }
 
-            return getTotalDate(dayAndMonth.day, dayAndMonth.month, new Date().getFullYear());
+            return getTotalDate(new Date().getFullYear(), dayAndMonth.month, dayAndMonth.day);
         }
 
         // 21 Feb 15
@@ -132,7 +135,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
 
-            return getTotalDate(parts[1], parts[3], parts[5]);
+            return getTotalDate(parts[5], parts[3], parts[1]);
         }
 
         // Feb 21, 15
@@ -142,7 +145,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
 
-            return getTotalDate(parts[3], parts[1], parts[6]);
+            return getTotalDate(parts[6], parts[1], parts[3]);
         }
 
         // Feb 21 15
@@ -152,7 +155,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
 
-            return getTotalDate(parts[3], parts[1], parts[5]);
+            return getTotalDate(parts[5], parts[1], parts[3]);
         }
 
         // 2015-02-21
@@ -161,7 +164,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
 
-            return getTotalDate(parts[5], parts[3], parts[1]);
+            return getTotalDate(parts[1], parts[3], parts[5]);
         }
 
         // 21-02-15
@@ -176,7 +179,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
                 return null;
             }
 
-            return getTotalDate(dayAndMonth.day, dayAndMonth.month, parts[5]);
+            return getTotalDate(parts[5], dayAndMonth.month, dayAndMonth.day);
         }
 
         // 2015-February-21
@@ -185,7 +188,16 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
 
-            return getTotalDate(parts[5], parts[3], parts[1]);
+            return getTotalDate(parts[1], parts[3], parts[5]);
+        }
+
+        // 2015-02-21T10:00:00Z
+        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)Z$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8]);
         }
 
         return null;
@@ -203,7 +215,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             return null;
         }
 
-        // possible formats of date parts (day, month, year)
+        // Possible formats of date parts (day, month, year)
         var datePartFormats = {
             s: ['ss'],
             m: ['mm'],
@@ -213,11 +225,11 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             y: ['yy', 'yyyy']
         };
 
-        // checks format string parts on conformity with available date formats
+        // Checks format string parts on conformity with available date formats
         var checkDatePart = function(dateChar) {
             var datePart = '';
 
-            // try-catch construction because some sub-formats may be not listed
+            // Try-catch construction because some sub-formats may be not listed
             try {
                 datePart = format.match(new RegExp(dateChar + '+', ''))[0];
             } catch (error) {}
@@ -242,7 +254,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             minutes = isMomentDate ? date.minutes() : date.getMinutes(),
             seconds = isMomentDate ? date.seconds() : date.getSeconds();
 
-        // formats date parts
+        // Formats date parts
         var formatDatePart = function(datePartFormat) {
             var datePart = '';
 
@@ -322,7 +334,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             return datePart;
         };
 
-        // check format of each part of the obtained format
+        // Check format of each part of the obtained format
         var dateParts = {
             days: formatDatePart(datePartFormats.d[checkDatePart('d')]),
             months: formatDatePart(datePartFormats.M[checkDatePart('M')]),
@@ -333,7 +345,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             separator: /^\w+([^\w])/.exec(format)
         };
 
-        // return formatted date string
+        // Return formatted date string
         return format
             .replace(/d+/, dateParts.days)
             .replace(/y+/, dateParts.years)
@@ -343,8 +355,29 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             .replace(/s+/, dateParts.seconds);
     };
 
+    var offset = function(date/*, timeZone*/) {
+        if (!date) {
+            return null;
+        }
+
+        // timeZoneOffset = timeZone ? moment().utcOffset(timeZone).utcOffset() : 0;
+
+        // Shift minutes to get a correct date UTC date or date in z specified time zone
+        // if (maHelper.isDate(date) || (date.isValid && date.isValid())) {
+        if (maHelper.isDate(date) || (date.isValid && date.isValid())) {
+            return moment(date);
+        } else if (typeof date === 'string') {
+            var _date = moment(date).minute(
+                moment(date).minute() + (moment().utcOffset() * -1) // + timeZoneOffset
+            );
+
+            return _date.isValid() ? _date : null;
+        }
+    };
+
     return {
         parse: parse,
-        format: format
+        format: format,
+        offset: offset
     };
 }]);

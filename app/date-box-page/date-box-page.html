@@ -9,14 +9,31 @@
         <h2>Date</h2>
     </div>
     <div class="nodes-item">
-        <label for="eta">ETA:</label>
         <ma-date-box
             id="eta"
-            date="date"
+            date="date1"
             format="'yyyy-MM-ddTHH:mm:ssZ'"
-            parser="parser"
             is-resettable="true"
             change="change(date, momentDate)">
         </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        Source date: {{date1}}
+    </div>
+    <div class="nodes-item">
+        <h2>Date in time zone GMT+10:00</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            id="eta"
+            date="date2"
+            time-zone="'GMT+10:00'"
+            format="'yyyy-MM-ddTHH:mm:ssZ'"
+            is-resettable="true"
+            change="change(date, momentDate)">
+        </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        Source date: {{date2}}
     </div>
 </div>

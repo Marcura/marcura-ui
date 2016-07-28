@@ -50,6 +50,11 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
                 resetValueElement = angular.element(element[0].querySelector('.ma-reset-value')),
                 previousDate = null,
+                time = {
+                    hours: 0,
+                    minutes: 0,
+                    seconds: 0
+                },
                 getNumbers = function(count) {
                     var numbers = [];
 
@@ -59,33 +64,18 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
                     return numbers;
                 },
-                getTimeZoneDate = function(date) {
-                    date = scope.timeZone ? moment(date).utcOffset(scope.timeZone) : moment(date);
-
-                    if (!scope.hasTime) {
-                        date = date.startOf('day');
-                    }
-
-                    return date.isValid() ? date : null;
-                },
                 onChange = function(internalDate) {
-                    var date = null,
-                        hours = scope.hours ? parseInt(scope.hours) : 0,
-                        minutes = scope.minutes ? parseInt(scope.minutes) : 0;
+                    var date = null;
 
                     if (internalDate) {
                         date = moment(new Date());
 
-                        if (scope.timeZone) {
-                            date = date.utcOffset(scope.timeZone);
-                        }
-
                         date.year(internalDate.year())
                             .month(internalDate.month())
                             .date(internalDate.date())
-                            .hour(hours)
-                            .minutes(minutes)
-                            .seconds(0);
+                            .hours(time.hours)
+                            .minutes(time.minutes)
+                            .seconds(time.seconds);
                     }
 
                     scope.$apply(function() {
@@ -93,8 +83,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         scope.change({
                             date: scope.date,
                             momentDate: date,
-                            hours: hours,
-                            minutes: minutes
+                            hours: time.hours,
+                            minutes: time.minutes,
+                            seconds: time.seconds
                         });
                     });
                 },
@@ -123,7 +114,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
                     var formattedDate = maDateConverter.format(date, displayFormat);
 
-                    // fall back to Moment
+                    // Fall back to Moment
                     if (!formattedDate) {
                         formattedDate = date.format(displayFormat.replace(/y/g, 'Y').replace(/d/g, 'D'));
                     }
@@ -131,11 +122,11 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     return formattedDate;
                 },
                 parseDate = function(date) {
-                    var parsedDate = null;
-
                     if (!date) {
                         return null;
                     }
+
+                    var parsedDate = null;
 
                     if (scope.parser) {
                         parsedDate = scope.parser(date);
@@ -143,24 +134,17 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         parsedDate = maDateConverter.parse(date, scope.culture);
 
                         if (!parsedDate) {
-                            // fall back to Moment
-                            parsedDate = moment(date);
-                        } else {
-                            // create Moment from string, not from JavaScript Date, for the date to be a valid ISO date
-                            parsedDate = moment(maDateConverter.format(parsedDate, 'yyyy-MM-ddT00:00:00Z'));
-                        }
-
-                        if (!isValidMomentDate(parsedDate)) {
                             return null;
                         }
 
-                        parsedDate = getTimeZoneDate(parsedDate);
+                        parsedDate = addTimeToDate(parsedDate);
+                        parsedDate = maDateConverter.offset(parsedDate, scope.timeZone);
                     }
 
                     return parsedDate;
                 },
-                isValidMomentDate = function(date) {
-                    return date && date._pf && date._pf.iso;
+                addTimeToDate = function(date) {
+                    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.hours, time.minutes, time.seconds);
                 };
 
             scope.hoursList = getNumbers(23);
@@ -177,7 +161,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     minDate: null,
                     maxDate: null,
                     onSelect: function() {
-                        var date = getTimeZoneDate(picker.getDate());
+                        var date = addTimeToDate(picker.getDate());
+                        date = maDateConverter.offset(date, scope.timeZone);
 
                         if (!hasDateChanged(date)) {
                             return;
@@ -188,7 +173,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     }
                 });
 
-                // move id to input
+                // Move id to input
                 element.removeAttr('id');
                 dateElement.attr('id', scope.id);
             });
@@ -235,9 +220,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 }
             });
 
-            // set initial date
+            // Set initial date
             if (scope.date) {
-                // determine initial date type
+                // Determine initial date type
                 if (scope.date) {
                     if (maHelper.isDate(scope.date)) {
                         dateType = 'Date';
@@ -246,7 +231,13 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     }
                 }
 
-                var date = getTimeZoneDate(scope.date);
+                var date = null;
+
+                if (dateType === 'String') {
+                    date = maDateConverter.parse(scope.date, scope.culture);
+                }
+
+                date = maDateConverter.offset(date, scope.timeZone);
 
                 if (!date) {
                     return;
@@ -254,6 +245,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
                 dateElement.val(formatDisplayDate(date));
                 previousDate = date;
+                time.hours = date.hours();
+                time.minutes = date.minutes();
+                time.seconds = date.seconds();
 
                 if (scope.hasTime) {
                     scope.hours = date.format('HH');

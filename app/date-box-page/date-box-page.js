@@ -2,7 +2,8 @@ angular.module('app.controllers').controller('dateBoxPageController', dateBoxPag
 
 function dateBoxPageController($scope, $timeout, maDateConverter) {
     // Moment string.
-    $scope.date = '2016-07-25T00:00:00Z';
+    $scope.date1 = '2016-07-25T10:00:00Z';
+    $scope.date2 = '2016-07-25T10:00:00Z';
 
     // Moment date.
     // $scope.date = moment('2014-12-31T00:00:00Z');
@@ -15,9 +16,13 @@ function dateBoxPageController($scope, $timeout, maDateConverter) {
     //     console.log('change momentDate:', momentDate);
     // };
 
-    $scope.$watch('date', function(newDate, oldDate) {
-        console.log('new:', newDate);
+    $scope.$watch('date1', function(newDate, oldDate) {
+        // console.log('date1:', newDate);
         // console.log('old:', oldDate);
+    });
+
+    $scope.$watch('date2', function(newDate, oldDate) {
+        // console.log('date2:', newDate);
     });
 
     // $timeout(function() {
