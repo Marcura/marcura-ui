@@ -6,7 +6,7 @@
         <h1>DateBox</h1>
     </div>
     <div class="nodes-item">
-        <h2>Date</h2>
+        <h2>Display and save date in UTC</h2>
     </div>
     <div class="nodes-item">
         <ma-date-box
@@ -21,13 +21,13 @@
         date: {{date1}}
     </div>
     <div class="nodes-item">
-        <h2>Date in time zone GMT+10:00</h2>
+        <h2>Display and save date in UTC+09:00</h2>
     </div>
     <div class="nodes-item">
         <ma-date-box
             id="eta"
             date="date2"
-            time-zone="'GMT+10:00'"
+            time-zone="'GMT+09:00'"
             format="'yyyy-MM-ddTHH:mm:ssZ'"
             is-resettable="true"
             change="change(date)">

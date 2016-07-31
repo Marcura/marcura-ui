@@ -246,6 +246,10 @@ describe('maDateConverter', function() {
             expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0, 7), 'yy-M-dd HH.mm.ss')).toEqual('15-2-07 12.00.07');
         });
 
+        it('supports time zone', function() {
+            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0, 7), 'yyyy-MM-dd HH:mm:ssZ', '+03:00')).toEqual('2015-02-07 12:00:07+03:00');
+        });
+
         it('supports different cultures', function() {
             expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0), 'yy-MMM-dd', 'en-US')).toEqual('15-Feb-07');
             expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0), 'yy-MMM-dd', 'en-GB')).toEqual('15-Feb-07');
@@ -263,6 +267,28 @@ describe('maDateConverter', function() {
             expect(maDateConverter.offsetUtc('2016-07-25T10:00:00Z').toString().slice(4, 24)).toEqual('Jul 25 2016 10:00:00');
             expect(maDateConverter.offsetUtc(new Date(2016, 6, 25, 10, 0, 0)).toString().slice(4, 24)).toEqual('Jul 25 2016 10:00:00');
             expect(maDateConverter.offsetUtc(moment([2016, 6, 25, 10, 0, 0])).toString().slice(4, 24)).toEqual('Jul 25 2016 10:00:00');
+        });
+
+        it('offsets the date to a specified time zone offset', function() {
+            expect(maDateConverter.offsetUtc('2016-07-25T10:00:00Z', 0).toString().slice(4, 24)).toEqual('Jul 25 2016 10:00:00');
+            expect(maDateConverter.offsetUtc(new Date(2016, 6, 25, 10, 0, 0), 0).toString().slice(4, 24)).toEqual('Jul 25 2016 10:00:00');
+            expect(maDateConverter.offsetUtc(moment([2016, 6, 25, 10, 0, 0]), 0).toString().slice(4, 24)).toEqual('Jul 25 2016 10:00:00');
+
+            expect(maDateConverter.offsetUtc('2016-07-25T10:00:00Z', -600).toString().slice(4, 24)).toEqual('Jul 25 2016 00:00:00');
+            expect(maDateConverter.offsetUtc(new Date(2016, 6, 25, 10, 0, 0), -600).toString().slice(4, 24)).toEqual('Jul 25 2016 00:00:00');
+            expect(maDateConverter.offsetUtc(moment([2016, 6, 25, 10, 0, 0]), -600).toString().slice(4, 24)).toEqual('Jul 25 2016 00:00:00');
+
+            expect(maDateConverter.offsetUtc('2016-07-25T06:00:00Z', -600).toString().slice(4, 24)).toEqual('Jul 24 2016 20:00:00');
+            expect(maDateConverter.offsetUtc(new Date(2016, 6, 25, 6, 0, 0), -600).toString().slice(4, 24)).toEqual('Jul 24 2016 20:00:00');
+            expect(maDateConverter.offsetUtc(moment([2016, 6, 25, 6, 0, 0]), -600).toString().slice(4, 24)).toEqual('Jul 24 2016 20:00:00');
+
+            expect(maDateConverter.offsetUtc('2016-07-25T10:00:00Z', 600).toString().slice(4, 24)).toEqual('Jul 25 2016 20:00:00');
+            expect(maDateConverter.offsetUtc(new Date(2016, 6, 25, 10, 0, 0), 600).toString().slice(4, 24)).toEqual('Jul 25 2016 20:00:00');
+            expect(maDateConverter.offsetUtc(moment([2016, 6, 25, 10, 0, 0]), 600).toString().slice(4, 24)).toEqual('Jul 25 2016 20:00:00');
+
+            expect(maDateConverter.offsetUtc('2016-07-25T20:00:00Z', 600).toString().slice(4, 24)).toEqual('Jul 26 2016 06:00:00');
+            expect(maDateConverter.offsetUtc(new Date(2016, 6, 25, 20, 0, 0), 600).toString().slice(4, 24)).toEqual('Jul 26 2016 06:00:00');
+            expect(maDateConverter.offsetUtc(moment([2016, 6, 25, 20, 0, 0]), 600).toString().slice(4, 24)).toEqual('Jul 26 2016 06:00:00');
         });
     });
 });

@@ -205,9 +205,10 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         return null;
     };
 
-    var format = function(date, format) {
+    var format = function(date, format, timeZone) {
         var languageIndex = 0,
-            isMomentDate = date && date.isValid && date.isValid();
+            isMomentDate = date && date.isValid && date.isValid(),
+            timeZone = timeZone || '';
 
         if (!maHelper.isDate(date) && !isMomentDate) {
             return null;
@@ -224,7 +225,8 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             H: ['HH'],
             d: ['d', 'dd'],
             M: ['M', 'MM', 'MMM', 'MMMM'],
-            y: ['yy', 'yyyy']
+            y: ['yy', 'yyyy'],
+            Z: ['Z']
         };
 
         // Checks format string parts on conformity with available date formats
@@ -327,6 +329,12 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
                         datePart = formatNumber(seconds, 2);
                         break;
                     }
+                case datePartFormats.Z[0]:
+                    // Z
+                    {
+                        datePart = timeZone || 'Z';
+                        break;
+                    }
                 default:
                     {
                         return '';
@@ -344,6 +352,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             hours: formatDatePart(datePartFormats.H[checkDatePart('H')]),
             minutes: formatDatePart(datePartFormats.m[checkDatePart('m')]),
             seconds: formatDatePart(datePartFormats.s[checkDatePart('s')]),
+            timeZone: formatDatePart(datePartFormats.Z[0]),
             separator: /^\w+([^\w])/.exec(format)
         };
 
@@ -354,19 +363,22 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             .replace(/M+/, dateParts.months)
             .replace(/H+/, dateParts.hours)
             .replace(/m+/, dateParts.minutes)
-            .replace(/s+/, dateParts.seconds);
+            .replace(/s+/, dateParts.seconds)
+            .replace(/Z+/, dateParts.timeZone);
     };
 
-    var offsetUtc = function(date) {
+    var offsetUtc = function(date, timeZoneOffset) {
         if (!date) {
             return null;
         }
 
+        timeZoneOffset = timeZoneOffset || 0;
+
         if (maHelper.isDate(date) || (date.isValid && date.isValid())) {
-            return moment(date);
+            return moment(date).add(timeZoneOffset, 'm');
         } else if (typeof date === 'string') {
             var _date = moment(date).minute(
-                moment(date).minute() + (moment().utcOffset() * -1)
+                moment(date).minute() + (moment().utcOffset() * -1) + timeZoneOffset
             );
 
             return _date.isValid() ? _date : null;

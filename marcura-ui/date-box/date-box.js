@@ -55,7 +55,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     minutes: 0,
                     seconds: 0
                 },
-                timeZone = scope.timeZone ? scope.timeZone.replace(/GMT/g, '') : null,
+                timeZone = scope.timeZone ? scope.timeZone.replace(/GMT/g, '') : 'Z',
+                timeZoneOffset = moment().utcOffset(timeZone).utcOffset(),
                 getNumbers = function(count) {
                     var numbers = [];
 
@@ -92,11 +93,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     } else if (dateType === 'Moment') {
                         return date;
                     } else {
-                        if (timeZone) {
-                            return maDateConverter.format(date, format).replace(/Z/g, timeZone);
-                        }
-
-                        return maDateConverter.format(date, format);
+                        return maDateConverter.format(date, format, timeZone);
                     }
                 },
                 hasDateChanged = function(date) {
@@ -107,7 +104,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     return true;
                 },
                 formatDisplayDate = function(date) {
-                    return maDateConverter.format(date, displayFormat);
+                    return maDateConverter.format(maDateConverter.offsetUtc(date, timeZoneOffset), displayFormat);
                 },
                 parseDate = function(date) {
                     if (!date) {
@@ -125,14 +122,10 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                             return null;
                         }
 
-                        parsedDate = addTimeToDate(parsedDate);
                         parsedDate = maDateConverter.offsetUtc(parsedDate);
                     }
 
                     return parsedDate;
-                },
-                addTimeToDate = function(date) {
-                    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.hours, time.minutes, time.seconds);
                 };
 
             scope.hoursList = getNumbers(23);
@@ -149,8 +142,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     minDate: null,
                     maxDate: null,
                     onSelect: function() {
-                        var date = addTimeToDate(picker.getDate());
-                        date = maDateConverter.offsetUtc(date);
+                        date = maDateConverter.offsetUtc(picker.getDate());
 
                         if (!hasDateChanged(date)) {
                             return;
@@ -229,11 +221,11 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
                 dateElement.val(formatDisplayDate(date));
                 previousDate = date;
-                time.hours = date.hours();
-                time.minutes = date.minutes();
-                time.seconds = date.seconds();
 
                 if (scope.hasTime) {
+                    time.hours = date.hours();
+                    time.minutes = date.minutes();
+                    time.seconds = date.seconds();
                     scope.hours = date.format('HH');
                     scope.minutes = date.format('mm');
                 }
