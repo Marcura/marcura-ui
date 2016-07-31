@@ -45,8 +45,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
         link: function(scope, element) {
             var picker = null,
                 dateType = 'String',
-                displayFormat = scope.displayFormat ? scope.displayFormat : 'dd MMM yyyy',
-                format = scope.format ? scope.format : 'dd MMM yyyy',
+                displayFormat = (scope.displayFormat ? scope.displayFormat : 'dd MMM yyyy').replace(/Y/g, 'y').replace(/D/g, 'd'),
+                format = (scope.format ? scope.format : 'dd MMM yyyy').replace(/Y/g, 'y').replace(/D/g, 'd'),
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
                 resetValueElement = angular.element(element[0].querySelector('.ma-reset-value')),
                 previousDate = null,
@@ -55,6 +55,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     minutes: 0,
                     seconds: 0
                 },
+                timeZone = scope.timeZone ? scope.timeZone.replace(/GMT/g, '') : null,
                 getNumbers = function(count) {
                     var numbers = [];
 
@@ -81,22 +82,20 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     scope.$apply(function() {
                         scope.date = getDateInType(date);
                         scope.change({
-                            date: scope.date,
-                            momentDate: date,
-                            hours: time.hours,
-                            minutes: time.minutes,
-                            seconds: time.seconds
+                            date: scope.date
                         });
                     });
                 },
                 getDateInType = function(date) {
                     if (!date) {
                         return null;
-                    } else if (dateType === 'Date') {
-                        return date.toDate();
                     } else if (dateType === 'Moment') {
                         return date;
                     } else {
+                        if (timeZone) {
+                            return maDateConverter.format(date, format).replace(/Z/g, timeZone);
+                        }
+
                         return maDateConverter.format(date, format);
                     }
                 },
@@ -108,18 +107,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     return true;
                 },
                 formatDisplayDate = function(date) {
-                    if (!date) {
-                        return '';
-                    }
-
-                    var formattedDate = maDateConverter.format(date, displayFormat);
-
-                    // Fall back to Moment
-                    if (!formattedDate) {
-                        formattedDate = date.format(displayFormat.replace(/y/g, 'Y').replace(/d/g, 'D'));
-                    }
-
-                    return formattedDate;
+                    return maDateConverter.format(date, displayFormat);
                 },
                 parseDate = function(date) {
                     if (!date) {
@@ -138,7 +126,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         }
 
                         parsedDate = addTimeToDate(parsedDate);
-                        parsedDate = maDateConverter.offset(parsedDate, scope.timeZone);
+                        parsedDate = maDateConverter.offsetUtc(parsedDate);
                     }
 
                     return parsedDate;
@@ -162,7 +150,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     maxDate: null,
                     onSelect: function() {
                         var date = addTimeToDate(picker.getDate());
-                        date = maDateConverter.offset(date, scope.timeZone);
+                        date = maDateConverter.offsetUtc(date);
 
                         if (!hasDateChanged(date)) {
                             return;
@@ -223,12 +211,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             // Set initial date
             if (scope.date) {
                 // Determine initial date type
-                if (scope.date) {
-                    if (maHelper.isDate(scope.date)) {
-                        dateType = 'Date';
-                    } else if (scope.date.isValid && scope.date.isValid()) {
-                        dateType = 'Moment';
-                    }
+                if (scope.date && scope.date.isValid && scope.date.isValid()) {
+                    dateType = 'Moment';
                 }
 
                 var date = null;
@@ -237,7 +221,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     date = maDateConverter.parse(scope.date, scope.culture);
                 }
 
-                date = maDateConverter.offset(date, scope.timeZone);
+                date = maDateConverter.offsetUtc(date);
 
                 if (!date) {
                     return;

@@ -192,7 +192,9 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         }
 
         // 2015-02-21T10:00:00Z
-        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)Z$/;
+        // 2015-02-21T10:00:00+03:00
+        // When a string contains a time zone in format +03:00, the time zone is ignored
+        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)(?:Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])$/;
 
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
@@ -355,20 +357,16 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             .replace(/s+/, dateParts.seconds);
     };
 
-    var offset = function(date/*, timeZone*/) {
+    var offsetUtc = function(date) {
         if (!date) {
             return null;
         }
 
-        // timeZoneOffset = timeZone ? moment().utcOffset(timeZone).utcOffset() : 0;
-
-        // Shift minutes to get a correct date UTC date or date in z specified time zone
-        // if (maHelper.isDate(date) || (date.isValid && date.isValid())) {
         if (maHelper.isDate(date) || (date.isValid && date.isValid())) {
             return moment(date);
         } else if (typeof date === 'string') {
             var _date = moment(date).minute(
-                moment(date).minute() + (moment().utcOffset() * -1) // + timeZoneOffset
+                moment(date).minute() + (moment().utcOffset() * -1)
             );
 
             return _date.isValid() ? _date : null;
@@ -378,6 +376,6 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
     return {
         parse: parse,
         format: format,
-        offset: offset
+        offsetUtc: offsetUtc
     };
 }]);
