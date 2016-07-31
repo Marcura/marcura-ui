@@ -207,8 +207,8 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
 
     var format = function(date, format, timeZone) {
         var languageIndex = 0,
-            isMomentDate = date && date.isValid && date.isValid(),
-            timeZone = timeZone || '';
+            isMomentDate = date && date.isValid && date.isValid();
+        timeZone = timeZone || '';
 
         if (!maHelper.isDate(date) && !isMomentDate) {
             return null;
