@@ -1,12 +1,12 @@
 {
-    "version": "0.8.1",
+    "version": "0.8.2",
     "name": "marcura-ui",
     "description": "Marcura UI",
     "author": "Marcura",
     "license": "(MIT OR Apache-2.0)",
     "repository": {
         "type": "git",
-        "url": "https://github.com/eakoryakin/marcura-ui.git"
+        "url": "https://github.com/Marcura/marcura-ui"
     },
     "devDependencies": {
         "jquery": "2.2.0",

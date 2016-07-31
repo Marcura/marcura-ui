@@ -26,10 +26,14 @@ As soon as you've downloaded the package and included it in your page you need t
 
 `angular.module('app', ['marcuraUI']);`
 
-# Documentation
+## Documentation
 Detailed documentation about all components and services can be found [here](../../wiki).
 
 ## Development
 
 1. `npm install`
 2. `gulp`
+
+## Testing
+
+`gulp test`
