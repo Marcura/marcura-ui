@@ -5,6 +5,7 @@
         "angular": false,
         "moment": false,
         "console": false,
-        "Pikaday": false
+        "Pikaday": false,
+        "document": false
     }
 }
