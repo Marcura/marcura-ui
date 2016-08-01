@@ -123,7 +123,7 @@
 
     &-footer {
         margin-top: 10px;
-        display: flex;
+        .display-flex;
 
         &-left {
             width: 50%;
@@ -231,6 +231,17 @@ textarea.form-control {
                 &:nth-child(n+4) {
                     margin-top: 10px;
                 }
+            }
+        }
+    }
+}
+
+.ma-ie9 {
+    .form {
+        &-footer {
+            &-left,
+            &-right {
+                display: table-cell;
             }
         }
     }

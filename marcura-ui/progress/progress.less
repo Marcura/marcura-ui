@@ -55,7 +55,7 @@
     }
 
     &-labels {
-        display: flex;
+        .display-flex;
         margin-top: 5px;
     }
 
@@ -71,6 +71,14 @@
 
         &:last-child {
             text-align: right;
+        }
+    }
+}
+
+.ma-ie9 {
+    .ma-progress {
+        &-label {
+            display: table-cell;
         }
     }
 }

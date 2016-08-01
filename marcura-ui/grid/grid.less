@@ -12,7 +12,7 @@
     &-header {
         border-top: 1px solid #979797;
         border-bottom: 1px solid #c3c3cd;
-        display: flex;
+        .display-flex;
 
         &-col {
             font-weight: bold;
@@ -58,7 +58,7 @@
 
     &-row {
         &-inner {
-            display: flex;
+            .display-flex;
         }
 
         &:first-child .ma-grid-col {
@@ -84,6 +84,15 @@
         &-text {
             text-align: center;
             color: #7d7d87;
+        }
+    }
+}
+
+.ma-ie9 {
+    .ma-grid {
+        &-col,
+        &-header-col {
+            display: table-cell;
         }
     }
 }
