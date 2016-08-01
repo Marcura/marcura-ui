@@ -106,6 +106,15 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 formatDisplayDate = function(date) {
                     return maDateConverter.format(maDateConverter.offsetUtc(date, timeZoneOffset), displayFormat);
                 },
+                setDisplayDate = function(date) {
+                    dateElement.val(date ? formatDisplayDate(date) : '');
+                    setCalendarDate(date);
+                },
+                setCalendarDate = function(date) {
+                    if (picker) {
+                        picker.setDate(date ? date.toDate() : null);
+                    }
+                },
                 parseDate = function(date) {
                     if (!date) {
                         return null;
@@ -140,8 +149,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 picker = new Pikaday({
                     field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                     position: 'bottom right',
-                    minDate: null,
-                    maxDate: null,
                     onSelect: function() {
                         date = maDateConverter.offsetUtc(picker.getDate());
 
@@ -153,6 +160,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         onChange(date);
                     }
                 });
+
+                setCalendarDate(previousDate);
 
                 // Move id to input
                 element.removeAttr('id');
@@ -172,7 +181,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 date = parseDate(date);
 
                 if (!hasDateChanged(date)) {
-                    dateElement.val(formatDisplayDate(date));
+                    setDisplayDate(date);
                     scope.$apply(function() {
                         scope.isInvalid = false;
                     });
@@ -181,7 +190,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 }
 
                 if (date) {
-                    dateElement.val(formatDisplayDate(date));
+                    setDisplayDate(date);
                     previousDate = date;
                 }
 
@@ -220,7 +229,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     return;
                 }
 
-                dateElement.val(formatDisplayDate(date));
+                setDisplayDate(date);
                 previousDate = date;
 
                 if (scope.hasTime) {
@@ -241,15 +250,15 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
                 if (date === null) {
                     previousDate = null;
-                    dateElement.val('');
+                    setDisplayDate(null);
                 }
 
                 if (!hasDateChanged(date)) {
-                    dateElement.val(formatDisplayDate(date));
+                    setDisplayDate(date);
                     return;
                 }
 
-                dateElement.val(formatDisplayDate(date));
+                setDisplayDate(date);
                 previousDate = date;
             });
 
