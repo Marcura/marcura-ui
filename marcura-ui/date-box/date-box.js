@@ -20,13 +20,13 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             <div class="ma-date-box" ng-class="{\
                     \'ma-date-box-has-time\': hasTime,\
                     \'has-error\': ((isRequired && isEmpty()) || isInvalid),\
-                    \'ma-date-box-is-resettable\': isResettable,\
+                    \'ma-date-box-is-resettable\': _isResettable,\
                 }">\
                 <div class="ma-date-box-wrapper">\
                     <input class="ma-date-box-date form-control input-sm" type="text" id="{{id}}"\
                         ng-required="isRequired"/>\
                     <i class="ma-date-box-icon fa fa-calendar"></i>\
-                    <ma-reset-value ng-show="isResettable && date"></ma-reset-value>\
+                    <ma-reset-value ng-show="_isResettable && date"></ma-reset-value>\
                 </div><select ui-select2="{ minimumResultsForSearch: -1 }"\
                     class="ma-date-box-hours"\
                     ng-model="hours"\
@@ -130,6 +130,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
             scope.hoursList = getNumbers(23);
             scope.minutesList = getNumbers(59);
+            scope._isResettable = scope.isResettable === false ? false : true;
 
             scope.isEmpty = function() {
                 return dateElement.val() === '';
