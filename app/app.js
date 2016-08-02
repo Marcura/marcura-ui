@@ -107,5 +107,11 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
         controller: 'checkBoxPageController'
     });
 
+    $stateProvider.state('radio-box', {
+        url: '/radio-box',
+        templateUrl: 'radio-box-page/radio-box-page.html',
+        controller: 'radioBoxPageController'
+    });
+
     $urlRouterProvider.otherwise('/home');
 }]);
