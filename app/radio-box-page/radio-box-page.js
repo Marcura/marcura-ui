@@ -2,6 +2,16 @@ angular.module('app.controllers').controller('radioBoxPageController', radioBoxP
 
 function radioBoxPageController($scope) {
     $scope.position = 'top';
+    $scope.ports = [{
+        id: 1,
+        name: 'Tokai'
+    }, {
+        id: 2,
+        name: 'Vladivostok'
+    }, {
+        id: 3,
+        name: 'Navlakhi'
+    }];
 
     $scope.change = function(value) {
         console.log('change position:', value);
@@ -10,4 +20,8 @@ function radioBoxPageController($scope) {
     $scope.$watch('position', function(position) {
         console.log('watch position:', position);
     });
+
+    $scope.portChange = function(value) {
+        console.log('port:', value);
+    };
 }

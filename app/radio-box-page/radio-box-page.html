@@ -10,19 +10,19 @@
     </div>
     <div class="nodes-item">
         <ma-radio-box
-            text="Top"
+            text="'Top'"
             value="'top'"
             selected-value="position"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
-            text="Middle"
+            text="'Middle'"
             value="'middle'"
             selected-value="position"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
-            text="Bottom"
+            text="'Bottom'"
             value="'bottom'"
             selected-value="position"
             change="change(value)">
@@ -34,21 +34,21 @@
     <div class="nodes-item">
         <ma-radio-box
             size="sm"
-            text="Top"
+            text="'Top'"
             value="'top'"
             selected-value="position"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
             size="sm"
-            text="Middle"
+            text="'Middle'"
             value="'middle'"
             selected-value="position"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
             size="sm"
-            text="Bottom"
+            text="'Bottom'"
             value="'bottom'"
             selected-value="position"
             change="change(value)">
@@ -60,24 +60,50 @@
     <div class="nodes-item">
         <ma-radio-box
             is-disabled="true"
-            text="Top"
+            text="'Top'"
             value="'top'"
             selected-value="position"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
             is-disabled="true"
-            text="Middle"
+            text="'Middle'"
             value="'middle'"
             selected-value="position"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
             is-disabled="true"
-            text="Bottom"
+            text="'Bottom'"
             value="'bottom'"
             selected-value="position"
             change="change(value)">
         </ma-radio-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Object as value</h1>
+    </div>
+    <div class="nodes-item">
+        <ma-radio-box
+            text="ports[0].name"
+            value="ports[0]"
+            selected-value="selectedPort"
+            change="portChange(value)">
+        </ma-radio-box>
+        <ma-radio-box
+            text="ports[1].name"
+            value="ports[1]"
+            selected-value="selectedPort"
+            change="portChange(value)">
+        </ma-radio-box>
+        <ma-radio-box
+            text="ports[2].name"
+            value="ports[2]"
+            selected-value="selectedPort"
+            change="portChange(value)">
+        </ma-radio-box>
+    </div>
+    <div class="nodes-item">
+        Port: {{selectedPort | json}}
     </div>
 </div>

@@ -2,7 +2,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', [function() {
     return {
         restrict: 'E',
         scope: {
-            text: '@',
+            text: '=',
             value: '=',
             selectedValue: '=',
             isDisabled: '=',
@@ -15,13 +15,13 @@ angular.module('marcuraUI.components').directive('maRadioBox', [function() {
             <div class="ma-radio-box{{cssClass}}"\
                 ng-click="onChange()"\
                 ng-class="{\
-                    \'ma-is-checked\': value === selectedValue,\
+                    \'ma-is-checked\': isChecked(),\
                     \'ma-radio-box-is-disabled\': isDisabled,\
                     \'ma-radio-box-has-text\': hasText,\
                 }">\
                 <span class="ma-radio-box-text">{{text || \'&nbsp;\'}}</span>\
                 <div class="ma-radio-box-inner"></div>\
-                <i class="ma-radio-box-icon" ng-show="value === selectedValue"></i>\
+                <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
             </div>';
 
             return html;
@@ -39,6 +39,10 @@ angular.module('marcuraUI.components').directive('maRadioBox', [function() {
                         value: scope.value
                     });
                 }
+            };
+
+            scope.isChecked = function() {
+                return JSON.stringify(scope.value) === JSON.stringify(scope.selectedValue);
             };
         }
     };
