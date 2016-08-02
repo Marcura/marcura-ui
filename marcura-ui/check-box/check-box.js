@@ -21,8 +21,8 @@ angular.module('marcuraUI.components').directive('maCheckBox', [function() {
                     \'ma-check-box-rtl\': rtl\
                 }">\
                 <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
-                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
                 <div class="ma-check-box-inner"></div>\
+                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
             </div>';
 
             return html;
