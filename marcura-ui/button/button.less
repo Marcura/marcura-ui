@@ -26,7 +26,7 @@
     }
 
     &:not(&-link):not(&-is-disabled):active {
-        box-shadow: 0 0 6px rgba(0, 0, 0, 0.225) inset;
+        .box-shadow(0 0 6px rgba(0, 0, 0, 0.225) inset);
         text-decoration: none;
     }
 
@@ -38,7 +38,7 @@
     &-is-disabled {
         background-color: #c3c3cd;
         cursor: default;
-        box-shadow: none;
+        .box-shadow(none);
     }
 
     &-xs {
@@ -121,7 +121,7 @@
     &-link {
         color: #333;
         background: none;
-        box-shadow: none;
+        .box-shadow(none);
 
         &:focus,
         &:hover {
@@ -133,12 +133,17 @@
         }
 
         .ma-button-icon {
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-            background-color: #36a4ff;
+            .box-shadow(0 1px 2px 0 rgba(0, 0, 0, 0.3));
             color: #ffffff;
             width: 30px;
             height: 30px;
             margin-top: -15px;
+            background-color: #36a4ff;
+        }
+
+        &.ma-button-is-disabled .ma-button-icon {
+            background-color: #c3c3cd;
+            .box-shadow(none);
         }
 
         .ma-button-icon-left {
@@ -165,17 +170,12 @@
             color: #7d7d87;
         }
 
-        &.ma-button-secondary .ma-button-icon {
+        &.ma-button-secondary:not(.ma-button-is-disabled) .ma-button-icon {
             background-color: #7d7d87;
         }
 
         &.ma-button-danger:not(.ma-button-is-disabled) .ma-button-icon {
             background-color: #c9302c;
-        }
-
-        &.ma-button-danger.ma-button-is-disabled .ma-button-icon {
-            background-color: #c3c3cd;
-            box-shadow: none;
         }
 
         &.ma-button-default .ma-button-icon {
@@ -184,7 +184,7 @@
         }
 
         &:not(.ma-button-is-disabled):active .ma-button-icon {
-            box-shadow: 0 0 6px rgba(0, 0, 0, 0.225) inset;
+            .box-shadow(0 0 6px rgba(0, 0, 0, 0.225) inset);
         }
     }
 
@@ -196,7 +196,7 @@
         margin: 0 0 0 -10px;
     }
 
-    &-secondary:not(&-link) {
+    &-secondary:not(&-link):not(&-is-disabled) {
         background-color: #7d7d87;
     }
 
