@@ -2,7 +2,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', [function() {
     return {
         restrict: 'E',
         scope: {
-            text: '=',
+            text: '@',
             value: '=',
             selectedValue: '=',
             isDisabled: '=',
