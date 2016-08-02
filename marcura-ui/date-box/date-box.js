@@ -21,23 +21,19 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     \'ma-date-box-has-time\': hasTime,\
                     \'has-error\': ((isRequired && isEmpty()) || isInvalid),\
                     \'ma-date-box-is-resettable\': _isResettable,\
+                    \'ma-date-box-is-focused\': isFocused\
                 }">\
                 <div class="ma-date-box-wrapper">\
                     <input class="ma-date-box-date form-control input-sm" type="text" id="{{id}}"\
-                        ng-required="isRequired"/>\
+                        ng-required="isRequired"\
+                        ng-focus="onFocus()"\
+                        ng-blur="onBlur()"/>\
                     <i class="ma-date-box-icon fa fa-calendar"></i>\
-                    <ma-reset-value ng-show="_isResettable && date"></ma-reset-value>\
-                </div><select ui-select2="{ minimumResultsForSearch: -1 }"\
-                    class="ma-date-box-hours"\
-                    ng-model="hours"\
-                    ng-if="hasTime">\
-                    <option ng-repeat="hour in hoursList" value="{{hour}}">{{hour}}</option>\
-                </select><select ui-select2="{ minimumResultsForSearch: -1 }"\
-                    class="ma-date-box-minutes"\
-                    ng-model="minutes"\
-                    ng-if="hasTime">\
-                    <option ng-repeat="minute in minutesList" value="{{minute}}">{{minute}}</option>\
-                </select>\
+                    <ma-reset-value\
+                        ng-show="_isResettable && date"\
+                        ng-click="onReset()">\
+                    </ma-reset-value>\
+                </div>\
             </div>';
 
             return html;
@@ -48,7 +44,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 displayFormat = (scope.displayFormat ? scope.displayFormat : 'dd MMM yyyy').replace(/Y/g, 'y').replace(/D/g, 'd'),
                 format = (scope.format ? scope.format : 'dd MMM yyyy').replace(/Y/g, 'y').replace(/D/g, 'd'),
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
-                resetValueElement = angular.element(element[0].querySelector('.ma-reset-value')),
                 previousDate = null,
                 time = {
                     hours: 0,
@@ -57,15 +52,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 },
                 timeZone = scope.timeZone ? scope.timeZone.replace(/GMT/g, '') : 'Z',
                 timeZoneOffset = moment().utcOffset(timeZone).utcOffset(),
-                getNumbers = function(count) {
-                    var numbers = [];
-
-                    for (var i = 0; i <= count; i++) {
-                        numbers.push((i < 10 ? '0' + i : i).toString());
-                    }
-
-                    return numbers;
-                },
                 onChange = function(internalDate) {
                     var date = null;
 
@@ -80,11 +66,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                             .seconds(time.seconds);
                     }
 
-                    scope.$apply(function() {
-                        scope.date = getDateInType(date);
-                        scope.change({
-                            date: scope.date
-                        });
+                    scope.date = getDateInType(date);
+                    scope.change({
+                        date: scope.date
                     });
                 },
                 getDateInType = function(date) {
@@ -137,12 +121,54 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     return parsedDate;
                 };
 
-            scope.hoursList = getNumbers(23);
-            scope.minutesList = getNumbers(59);
             scope._isResettable = scope.isResettable === false ? false : true;
+            scope.isFocused = false;
 
             scope.isEmpty = function() {
                 return dateElement.val() === '';
+            };
+
+            scope.onFocus = function() {
+                scope.isFocused = true;
+            };
+
+            scope.onBlur = function() {
+                scope.isFocused = false;
+                scope.isInvalid = false;
+                var date = dateElement.val().trim(),
+                    isEmptyDate = date === '',
+                    isValidDate = true;
+                date = parseDate(date);
+
+                if (!hasDateChanged(date)) {
+                    setDisplayDate(date);
+                    scope.isInvalid = false;
+
+                    return;
+                }
+
+                if (date) {
+                    setDisplayDate(date);
+                    previousDate = date;
+                }
+
+                isValidDate = date !== null;
+
+                if (!isEmptyDate && !isValidDate) {
+                    scope.isInvalid = true;
+
+                    return;
+                }
+
+                if (date || isEmptyDate) {
+                    scope.isInvalid = scope.isRequired && isEmptyDate && !isValidDate;
+                    onChange(date);
+                }
+            };
+
+            scope.onReset = function() {
+                previousDate = null;
+                onChange();
             };
 
             $timeout(function() {
@@ -157,7 +183,12 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         }
 
                         previousDate = date;
-                        onChange(date);
+
+                        // Use $timeout to apply scope changes instead of $apply,
+                        // which throws digest error at this point
+                        $timeout(function() {
+                            onChange(date);
+                        });
                     }
                 });
 
@@ -166,48 +197,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 // Move id to input
                 element.removeAttr('id');
                 dateElement.attr('id', scope.id);
-            });
-
-            resetValueElement.on('click', function() {
-                previousDate = null;
-                onChange();
-            });
-
-            dateElement.on('blur', function() {
-                scope.isInvalid = false;
-                var date = dateElement.val().trim(),
-                    isEmptyDate = date === '',
-                    isValidDate = true;
-                date = parseDate(date);
-
-                if (!hasDateChanged(date)) {
-                    setDisplayDate(date);
-                    scope.$apply(function() {
-                        scope.isInvalid = false;
-                    });
-
-                    return;
-                }
-
-                if (date) {
-                    setDisplayDate(date);
-                    previousDate = date;
-                }
-
-                isValidDate = date !== null;
-
-                if (!isEmptyDate && !isValidDate) {
-                    scope.$apply(function() {
-                        scope.isInvalid = true;
-                    });
-
-                    return;
-                }
-
-                if (date || isEmptyDate) {
-                    scope.isInvalid = scope.isRequired && isEmptyDate && !isValidDate;
-                    onChange(date);
-                }
             });
 
             // Set initial date
@@ -261,17 +250,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 setDisplayDate(date);
                 previousDate = date;
             });
-
-            // TODO: Fix time functionality
-            // if (scope.hasTime) {
-            //     scope.$watch('hours', function() {
-            //         onChange();
-            //     });
-            //
-            //     scope.$watch('minutes', function() {
-            //         onChange();
-            //     });
-            // }
         }
     };
 }]);

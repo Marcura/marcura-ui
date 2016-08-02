@@ -10,10 +10,9 @@
     </div>
     <div class="nodes-item">
         <ma-date-box
-            id="eta"
             date="date1"
             format="'yyyy-MM-ddTHH:mm:ssZ'"
-            change="change(date)">
+            change="change1(date)">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -24,14 +23,26 @@
     </div>
     <div class="nodes-item">
         <ma-date-box
-            id="eta"
             date="date2"
             time-zone="'GMT+09:00'"
             format="'yyyy-MM-ddTHH:mm:ssZ'"
-            change="change(date)">
+            change="change2(date)">
         </ma-date-box>
     </div>
     <div class="nodes-item">
         date: {{date2}}
+    </div>
+    <div class="nodes-item">
+        <h2>Date and time</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            has-time="true"
+            date="date3"
+            format="'yyyy-MM-ddTHH:mm:ssZ'">
+        </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        date: {{date3}}
     </div>
 </div>

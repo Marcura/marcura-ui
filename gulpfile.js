@@ -78,13 +78,13 @@ gulp.task('start', function() {
             }
         });
 
-        // watch marcura-ui files
+        // Watch marcura-ui files
         gulp.watch(paths.source.css, ['copy-css']);
         gulp.watch(paths.source.js).on('change', function() {
             build(browserSync.reload);
         });
 
-        // watch app files
+        // Watch app files
         gulp.watch(paths.app.css).on('change', function() {
             build(browserSync.reload);
         });
