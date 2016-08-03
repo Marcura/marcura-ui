@@ -17,16 +17,15 @@ function dateBoxPageController($scope, $timeout, maDateConverter) {
         console.log('date2:', date);
     };
 
-    // $scope.$watch('date1', function(newDate, oldDate) {
-    //     console.log('date1:', newDate);
-    // });
+    $scope.change3 = function(date) {
+        console.log('date3:', date);
+    };
 
     // $scope.$watch('date2', function(newDate, oldDate) {
     //     console.log('date2:', newDate);
     // });
 
     // $timeout(function() {
-    //     // $scope.date = '2014-11-17T00:00:00Z';
-    //     $scope.date = '';
-    // }, 5000);
+    //     $scope.date3 = '2016-07-25T18:20:00Z';
+    // }, 3000);
 }

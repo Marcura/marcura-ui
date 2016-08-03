@@ -1,14 +1,20 @@
-.user-select (@value) {
+.user-select(@value) {
     -webkit-user-select: @value;
     -moz-user-select: @value;
     -ms-user-select: @value;
     user-select: @value;
 }
 
-.box-shadow (@value) {
+.box-shadow(@value) {
     -webkit-box-shadow: @value;
     -moz-box-shadow: @value;
     box-shadow: @value;
+}
+
+.transition(@value) {
+    -webkit-transition: @value;
+    -o-transition: @value;
+    transition: @value;
 }
 
 .display-flex {
@@ -16,4 +22,15 @@
     display: -moz-flex;
     display: -ms-flex;
     display: flex;
+}
+
+.input {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    outline: 0;
+
+    &::-ms-clear {
+        display: none;
+    }
 }

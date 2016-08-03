@@ -58,7 +58,10 @@ gulp.task('check-js', function() {
 
 gulp.task('copy-css', function() {
     return gulp.src(paths.source.css)
-        .pipe(less())
+        .pipe(less().on('error', function(error) {
+            console.log(error);
+            this.emit('end');
+        }))
         .pipe(concat('marcura-ui.min.css'))
         .pipe(minifyCss())
         .pipe(gulp.dest(paths.dest.root))

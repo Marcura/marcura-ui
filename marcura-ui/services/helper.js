@@ -1,5 +1,24 @@
 angular.module('marcuraUI.services').factory('maHelper', [function() {
     return {
+        keyCode: {
+            backspace: 8,
+            comma: 188,
+            delete: 46,
+            down: 40,
+            end: 35,
+            enter: 13,
+            escape: 27,
+            home: 36,
+            left: 37,
+            pageDown: 34,
+            pageUp: 33,
+            period: 190,
+            right: 39,
+            space: 32,
+            tab: 9,
+            up: 38
+        },
+
         isDate: function(value) {
             if (!value) {
                 return false;
@@ -13,11 +32,11 @@ angular.module('marcuraUI.services').factory('maHelper', [function() {
             return pattern.test(value);
         },
 
-        formatString: function (value) {
+        formatString: function(value) {
             // Source: http://ajaxcontroltoolkit.codeplex.com/SourceControl/latest#Client/MicrosoftAjax/Extensions/String.js
             var formattedString = '';
 
-            for (var i = 0; ;) {
+            for (var i = 0;;) {
                 // Search for curly bracers.
                 var open = value.indexOf('{', i);
                 var close = value.indexOf('}', i);
@@ -73,7 +92,7 @@ angular.module('marcuraUI.services').factory('maHelper', [function() {
 
                 var arg = arguments[argNumber];
 
-                if (typeof (arg) === 'undefined' || arg === null) {
+                if (typeof(arg) === 'undefined' || arg === null) {
                     arg = '';
                 }
 

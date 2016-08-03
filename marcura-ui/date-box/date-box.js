@@ -19,21 +19,29 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             var html = '\
             <div class="ma-date-box" ng-class="{\
                     \'ma-date-box-has-time\': hasTime,\
-                    \'has-error\': ((isRequired && isEmpty()) || isInvalid),\
+                    \'ma-date-box-is-invalid\': ((isRequired && isEmpty()) || isInvalid),\
                     \'ma-date-box-is-resettable\': _isResettable,\
                     \'ma-date-box-is-focused\': isFocused\
                 }">\
-                <div class="ma-date-box-wrapper">\
-                    <input class="ma-date-box-date form-control input-sm" type="text" id="{{id}}"\
-                        ng-required="isRequired"\
-                        ng-focus="onFocus()"\
-                        ng-blur="onBlur()"/>\
-                    <i class="ma-date-box-icon fa fa-calendar"></i>\
-                    <ma-reset-value\
-                        ng-show="_isResettable && date"\
-                        ng-click="onReset()">\
-                    </ma-reset-value>\
-                </div>\
+                <input class="ma-date-box-date" type="text" id="{{id}}"\
+                    ng-required="isRequired"\
+                    ng-focus="onFocus()"\
+                    ng-blur="onBlur()"/><input class="ma-date-box-hours" type="text"\
+                        maxlength="2"\
+                        ng-show="hasTime"\
+                        ng-blur="onBlur()"\
+                        ng-keydown="timeKeydown($event)"\
+                        /><div class="ma-date-box-colon" ng-if="hasTime">:</div><input \
+                        class="ma-date-box-minutes" type="text"\
+                        maxlength="2"\
+                        ng-show="hasTime"\
+                        ng-blur="onBlur()"\
+                        ng-keydown="timeKeydown($event)"/>\
+                <i class="ma-date-box-icon fa fa-calendar"></i>\
+                <ma-reset-value\
+                    ng-show="_isResettable && date"\
+                    ng-click="onReset()">\
+                </ma-reset-value>\
             </div>';
 
             return html;
@@ -44,12 +52,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 displayFormat = (scope.displayFormat ? scope.displayFormat : 'dd MMM yyyy').replace(/Y/g, 'y').replace(/D/g, 'd'),
                 format = (scope.format ? scope.format : 'dd MMM yyyy').replace(/Y/g, 'y').replace(/D/g, 'd'),
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
+                hoursElement = angular.element(element[0].querySelector('.ma-date-box-hours')),
+                minutesElement = angular.element(element[0].querySelector('.ma-date-box-minutes')),
                 previousDate = null,
-                time = {
-                    hours: 0,
-                    minutes: 0,
-                    seconds: 0
-                },
                 timeZone = scope.timeZone ? scope.timeZone.replace(/GMT/g, '') : 'Z',
                 timeZoneOffset = moment().utcOffset(timeZone).utcOffset(),
                 onChange = function(internalDate) {
@@ -61,9 +66,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         date.year(internalDate.year())
                             .month(internalDate.month())
                             .date(internalDate.date())
-                            .hours(time.hours)
-                            .minutes(time.minutes)
-                            .seconds(time.seconds);
+                            .hours(internalDate.hours())
+                            .minutes(internalDate.minutes())
+                            .seconds(0);
                     }
 
                     scope.date = getDateInType(date);
@@ -93,6 +98,11 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 setDisplayDate = function(date) {
                     dateElement.val(date ? formatDisplayDate(date) : '');
                     setCalendarDate(date);
+
+                    if (scope.hasTime) {
+                        hoursElement.val(date ? maDateConverter.format(date, 'HH') : '00');
+                        minutesElement.val(date ? maDateConverter.format(date, 'mm') : '00');
+                    }
                 },
                 setCalendarDate = function(date) {
                     if (picker) {
@@ -119,6 +129,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     }
 
                     return parsedDate;
+                },
+                addTimeToDate = function(date) {
+                    return moment([date.year(), date.month(), date.date(), Number(hoursElement.val()), Number(minutesElement.val()), 0]);
                 };
 
             scope._isResettable = scope.isResettable === false ? false : true;
@@ -139,6 +152,10 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     isEmptyDate = date === '',
                     isValidDate = true;
                 date = parseDate(date);
+
+                if (scope.hasTime) {
+                    date = addTimeToDate(date);
+                }
 
                 if (!hasDateChanged(date)) {
                     setDisplayDate(date);
@@ -166,17 +183,45 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 }
             };
 
+            scope.timeKeydown = function(event) {
+                if (
+                    // Allow backspace, tab, delete
+                    $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.tab, maHelper.keyCode.delete]) !== -1 ||
+                    // Allow left, right
+                    (event.keyCode === 37 || event.keyCode === 39)) {
+                    return;
+                }
+
+                // Ensure that it is a number and stop the keypress
+                if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event.keyCode > 105)) {
+                    event.preventDefault();
+                }
+            };
+
             scope.onReset = function() {
                 previousDate = null;
                 onChange();
             };
 
             $timeout(function() {
+                var isFirstDateSelection = true;
+
                 picker = new Pikaday({
                     field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                     position: 'bottom right',
                     onSelect: function() {
+                        // This is to prevent the event from firing when the date
+                        // is set for the first time with setCalendarDate method
+                        if (isFirstDateSelection) {
+                            isFirstDateSelection = false;
+                            return;
+                        }
+
                         date = maDateConverter.offsetUtc(picker.getDate());
+
+                        if (scope.hasTime) {
+                            date = addTimeToDate(date);
+                        }
 
                         if (!hasDateChanged(date)) {
                             return;
@@ -220,14 +265,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
                 setDisplayDate(date);
                 previousDate = date;
-
-                if (scope.hasTime) {
-                    time.hours = date.hours();
-                    time.minutes = date.minutes();
-                    time.seconds = date.seconds();
-                    scope.hours = date.format('HH');
-                    scope.minutes = date.format('mm');
-                }
             }
 
             scope.$watch('date', function(newDate, oldDate) {
