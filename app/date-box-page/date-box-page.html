@@ -6,7 +6,7 @@
         <h1>DateBox</h1>
     </div>
     <div class="nodes-item">
-        <h2>Display and save date in UTC</h2>
+        <h2>Date in UTC</h2>
     </div>
     <div class="nodes-item">
         <ma-date-box
@@ -19,12 +19,12 @@
         date: {{date1}}
     </div>
     <div class="nodes-item">
-        <h2>Display and save date in UTC+09:00</h2>
+        <h2>Date in UTC+09:00</h2>
     </div>
     <div class="nodes-item">
         <ma-date-box
             date="date2"
-            time-zone="'GMT+09:00'"
+            time-zone="'+09:00'"
             format="'yyyy-MM-ddTHH:mm:ssZ'"
             change="change2(date)">
         </ma-date-box>
@@ -44,5 +44,19 @@
     </div>
     <div class="nodes-item">
         date: {{date3}}
+    </div>
+    <div class="nodes-item">
+        <h2>Date and time in UTC+09:00</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            has-time="true"
+            date="date4"
+            time-zone="'+09:00'"
+            format="'yyyy-MM-ddTHH:mm:ssZ'">
+        </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        date: {{date4}}
     </div>
 </div>

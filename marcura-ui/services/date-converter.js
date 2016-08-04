@@ -9,15 +9,16 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         return date.match(new RegExp(substring, 'i'));
     };
 
-    var getTotalDate = function(year, month, day, hours, minutes, seconds) {
+    var getTotalDate = function(year, month, day, hours, minutes, seconds, offset) {
         var finalMonth;
         day = day.toString();
         month = month.toString();
         hours = hours || 0;
         minutes = minutes || 0;
         seconds = seconds || 0;
+        offset = offset || 0;
 
-        // Convert YY to YYYY according to rules
+        // Convert YY to YYYY according to rules.
         if (year <= 99) {
             if (year >= 0 && year < 30) {
                 year = '20' + year;
@@ -26,7 +27,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             }
         }
 
-        // Detect leap year and change amount of days in daysPerMonth for February
+        // Detect leap year and change amount of days in daysPerMonth for February.
         var isLeap = new Date(year, 1, 29).getMonth() === 1;
 
         if (isLeap) {
@@ -35,7 +36,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             daysPerMonth[1] = 28;
         }
 
-        // Convert month to number
+        // Convert month to number.
         if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
             for (var j = 0; j < months.length; j++) {
                 for (var i = 0; i < months[j].items.length; i++) {
@@ -61,7 +62,10 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             return null;
         }
 
-        return new Date(year, month - 1, day, hours, minutes, seconds);
+        return {
+            date: new Date(year, month - 1, day, hours, minutes, seconds),
+            offset: offset
+        };
     };
 
     var getDayAndMonth = function(day, month, culture) {
@@ -71,7 +75,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             isValid: true
         };
 
-        // Handle difference between en-GB and en-US culture formats
+        // Handle difference between en-GB and en-US culture formats.
         if (culture === 'en-GB' && month > 12) {
             dayAndMonth.isValid = false;
         }
@@ -85,7 +89,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             }
         }
 
-        // Give priority to en-GB if culture is not set
+        // Give priority to en-GB if culture is not set.
         if (!culture && month > 12) {
             dayAndMonth.day = month;
             dayAndMonth.month = day;
@@ -193,13 +197,22 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
 
         // 2015-02-21T10:00:00Z
         // 2015-02-21T10:00:00+03:00
-        // When a string contains a time zone in format +03:00, the time zone is ignored
-        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)(?:Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])$/;
+        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)(?:Z|([+-])(2[0-3]|[01][0-9]):([0-5][0-9]))$/;
 
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
+            var offset = 0;
 
-            return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8]);
+            // Get time zone offset.
+            if (parts.length === 12) {
+                offset = (Number(parts[10]) || 0) * 60 + (Number(parts[11]) || 0);
+
+                if (parts[9] === '-' && offset !== 0) {
+                    offset = -offset;
+                }
+            }
+
+            return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], offset);
         }
 
         return null;
@@ -218,7 +231,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             return null;
         }
 
-        // Possible formats of date parts (day, month, year)
+        // Possible formats of date parts (day, month, year).
         var datePartFormats = {
             s: ['ss'],
             m: ['mm'],
@@ -229,11 +242,11 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             Z: ['Z']
         };
 
-        // Checks format string parts on conformity with available date formats
+        // Checks format string parts on conformity with available date formats.
         var checkDatePart = function(dateChar) {
             var datePart = '';
 
-            // Try-catch construction because some sub-formats may be not listed
+            // Try-catch construction because some sub-formats may be not listed.
             try {
                 datePart = format.match(new RegExp(dateChar + '+', ''))[0];
             } catch (error) {}
@@ -258,7 +271,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             minutes = isMomentDate ? date.minutes() : date.getMinutes(),
             seconds = isMomentDate ? date.seconds() : date.getSeconds();
 
-        // Formats date parts
+        // Formats date parts.
         var formatDatePart = function(datePartFormat) {
             var datePart = '';
 
@@ -344,7 +357,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             return datePart;
         };
 
-        // Check format of each part of the obtained format
+        // Check format of each part of the obtained format.
         var dateParts = {
             days: formatDatePart(datePartFormats.d[checkDatePart('d')]),
             months: formatDatePart(datePartFormats.M[checkDatePart('M')]),
@@ -356,7 +369,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             separator: /^\w+([^\w])/.exec(format)
         };
 
-        // Return formatted date string
+        // Return formatted date string.
         return format
             .replace(/d+/, dateParts.days)
             .replace(/y+/, dateParts.years)
