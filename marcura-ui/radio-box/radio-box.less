@@ -8,8 +8,16 @@
     .user-select(none);
 
     &-is-disabled {
-        opacity: 0.65;
         cursor: default;
+
+        .ma-radio-box-inner {
+            background-color: #eee;
+            .box-shadow(none);
+        }
+
+        .ma-radio-box-icon {
+            opacity: 0.65;
+        }
     }
 
     &-text {
