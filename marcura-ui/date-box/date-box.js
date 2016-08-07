@@ -19,25 +19,37 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             var html = '\
             <div class="ma-date-box" ng-class="{\
                     \'ma-date-box-has-time\': hasTime,\
-                    \'has-error\': ((isRequired && isEmpty()) || isInvalid),\
+                    \'ma-date-box-is-invalid\': ((isRequired && isEmpty()) || isInvalid),\
                     \'ma-date-box-is-resettable\': _isResettable,\
+                    \'ma-date-box-is-focused\': isFocused\
                 }">\
-                <div class="ma-date-box-wrapper">\
-                    <input class="ma-date-box-date form-control input-sm" type="text" id="{{id}}"\
-                        ng-required="isRequired"/>\
-                    <i class="ma-date-box-icon fa fa-calendar"></i>\
-                    <ma-reset-value ng-show="_isResettable && date"></ma-reset-value>\
-                </div><select ui-select2="{ minimumResultsForSearch: -1 }"\
-                    class="ma-date-box-hours"\
-                    ng-model="hours"\
-                    ng-if="hasTime">\
-                    <option ng-repeat="hour in hoursList" value="{{hour}}">{{hour}}</option>\
-                </select><select ui-select2="{ minimumResultsForSearch: -1 }"\
-                    class="ma-date-box-minutes"\
-                    ng-model="minutes"\
-                    ng-if="hasTime">\
-                    <option ng-repeat="minute in minutesList" value="{{minute}}">{{minute}}</option>\
-                </select>\
+                <input class="ma-date-box-date" type="text" id="{{id}}"\
+                    ng-required="isRequired"\
+                    ng-focus="onFocus()"\
+                    ng-keydown="onKeydown($event)"\
+                    ng-keyup="onKeyup($event)"\
+                    ng-blur="onBlur()"/><input class="ma-date-box-hours"\
+                        maxlength="2"\
+                        ng-show="hasTime"\
+                        ng-focus="onFocus()"\
+                        ng-keydown="onKeydown($event)"\
+                        ng-keyup="onKeyup($event)"\
+                        ng-blur="onBlur()"\
+                        ng-keydown="onTimeKeydown($event)"\
+                        /><div class="ma-date-box-colon" ng-if="hasTime">:</div><input \
+                        class="ma-date-box-minutes" type="text"\
+                        maxlength="2"\
+                        ng-show="hasTime"\
+                        ng-focus="onFocus()"\
+                        ng-keydown="onKeydown($event)"\
+                        ng-keyup="onKeyup($event)"\
+                        ng-blur="onBlur()"\
+                        ng-keydown="onTimeKeydown($event)"/>\
+                <i class="ma-date-box-icon fa fa-calendar"></i>\
+                <ma-reset-value\
+                    ng-show="_isResettable && date"\
+                    ng-click="onReset()">\
+                </ma-reset-value>\
             </div>';
 
             return html;
@@ -48,24 +60,18 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 displayFormat = (scope.displayFormat ? scope.displayFormat : 'dd MMM yyyy').replace(/Y/g, 'y').replace(/D/g, 'd'),
                 format = (scope.format ? scope.format : 'dd MMM yyyy').replace(/Y/g, 'y').replace(/D/g, 'd'),
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
-                resetValueElement = angular.element(element[0].querySelector('.ma-reset-value')),
+                hoursElement = angular.element(element[0].querySelector('.ma-date-box-hours')),
+                minutesElement = angular.element(element[0].querySelector('.ma-date-box-minutes')),
                 previousDate = null,
-                time = {
-                    hours: 0,
-                    minutes: 0,
-                    seconds: 0
-                },
                 timeZone = scope.timeZone ? scope.timeZone.replace(/GMT/g, '') : 'Z',
                 timeZoneOffset = moment().utcOffset(timeZone).utcOffset(),
-                getNumbers = function(count) {
-                    var numbers = [];
-
-                    for (var i = 0; i <= count; i++) {
-                        numbers.push((i < 10 ? '0' + i : i).toString());
-                    }
-
-                    return numbers;
-                },
+                isDateSetInternally = true,
+                initialDisplayDate,
+                // Help track changes in date, hours or minutes.
+                keydownValue,
+                keyupValue,
+                isTouched = false,
+                initialDateOffset = 0,
                 onChange = function(internalDate) {
                     var date = null;
 
@@ -75,16 +81,14 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         date.year(internalDate.year())
                             .month(internalDate.month())
                             .date(internalDate.date())
-                            .hours(time.hours)
-                            .minutes(time.minutes)
-                            .seconds(time.seconds);
+                            .hours(internalDate.hours())
+                            .minutes(internalDate.minutes())
+                            .seconds(0);
                     }
 
-                    scope.$apply(function() {
-                        scope.date = getDateInType(date);
-                        scope.change({
-                            date: scope.date
-                        });
+                    scope.date = getDateInType(date);
+                    scope.change({
+                        date: scope.date
                     });
                 },
                 getDateInType = function(date) {
@@ -101,17 +105,34 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         return false;
                     }
 
+                    isTouched = true;
+
                     return true;
                 },
-                formatDisplayDate = function(date) {
-                    return maDateConverter.format(maDateConverter.offsetUtc(date, timeZoneOffset), displayFormat);
-                },
-                setDisplayDate = function(date) {
-                    dateElement.val(date ? formatDisplayDate(date) : '');
-                    setCalendarDate(date);
+                setDisplayDate = function(maDate, offset) {
+                    var displayDate = null;
+
+                    if (maDate && maDate.date) {
+                        // Adjust time zone offset.
+                        displayDate = maDateConverter.offsetUtc(maDate.date, timeZoneOffset - maDate.offset);
+                        dateElement.val(maDateConverter.format(displayDate, displayFormat));
+                        hoursElement.val(maDateConverter.format(displayDate, 'HH'));
+                        minutesElement.val(maDateConverter.format(displayDate, 'mm'));
+
+                        if (!initialDisplayDate) {
+                            initialDisplayDate = dateElement.val();
+                        }
+                    } else {
+                        dateElement.val('');
+                        hoursElement.val('00');
+                        minutesElement.val('00');
+                    }
+
+                    setCalendarDate(displayDate);
                 },
                 setCalendarDate = function(date) {
                     if (picker) {
+                        isDateSetInternally = true;
                         picker.setDate(date ? date.toDate() : null);
                     }
                 },
@@ -130,19 +151,117 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         if (!parsedDate) {
                             return null;
                         }
-
-                        parsedDate = maDateConverter.offsetUtc(parsedDate);
                     }
 
-                    return parsedDate;
+                    return {
+                        date: moment(parsedDate.date),
+                        offset: parsedDate.offset
+                    };
+                },
+                addTimeToDate = function(date) {
+                    var _date = moment(date);
+
+                    return moment([_date.year(), _date.month(), _date.date(), Number(hoursElement.val()), Number(minutesElement.val()), 0]);
                 };
 
-            scope.hoursList = getNumbers(23);
-            scope.minutesList = getNumbers(59);
             scope._isResettable = scope.isResettable === false ? false : true;
+            scope.isFocused = false;
 
             scope.isEmpty = function() {
                 return dateElement.val() === '';
+            };
+
+            scope.onFocus = function() {
+                scope.isFocused = true;
+            };
+
+            scope.onBlur = function() {
+                scope.isFocused = false;
+                scope.isInvalid = false;
+
+                var date = dateElement.val().trim(),
+                    isEmptyDate = date === '',
+                    isValidDate = true,
+                    hours = Number(hoursElement.val()),
+                    minutes = Number(minutesElement.val()),
+                    maDate = {
+                        date: null,
+                        offset: 0
+                    };
+
+                // Check time.
+                if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+                    maDate = parseDate(date) || maDate;
+                    maDate.offset = initialDateOffset;
+                }
+
+                if (maDate.date) {
+                    if (scope.hasTime || (!isTouched && initialDisplayDate === date)) {
+                        // Substruct time zone offset.
+                        maDate.date = addTimeToDate(maDate.date);
+                        maDate.date = maDateConverter.offsetUtc(maDate.date, -(timeZoneOffset - initialDateOffset));
+                    }
+                }
+
+                if (!hasDateChanged(maDate.date)) {
+                    setDisplayDate(maDate);
+                    scope.isInvalid = false;
+
+                    return;
+                }
+
+                if (maDate.date) {
+                    setDisplayDate(maDate);
+                    previousDate = maDate.date;
+                }
+
+                isValidDate = maDate.date !== null;
+
+                if (!isEmptyDate && !isValidDate) {
+                    scope.isInvalid = true;
+
+                    return;
+                }
+
+                if (maDate.date || isEmptyDate) {
+                    scope.isInvalid = scope.isRequired && isEmptyDate && !isValidDate;
+                    onChange(maDate.date);
+                }
+            };
+
+            scope.onKeydown = function(event) {
+                keydownValue = angular.element(event.target).val();
+            };
+
+            scope.onKeyup = function() {
+                keyupValue = angular.element(event.target).val();
+
+                if (keydownValue !== keyupValue) {
+                    isTouched = true;
+
+                    // Override initial time zone offset after date has been changed.
+                    initialDateOffset = timeZoneOffset;
+                }
+            };
+
+            scope.onTimeKeydown = function(event) {
+                if (
+                    // Allow backspace, tab, delete.
+                    $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.tab, maHelper.keyCode.delete]) !== -1 ||
+                    // Allow left, right.
+                    (event.keyCode === 37 || event.keyCode === 39)) {
+                    return;
+                }
+
+                // Ensure that it is a number and stop the keypress.
+                if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event.keyCode > 105)) {
+                    event.preventDefault();
+                }
+            };
+
+            scope.onReset = function() {
+                previousDate = null;
+                onChange();
             };
 
             $timeout(function() {
@@ -150,95 +269,67 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                     position: 'bottom right',
                     onSelect: function() {
-                        date = maDateConverter.offsetUtc(picker.getDate());
+                        // This is to prevent the event from firing when the date
+                        // is set internally with setCalendarDate method.
+                        if (isDateSetInternally) {
+                            isDateSetInternally = false;
+                            return;
+                        }
+
+                        var date = maDateConverter.offsetUtc(picker.getDate());
+
+                        if (scope.hasTime) {
+                            // Substruct time zone offset.
+                            date = addTimeToDate(date);
+                            date = maDateConverter.offsetUtc(date, -(timeZoneOffset - initialDateOffset));
+                        }
 
                         if (!hasDateChanged(date)) {
                             return;
                         }
 
                         previousDate = date;
-                        onChange(date);
+
+                        // Use $timeout to apply scope changes instead of $apply,
+                        // which throws digest error at this point.
+                        $timeout(function() {
+                            onChange(date);
+                        });
                     }
                 });
 
                 setCalendarDate(previousDate);
 
-                // Move id to input
+                // Move id to input.
                 element.removeAttr('id');
                 dateElement.attr('id', scope.id);
             });
 
-            resetValueElement.on('click', function() {
-                previousDate = null;
-                onChange();
-            });
-
-            dateElement.on('blur', function() {
-                scope.isInvalid = false;
-                var date = dateElement.val().trim(),
-                    isEmptyDate = date === '',
-                    isValidDate = true;
-                date = parseDate(date);
-
-                if (!hasDateChanged(date)) {
-                    setDisplayDate(date);
-                    scope.$apply(function() {
-                        scope.isInvalid = false;
-                    });
-
-                    return;
-                }
-
-                if (date) {
-                    setDisplayDate(date);
-                    previousDate = date;
-                }
-
-                isValidDate = date !== null;
-
-                if (!isEmptyDate && !isValidDate) {
-                    scope.$apply(function() {
-                        scope.isInvalid = true;
-                    });
-
-                    return;
-                }
-
-                if (date || isEmptyDate) {
-                    scope.isInvalid = scope.isRequired && isEmptyDate && !isValidDate;
-                    onChange(date);
-                }
-            });
-
-            // Set initial date
+            // Set initial date.
             if (scope.date) {
-                // Determine initial date type
+                // Determine initial date type.
                 if (scope.date && scope.date.isValid && scope.date.isValid()) {
                     dateType = 'Moment';
                 }
 
-                var date = null;
+                var maDate = {
+                    date: null,
+                    offset: 0
+                };
 
                 if (dateType === 'String') {
-                    date = maDateConverter.parse(scope.date, scope.culture);
+                    maDate = maDateConverter.parse(scope.date, scope.culture) || maDate;
                 }
 
-                date = maDateConverter.offsetUtc(date);
+                maDate.date = maDateConverter.offsetUtc(maDate.date);
 
-                if (!date) {
+                if (!maDate.date) {
                     return;
                 }
 
-                setDisplayDate(date);
-                previousDate = date;
-
-                if (scope.hasTime) {
-                    time.hours = date.hours();
-                    time.minutes = date.minutes();
-                    time.seconds = date.seconds();
-                    scope.hours = date.format('HH');
-                    scope.minutes = date.format('mm');
-                }
+                setDisplayDate(maDate);
+                previousDate = maDate.date;
+                initialDateOffset = maDate.offset;
             }
 
             scope.$watch('date', function(newDate, oldDate) {
@@ -246,32 +337,27 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     return;
                 }
 
-                var date = parseDate(newDate);
+                var maDate = {
+                    date: null,
+                    offset: 0
+                };
 
-                if (date === null) {
+                maDate = parseDate(newDate) || maDate;
+
+                if (maDate.date === null) {
                     previousDate = null;
                     setDisplayDate(null);
                 }
 
-                if (!hasDateChanged(date)) {
-                    setDisplayDate(date);
+                if (!hasDateChanged(maDate.date)) {
+                    setDisplayDate(maDate);
                     return;
                 }
 
-                setDisplayDate(date);
-                previousDate = date;
+                setDisplayDate(maDate);
+                previousDate = maDate.date;
+                initialDateOffset = maDate.offset;
             });
-
-            // TODO: Fix time functionality
-            // if (scope.hasTime) {
-            //     scope.$watch('hours', function() {
-            //         onChange();
-            //     });
-            //
-            //     scope.$watch('minutes', function() {
-            //         onChange();
-            //     });
-            // }
         }
     };
 }]);

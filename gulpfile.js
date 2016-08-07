@@ -58,7 +58,10 @@ gulp.task('check-js', function() {
 
 gulp.task('copy-css', function() {
     return gulp.src(paths.source.css)
-        .pipe(less())
+        .pipe(less().on('error', function(error) {
+            console.log(error);
+            this.emit('end');
+        }))
         .pipe(concat('marcura-ui.min.css'))
         .pipe(minifyCss())
         .pipe(gulp.dest(paths.dest.root))
@@ -78,13 +81,13 @@ gulp.task('start', function() {
             }
         });
 
-        // watch marcura-ui files
+        // Watch marcura-ui files
         gulp.watch(paths.source.css, ['copy-css']);
         gulp.watch(paths.source.js).on('change', function() {
             build(browserSync.reload);
         });
 
-        // watch app files
+        // Watch app files
         gulp.watch(paths.app.css).on('change', function() {
             build(browserSync.reload);
         });

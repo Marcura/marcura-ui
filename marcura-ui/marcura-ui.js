@@ -2,7 +2,7 @@ angular.module('marcuraUI.services', []);
 angular.module('marcuraUI.components', ['marcuraUI.services']);
 angular.module('marcuraUI', ['marcuraUI.components']);
 
-// Detect IE9
+// Detect IE9.
 angular.element(document).ready(function() {
     var ie = (function() {
         var version = 3,
