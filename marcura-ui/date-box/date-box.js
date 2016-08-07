@@ -6,6 +6,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             date: '=',
             timeZone: '=',
             culture: '=',
+            isDisabled: '=',
             isRequired: '=',
             change: '&',
             isResettable: '=',
@@ -20,16 +21,19 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             <div class="ma-date-box" ng-class="{\
                     \'ma-date-box-has-time\': hasTime,\
                     \'ma-date-box-is-invalid\': ((isRequired && isEmpty()) || isInvalid),\
+                    \'ma-date-box-is-disabled\': isDisabled,\
                     \'ma-date-box-is-resettable\': _isResettable,\
                     \'ma-date-box-is-focused\': isFocused\
                 }">\
                 <input class="ma-date-box-date" type="text" id="{{id}}"\
+                    ng-disabled="isDisabled"\
                     ng-required="isRequired"\
                     ng-focus="onFocus()"\
                     ng-keydown="onKeydown($event)"\
                     ng-keyup="onKeyup($event)"\
                     ng-blur="onBlur()"/><input class="ma-date-box-hours"\
                         maxlength="2"\
+                        ng-disabled="isDisabled"\
                         ng-show="hasTime"\
                         ng-focus="onFocus()"\
                         ng-keydown="onKeydown($event)"\
@@ -39,6 +43,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         /><div class="ma-date-box-colon" ng-if="hasTime">:</div><input \
                         class="ma-date-box-minutes" type="text"\
                         maxlength="2"\
+                        ng-disabled="isDisabled"\
                         ng-show="hasTime"\
                         ng-focus="onFocus()"\
                         ng-keydown="onKeydown($event)"\
@@ -162,6 +167,47 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     var _date = moment(date);
 
                     return moment([_date.year(), _date.month(), _date.date(), Number(hoursElement.val()), Number(minutesElement.val()), 0]);
+                },
+                initializePikaday = function() {
+                    picker = new Pikaday({
+                        field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
+                        position: 'bottom right',
+                        onSelect: function() {
+                            // This is to prevent the event from firing when the date
+                            // is set internally with setCalendarDate method.
+                            if (isDateSetInternally) {
+                                isDateSetInternally = false;
+                                return;
+                            }
+
+                            var date = maDateConverter.offsetUtc(picker.getDate());
+
+                            if (scope.hasTime) {
+                                // Substruct time zone offset.
+                                date = addTimeToDate(date);
+                                date = maDateConverter.offsetUtc(date, -(timeZoneOffset - initialDateOffset));
+                            }
+
+                            if (!hasDateChanged(date)) {
+                                return;
+                            }
+
+                            previousDate = date;
+
+                            // Use $timeout to apply scope changes instead of $apply,
+                            // which throws digest error at this point.
+                            $timeout(function() {
+                                onChange(date);
+                            });
+                        }
+                    });
+
+                    setCalendarDate(previousDate);
+                },
+                destroyPikaday = function() {
+                    if (picker) {
+                        picker.destroy();
+                    }
                 };
 
             scope._isResettable = scope.isResettable === false ? false : true;
@@ -260,50 +306,13 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             };
 
             scope.onReset = function() {
+                if (scope.isDisabled) {
+                    return;
+                }
+
                 previousDate = null;
                 onChange();
             };
-
-            $timeout(function() {
-                picker = new Pikaday({
-                    field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
-                    position: 'bottom right',
-                    onSelect: function() {
-                        // This is to prevent the event from firing when the date
-                        // is set internally with setCalendarDate method.
-                        if (isDateSetInternally) {
-                            isDateSetInternally = false;
-                            return;
-                        }
-
-                        var date = maDateConverter.offsetUtc(picker.getDate());
-
-                        if (scope.hasTime) {
-                            // Substruct time zone offset.
-                            date = addTimeToDate(date);
-                            date = maDateConverter.offsetUtc(date, -(timeZoneOffset - initialDateOffset));
-                        }
-
-                        if (!hasDateChanged(date)) {
-                            return;
-                        }
-
-                        previousDate = date;
-
-                        // Use $timeout to apply scope changes instead of $apply,
-                        // which throws digest error at this point.
-                        $timeout(function() {
-                            onChange(date);
-                        });
-                    }
-                });
-
-                setCalendarDate(previousDate);
-
-                // Move id to input.
-                element.removeAttr('id');
-                dateElement.attr('id', scope.id);
-            });
 
             // Set initial date.
             if (scope.date) {
@@ -332,6 +341,16 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 initialDateOffset = maDate.offset;
             }
 
+            $timeout(function() {
+                if (!scope.isDisabled) {
+                    initializePikaday();
+                }
+
+                // Move id to input.
+                element.removeAttr('id');
+                dateElement.attr('id', scope.id);
+            });
+
             scope.$watch('date', function(newDate, oldDate) {
                 if (newDate === null && oldDate === null) {
                     return;
@@ -357,6 +376,18 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 setDisplayDate(maDate);
                 previousDate = maDate.date;
                 initialDateOffset = maDate.offset;
+            });
+
+            scope.$watch('isDisabled', function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (!scope.isDisabled) {
+                    initializePikaday();
+                } else {
+                    destroyPikaday();
+                }
             });
         }
     };

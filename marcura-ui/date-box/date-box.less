@@ -16,6 +16,35 @@
     background-color: #ffffff;
     .transition(border-color ease-in-out .15s, box-shadow ease-in-out .15s;);
 
+    &-is-disabled {
+        background-color: #eee;
+        .box-shadow(none);
+
+        .ma-date-box-date,
+        .ma-date-box-hours,
+        .ma-date-box-minutes {
+            background-color: #eee;
+            cursor: default;
+        }
+
+        .ma-date-box-colon {
+            cursor: default;
+        }
+
+        .ma-date-box-icon {
+            opacity: 0.65;
+            cursor: default;
+        }
+
+        .ma-reset-value,
+        .ma-reset-value:hover {
+            opacity: 0.65;
+            background-color: #bebebe;
+            color: #fff;
+            cursor: default;
+        }
+    }
+
     &-is-focused {
         .box-shadow(@input-shadow-is-focused);
         border-color: #66afe9;

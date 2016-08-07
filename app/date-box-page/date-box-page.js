@@ -7,6 +7,7 @@ function dateBoxPageController($scope, $timeout, maDateConverter) {
     $scope.date3 = '2016-07-25T16:30:00Z';
     // $scope.date4 = '2016-07-25T16:30:00Z';
     $scope.date4 = '2016-07-25T16:30:00+04:00';
+    $scope.isDate4Disabled = false;
 
     // console.log(maDateConverter.parse('2016-07-26T20:00:00+09:00'));
 
@@ -31,5 +32,10 @@ function dateBoxPageController($scope, $timeout, maDateConverter) {
 
     $timeout(function() {
         // $scope.date4 = '2016-07-25T18:30:00+03:00';
+        // $scope.isDate4Disabled = true;
     }, 3000);
+
+    // $timeout(function() {
+    //     $scope.isDate4Disabled = false;
+    // }, 6000);
 }

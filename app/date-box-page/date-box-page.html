@@ -53,10 +53,30 @@
             has-time="true"
             date="date4"
             time-zone="'+09:00'"
+            is-disabled="isDate4Disabled"
             format="'yyyy-MM-ddTHH:mm:ssZ'">
         </ma-date-box>
     </div>
     <div class="nodes-item">
         date: {{date4}}
+    </div>
+    <div class="nodes-item">
+        <h2>Disabled</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            date="date1"
+            is-disabled="true"
+            format="'yyyy-MM-ddTHH:mm:ssZ'">
+        </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            has-time="true"
+            date="date1"
+            is-disabled="true"
+            time-zone="'+09:00'"
+            format="'yyyy-MM-ddTHH:mm:ssZ'">
+        </ma-date-box>
     </div>
 </div>
