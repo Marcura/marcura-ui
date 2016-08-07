@@ -233,7 +233,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 keydownValue = angular.element(event.target).val();
             };
 
-            scope.onKeyup = function() {
+            scope.onKeyup = function(event) {
                 keyupValue = angular.element(event.target).val();
 
                 if (keydownValue !== keyupValue) {

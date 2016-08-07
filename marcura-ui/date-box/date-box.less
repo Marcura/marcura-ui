@@ -2,8 +2,10 @@
 @input-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
 @input-shadow-is-focused: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
 @input-shadow-is-invalid: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483;
+@font-family: 'Helvetica Neue', 'Helvetica', sans-serif;
 
 .ma-date-box {
+    font-family: @font-family;
     min-width: 258px;
     display: inline-block;
     .box-shadow(@input-shadow);
@@ -11,6 +13,7 @@
     height: 30px;
     padding: 5px 30px 5px 10px;
     position: relative;
+    background-color: #ffffff;
     .transition(border-color ease-in-out .15s, box-shadow ease-in-out .15s;);
 
     &-is-focused {
@@ -45,6 +48,8 @@
         font-size: 14px;
         height: 17px;
         color: #555;
+        vertical-align: top;
+        font-family: @font-family;
     }
 
     &-date {
