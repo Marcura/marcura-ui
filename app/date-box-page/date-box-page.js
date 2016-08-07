@@ -29,7 +29,7 @@ function dateBoxPageController($scope, $timeout, maDateConverter) {
         console.log('change:', newDate);
     });
 
-    // $timeout(function() {
-    //     $scope.date3 = '2016-07-25T18:20:00Z';
-    // }, 3000);
+    $timeout(function() {
+        // $scope.date4 = '2016-07-25T18:30:00+03:00';
+    }, 3000);
 }

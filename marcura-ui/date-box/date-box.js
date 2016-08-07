@@ -26,12 +26,14 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 <input class="ma-date-box-date" type="text" id="{{id}}"\
                     ng-required="isRequired"\
                     ng-focus="onFocus()"\
-                    ng-keydown="onDateKeydown()"\
-                    ng-keyup="onDateKeyup()"\
+                    ng-keydown="onKeydown($event)"\
+                    ng-keyup="onKeyup($event)"\
                     ng-blur="onBlur()"/><input class="ma-date-box-hours"\
                         maxlength="2"\
                         ng-show="hasTime"\
                         ng-focus="onFocus()"\
+                        ng-keydown="onKeydown($event)"\
+                        ng-keyup="onKeyup($event)"\
                         ng-blur="onBlur()"\
                         ng-keydown="onTimeKeydown($event)"\
                         /><div class="ma-date-box-colon" ng-if="hasTime">:</div><input \
@@ -39,6 +41,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         maxlength="2"\
                         ng-show="hasTime"\
                         ng-focus="onFocus()"\
+                        ng-keydown="onKeydown($event)"\
+                        ng-keyup="onKeyup($event)"\
                         ng-blur="onBlur()"\
                         ng-keydown="onTimeKeydown($event)"/>\
                 <i class="ma-date-box-icon fa fa-calendar"></i>\
@@ -63,8 +67,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 timeZoneOffset = moment().utcOffset(timeZone).utcOffset(),
                 isDateSetInternally = true,
                 initialDisplayDate,
-                keydownDate,
-                keyupDate,
+                // Help track changes in date, hours or minutes.
+                keydownValue,
+                keyupValue,
                 isTouched = false,
                 initialDateOffset = 0,
                 onChange = function(internalDate) {
@@ -198,11 +203,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     }
                 }
 
-                console.log('date:', maDate.date);
-                console.log('prev:', previousDate);
-                console.log('chan:', hasDateChanged(maDate.date));
-
-
                 if (!hasDateChanged(maDate.date)) {
                     setDisplayDate(maDate);
                     scope.isInvalid = false;
@@ -229,14 +229,14 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 }
             };
 
-            scope.onDateKeydown = function() {
-                keydownDate = dateElement.val();
+            scope.onKeydown = function(event) {
+                keydownValue = angular.element(event.target).val();
             };
 
-            scope.onDateKeyup = function() {
-                keyupDate = dateElement.val();
+            scope.onKeyup = function() {
+                keyupValue = angular.element(event.target).val();
 
-                if (keydownDate !== keyupDate) {
+                if (keydownValue !== keyupValue) {
                     isTouched = true;
 
                     // Override initial time zone offset after date has been changed.
@@ -276,7 +276,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                             return;
                         }
 
-                        date = maDateConverter.offsetUtc(picker.getDate());
+                        var date = maDateConverter.offsetUtc(picker.getDate());
 
                         if (scope.hasTime) {
                             // Substruct time zone offset.
