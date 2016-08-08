@@ -7,6 +7,7 @@
 .ma-date-box {
     font-family: @font-family;
     min-width: 258px;
+    width: 100%;
     display: inline-block;
     .box-shadow(@input-shadow);
     border: 1px solid #ccc;
@@ -52,6 +53,18 @@
 
     &-is-resettable {
         padding-right: 60px;
+
+        .ma-date-box-hours {
+            right: 65px;
+        }
+
+        .ma-date-box-minutes {
+            right: 89px;
+        }
+
+        .ma-date-box-colon {
+            right: 88px;
+        }
     }
 
     &-is-invalid {
@@ -63,10 +76,7 @@
     }
 
     &-has-time {
-        .ma-date-box-date {
-            width: ~'calc(100% - 50px)';
-            padding-right: 5px;
-        }
+        padding-right: 91px;
     }
 
     &-date,
@@ -88,12 +98,17 @@
     &-hours {
         width: 22px;
         text-align: center;
+        position: absolute;
+        top: 5px;
+        right: 35px;
     }
 
     &-minutes {
-        width: 26px;
+        width: 22px;
         text-align: center;
-        padding-right: 3px;
+        position: absolute;
+        top: 5px;
+        right: 59px;
     }
 
     &-colon {
@@ -103,6 +118,9 @@
         width: 2px;
         color: #555;
         text-align: center;
+        position: absolute;
+        top: 5px;
+        right: 58px;
     }
 
     &-icon {
