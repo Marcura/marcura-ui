@@ -43,9 +43,10 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
         // $scope.date4 = '2016-07-25T18:30:00+03:00';
         // $scope.date4Disabled = true;
         $scope.date9Instance.validate();
+        console.log($scope.date9Instance.isValid());
     }, 3000);
 
     // $timeout(function() {
-    //     $scope.date4Disabled = false;
+    //     console.log($scope.date9Instance.isValid());
     // }, 6000);
 }

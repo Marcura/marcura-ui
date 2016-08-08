@@ -25,7 +25,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     \'ma-date-box-is-invalid\': !_isValid,\
                     \'ma-date-box-is-disabled\': isDisabled,\
                     \'ma-date-box-is-resettable\': _isResettable,\
-                    \'ma-date-box-is-focused\': isFocused\
+                    \'ma-date-box-is-focused\': isFocused,\
+                    \'ma-date-box-is-touched\': isTouched\
                 }">\
                 <input class="ma-date-box-date" type="text" id="{{id}}"\
                     ng-disabled="isDisabled"\
@@ -76,7 +77,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 // Help track changes in date, hours or minutes.
                 keydownValue,
                 keyupValue,
-                isTouched = false,
                 initialDateOffset = 0,
                 validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
@@ -114,7 +114,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         return false;
                     }
 
-                    isTouched = true;
+                    scope.isTouched = true;
 
                     return true;
                 },
@@ -233,6 +233,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             scope._isResettable = scope.isResettable === false ? false : true;
             scope.isFocused = false;
             scope._isValid = true;
+            scope.isTouched = false;
 
             scope.isResetValueVisible = function() {
                 return scope._isResettable && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
@@ -244,9 +245,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
             scope.onBlur = function() {
                 scope.isFocused = false;
-                scope._isValid = true;
 
                 var date = dateElement.val().trim(),
+                    isEmpty = date === '',
                     hours = Number(hoursElement.val()),
                     minutes = Number(minutesElement.val()),
                     maDate = {
@@ -263,8 +264,14 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     return;
                 }
 
+                // Date is incorrect (has not been parsed) or is empty and touched.
+                if ((!isEmpty && !maDate.date) || (isEmpty && scope.isTouched)) {
+                    scope._isValid = false;
+                    return;
+                }
+
                 if (maDate.date) {
-                    if (scope.hasTime || (!isTouched && initialDisplayDate === date)) {
+                    if (scope.hasTime || (!scope.isTouched && initialDisplayDate === date)) {
                         // Substruct time zone offset.
                         maDate.date = addTimeToDate(maDate.date);
                         maDate.date = maDateConverter.offsetUtc(maDate.date, -(timeZoneOffset - initialDateOffset));
@@ -274,7 +281,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 if (!hasDateChanged(maDate.date)) {
                     setDisplayDate(maDate);
                     scope._isValid = true;
-
                     return;
                 }
 
@@ -285,6 +291,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
                 // Run validators.
                 if (validators && validators.length) {
+                    scope._isValid = true;
+
                     for (var i = 0; i < validators.length; i++) {
                         if (!validators[i].method(maDate.date)) {
                             scope._isValid = false;
@@ -318,7 +326,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 keyupValue = angular.element(event.target).val();
 
                 if (keydownValue !== keyupValue) {
-                    isTouched = true;
+                    scope.isTouched = true;
 
                     // Override initial time zone offset after date has been changed.
                     initialDateOffset = timeZoneOffset;
@@ -434,6 +442,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             // Prepare API instance.
             if (scope.instance) {
                 scope.instance.validate = function() {
+                    scope.isTouched = true;
+
                     if (isRequired && !scope.date) {
                         scope._isValid = false;
                         return;
@@ -449,6 +459,10 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                             }
                         }
                     }
+                };
+
+                scope.instance.isValid = function() {
+                    return scope._isValid;
                 };
             }
         }
