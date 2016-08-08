@@ -55,7 +55,7 @@
             has-time="true"
             date="date4"
             time-zone="'+09:00'"
-            is-disabled="isDate4Disabled"
+            is-disabled="date4Disabled"
             format="'yyyy-MM-ddTHH:mm:ssZ'">
         </ma-date-box>
     </div>
@@ -104,5 +104,31 @@
     </div>
     <div class="nodes-item">
         date: {{date8}}
+    </div>
+    <div class="nodes-item">
+        <h2>Set validity</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            instance="date9Instance"
+            is-valid="false"
+            date="date9"
+            format="'yyyy-MM-ddTHH:mm:ssZ'"
+            is-required="true">
+        </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        date: {{date9}}
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            is-valid="false"
+            has-time="true"
+            date="date10"
+            format="'yyyy-MM-ddTHH:mm:ssZ'">
+        </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        date: {{date10}}
     </div>
 </div>

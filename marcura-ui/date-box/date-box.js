@@ -14,14 +14,15 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             format: '=',
             hasTime: '=',
             parser: '=',
-            validators: '='
+            validators: '=',
+            instance: '='
         },
         replace: true,
         template: function() {
             var html = '\
             <div class="ma-date-box" ng-class="{\
                     \'ma-date-box-has-time\': hasTime,\
-                    \'ma-date-box-is-invalid\': isInvalid,\
+                    \'ma-date-box-is-invalid\': !_isValid,\
                     \'ma-date-box-is-disabled\': isDisabled,\
                     \'ma-date-box-is-resettable\': _isResettable,\
                     \'ma-date-box-is-focused\': isFocused\
@@ -231,6 +232,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
             scope._isResettable = scope.isResettable === false ? false : true;
             scope.isFocused = false;
+            scope._isValid = true;
 
             scope.isResetValueVisible = function() {
                 return scope._isResettable && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
@@ -242,10 +244,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
             scope.onBlur = function() {
                 scope.isFocused = false;
-                scope.isInvalid = false;
+                scope._isValid = true;
 
                 var date = dateElement.val().trim(),
-                    isValid = true,
                     hours = Number(hoursElement.val()),
                     minutes = Number(minutesElement.val()),
                     maDate = {
@@ -258,8 +259,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     maDate = parseDate(date) || maDate;
                     maDate.offset = initialDateOffset;
                 } else {
-                    isValid = false;
-                    scope.isInvalid = true;
+                    scope._isValid = false;
                     return;
                 }
 
@@ -273,7 +273,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
 
                 if (!hasDateChanged(maDate.date)) {
                     setDisplayDate(maDate);
-                    scope.isInvalid = false;
+                    scope._isValid = true;
 
                     return;
                 }
@@ -287,15 +287,13 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
                         if (!validators[i].method(maDate.date)) {
-                            isValid = false;
+                            scope._isValid = false;
                             break;
                         }
                     }
                 }
 
-                if (!isValid) {
-                    scope.isInvalid = true;
-
+                if (!scope._isValid) {
                     return;
                 }
 
@@ -350,7 +348,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 previousDate = null;
 
                 if (isRequired) {
-                    scope.isInvalid = true;
+                    scope._isValid = false;
                     setDisplayDate();
                 } else {
                     onChange();
@@ -432,6 +430,27 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     destroyPikaday();
                 }
             });
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.validate = function() {
+                    if (isRequired && !scope.date) {
+                        scope._isValid = false;
+                        return;
+                    }
+
+                    maDate = parseDate();
+
+                    if (validators && validators.length) {
+                        for (var i = 0; i < validators.length; i++) {
+                            if (!validators[i].method(maDate.date)) {
+                                scope._isValid = false;
+                                break;
+                            }
+                        }
+                    }
+                };
+            }
         }
     };
 }]);

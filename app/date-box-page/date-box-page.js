@@ -9,11 +9,14 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
     $scope.date3 = '2016-07-25T16:30:00Z';
     // $scope.date4 = '2016-07-25T16:30:00Z';
     $scope.date4 = '2016-07-25T16:30:00+04:00';
+    $scope.date4Disabled = false;
     $scope.date5 = '2016-07-25T16:30:00Z';
     $scope.date6 = '2016-07-25T16:30:00Z';
     $scope.date7 = '2016-07-25T00:00:00Z';
     $scope.date8 = '2016-07-25T16:30:00+04:00';
-    $scope.isDate4Disabled = false;
+    $scope.date9 = '';
+    $scope.date9Instance = {};
+    $scope.date10 = '2016-07-25T16:30:00+04:00';
 
     // console.log(maDateConverter.parse('2016-07-26T20:00:00+09:00'));
 
@@ -38,10 +41,11 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
 
     $timeout(function() {
         // $scope.date4 = '2016-07-25T18:30:00+03:00';
-        // $scope.isDate4Disabled = true;
+        // $scope.date4Disabled = true;
+        $scope.date9Instance.validate();
     }, 3000);
 
     // $timeout(function() {
-    //     $scope.isDate4Disabled = false;
+    //     $scope.date4Disabled = false;
     // }, 6000);
 }
