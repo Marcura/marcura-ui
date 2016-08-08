@@ -449,7 +449,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         return;
                     }
 
-                    var maDate = parseDate();
+                    var maDate = parseDate(scope.date);
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
