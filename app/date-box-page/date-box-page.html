@@ -66,7 +66,7 @@
     </div>
     <div class="nodes-item">
         <ma-date-box
-            date="date1"
+            date="date5"
             is-disabled="true"
             format="'yyyy-MM-ddTHH:mm:ssZ'">
         </ma-date-box>
@@ -74,10 +74,34 @@
     <div class="nodes-item">
         <ma-date-box
             has-time="true"
-            date="date1"
+            date="date6"
             is-disabled="true"
             time-zone="'+09:00'"
             format="'yyyy-MM-ddTHH:mm:ssZ'">
         </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Required</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            date="date7"
+            format="'yyyy-MM-ddTHH:mm:ssZ'"
+            is-required="true">
+        </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        date: {{date7}}
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            has-time="true"
+            date="date8"
+            format="'yyyy-MM-ddTHH:mm:ssZ'"
+            is-required="true">
+        </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        date: {{date8}}
     </div>
 </div>

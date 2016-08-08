@@ -7,7 +7,7 @@ describe('maHelper service', function() {
     }));
 
     describe('isEmail method', function() {
-        it('should determine whether a specified value is an email', function() {
+        it('determines whether a specified value is an email', function() {
             expect(maHelper.isEmail('p.smith@gmail.com')).toEqual(true);
             expect(maHelper.isEmail('p.smithgmail.com')).toEqual(false);
             expect(maHelper.isEmail('p.smith@gmailcom')).toEqual(false);
@@ -19,7 +19,7 @@ describe('maHelper service', function() {
     });
 
     describe('isDate method', function() {
-        it('should determine whether a specified value is a date', function() {
+        it('determines whether a specified value is a date', function() {
             expect(maHelper.isDate(new Date())).toEqual(true);
             expect(maHelper.isDate(new Date('invalid'))).toEqual(false);
             expect(maHelper.isDate('Mon Aug 24 2015 10:42:31 GMT+0700 (N. Central Asia Daylight Time)')).toEqual(false);
@@ -38,6 +38,29 @@ describe('maHelper service', function() {
             expect(maHelper.isDate(null)).toEqual(false);
             expect(maHelper.isDate(undefined)).toEqual(false);
             expect(maHelper.isDate(NaN)).toEqual(false);
+        });
+    });
+
+    describe('isNullOrWhiteSpace method', function() {
+        it('determines whether a specified string is null, empty, or consists only of white-space characters', function() {
+            expect(maHelper.isNullOrWhiteSpace(null)).toEqual(true);
+            expect(maHelper.isNullOrWhiteSpace('')).toEqual(true);
+            expect(maHelper.isNullOrWhiteSpace(' ')).toEqual(true);
+            expect(maHelper.isNullOrWhiteSpace('    ')).toEqual(true);
+            expect(maHelper.isNullOrWhiteSpace(undefined)).toEqual(true);
+            expect(maHelper.isNullOrWhiteSpace(false)).toEqual(false);
+            expect(maHelper.isNullOrWhiteSpace(true)).toEqual(false);
+            expect(maHelper.isNullOrWhiteSpace('data')).toEqual(false);
+            expect(maHelper.isNullOrWhiteSpace({
+                name: 'Data'
+            })).toEqual(false);
+            expect(maHelper.isNullOrWhiteSpace({})).toEqual(false);
+            expect(maHelper.isNullOrWhiteSpace([{
+                name: 'Data'
+            }])).toEqual(false);
+            expect(maHelper.isNullOrWhiteSpace(1100)).toEqual(false);
+            expect(maHelper.isNullOrWhiteSpace(new Date())).toEqual(false);
+            expect(maHelper.isNullOrWhiteSpace([])).toEqual(false);
         });
     });
 });

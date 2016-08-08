@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDateConverter', 'maHelper', function($timeout, maDateConverter, maHelper) {
+angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDateConverter', 'maHelper', 'maValidators', function($timeout, maDateConverter, maHelper, maValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -13,21 +13,21 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             displayFormat: '=',
             format: '=',
             hasTime: '=',
-            parser: '='
+            parser: '=',
+            validators: '='
         },
         replace: true,
         template: function() {
             var html = '\
             <div class="ma-date-box" ng-class="{\
                     \'ma-date-box-has-time\': hasTime,\
-                    \'ma-date-box-is-invalid\': ((isRequired && isEmpty()) || isInvalid),\
+                    \'ma-date-box-is-invalid\': isInvalid,\
                     \'ma-date-box-is-disabled\': isDisabled,\
                     \'ma-date-box-is-resettable\': _isResettable,\
                     \'ma-date-box-is-focused\': isFocused\
                 }">\
                 <input class="ma-date-box-date" type="text" id="{{id}}"\
                     ng-disabled="isDisabled"\
-                    ng-required="isRequired"\
                     ng-focus="onFocus()"\
                     ng-keydown="onKeydown($event)"\
                     ng-keyup="onKeyup($event)"\
@@ -52,7 +52,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         ng-keydown="onTimeKeydown($event)"/>\
                 <i class="ma-date-box-icon fa fa-calendar"></i>\
                 <ma-reset-value\
-                    ng-show="_isResettable && date"\
+                    ng-show="isResetValueVisible()"\
                     ng-click="onReset()">\
                 </ma-reset-value>\
             </div>';
@@ -77,6 +77,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 keyupValue,
                 isTouched = false,
                 initialDateOffset = 0,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false,
                 onChange = function(internalDate) {
                     var date = null;
 
@@ -210,11 +213,27 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     }
                 };
 
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(maValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
             scope._isResettable = scope.isResettable === false ? false : true;
             scope.isFocused = false;
 
-            scope.isEmpty = function() {
-                return dateElement.val() === '';
+            scope.isResetValueVisible = function() {
+                return scope._isResettable && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
             };
 
             scope.onFocus = function() {
@@ -226,8 +245,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 scope.isInvalid = false;
 
                 var date = dateElement.val().trim(),
-                    isEmptyDate = date === '',
-                    isValidDate = true,
+                    isValid = true,
                     hours = Number(hoursElement.val()),
                     minutes = Number(minutesElement.val()),
                     maDate = {
@@ -239,6 +257,10 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
                     maDate = parseDate(date) || maDate;
                     maDate.offset = initialDateOffset;
+                } else {
+                    isValid = false;
+                    scope.isInvalid = true;
+                    return;
                 }
 
                 if (maDate.date) {
@@ -261,25 +283,40 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                     previousDate = maDate.date;
                 }
 
-                isValidDate = maDate.date !== null;
+                // Run validators.
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].method(maDate.date)) {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
 
-                if (!isEmptyDate && !isValidDate) {
+                if (!isValid) {
                     scope.isInvalid = true;
 
                     return;
                 }
 
-                if (maDate.date || isEmptyDate) {
-                    scope.isInvalid = scope.isRequired && isEmptyDate && !isValidDate;
-                    onChange(maDate.date);
-                }
+                onChange(maDate.date);
             };
 
             scope.onKeydown = function(event) {
+                // Ignore tab key.
+                if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    return;
+                }
+
                 keydownValue = angular.element(event.target).val();
             };
 
             scope.onKeyup = function(event) {
+                // Ignore tab key.
+                if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    return;
+                }
+
                 keyupValue = angular.element(event.target).val();
 
                 if (keydownValue !== keyupValue) {
@@ -311,7 +348,13 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 }
 
                 previousDate = null;
-                onChange();
+
+                if (isRequired) {
+                    scope.isInvalid = true;
+                    setDisplayDate();
+                } else {
+                    onChange();
+                }
             };
 
             // Set initial date.

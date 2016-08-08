@@ -14,6 +14,7 @@ angular.module('marcuraUI.services').factory('maHelper', [function() {
             pageUp: 33,
             period: 190,
             right: 39,
+            shift: 16,
             space: 32,
             tab: 9,
             up: 38
@@ -30,6 +31,19 @@ angular.module('marcuraUI.services').factory('maHelper', [function() {
         isEmail: function(value) {
             var pattern = /^([\+\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
             return pattern.test(value);
+        },
+
+        isNullOrWhiteSpace: function(value) {
+            if (value === null || value === undefined) {
+                return true;
+            }
+
+            if (angular.isArray(value)) {
+                return false;
+            }
+
+            // Convert value to string in case if it is not.
+            return value.toString().replace(/\s/g, '').length < 1;
         },
 
         formatString: function(value) {
