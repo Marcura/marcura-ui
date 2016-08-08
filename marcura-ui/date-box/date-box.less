@@ -6,7 +6,7 @@
 
 .ma-date-box {
     font-family: @font-family;
-    min-width: 258px;
+    min-width: 120px;
     width: 100%;
     display: inline-block;
     .box-shadow(@input-shadow);
@@ -76,7 +76,11 @@
     }
 
     &-has-time {
-        padding-right: 91px;
+        padding-right: 86px;
+
+        &.ma-date-box-is-resettable {
+            padding-right: 116px;
+        }
     }
 
     &-date,
@@ -94,6 +98,7 @@
 
     &-date {
         width: 100%;
+        text-overflow: ellipsis;
     }
 
     &-hours {
