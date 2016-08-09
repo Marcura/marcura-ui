@@ -18,8 +18,8 @@ var paths = {
         js: 'app/**/*.js',
         css: 'app/**/*.css'
     },
-    dest: {
-        root: 'dest/'
+    dist: {
+        root: 'dist/'
     },
     source: {
         js: 'marcura-ui/**/*.js',
@@ -32,14 +32,14 @@ var build = function(complete) {
 }
 
 gulp.task('clean', function() {
-    del.sync([paths.dest.root + '/**/*', '!' + paths.dest.root]);
+    del.sync([paths.dist.root + '/**/*', '!' + paths.dist.root]);
 });
 
 gulp.task('copy-js', function() {
     return gulp.src(paths.source.js)
         .pipe(wrap('(function(){<%=contents%>})();'))
         .pipe(concat('marcura-ui.js'))
-        .pipe(gulp.dest(paths.dest.root));
+        .pipe(gulp.dest(paths.dist.root));
 });
 
 gulp.task('copy-and-minify-js', function() {
@@ -47,7 +47,7 @@ gulp.task('copy-and-minify-js', function() {
         .pipe(wrap('(function(){<%=contents%>})();'))
         .pipe(uglify())
         .pipe(concat('marcura-ui.min.js'))
-        .pipe(gulp.dest(paths.dest.root));
+        .pipe(gulp.dest(paths.dist.root));
 });
 
 gulp.task('check-js', function() {
@@ -64,7 +64,7 @@ gulp.task('copy-css', function() {
         }))
         .pipe(concat('marcura-ui.min.css'))
         .pipe(minifyCss())
-        .pipe(gulp.dest(paths.dest.root))
+        .pipe(gulp.dest(paths.dist.root))
         .pipe(browserSync.stream());
 });
 

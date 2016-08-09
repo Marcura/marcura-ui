@@ -5,5 +5,6 @@ marcura-ui
 .gitignore
 .npmignore
 gulpfile.js
-!dest
 tests
+Procfile
+server.js

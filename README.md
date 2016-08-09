@@ -22,8 +22,8 @@ Download it using npm:
 `npm install marcura-ui --save`
 
 ## Getting started
-`<link rel="stylesheet" href="node_modules/marcura-ui/dest/marcura-ui.min.css">`  
-`<script src="node_modules/marcura-ui/dest/marcura-ui.min.js"></script>`
+`<link rel="stylesheet" href="node_modules/marcura-ui/dist/marcura-ui.min.css">`  
+`<script src="node_modules/marcura-ui/dist/marcura-ui.min.js"></script>`
 
 As soon as you've downloaded the package and included it in your page you need to declare a dependency on it:
 
