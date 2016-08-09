@@ -6,7 +6,7 @@
 [![NPM Version][npm-image]][npm-url]
 
 ## Demos
-https://macrura-ui.herokuapp.com/#/home
+https://marcura-ui.herokuapp.com/#/home
 
 ## Dependencies
 * [Angular](https://angularjs.org/) (1.3.8 or higher)
