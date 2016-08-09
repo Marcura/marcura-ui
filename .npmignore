@@ -8,3 +8,4 @@ gulpfile.js
 tests
 Procfile
 server.js
+.jshintrc
