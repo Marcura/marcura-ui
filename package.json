@@ -33,7 +33,8 @@
         "karma-jasmine": "1.0.2",
         "karma-junit-reporter": "1.1.0",
         "gulp-jshint": "2.0.1",
-        "express": "4.13.3"
+        "express": "4.13.3",
+        "ui-select": "0.19.1"
     },
     "main": "server.js",
     "scripts": {

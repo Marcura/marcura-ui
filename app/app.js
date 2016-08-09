@@ -95,6 +95,12 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
         controller: 'select2PageController'
     });
 
+    $stateProvider.state('ui-select', {
+        url: '/ui-select',
+        templateUrl: 'ui-select-page/ui-select-page.html',
+        controller: 'uiSelectPageController'
+    });
+
     $stateProvider.state('costs-grid', {
         url: '/costs-grid',
         templateUrl: 'costs-grid-page/costs-grid-page.html',
