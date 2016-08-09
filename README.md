@@ -5,6 +5,9 @@
 
 [![NPM Version][npm-image]][npm-url]
 
+## Demos
+https://macrura-ui.herokuapp.com/#/home
+
 ## Dependencies
 * [Angular](https://angularjs.org/) (1.3.8 or higher)
 * [Angular UI Router](https://github.com/angular-ui/ui-router/wiki) (0.2.14 or higher)
