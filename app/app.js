@@ -121,5 +121,11 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
         controller: 'radioBoxPageController'
     });
 
+    $stateProvider.state('reset-value', {
+        url: '/reset-value',
+        templateUrl: 'reset-value-page/reset-value-page.html',
+        controller: 'resetValuePageController'
+    });
+
     $urlRouterProvider.otherwise('/home');
 }]);

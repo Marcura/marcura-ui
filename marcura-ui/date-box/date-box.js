@@ -54,8 +54,9 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                         ng-keydown="onTimeKeydown($event)"/>\
                 <i class="ma-date-box-icon fa fa-calendar"></i>\
                 <ma-reset-value\
-                    ng-show="isResetValueVisible()"\
-                    ng-click="onReset()">\
+                    is-disabled="!isResetEnabled()"\
+                    click="onReset()"\
+                    ng-show="_isResettable">\
                 </ma-reset-value>\
             </div>';
 
@@ -235,8 +236,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
             scope._isValid = true;
             scope.isTouched = false;
 
-            scope.isResetValueVisible = function() {
-                return scope._isResettable && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
+            scope.isResetEnabled = function() {
+                return !scope.isDisabled && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
             };
 
             scope.onFocus = function() {

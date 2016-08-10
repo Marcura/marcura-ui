@@ -202,8 +202,9 @@ angular.element(document).ready(function() {
                         ng-keydown="onTimeKeydown($event)"/>\
                 <i class="ma-date-box-icon fa fa-calendar"></i>\
                 <ma-reset-value\
-                    ng-show="isResetValueVisible()"\
-                    ng-click="onReset()">\
+                    is-disabled="!isResetEnabled()"\
+                    click="onReset()"\
+                    ng-show="_isResettable">\
                 </ma-reset-value>\
             </div>';
 
@@ -383,8 +384,8 @@ angular.element(document).ready(function() {
             scope._isValid = true;
             scope.isTouched = false;
 
-            scope.isResetValueVisible = function() {
-                return scope._isResettable && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
+            scope.isResetEnabled = function() {
+                return !scope.isDisabled && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
             };
 
             scope.onFocus = function() {
@@ -755,14 +756,28 @@ angular.element(document).ready(function() {
 (function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
     return {
         restrict: 'E',
+        scope: {
+            isDisabled: '=',
+            click: '&'
+        },
         replace: true,
         template: function() {
             var html = '\
-            <div class="ma-reset-value">\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
                 <i class="fa fa-times"></i>\
             </div>';
 
             return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
         }
     };
 }]);

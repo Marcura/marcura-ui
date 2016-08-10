@@ -8,11 +8,16 @@
     background-color: #bebebe;
     border-radius: 10px;
     color: #fff;
-    cursor: pointer;
+    text-align: left;
 
-    &:hover {
+    &-is-disabled {
+        opacity: 0.45;
+    }
+
+    &:not(&-is-disabled):hover {
         background-color: #868686;
         color: #fff;
+        cursor: pointer;
     }
 
     .fa {
