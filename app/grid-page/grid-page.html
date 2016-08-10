@@ -85,7 +85,7 @@
                     ng-repeat="da in das | orderBy: orderedBy">
                     <div class="ma-grid-row-inner">
                         <div class="ma-grid-col ma-grid-col-vessel">
-                            <td>{{da.vessel}}</td>
+                            {{da.vessel}}
                         </div>
                         <div class="ma-grid-col ma-grid-col-operation">
                             {{da.operation.substring(0,1)}}
