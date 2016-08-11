@@ -266,7 +266,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'maDa
                 }
 
                 // Date is incorrect (has not been parsed) or is empty and touched.
-                if ((!isEmpty && !maDate.date) || (isEmpty && scope.isTouched)) {
+                if ((!isEmpty && !maDate.date) || (isEmpty && scope.isTouched && isRequired)) {
                     scope._isValid = false;
                     return;
                 }

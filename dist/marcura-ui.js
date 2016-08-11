@@ -78,27 +78,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', [function() {
     return {
         restrict: 'E',
@@ -414,7 +393,7 @@ angular.element(document).ready(function() {
                 }
 
                 // Date is incorrect (has not been parsed) or is empty and touched.
-                if ((!isEmpty && !maDate.date) || (isEmpty && scope.isTouched)) {
+                if ((!isEmpty && !maDate.date) || (isEmpty && scope.isTouched && isRequired)) {
                     scope._isValid = false;
                     return;
                 }
@@ -614,6 +593,27 @@ angular.element(document).ready(function() {
                     return scope._isValid;
                 };
             }
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
