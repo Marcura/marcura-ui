@@ -78,7 +78,7 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', [function() {
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', function(maHelper) {
     return {
         restrict: 'E',
         scope: {
@@ -93,12 +93,16 @@ angular.element(document).ready(function() {
         template: function() {
             var html = '\
             <div class="ma-check-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
                 ng-click="onChange()"\
                 ng-class="{\
                     \'ma-check-box-is-checked\': value === true,\
                     \'ma-check-box-is-disabled\': isDisabled,\
                     \'ma-check-box-has-text\': hasText,\
-                    \'ma-check-box-rtl\': rtl\
+                    \'ma-check-box-rtl\': rtl,\
+                    \'ma-check-box-is-focused\': isFocused\
                 }">\
                 <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
                 <div class="ma-check-box-inner"></div>\
@@ -107,10 +111,19 @@ angular.element(document).ready(function() {
 
             return html;
         },
-        link: function(scope) {
+        link: function(scope, element) {
+            var setTabindex = function() {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
             scope._size = scope.size ? scope.size : 'xs';
             scope.cssClass = ' ma-check-box-' + scope._size;
             scope.hasText = scope.text ? true : false;
+            scope.isFocused = false;
 
             scope.onChange = function() {
                 if (!scope.isDisabled) {
@@ -121,6 +134,59 @@ angular.element(document).ready(function() {
                     });
                 }
             };
+
+            scope.onFocus = function() {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function() {
+                if (!scope.isDisabled) {
+                    scope.isFocused = false;
+                }
+            };
+
+            scope.onKeypress = function(event) {
+                if (!scope.isDisabled && event.keyCode === maHelper.keyCode.space) {
+                    scope.onChange();
+                }
+            };
+
+            scope.$watch('isDisabled', function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -593,27 +659,6 @@ angular.element(document).ready(function() {
                     return scope._isValid;
                 };
             }
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);

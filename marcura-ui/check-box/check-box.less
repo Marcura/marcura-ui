@@ -5,6 +5,7 @@
     position: relative;
     padding-left: 21px;
     cursor: pointer;
+    outline: 0;
     .user-select(none);
 
     &-is-disabled {
@@ -17,6 +18,13 @@
 
         .ma-check-box-icon {
             opacity: 0.65;
+        }
+    }
+
+    &-is-focused {
+        .ma-check-box-inner {
+            .box-shadow(@input-shadow-is-focused);
+            border-color: #66afe9;
         }
     }
 
