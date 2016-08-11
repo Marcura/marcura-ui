@@ -257,7 +257,6 @@ angular.element(document).ready(function() {
         },
         link: function(scope, element) {
             var picker = null,
-                dateType = 'String',
                 displayFormat = (scope.displayFormat ? scope.displayFormat : 'dd MMM yyyy').replace(/Y/g, 'y').replace(/D/g, 'd'),
                 format = (scope.format ? scope.format : 'dd MMM yyyy').replace(/Y/g, 'y').replace(/D/g, 'd'),
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
@@ -289,19 +288,10 @@ angular.element(document).ready(function() {
                             .seconds(0);
                     }
 
-                    scope.date = getDateInType(date);
+                    scope.date = date ? maDateConverter.format(date, format, timeZone) : null;
                     scope.change({
                         date: scope.date
                     });
-                },
-                getDateInType = function(date) {
-                    if (!date) {
-                        return null;
-                    } else if (dateType === 'Moment') {
-                        return date;
-                    } else {
-                        return maDateConverter.format(date, format, timeZone);
-                    }
                 },
                 hasDateChanged = function(date) {
                     if ((previousDate === null && date === null) || (previousDate && date && previousDate.diff(date) === 0)) {
@@ -559,20 +549,12 @@ angular.element(document).ready(function() {
 
             // Set initial date.
             if (scope.date) {
-                // Determine initial date type.
-                if (scope.date && scope.date.isValid && scope.date.isValid()) {
-                    dateType = 'Moment';
-                }
-
                 var maDate = {
                     date: null,
                     offset: 0
                 };
 
-                if (dateType === 'String') {
-                    maDate = maDateConverter.parse(scope.date, scope.culture) || maDate;
-                }
-
+                maDate = maDateConverter.parse(scope.date, scope.culture) || maDate;
                 maDate.date = maDateConverter.offsetUtc(maDate.date);
 
                 if (!maDate.date) {

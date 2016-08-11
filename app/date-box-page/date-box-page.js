@@ -19,11 +19,6 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
     $scope.date9Instance = {};
     $scope.date10 = '2016-07-25T16:30:00+04:00';
 
-    // console.log(maDateConverter.parse('2016-07-26T20:00:00+09:00'));
-
-    // Moment date.
-    // $scope.date = moment('2014-12-31T00:00:00Z');
-
     $scope.change1 = function(date) {
         console.log('date1:', date);
     };
