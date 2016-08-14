@@ -11,7 +11,9 @@ var app = angular.module('app', [
     'app.controllers'
 ]);
 
-app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationProvider) {
+    maDateBoxConfigurationProvider.displayFormat = 'dd MMM yy';
+
     $stateProvider.state('home', {
         url: '/home',
         templateUrl: 'home/home.html',
@@ -128,4 +130,4 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
     });
 
     $urlRouterProvider.otherwise('/home');
-}]);
+});
