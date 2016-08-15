@@ -78,27 +78,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', function(maHelper) {
     return {
         restrict: 'E',
@@ -187,6 +166,27 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -665,15 +665,14 @@ angular.element(document).ready(function() {
         restrict: 'E',
         scope: {
             orderBy: '@',
-            orderedBy: '=',
-            direction: '='
+            sorting: '='
         },
         replace: true,
         template: function() {
             var html = '\
-            <div class="ma-grid-order ma-grid-order-{{direction}}"\
-                ng-show="orderedBy === orderBy || (orderedBy === \'-\' + orderBy)">\
-                <i class="fa fa-sort-{{direction}}"></i>\
+            <div class="ma-grid-order ma-grid-order-{{sorting.direction}}"\
+                ng-show="sorting.orderedBy === orderBy || (sorting.orderedBy === \'-\' + orderBy)">\
+                <i class="fa fa-sort-{{sorting.direction}}"></i>\
             </div>';
 
             return html;
@@ -1348,6 +1347,26 @@ angular.element(document).ready(function() {
             }
 
             return formattedString;
+        },
+
+        changeSortingOrder: function(sorting, orderBy) {
+            if (orderBy.charAt(0) === '-') {
+                if (sorting.orderedBy !== orderBy) {
+                    sorting.direction = 'desc';
+                    sorting.orderedBy = orderBy;
+                } else {
+                    sorting.direction = 'asc';
+                    sorting.orderedBy = orderBy.substr(1);
+                }
+            } else {
+                if (sorting.orderedBy !== orderBy) {
+                    sorting.direction = 'asc';
+                    sorting.orderedBy = orderBy;
+                } else {
+                    sorting.direction = 'desc';
+                    sorting.orderedBy = '-' + orderBy;
+                }
+            }
         }
     };
 }]);

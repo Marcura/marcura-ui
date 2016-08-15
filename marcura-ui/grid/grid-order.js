@@ -3,15 +3,14 @@ angular.module('marcuraUI.components').directive('maGridOrder', [function() {
         restrict: 'E',
         scope: {
             orderBy: '@',
-            orderedBy: '=',
-            direction: '='
+            sorting: '='
         },
         replace: true,
         template: function() {
             var html = '\
-            <div class="ma-grid-order ma-grid-order-{{direction}}"\
-                ng-show="orderedBy === orderBy || (orderedBy === \'-\' + orderBy)">\
-                <i class="fa fa-sort-{{direction}}"></i>\
+            <div class="ma-grid-order ma-grid-order-{{sorting.direction}}"\
+                ng-show="sorting.orderedBy === orderBy || (sorting.orderedBy === \'-\' + orderBy)">\
+                <i class="fa fa-sort-{{sorting.direction}}"></i>\
             </div>';
 
             return html;
