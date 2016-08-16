@@ -12,6 +12,12 @@
         overflow-y: hidden;
     }
 
+    &-is-disabled &-value {
+        .box-shadow(none);
+        background-color: @input-background-color-is-disabled;
+        cursor: default;
+    }
+
     &-value {
         .input;
         .input-transition;

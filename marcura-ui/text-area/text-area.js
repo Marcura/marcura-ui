@@ -9,7 +9,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             canResize: '='
         },
         replace: true,
-        template: function($timeout) {
+        template: function() {
             var html = '\
             <div class="ma-text-area"\
                 ng-class="{\
@@ -21,6 +21,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     type="text"\
                     ng-focus="onFocus()"\
                     ng-blur="onBlur()"\
+                    ng-disabled="isDisabled"\
                     ng-model="value">\
                 </textarea>\
             </div>';
