@@ -6,7 +6,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             value: '=',
             isDisabled: '=',
             fitContentHeight: '=',
-            canResize: '='
+            isResizable: '='
         },
         replace: true,
         template: function() {
@@ -87,7 +87,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             $timeout(function() {
                 resize();
 
-                if (scope.canResize === false) {
+                if (scope.isResizable === false) {
                     valueElement.css('resize', 'none');
                 }
 
