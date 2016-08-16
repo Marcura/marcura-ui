@@ -14,15 +14,16 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             <div class="ma-text-area"\
                 ng-class="{\
                     \'ma-text-area-is-disabled\': isDisabled,\
-                    \'ma-text-area-is-focused\': isFocused\
+                    \'ma-text-area-is-focused\': isFocused,\
+                    \'ma-text-area-fit-content-height\': fitContentHeight\
                 }">\
                 <textarea class="ma-text-area-value"\
                     type="text"\
                     ng-focus="onFocus()"\
                     ng-blur="onBlur()"\
-                    ng-model="value"></textarea>\
+                    ng-model="value">\
+                </textarea>\
             </div>';
-            // <i class="fa fa-caret-down ma-text-area-resize"></i>\
 
             return html;
         },
@@ -46,6 +47,17 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     properties.font = style.getPropertyValue('font');
 
                     return properties;
+                },
+                resize = function() {
+                    if (!scope.fitContentHeight) {
+                        return;
+                    }
+
+                    var valueElementStyle = getValueElementStyle(),
+                        textHeight = maHelper.getTextHeight(scope.value, valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight);
+
+                    valueElement[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
+                    element[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
                 };
 
             scope.isFocused = false;
@@ -58,17 +70,21 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 scope.isFocused = false;
             };
 
-            $timeout(function() {
-                var valueStyle = $window.getComputedStyle(valueElement[0], null),
-                    valueElementStyle = getValueElementStyle(),
-                    textHeight = maHelper.getTextHeight(scope.value, valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight);
+            // We are forced to use input event because scope.watch does
+            // not respond to Enter key when the cursor is in the end of text.
+            valueElement.on('input', function(event) {
+                scope.$apply(function() {
+                    scope.value = valueElement.val();
+                });
+                resize();
+            });
 
-                if (scope.fitContentHeight) {
-                    valueElement[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
-                    element[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
-                } else {
-                    element[0].style.height = (valueElementStyle.height + valueElementStyle.paddingHeight) + 'px';
-                }
+            angular.element($window).on('resize', function() {
+                resize();
+            });
+
+            $timeout(function() {
+                resize();
 
                 if (scope.canResize === false) {
                     valueElement.css('resize', 'none');

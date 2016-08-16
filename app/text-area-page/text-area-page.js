@@ -11,7 +11,7 @@ I fixed this by setting element[0].style.height in the resize function to 1px fi
     $scope.text3 = $scope.text1;
     $scope.text4 = $scope.text1;
 
-    $scope.$watch('text', function(newValue, oldValue) {
+    $scope.$watch('text2', function(newValue, oldValue) {
         console.log('new:', newValue);
         console.log('old:', oldValue);
     });

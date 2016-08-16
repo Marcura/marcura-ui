@@ -20,64 +20,6 @@ angular.element(document).ready(function() {
     }
 });
 })();
-(function(){angular.module('marcuraUI.components').directive('maButton', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            kind: '@',
-            leftIcon: '@',
-            rightIcon: '@',
-            isDisabled: '=',
-            click: '&',
-            size: '@',
-            modifier: '@'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <button class="ma-button{{cssClass}}"\
-                ng-click="onClick()"\
-                ng-disabled="isDisabled"\
-                ng-class="{\
-                    \'ma-button-link\': kind === \'link\',\
-                    \'ma-button-has-left-icon\': hasLeftIcon,\
-                    \'ma-button-has-right-icon\': hasRightIcon,\
-                    \'ma-button-is-disabled\': isDisabled,\
-                    \'ma-button-has-text\': hasText\
-                }">\
-                <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
-                    <i class="fa fa-{{leftIcon}}"></i>\
-                </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
-                    <i class="fa fa-{{rightIcon}}"></i>\
-                </span>\
-            </button>';
-
-            return html;
-        },
-        link: function(scope) {
-            scope.hasText = false;
-            scope.hasLeftIcon = false;
-            scope.hasRightIcon = false;
-            scope.size = scope.size ? scope.size : 'md';
-            scope.cssClass = ' ma-button-' + scope.size;
-            scope.hasLeftIcon = scope.leftIcon ? true : false;
-            scope.hasRightIcon = scope.rightIcon ? true : false;
-            scope.hasText = scope.text ? true : false;
-
-            if (scope.modifier) {
-                scope.cssClass += ' ma-button-' + scope.modifier;
-            }
-
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', function(maHelper) {
     return {
         restrict: 'E',
@@ -166,6 +108,64 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maButton', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            kind: '@',
+            leftIcon: '@',
+            rightIcon: '@',
+            isDisabled: '=',
+            click: '&',
+            size: '@',
+            modifier: '@'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <button class="ma-button{{cssClass}}"\
+                ng-click="onClick()"\
+                ng-disabled="isDisabled"\
+                ng-class="{\
+                    \'ma-button-link\': kind === \'link\',\
+                    \'ma-button-has-left-icon\': hasLeftIcon,\
+                    \'ma-button-has-right-icon\': hasRightIcon,\
+                    \'ma-button-is-disabled\': isDisabled,\
+                    \'ma-button-has-text\': hasText\
+                }">\
+                <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
+                    <i class="fa fa-{{leftIcon}}"></i>\
+                </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
+                    <i class="fa fa-{{rightIcon}}"></i>\
+                </span>\
+            </button>';
+
+            return html;
+        },
+        link: function(scope) {
+            scope.hasText = false;
+            scope.hasLeftIcon = false;
+            scope.hasRightIcon = false;
+            scope.size = scope.size ? scope.size : 'md';
+            scope.cssClass = ' ma-button-' + scope.size;
+            scope.hasLeftIcon = scope.leftIcon ? true : false;
+            scope.hasRightIcon = scope.rightIcon ? true : false;
+            scope.hasText = scope.text ? true : false;
+
+            if (scope.modifier) {
+                scope.cssClass += ' ma-button-' + scope.modifier;
+            }
+
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
         }
     };
 }]);
@@ -1369,32 +1369,22 @@ angular.element(document).ready(function() {
             }
         },
 
-        /**
-         * Measures height of text.
-         * @param {string} text Text.
-         * @param {string} font The font of text.
-         * @param {string} width The width of text.
-         * @returns {string} The line height of text.
-         */
         getTextHeight: function(text, font, width, lineHeight) {
             if (!font) {
                 return 0;
             }
 
-            width = width ? width : '0px';
-            lineHeight = lineHeight || 'normal';
-
             // Prepare textarea.
             var textArea = document.createElement('TEXTAREA');
             textArea.setAttribute('rows', 1);
             textArea.style.font = font;
-            textArea.style.width = width;
+            textArea.style.width = width || '0px';
             textArea.style.border = '0';
             textArea.style.overflow = 'hidden';
             textArea.style.padding = '0';
             textArea.style.outline = '0';
             textArea.style.resize = 'none';
-            textArea.style.lineHeight = lineHeight;
+            textArea.style.lineHeight = lineHeight || 'normal';
             textArea.value = text;
 
             // To measure sizes we need to add textarea to DOM.
@@ -1587,15 +1577,16 @@ angular.element(document).ready(function() {
             <div class="ma-text-area"\
                 ng-class="{\
                     \'ma-text-area-is-disabled\': isDisabled,\
-                    \'ma-text-area-is-focused\': isFocused\
+                    \'ma-text-area-is-focused\': isFocused,\
+                    \'ma-text-area-fit-content-height\': fitContentHeight\
                 }">\
                 <textarea class="ma-text-area-value"\
                     type="text"\
                     ng-focus="onFocus()"\
                     ng-blur="onBlur()"\
-                    ng-model="value"></textarea>\
+                    ng-model="value">\
+                </textarea>\
             </div>';
-            // <i class="fa fa-caret-down ma-text-area-resize"></i>\
 
             return html;
         },
@@ -1619,6 +1610,17 @@ angular.element(document).ready(function() {
                     properties.font = style.getPropertyValue('font');
 
                     return properties;
+                },
+                resize = function() {
+                    if (!scope.fitContentHeight) {
+                        return;
+                    }
+
+                    var valueElementStyle = getValueElementStyle(),
+                        textHeight = maHelper.getTextHeight(scope.value, valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight);
+
+                    valueElement[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
+                    element[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
                 };
 
             scope.isFocused = false;
@@ -1631,17 +1633,21 @@ angular.element(document).ready(function() {
                 scope.isFocused = false;
             };
 
-            $timeout(function() {
-                var valueStyle = $window.getComputedStyle(valueElement[0], null),
-                    valueElementStyle = getValueElementStyle(),
-                    textHeight = maHelper.getTextHeight(scope.value, valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight);
+            // We are forced to use input event because scope.watch does
+            // not respond to Enter key when the cursor is in the end of text.
+            valueElement.on('input', function(event) {
+                scope.$apply(function() {
+                    scope.value = valueElement.val();
+                });
+                resize();
+            });
 
-                if (scope.fitContentHeight) {
-                    valueElement[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
-                    element[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
-                } else {
-                    element[0].style.height = (valueElementStyle.height + valueElementStyle.paddingHeight) + 'px';
-                }
+            angular.element($window).on('resize', function() {
+                resize();
+            });
+
+            $timeout(function() {
+                resize();
 
                 if (scope.canResize === false) {
                     valueElement.css('resize', 'none');

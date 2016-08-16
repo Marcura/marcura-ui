@@ -137,32 +137,22 @@ angular.module('marcuraUI.services').factory('maHelper', [function() {
             }
         },
 
-        /**
-         * Measures height of text.
-         * @param {string} text Text.
-         * @param {string} font The font of text.
-         * @param {string} width The width of text.
-         * @returns {string} The line height of text.
-         */
         getTextHeight: function(text, font, width, lineHeight) {
             if (!font) {
                 return 0;
             }
 
-            width = width ? width : '0px';
-            lineHeight = lineHeight || 'normal';
-
             // Prepare textarea.
             var textArea = document.createElement('TEXTAREA');
             textArea.setAttribute('rows', 1);
             textArea.style.font = font;
-            textArea.style.width = width;
+            textArea.style.width = width || '0px';
             textArea.style.border = '0';
             textArea.style.overflow = 'hidden';
             textArea.style.padding = '0';
             textArea.style.outline = '0';
             textArea.style.resize = 'none';
-            textArea.style.lineHeight = lineHeight;
+            textArea.style.lineHeight = lineHeight || 'normal';
             textArea.value = text;
 
             // To measure sizes we need to add textarea to DOM.
