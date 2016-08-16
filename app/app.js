@@ -129,5 +129,11 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         controller: 'resetValuePageController'
     });
 
+    $stateProvider.state('text-area', {
+        url: '/text-area',
+        templateUrl: 'text-area-page/text-area-page.html',
+        controller: 'textAreaPageController'
+    });
+
     $urlRouterProvider.otherwise('/home');
 });

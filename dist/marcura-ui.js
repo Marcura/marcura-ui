@@ -1367,6 +1367,49 @@ angular.element(document).ready(function() {
                     sorting.orderedBy = '-' + orderBy;
                 }
             }
+        },
+
+        /**
+         * Measures height of text.
+         * @param {string} text Text.
+         * @param {string} font The font of text.
+         * @param {string} width The width of text.
+         * @returns {string} The line height of text.
+         */
+        getTextHeight: function(text, font, width, lineHeight) {
+            if (!font) {
+                return 0;
+            }
+
+            width = width ? width : '0px';
+            lineHeight = lineHeight || 'normal';
+
+            // Prepare textarea.
+            var textArea = document.createElement('TEXTAREA');
+            textArea.setAttribute('rows', 1);
+            textArea.style.font = font;
+            textArea.style.width = width;
+            textArea.style.border = '0';
+            textArea.style.overflow = 'hidden';
+            textArea.style.padding = '0';
+            textArea.style.outline = '0';
+            textArea.style.resize = 'none';
+            textArea.style.lineHeight = lineHeight;
+            textArea.value = text;
+
+            // To measure sizes we need to add textarea to DOM.
+            angular.element(document.querySelector('body')).append(textArea);
+
+            // Measure height.
+            textArea.style.height = 'auto';
+            textArea.style.height = textArea.scrollHeight + 'px';
+
+            var height = parseInt(textArea.style.height);
+
+            // Remove textarea.
+            angular.element(textArea).remove();
+
+            return height;
         }
     };
 }]);
@@ -1524,6 +1567,90 @@ angular.element(document).ready(function() {
                     });
                 }
             };
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', function($timeout, $window, maHelper) {
+    return {
+        restrict: 'E',
+        scope: {
+            id: '@',
+            value: '=',
+            isDisabled: '=',
+            fitContentHeight: '=',
+            canResize: '='
+        },
+        replace: true,
+        template: function($timeout) {
+            var html = '\
+            <div class="ma-text-area"\
+                ng-class="{\
+                    \'ma-text-area-is-disabled\': isDisabled,\
+                    \'ma-text-area-is-focused\': isFocused\
+                }">\
+                <textarea class="ma-text-area-value"\
+                    type="text"\
+                    ng-focus="onFocus()"\
+                    ng-blur="onBlur()"\
+                    ng-model="value"></textarea>\
+            </div>';
+            // <i class="fa fa-caret-down ma-text-area-resize"></i>\
+
+            return html;
+        },
+        link: function(scope, element) {
+            var valueElement = angular.element(element[0].querySelector('.ma-text-area-value')),
+                getValueElementStyle = function() {
+                    var style = $window.getComputedStyle(valueElement[0], null),
+                        properties = {},
+                        paddingHeight = parseInt(style.getPropertyValue('padding-top')) + parseInt(style.getPropertyValue('padding-bottom')),
+                        paddingWidth = parseInt(style.getPropertyValue('padding-left')) + parseInt(style.getPropertyValue('padding-right')),
+                        borderHeight = parseInt(style.getPropertyValue('border-top-width')) + parseInt(style.getPropertyValue('border-bottom-width')),
+                        borderWidth = parseInt(style.getPropertyValue('border-left-width')) + parseInt(style.getPropertyValue('border-right-width'));
+
+                    properties.width = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('width')) - paddingWidth;
+                    properties.height = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('height')) - paddingHeight;
+                    properties.paddingHeight = paddingHeight;
+                    properties.paddingWidth = paddingWidth;
+                    properties.borderHeight = borderHeight;
+                    properties.borderWidth = borderWidth;
+                    properties.lineHeight = style.getPropertyValue('line-height');
+                    properties.font = style.getPropertyValue('font');
+
+                    return properties;
+                };
+
+            scope.isFocused = false;
+
+            scope.onFocus = function() {
+                scope.isFocused = true;
+            };
+
+            scope.onBlur = function() {
+                scope.isFocused = false;
+            };
+
+            $timeout(function() {
+                var valueStyle = $window.getComputedStyle(valueElement[0], null),
+                    valueElementStyle = getValueElementStyle(),
+                    textHeight = maHelper.getTextHeight(scope.value, valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight);
+
+                if (scope.fitContentHeight) {
+                    valueElement[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
+                    element[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
+                } else {
+                    element[0].style.height = (valueElementStyle.height + valueElementStyle.paddingHeight) + 'px';
+                }
+
+                if (scope.canResize === false) {
+                    valueElement.css('resize', 'none');
+                }
+
+                // Move id to input.
+                element.removeAttr('id');
+                valueElement.attr('id', scope.id);
+            });
         }
     };
 }]);

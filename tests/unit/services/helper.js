@@ -63,4 +63,11 @@ describe('maHelper service', function() {
             expect(maHelper.isNullOrWhiteSpace([])).toEqual(false);
         });
     });
+
+    describe('getTextHeight method', function() {
+        it('measures height of text', function() {
+            expect(maHelper.getTextHeight('d\n\n\n', '12.8px Arial', '100px')).toEqual(60);
+            expect(maHelper.getTextHeight('dddddddddddddddddddddddddddddddd', '12.8px Arial', '100px')).toEqual(45);
+        });
+    });
 });

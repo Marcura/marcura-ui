@@ -6,7 +6,7 @@
     width: 100%;
     display: inline-block;
     .box-shadow(@input-shadow);
-    border: 1px solid #ccc;
+    border: 1px solid @input-border-color;
     height: 30px;
     padding: 5px 30px 5px 10px;
     position: relative;
@@ -36,7 +36,7 @@
 
     &-is-focused {
         .box-shadow(@input-shadow-is-focused);
-        border-color: #66afe9;
+        border-color: @input-border-color-is-focused;
     }
 
     &-is-resettable {

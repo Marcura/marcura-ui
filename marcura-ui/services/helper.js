@@ -135,6 +135,49 @@ angular.module('marcuraUI.services').factory('maHelper', [function() {
                     sorting.orderedBy = '-' + orderBy;
                 }
             }
+        },
+
+        /**
+         * Measures height of text.
+         * @param {string} text Text.
+         * @param {string} font The font of text.
+         * @param {string} width The width of text.
+         * @returns {string} The line height of text.
+         */
+        getTextHeight: function(text, font, width, lineHeight) {
+            if (!font) {
+                return 0;
+            }
+
+            width = width ? width : '0px';
+            lineHeight = lineHeight || 'normal';
+
+            // Prepare textarea.
+            var textArea = document.createElement('TEXTAREA');
+            textArea.setAttribute('rows', 1);
+            textArea.style.font = font;
+            textArea.style.width = width;
+            textArea.style.border = '0';
+            textArea.style.overflow = 'hidden';
+            textArea.style.padding = '0';
+            textArea.style.outline = '0';
+            textArea.style.resize = 'none';
+            textArea.style.lineHeight = lineHeight;
+            textArea.value = text;
+
+            // To measure sizes we need to add textarea to DOM.
+            angular.element(document.querySelector('body')).append(textArea);
+
+            // Measure height.
+            textArea.style.height = 'auto';
+            textArea.style.height = textArea.scrollHeight + 'px';
+
+            var height = parseInt(textArea.style.height);
+
+            // Remove textarea.
+            angular.element(textArea).remove();
+
+            return height;
         }
     };
 }]);

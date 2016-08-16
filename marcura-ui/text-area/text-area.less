@@ -1,0 +1,39 @@
+@import 'marcura-ui/less.less';
+
+.ma-text-area {
+    display: inline-block;
+    position: relative;
+
+    &-is-focused &-value {
+        .box-shadow(@input-shadow-is-focused);
+        border-color: @input-border-color-is-focused;
+    }
+
+    &-value {
+        .input;
+        padding: 5px 27px 5px 10px;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        .box-shadow(@input-shadow);
+        font-family: @font-family;
+        border: 1px solid @input-border-color;
+        .transition(border-color ease-in-out .15s, box-shadow ease-in-out .15s;);
+        line-height: 20px;
+    }
+
+    // &-resize {
+    //     position: absolute;
+    //     right: 0;
+    //     bottom: 0;
+    //     width: 12px;
+    //     height: 12px;
+    //     opacity: 0.3;
+    //     // .rotate(-45deg);
+    //     &:before {
+    //         display: block;
+    //         width: 100%;
+    //         height: 100%;
+    //     }
+    // }
+}
