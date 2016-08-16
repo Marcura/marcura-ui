@@ -78,6 +78,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', function(maHelper) {
     return {
         restrict: 'E',
@@ -166,27 +187,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1561,85 +1561,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            id: '@',
-            value: '=',
-            size: '=',
-            change: '&',
-            isDisabled: '='
-        },
-        replace: true,
-        template: function($timeout) {
-            var html = '\
-            <div class="ma-text-box"\
-                ng-class="{\
-                    \'ma-text-box-is-disabled\': isDisabled\
-                }">\
-                <input class="ma-text-box-value form-control input-{{_size}}"\
-                    ng-disabled="isDisabled"\
-                    type="text"\
-                    ng-model="value"/>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element) {
-            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
-            // valueType,
-
-            // getValueInType = function(value) {
-            //     if (!value) {
-            //         return null;
-            //     } else if (dateType === 'String') {
-            //         return value.toString();
-            //     } else if (angular.isNumber(value)) {
-            //         return date;
-            //     } else {
-            //         return maDateConverter.format(date, format);
-            //     }
-            // },
-            // onChange = function (value) {
-            //     scope.change({
-            //         value: value
-            //     });
-            // };
-
-            scope._size = scope.size ? scope.size : 'sm';
-
-            $timeout(function() {
-                // move id to input
-                element.removeAttr('id');
-                valueElement.attr('id', scope.id);
-            });
-
-            // scope.$watch('value', function(newValue, oldValue) {
-            //     if (newValue === oldValue) {
-            //         return;
-            //     }
-            //
-            //     scope.change({
-            //         value: value
-            //     });
-            // });
-
-
-            // if (scope.value) {
-            //     // determine initial value type
-            //     if (maHelper.isString(scope.value)) {
-            //         valueType = 'String';
-            //     } else {
-            //         valueType = 'Number';
-            //     }
-            //
-            //     valueElement.val(scope.value);
-            // }
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', function($timeout, $window, maHelper) {
     return {
         restrict: 'E',
@@ -1736,7 +1657,106 @@ angular.element(document).ready(function() {
                 // Move id to input.
                 element.removeAttr('id');
                 valueElement.attr('id', scope.id);
+
+                // If TextArea is hidden initially with ng-show then after appearing
+                // it's height is calculated incorectly. This code fixes the issue.
+                if (scope.fitContentHeight) {
+                    var hiddenParent = $(element[0]).closest('.ng-hide[ng-show]');
+
+                    if (hiddenParent.length === 1) {
+                        var parentScope = hiddenParent.scope();
+
+                        var watcher = parentScope.$watch(hiddenParent.attr('ng-show'), function(isVisible) {
+                            if (isVisible) {
+                                // Wait for the hidden element to appear first.
+                                $timeout(function() {
+                                    resize();
+                                    watcher();
+                                });
+                            }
+                        });
+                    }
+                }
             });
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            id: '@',
+            value: '=',
+            size: '=',
+            change: '&',
+            isDisabled: '='
+        },
+        replace: true,
+        template: function($timeout) {
+            var html = '\
+            <div class="ma-text-box"\
+                ng-class="{\
+                    \'ma-text-box-is-disabled\': isDisabled\
+                }">\
+                <input class="ma-text-box-value form-control input-{{_size}}"\
+                    ng-disabled="isDisabled"\
+                    type="text"\
+                    ng-model="value"/>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element) {
+            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
+            // valueType,
+
+            // getValueInType = function(value) {
+            //     if (!value) {
+            //         return null;
+            //     } else if (dateType === 'String') {
+            //         return value.toString();
+            //     } else if (angular.isNumber(value)) {
+            //         return date;
+            //     } else {
+            //         return maDateConverter.format(date, format);
+            //     }
+            // },
+            // onChange = function (value) {
+            //     scope.change({
+            //         value: value
+            //     });
+            // };
+
+            scope._size = scope.size ? scope.size : 'sm';
+
+            $timeout(function() {
+                // move id to input
+                element.removeAttr('id');
+                valueElement.attr('id', scope.id);
+            });
+
+            // scope.$watch('value', function(newValue, oldValue) {
+            //     if (newValue === oldValue) {
+            //         return;
+            //     }
+            //
+            //     scope.change({
+            //         value: value
+            //     });
+            // });
+
+
+            // if (scope.value) {
+            //     // determine initial value type
+            //     if (maHelper.isString(scope.value)) {
+            //         valueType = 'String';
+            //     } else {
+            //         valueType = 'Number';
+            //     }
+            //
+            //     valueElement.val(scope.value);
+            // }
         }
     };
 }]);

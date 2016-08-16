@@ -94,6 +94,26 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 // Move id to input.
                 element.removeAttr('id');
                 valueElement.attr('id', scope.id);
+
+                // If TextArea is hidden initially with ng-show then after appearing
+                // it's height is calculated incorectly. This code fixes the issue.
+                if (scope.fitContentHeight) {
+                    var hiddenParent = $(element[0]).closest('.ng-hide[ng-show]');
+
+                    if (hiddenParent.length === 1) {
+                        var parentScope = hiddenParent.scope();
+
+                        var watcher = parentScope.$watch(hiddenParent.attr('ng-show'), function(isVisible) {
+                            if (isVisible) {
+                                // Wait for the hidden element to appear first.
+                                $timeout(function() {
+                                    resize();
+                                    watcher();
+                                });
+                            }
+                        });
+                    }
+                }
             });
         }
     };

@@ -54,4 +54,20 @@
             value="text2">
         </ma-text-area>
     </div>
+    <div class="nodes-item">
+        <h2>Inside ng-show</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-check-box
+            text="Show or hide"
+            value="showTextArea">
+        </ma-check-box>
+    </div>
+    <div class="nodes-item" ng-show="showTextArea">
+        <ma-text-area
+            fit-content-height="true"
+            is-resizable="false"
+            value="text5">
+        </ma-text-area>
+    </div>
 </div>
