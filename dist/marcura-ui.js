@@ -1618,10 +1618,15 @@ angular.element(document).ready(function() {
                     }
 
                     var valueElementStyle = getValueElementStyle(),
-                        textHeight = maHelper.getTextHeight(scope.value, valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight);
+                        textHeight = maHelper.getTextHeight(scope.value, valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
+                        height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
 
-                    valueElement[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
-                    element[0].style.height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight) + 'px';
+                    if (height < 40) {
+                        height = 30;
+                    }
+
+                    valueElement[0].style.height = height + 'px';
+                    element[0].style.height = height + 'px';
                 };
 
             scope.isFocused = false;

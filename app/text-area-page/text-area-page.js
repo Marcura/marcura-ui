@@ -11,10 +11,12 @@ I fixed this by setting element[0].style.height in the resize function to 1px fi
     $scope.text3 = $scope.text1;
     $scope.text4 = $scope.text1;
     $scope.text5 = $scope.text1;
+    $scope.text6 = 'Sweet, thanks for posting!';
     $scope.showTextArea = false;
+    $scope.date1 = '2016-07-25T00:00:00Z';
 
-    $scope.$watch('text2', function(newValue, oldValue) {
-        console.log('new:', newValue);
-        console.log('old:', oldValue);
-    });
+    // $scope.$watch('text2', function(newValue, oldValue) {
+    //     console.log('new:', newValue);
+    //     console.log('old:', oldValue);
+    // });
 }
