@@ -8,7 +8,8 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             fitContentHeight: '=',
             isResizable: '=',
             isRequired: '=',
-            validators: '='
+            validators: '=',
+            instance: '='
         },
         replace: true,
         template: function() {
@@ -201,6 +202,13 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
             // Set initial value.
             valueElement.val(scope.value);
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isValid = function() {
+                    return scope._isValid;
+                };
+            }
         }
     };
 }]);
