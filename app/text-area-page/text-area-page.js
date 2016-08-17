@@ -17,12 +17,13 @@ I fixed this by setting element[0].style.height in the resize function to 1px fi
     $scope.showTextArea = false;
     $scope.date1 = '2016-07-25T00:00:00Z';
 
-    $scope.$watch('text2', function(newValue, oldValue) {
-        console.log('new:', newValue);
-    });
+    // $scope.$watch('text2', function(newValue, oldValue) {
+    //     console.log('new:', newValue);
+    // });
 
     $timeout(function() {
-        $scope.text2 = 'Sweet, thanks for posting!';
+        $scope.text7 = '';
+        // $scope.textBox7.isValid()
     }, 3000);
 
     // $interval(function() {

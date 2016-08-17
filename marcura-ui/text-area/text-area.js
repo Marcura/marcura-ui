@@ -19,7 +19,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     \'ma-text-area-is-disabled\': isDisabled,\
                     \'ma-text-area-is-focused\': isFocused,\
                     \'ma-text-area-fit-content-height\': fitContentHeight,\
-                    \'ma-text-area-is-invalid\': !_isValid,\
+                    \'ma-text-area-is-invalid\': !isValid,\
                     \'ma-text-area-is-touched\': isTouched\
                 }">\
                 <textarea class="ma-text-area-value"\
@@ -78,12 +78,12 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     element[0].style.height = height + 'px';
                 },
                 validate = function() {
-                    scope._isValid = true;
+                    scope.isValid = true;
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
                             if (!validators[i].method(valueElement.val())) {
-                                scope._isValid = false;
+                                scope.isValid = false;
                                 break;
                             }
                         }
@@ -91,7 +91,6 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 };
 
             scope.isFocused = false;
-            scope._isValid = true;
             scope.isTouched = false;
 
             // Set up validators.
@@ -146,7 +145,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 validate();
                 resize();
 
-                if (scope._isValid) {
+                if (scope.isValid) {
                     scope.$apply(function() {
                         scope.value = valueElement.val();
                     });
@@ -194,7 +193,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     return;
                 }
 
-                scope._isValid = true;
+                scope.isValid = true;
                 scope.isTouched = false;
                 valueElement.val(newValue);
                 resize();
@@ -202,11 +201,12 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
             // Set initial value.
             valueElement.val(scope.value);
+            validate();
 
             // Prepare API instance.
             if (scope.instance) {
                 scope.instance.isValid = function() {
-                    return scope._isValid;
+                    return scope.isValid;
                 };
             }
         }
