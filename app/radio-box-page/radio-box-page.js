@@ -1,7 +1,7 @@
 angular.module('app.controllers').controller('radioBoxPageController', radioBoxPageController);
 
-function radioBoxPageController($scope) {
-    $scope.position = 'top';
+function radioBoxPageController($scope, $timeout) {
+    $scope.selectedPortName = 'top';
     $scope.ports = [{
         id: 1,
         name: 'Tokai'
@@ -12,16 +12,20 @@ function radioBoxPageController($scope) {
         id: 3,
         name: 'Navlakhi'
     }];
+    $scope.ports2 = angular.copy($scope.ports);
+    $scope.selectedPort = null;
+    $scope.selectedPort2 = null;
 
     $scope.change = function(value) {
-        console.log('change position:', value);
+        console.log('change:', value);
     };
 
-    $scope.$watch('position', function(position) {
-        console.log('watch position:', position);
-    });
-
-    $scope.portChange = function(value) {
-        console.log('port:', value);
+    $scope.portChange2 = function(value) {
+        // console.log('port:', value);
+        console.log('selectedPort:', $scope.selectedPort2);
     };
+
+    // $timeout(function() {
+    //     $scope.selectedPort2 = $scope.ports2[1];
+    // }, 4000);
 }

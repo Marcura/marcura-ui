@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', function(maHelper) {
+angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
         scope: {
@@ -49,8 +49,10 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', func
                 if (!scope.isDisabled) {
                     scope.value = !scope.value;
 
-                    scope.change({
-                        value: scope.value
+                    $timeout(function() {
+                        scope.change({
+                            value: scope.value
+                        });
                     });
                 }
             };

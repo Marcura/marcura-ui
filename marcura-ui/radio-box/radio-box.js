@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', function(maHelper) {
+angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
         scope: {
@@ -30,15 +30,30 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', func
 
             return html;
         },
-        link: function(scope, element) {
+        link: function(scope, element, attributes) {
             var setTabindex = function() {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
+                    if (scope.isDisabled) {
+                        element.removeAttr('tabindex');
+                    } else {
+                        element.attr('tabindex', '0');
+                    }
+                },
+                getControllerScope = function() {
+                    var controllerScope = null,
+                        initialScope = scope.$parent;
 
+                    while (initialScope && !controllerScope) {
+                        if (initialScope.hasOwnProperty(attributes.selectedValue)) {
+                            controllerScope = initialScope;
+                        } else {
+                            initialScope = initialScope.$parent;
+                        }
+                    }
+
+                    return controllerScope;
+                },
+                controllerScope = getControllerScope();
+                
             scope._size = scope.size ? scope.size : 'xs';
             scope.cssClass = ' ma-radio-box-' + scope._size;
             scope.hasText = scope.text ? true : false;
@@ -52,8 +67,15 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', func
                 if (!scope.isDisabled) {
                     scope.selectedValue = scope.value;
 
-                    scope.change({
-                        value: scope.value
+                    // This is to update correct scope value when the component is inside ng-repeat.
+                    if (controllerScope) {
+                        controllerScope[attributes.selectedValue] = scope.value;
+                    }
+
+                    $timeout(function() {
+                        scope.change({
+                            value: scope.value
+                        });
                     });
                 }
             };

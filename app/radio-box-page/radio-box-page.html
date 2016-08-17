@@ -11,20 +11,20 @@
     <div class="nodes-item">
         <ma-radio-box
             text="{{ports[0].name}}"
-            value="'top'"
-            selected-value="position"
+            value="ports[0].name"
+            selected-value="selectedPortName"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
             text="{{ports[1].name}}"
-            value="'middle'"
-            selected-value="position"
+            value="ports[1].name"
+            selected-value="selectedPortName"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
             text="{{ports[2].name}}"
-            value="'bottom'"
-            selected-value="position"
+            value="ports[2].name"
+            selected-value="selectedPortName"
             change="change(value)">
         </ma-radio-box>
     </div>
@@ -35,22 +35,22 @@
         <ma-radio-box
             size="sm"
             text="{{ports[0].name}}"
-            value="'top'"
-            selected-value="position"
+            value="ports[0].name"
+            selected-value="selectedPortName"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
             size="sm"
             text="{{ports[1].name}}"
-            value="'middle'"
-            selected-value="position"
+            value="ports[1].name"
+            selected-value="selectedPortName"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
             size="sm"
             text="{{ports[2].name}}"
-            value="'bottom'"
-            selected-value="position"
+            value="ports[2].name"
+            selected-value="selectedPortName"
             change="change(value)">
         </ma-radio-box>
     </div>
@@ -61,22 +61,22 @@
         <ma-radio-box
             is-disabled="true"
             text="{{ports[0].name}}"
-            value="'top'"
-            selected-value="position"
+            value="ports[0].name"
+            selected-value="selectedPortName"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
             is-disabled="true"
             text="{{ports[1].name}}"
-            value="'middle'"
-            selected-value="position"
+            value="ports[1].name"
+            selected-value="selectedPortName"
             change="change(value)">
         </ma-radio-box>
         <ma-radio-box
             is-disabled="true"
             text="{{ports[2].name}}"
-            value="'bottom'"
-            selected-value="position"
+            value="ports[2].name"
+            selected-value="selectedPortName"
             change="change(value)">
         </ma-radio-box>
     </div>
@@ -105,5 +105,23 @@
     </div>
     <div class="nodes-item">
         Port: {{selectedPort | json}}
+    </div>
+    <div class="nodes-item">
+        <h2>Inside ng-repeat</h1>
+    </div>
+    <div ng-show="true">
+        <div class="nodes-item">
+            <div ng-repeat="port in ports2">
+                <ma-radio-box
+                    text="{{port.name}}"
+                    value="port"
+                    selected-value="selectedPort2"
+                    change="portChange2(value)">
+                </ma-radio-box>
+            </div>
+        </div>
+    </div>
+    <div class="nodes-item">
+        Port: {{selectedPort2 | json}}
     </div>
 </div>

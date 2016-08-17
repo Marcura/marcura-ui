@@ -78,28 +78,7 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', function(maHelper) {
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
         scope: {
@@ -150,8 +129,10 @@ angular.element(document).ready(function() {
                 if (!scope.isDisabled) {
                     scope.value = !scope.value;
 
-                    scope.change({
-                        value: scope.value
+                    $timeout(function() {
+                        scope.change({
+                            value: scope.value
+                        });
                     });
                 }
             };
@@ -187,6 +168,27 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -744,7 +746,7 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', function(maHelper) {
+(function(){angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
         scope: {
@@ -776,15 +778,30 @@ angular.element(document).ready(function() {
 
             return html;
         },
-        link: function(scope, element) {
+        link: function(scope, element, attributes) {
             var setTabindex = function() {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
+                    if (scope.isDisabled) {
+                        element.removeAttr('tabindex');
+                    } else {
+                        element.attr('tabindex', '0');
+                    }
+                },
+                getControllerScope = function() {
+                    var controllerScope = null,
+                        initialScope = scope.$parent;
 
+                    while (initialScope && !controllerScope) {
+                        if (initialScope.hasOwnProperty(attributes.selectedValue)) {
+                            controllerScope = initialScope;
+                        } else {
+                            initialScope = initialScope.$parent;
+                        }
+                    }
+
+                    return controllerScope;
+                },
+                controllerScope = getControllerScope();
+                
             scope._size = scope.size ? scope.size : 'xs';
             scope.cssClass = ' ma-radio-box-' + scope._size;
             scope.hasText = scope.text ? true : false;
@@ -798,8 +815,15 @@ angular.element(document).ready(function() {
                 if (!scope.isDisabled) {
                     scope.selectedValue = scope.value;
 
-                    scope.change({
-                        value: scope.value
+                    // This is to update correct scope value when the component is inside ng-repeat.
+                    if (controllerScope) {
+                        controllerScope[attributes.selectedValue] = scope.value;
+                    }
+
+                    $timeout(function() {
+                        scope.change({
+                            value: scope.value
+                        });
                     });
                 }
             };
@@ -1466,7 +1490,7 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', function($state) {
+(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
     return {
         restrict: 'E',
         scope: {
@@ -1477,18 +1501,16 @@ angular.element(document).ready(function() {
         replace: true,
         template: function() {
             var html = '\
-            <div class="ma-tabs">\
-                <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item" ng-repeat="item in items" ng-class="{\
-                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
-                            \'ma-tabs-item-is-disabled\': item.isDisabled\
-                        }"\
-                        ng-click="onSelect(item)">\
-                        <a class="ma-tabs-link">\
-                            <span class="ma-tabs-text">{{item.text}}</span>\
-                        </a>\
-                    </li>\
-                </ul>\
+            <div class="ma-side-menu">\
+                <div class="ma-side-menu-item" ng-repeat="item in items" ng-class="{\
+                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
+                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
+                    }"\
+                    ng-click="onSelect(item)">\
+                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
+                    <div class="ma-side-menu-text">{{item.text}}</div>\
+                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
+                </div>\
             </div>';
 
             return html;
@@ -1537,7 +1559,7 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
+(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', function($state) {
     return {
         restrict: 'E',
         scope: {
@@ -1548,16 +1570,18 @@ angular.element(document).ready(function() {
         replace: true,
         template: function() {
             var html = '\
-            <div class="ma-side-menu">\
-                <div class="ma-side-menu-item" ng-repeat="item in items" ng-class="{\
-                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
-                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
-                    }"\
-                    ng-click="onSelect(item)">\
-                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
-                    <div class="ma-side-menu-text">{{item.text}}</div>\
-                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
-                </div>\
+            <div class="ma-tabs">\
+                <ul class="ma-tabs-list clearfix">\
+                    <li class="ma-tabs-item" ng-repeat="item in items" ng-class="{\
+                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
+                            \'ma-tabs-item-is-disabled\': item.isDisabled\
+                        }"\
+                        ng-click="onSelect(item)">\
+                        <a class="ma-tabs-link">\
+                            <span class="ma-tabs-text">{{item.text}}</span>\
+                        </a>\
+                    </li>\
+                </ul>\
             </div>';
 
             return html;
