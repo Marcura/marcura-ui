@@ -18,6 +18,16 @@
         cursor: default;
     }
 
+    &-is-invalid&-is-touched {
+        &.ma-text-area-is-focused .ma-text-area-value {
+            .box-shadow(@input-shadow-is-invalid);
+        }
+
+        .ma-text-area-value {
+            border-color: #843534;
+        }
+    }
+
     &-value {
         .input;
         .input-transition;

@@ -89,7 +89,7 @@ angular.module('marcuraUI.components')
                     timeZoneOffset = moment().utcOffset(timeZone).utcOffset(),
                     isDateSetInternally = true,
                     initialDisplayDate,
-                    // Help track changes in date, hours or minutes.
+                    // Variables keydownValue and keyupValue help track touched state.
                     keydownValue,
                     keyupValue,
                     initialDateOffset = 0,
