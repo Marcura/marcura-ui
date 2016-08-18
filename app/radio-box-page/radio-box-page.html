@@ -109,16 +109,14 @@
     <div class="nodes-item">
         <h2>Inside ng-repeat</h1>
     </div>
-    <div ng-show="true">
-        <div class="nodes-item">
-            <div ng-repeat="port in ports2">
-                <ma-radio-box
-                    text="{{port.name}}"
-                    value="port"
-                    selected-value="selectedPort2"
-                    change="portChange2(value)">
-                </ma-radio-box>
-            </div>
+    <div class="nodes-item">
+        <div ng-repeat="port in ports2">
+            <ma-radio-box
+                text="{{port.name}}"
+                value="port"
+                selected-value="selectedPort2"
+                change="portChange2(value)">
+            </ma-radio-box>
         </div>
     </div>
     <div class="nodes-item">

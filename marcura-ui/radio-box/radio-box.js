@@ -53,7 +53,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                     return controllerScope;
                 },
                 controllerScope = getControllerScope();
-                
+
             scope._size = scope.size ? scope.size : 'xs';
             scope.cssClass = ' ma-radio-box-' + scope._size;
             scope.hasText = scope.text ? true : false;
@@ -67,7 +67,10 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                 if (!scope.isDisabled) {
                     scope.selectedValue = scope.value;
 
-                    // This is to update correct scope value when the component is inside ng-repeat.
+                    // When the component is inside ng-repeat normal binding like
+                    // selected-value="selectedPort" won't work.
+                    // Other binding like using an array will work selected-value="selectedPorts[0]".
+                    // This is to workaround the problem.
                     if (controllerScope) {
                         controllerScope[attributes.selectedValue] = scope.value;
                     }
