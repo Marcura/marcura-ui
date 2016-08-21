@@ -18,7 +18,7 @@ angular.module('marcuraUI.components').directive('maButton', [function() {
                 ng-click="onClick()"\
                 ng-disabled="isDisabled"\
                 ng-class="{\
-                    \'ma-button-link\': kind === \'link\',\
+                    \'ma-button-link\': isLink(),\
                     \'ma-button-has-left-icon\': hasLeftIcon,\
                     \'ma-button-has-right-icon\': hasRightIcon,\
                     \'ma-button-is-disabled\': isDisabled,\
@@ -26,9 +26,12 @@ angular.module('marcuraUI.components').directive('maButton', [function() {
                 }">\
                 <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
                     <i class="fa fa-{{leftIcon}}"></i>\
+                    <span class="ma-button-rim" ng-if="isLink()"></span>\
                 </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
                     <i class="fa fa-{{rightIcon}}"></i>\
+                    <span class="ma-button-rim" ng-if="isLink()"></span>\
                 </span>\
+                <span class="ma-button-rim" ng-if="!isLink()"></span>\
             </button>';
 
             return html;
@@ -51,6 +54,10 @@ angular.module('marcuraUI.components').directive('maButton', [function() {
                 if (!scope.isDisabled) {
                     scope.click();
                 }
+            };
+
+            scope.isLink = function functionName() {
+                return scope.kind === 'link';
             };
         }
     };

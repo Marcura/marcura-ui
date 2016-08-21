@@ -25,6 +25,18 @@
         color: #ffffff;
     }
 
+    &:focus:not(&-is-disabled) {
+        .ma-button-rim {
+            display: block;
+        }
+    }
+
+    &-link:focus {
+        .ma-button-text {
+            text-decoration: underline;
+        }
+    }
+
     &:not(&-link):not(&-is-disabled):active {
         .box-shadow(0 0 6px rgba(0, 0, 0, 0.225) inset);
         text-decoration: none;
@@ -39,6 +51,20 @@
         background-color: #c3c3cd;
         cursor: default;
         .box-shadow(none);
+    }
+
+    &-default .ma-button-rim {
+        border-color: #7d7d87;
+    }
+
+    &-rim {
+        display: none;
+        position: absolute;
+        top: 1px;
+        bottom: 1px;
+        left: 1px;
+        right: 1px;
+        border: 1px solid #ffffff;
     }
 
     &-xs {
