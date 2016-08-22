@@ -135,5 +135,11 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         controller: 'textAreaPageController'
     });
 
+    $stateProvider.state('form', {
+        url: '/form',
+        templateUrl: 'form-page/form-page.html',
+        controller: 'formPageController'
+    });
+
     $urlRouterProvider.otherwise('/home');
 });
