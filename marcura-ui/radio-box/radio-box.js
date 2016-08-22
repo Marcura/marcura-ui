@@ -103,6 +103,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             scope.onKeypress = function(event) {
                 if (!scope.isDisabled && !scope.isChecked() && event.keyCode === maHelper.keyCode.space) {
                     scope.onChange();
+                    event.preventDefault();
                 }
             };
 

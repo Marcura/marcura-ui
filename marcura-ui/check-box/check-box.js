@@ -72,6 +72,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
             scope.onKeypress = function(event) {
                 if (!scope.isDisabled && event.keyCode === maHelper.keyCode.space) {
                     scope.onChange();
+                    event.preventDefault();
                 }
             };
 
