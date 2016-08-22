@@ -70,9 +70,13 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
             };
 
             scope.onKeypress = function(event) {
-                if (!scope.isDisabled && event.keyCode === maHelper.keyCode.space) {
-                    scope.onChange();
+                if (event.keyCode === maHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
                     event.preventDefault();
+
+                    if (!scope.isDisabled) {
+                        scope.onChange();
+                    }
                 }
             };
 

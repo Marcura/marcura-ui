@@ -101,9 +101,13 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             };
 
             scope.onKeypress = function(event) {
-                if (!scope.isDisabled && !scope.isChecked() && event.keyCode === maHelper.keyCode.space) {
-                    scope.onChange();
+                if (event.keyCode === maHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
                     event.preventDefault();
+
+                    if (!scope.isDisabled && !scope.isChecked()) {
+                        scope.onChange();
+                    }
                 }
             };
 

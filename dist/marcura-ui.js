@@ -105,6 +105,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -177,9 +198,13 @@ angular.element(document).ready(function() {
             };
 
             scope.onKeypress = function(event) {
-                if (!scope.isDisabled && event.keyCode === maHelper.keyCode.space) {
-                    scope.onChange();
+                if (event.keyCode === maHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
                     event.preventDefault();
+
+                    if (!scope.isDisabled) {
+                        scope.onChange();
+                    }
                 }
             };
 
@@ -669,27 +694,6 @@ angular.element(document).ready(function() {
         };
     }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
         restrict: 'E',
@@ -877,9 +881,13 @@ angular.element(document).ready(function() {
             };
 
             scope.onKeypress = function(event) {
-                if (!scope.isDisabled && !scope.isChecked() && event.keyCode === maHelper.keyCode.space) {
-                    scope.onChange();
+                if (event.keyCode === maHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
                     event.preventDefault();
+
+                    if (!scope.isDisabled && !scope.isChecked()) {
+                        scope.onChange();
+                    }
                 }
             };
 
