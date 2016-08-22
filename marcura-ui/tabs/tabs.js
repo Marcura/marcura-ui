@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maTabs', ['$state', function($state) {
+angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
     return {
         restrict: 'E',
         scope: {
@@ -11,9 +11,14 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', function($
             var html = '\
             <div class="ma-tabs">\
                 <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item" ng-repeat="item in items" ng-class="{\
+                    <li class="ma-tabs-item" ng-repeat="item in items"\
+                        ng-focus="onFocus(item)"\
+                        ng-blur="onBlur(item)"\
+                        ng-keypress="onKeypress($event, item)"\
+                        ng-class="{\
                             \'ma-tabs-item-is-selected\': isItemSelected(item),\
-                            \'ma-tabs-item-is-disabled\': item.isDisabled\
+                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
+                            \'ma-tabs-item-is-focused\': item.isFocused\
                         }"\
                         ng-click="onSelect(item)">\
                         <a class="ma-tabs-link">\
@@ -46,7 +51,7 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', function($
             };
 
             scope.onSelect = function(item) {
-                if (item.isDisabled) {
+                if (item.isDisabled || item.isSelected) {
                     return;
                 }
 
@@ -65,6 +70,32 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', function($
                     });
                 }
             };
+
+            scope.onKeypress = function(event, item) {
+                if (event.keyCode === maHelper.keyCode.enter) {
+                    scope.onSelect(item);
+                }
+            };
+
+            scope.onFocus = function(item) {
+                item.isFocused = true;
+            };
+
+            scope.onBlur = function(item) {
+                item.isFocused = false;
+            };
+
+            $timeout(function() {
+                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
+
+                itemElements.each(function(itemIndex, itemElement) {
+                    var item = scope.items[itemIndex];
+
+                    if (!item.isDisabled) {
+                        angular.element(itemElement).attr('tabindex', '0');
+                    }
+                });
+            });
         }
     };
 }]);
