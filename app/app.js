@@ -2,6 +2,7 @@ angular.module('app.controllers', []);
 angular.module('app.services', []);
 
 var app = angular.module('app', [
+    'ui.bootstrap',
     'ui.router',
     'ui.select2',
     'ui.select',
@@ -139,6 +140,12 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         url: '/form',
         templateUrl: 'form-page/form-page.html',
         controller: 'formPageController'
+    });
+
+    $stateProvider.state('modal', {
+        url: '/modal',
+        templateUrl: 'modal-page/modal-page.html',
+        controller: 'modalPageController'
     });
 
     $urlRouterProvider.otherwise('/home');

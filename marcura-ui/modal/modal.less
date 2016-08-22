@@ -1,0 +1,88 @@
+@import 'marcura-ui/less.less';
+
+.modal {
+    &-content {
+        border: 0;
+        border-radius: 0;
+        .box-shadow(0 1px 5px 2px rgba(0, 0, 0, 0.3));
+    }
+
+    &-backdrop.in {
+        opacity: 0.75;
+    }
+}
+
+.da-modal {
+    &-is-loading &-content-wrapper {
+        position: relative;
+        min-height: 100px;
+    }
+
+    &-header {
+        background-color: #ffffff;
+        padding: 10px 60px 10px 15px;
+        border-bottom: solid 1px #979797;
+        position: relative;
+        box-sizing: content-box;
+        .box-shadow(0 1px 3px 0 rgba(0, 0, 0, 0.2));
+
+        .ma-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+        }
+    }
+
+    &-title {
+        font-size: 18px;
+        min-height: 30px;
+        box-sizing: border-box;
+        padding-top: 5px;
+    }
+
+    &-content {
+        padding: 15px;
+    }
+
+    &-footer {
+        padding: 10px 15px;
+        border-top: solid 1px #979797;
+        .display-flex;
+
+        &-left {
+            width: 50%;
+
+            .ma-button {
+                margin-right: 10px;
+
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
+        }
+
+        &-left + &-right {
+            width: 50%;
+        }
+
+        &-right {
+            width: 100%;
+            text-align: right;
+
+            .ma-button {
+                margin-right: 10px;
+
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
+        }
+    }
+}
+
+.ma-ie9 {
+    .da-modal-footer-left,
+    .da-modal-footer-right {
+        display: table-cell;
+    }
+}
