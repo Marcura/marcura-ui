@@ -7,7 +7,8 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             selectedValue: '=',
             isDisabled: '=',
             change: '&',
-            size: '@'
+            size: '@',
+            comparer: '='
         },
         replace: true,
         template: function() {
@@ -60,6 +61,10 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             scope.isFocused = false;
 
             scope.isChecked = function() {
+                if (scope.comparer) {
+                    return scope.comparer(scope.value, scope.selectedValue);
+                }
+
                 return JSON.stringify(scope.value) === JSON.stringify(scope.selectedValue);
             };
 
