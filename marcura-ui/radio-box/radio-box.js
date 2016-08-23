@@ -32,7 +32,8 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             return html;
         },
         link: function(scope, element, attributes) {
-            var setTabindex = function() {
+            var valuePropertyParts = null,
+                setTabindex = function() {
                     if (scope.isDisabled) {
                         element.removeAttr('tabindex');
                     } else {
@@ -41,10 +42,17 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                 },
                 getControllerScope = function() {
                     var controllerScope = null,
-                        initialScope = scope.$parent;
+                        initialScope = scope.$parent,
+                        property = attributes.selectedValue;
+
+                    // In case of a nested property binding like 'company.port.id'.
+                    if (property.indexOf('.') !== -1) {
+                        valuePropertyParts = property.split('.');
+                        property = valuePropertyParts[0];
+                    }
 
                     while (initialScope && !controllerScope) {
-                        if (initialScope.hasOwnProperty(attributes.selectedValue)) {
+                        if (initialScope.hasOwnProperty(property)) {
                             controllerScope = initialScope;
                         } else {
                             initialScope = initialScope.$parent;
@@ -70,13 +78,23 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
 
             scope.onChange = function() {
                 if (!scope.isDisabled) {
+                    var valueProperty;
                     scope.selectedValue = scope.value;
 
-                    // When the component is inside ng-repeat normal binding like
-                    // selected-value="selectedPort" won't work.
-                    // Other binding like using an array will work selected-value="selectedPorts[0]".
-                    // This is to workaround the problem.
-                    if (controllerScope) {
+                    if (controllerScope && valuePropertyParts) {
+                        // When the component is inside ng-repeat normal binding like
+                        // selected-value="selectedPort" won't work.
+                        // This is to workaround the problem.
+                        valueProperty = controllerScope;
+
+                        // Handle nested property binding.
+                        for (var i = 0; i < valuePropertyParts.length; i++) {
+                            valueProperty = valueProperty[valuePropertyParts[i]];
+                        }
+
+                        valueProperty = scope.value;
+                    } else {
+                        valueProperty = controllerScope[attributes.selectedValue];
                         controllerScope[attributes.selectedValue] = scope.value;
                     }
 

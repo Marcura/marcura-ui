@@ -778,6 +778,154 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            value: '=',
+            selectedValue: '=',
+            isDisabled: '=',
+            change: '&',
+            size: '@',
+            comparer: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-radio-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
+                ng-click="onChange()"\
+                ng-class="{\
+                    \'ma-radio-box-is-checked\': isChecked(),\
+                    \'ma-radio-box-is-disabled\': isDisabled,\
+                    \'ma-radio-box-has-text\': hasText,\
+                    \'ma-radio-box-is-focused\': isFocused\
+                }">\
+                <span class="ma-radio-box-text">{{text || \'&nbsp;\'}}</span>\
+                <div class="ma-radio-box-inner"></div>\
+                <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            var valuePropertyParts = null,
+                setTabindex = function() {
+                    if (scope.isDisabled) {
+                        element.removeAttr('tabindex');
+                    } else {
+                        element.attr('tabindex', '0');
+                    }
+                },
+                getControllerScope = function() {
+                    var controllerScope = null,
+                        initialScope = scope.$parent,
+                        property = attributes.selectedValue;
+
+                    // In case of a nested property binding like 'company.port.id'.
+                    if (property.indexOf('.') !== -1) {
+                        valuePropertyParts = property.split('.');
+                        property = valuePropertyParts[0];
+                    }
+
+                    while (initialScope && !controllerScope) {
+                        if (initialScope.hasOwnProperty(property)) {
+                            controllerScope = initialScope;
+                        } else {
+                            initialScope = initialScope.$parent;
+                        }
+                    }
+
+                    return controllerScope;
+                },
+                controllerScope = getControllerScope();
+
+            scope._size = scope.size ? scope.size : 'xs';
+            scope.cssClass = ' ma-radio-box-' + scope._size;
+            scope.hasText = scope.text ? true : false;
+            scope.isFocused = false;
+
+            scope.isChecked = function() {
+                if (scope.comparer) {
+                    return scope.comparer(scope.value, scope.selectedValue);
+                }
+
+                return JSON.stringify(scope.value) === JSON.stringify(scope.selectedValue);
+            };
+
+            scope.onChange = function() {
+                if (!scope.isDisabled) {
+                    var valueProperty;
+                    scope.selectedValue = scope.value;
+
+                    if (controllerScope && valuePropertyParts) {
+                        // When the component is inside ng-repeat normal binding like
+                        // selected-value="selectedPort" won't work.
+                        // This is to workaround the problem.
+                        valueProperty = controllerScope;
+
+                        // Handle nested property binding.
+                        for (var i = 0; i < valuePropertyParts.length; i++) {
+                            valueProperty = valueProperty[valuePropertyParts[i]];
+                        }
+
+                        valueProperty = scope.value;
+                    } else {
+                        valueProperty = controllerScope[attributes.selectedValue];
+                        controllerScope[attributes.selectedValue] = scope.value;
+                    }
+
+                    $timeout(function() {
+                        scope.change({
+                            value: scope.value
+                        });
+                    });
+                }
+            };
+
+            scope.onFocus = function() {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function() {
+                if (!scope.isDisabled) {
+                    scope.isFocused = false;
+                }
+            };
+
+            scope.onKeypress = function(event) {
+                if (event.keyCode === maHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (!scope.isDisabled && !scope.isChecked()) {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            scope.$watch('isDisabled', function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            setTabindex();
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
     return {
         restrict: 'E',
@@ -1405,136 +1553,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            value: '=',
-            selectedValue: '=',
-            isDisabled: '=',
-            change: '&',
-            size: '@',
-            comparer: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-radio-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-radio-box-is-checked\': isChecked(),\
-                    \'ma-radio-box-is-disabled\': isDisabled,\
-                    \'ma-radio-box-has-text\': hasText,\
-                    \'ma-radio-box-is-focused\': isFocused\
-                }">\
-                <span class="ma-radio-box-text">{{text || \'&nbsp;\'}}</span>\
-                <div class="ma-radio-box-inner"></div>\
-                <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            var setTabindex = function() {
-                    if (scope.isDisabled) {
-                        element.removeAttr('tabindex');
-                    } else {
-                        element.attr('tabindex', '0');
-                    }
-                },
-                getControllerScope = function() {
-                    var controllerScope = null,
-                        initialScope = scope.$parent;
-
-                    while (initialScope && !controllerScope) {
-                        if (initialScope.hasOwnProperty(attributes.selectedValue)) {
-                            controllerScope = initialScope;
-                        } else {
-                            initialScope = initialScope.$parent;
-                        }
-                    }
-
-                    return controllerScope;
-                },
-                controllerScope = getControllerScope();
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-radio-box-' + scope._size;
-            scope.hasText = scope.text ? true : false;
-            scope.isFocused = false;
-
-            scope.isChecked = function() {
-                if (scope.comparer) {
-                    return scope.comparer(scope.value, scope.selectedValue);
-                }
-
-                return JSON.stringify(scope.value) === JSON.stringify(scope.selectedValue);
-            };
-
-            scope.onChange = function() {
-                if (!scope.isDisabled) {
-                    scope.selectedValue = scope.value;
-
-                    // When the component is inside ng-repeat normal binding like
-                    // selected-value="selectedPort" won't work.
-                    // Other binding like using an array will work selected-value="selectedPorts[0]".
-                    // This is to workaround the problem.
-                    if (controllerScope) {
-                        controllerScope[attributes.selectedValue] = scope.value;
-                    }
-
-                    $timeout(function() {
-                        scope.change({
-                            value: scope.value
-                        });
-                    });
-                }
-            };
-
-            scope.onFocus = function() {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function() {
-                if (!scope.isDisabled) {
-                    scope.isFocused = false;
-                }
-            };
-
-            scope.onKeypress = function(event) {
-                if (event.keyCode === maHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (!scope.isDisabled && !scope.isChecked()) {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            scope.$watch('isDisabled', function(newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            setTabindex();
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
     return {
         restrict: 'E',
@@ -1600,6 +1618,108 @@ angular.element(document).ready(function() {
                     });
                 }
             };
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-tabs">\
+                <ul class="ma-tabs-list clearfix">\
+                    <li class="ma-tabs-item" ng-repeat="item in items"\
+                        ng-focus="onFocus(item)"\
+                        ng-blur="onBlur(item)"\
+                        ng-keypress="onKeypress($event, item)"\
+                        ng-class="{\
+                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
+                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
+                            \'ma-tabs-item-is-focused\': item.isFocused\
+                        }"\
+                        ng-click="onSelect(item)">\
+                        <a class="ma-tabs-link" href="" tabindex="-1">\
+                            <span class="ma-tabs-text">{{item.text}}</span>\
+                        </a>\
+                    </li>\
+                </ul>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function(item) {
+                if (item.isDisabled || item.isSelected) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function(item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
+
+            scope.onKeypress = function(event, item) {
+                if (event.keyCode === maHelper.keyCode.enter) {
+                    scope.onSelect(item);
+                }
+            };
+
+            scope.onFocus = function(item) {
+                item.isFocused = true;
+            };
+
+            scope.onBlur = function(item) {
+                item.isFocused = false;
+            };
+
+            $timeout(function() {
+                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
+
+                itemElements.each(function(itemIndex, itemElement) {
+                    var item = scope.items[itemIndex];
+
+                    if (!item.isDisabled) {
+                        angular.element(itemElement).attr('tabindex', '0');
+                    }
+                });
+            });
         }
     };
 }]);
@@ -1815,108 +1935,6 @@ angular.element(document).ready(function() {
                     return scope.isValid;
                 };
             }
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-tabs">\
-                <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item" ng-repeat="item in items"\
-                        ng-focus="onFocus(item)"\
-                        ng-blur="onBlur(item)"\
-                        ng-keypress="onKeypress($event, item)"\
-                        ng-class="{\
-                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
-                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
-                            \'ma-tabs-item-is-focused\': item.isFocused\
-                        }"\
-                        ng-click="onSelect(item)">\
-                        <a class="ma-tabs-link" href="" tabindex="-1">\
-                            <span class="ma-tabs-text">{{item.text}}</span>\
-                        </a>\
-                    </li>\
-                </ul>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function(item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function(item) {
-                if (item.isDisabled || item.isSelected) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
-                }
-            };
-
-            scope.onKeypress = function(event, item) {
-                if (event.keyCode === maHelper.keyCode.enter) {
-                    scope.onSelect(item);
-                }
-            };
-
-            scope.onFocus = function(item) {
-                item.isFocused = true;
-            };
-
-            scope.onBlur = function(item) {
-                item.isFocused = false;
-            };
-
-            $timeout(function() {
-                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
-
-                itemElements.each(function(itemIndex, itemElement) {
-                    var item = scope.items[itemIndex];
-
-                    if (!item.isDisabled) {
-                        angular.element(itemElement).attr('tabindex', '0');
-                    }
-                });
-            });
         }
     };
 }]);
