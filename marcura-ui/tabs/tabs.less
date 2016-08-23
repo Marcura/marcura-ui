@@ -58,6 +58,10 @@
             padding-bottom: 7px;
             border-color: #fafafa;
         }
+
+        &:not(&-is-selected):not(&-is-disabled) a.ma-tabs-link {
+            color: #7d7d87;
+        }
     }
 
     &-link {
@@ -71,5 +75,6 @@
 
     a.ma-tabs-link {
         text-decoration: none;
+        outline: none;
     }
 }

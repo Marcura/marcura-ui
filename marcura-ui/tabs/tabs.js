@@ -21,7 +21,7 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper'
                             \'ma-tabs-item-is-focused\': item.isFocused\
                         }"\
                         ng-click="onSelect(item)">\
-                        <a class="ma-tabs-link">\
+                        <a class="ma-tabs-link" href="" tabindex="-1">\
                             <span class="ma-tabs-text">{{item.text}}</span>\
                         </a>\
                     </li>\
