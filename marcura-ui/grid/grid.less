@@ -86,6 +86,10 @@
             color: #7d7d87;
         }
     }
+
+    &-responsive {
+        overflow-x: auto;
+    }
 }
 
 .ma-ie9 {
@@ -93,6 +97,24 @@
         &-col,
         &-header-col {
             display: table-cell;
+        }
+    }
+}
+@media (max-width: 767px) {
+    .ma-grid-responsive {
+        overflow-y: hidden;
+        border-bottom: 1px solid #e0e0dc;
+
+        &.ma-grid-size-sm .ma-grid-inner {
+            width: 768px;
+        }
+
+        &.ma-grid-size-md .ma-grid-inner {
+            width: 992px;
+        }
+
+        &.ma-grid-size-lg .ma-grid-inner {
+            width: 1200px;
         }
     }
 }
