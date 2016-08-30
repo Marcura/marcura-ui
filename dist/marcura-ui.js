@@ -40,27 +40,6 @@ angular.element(document).ready(function() {
     }
 });
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maButton', [function() {
     return {
         restrict: 'E',
@@ -221,6 +200,27 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -804,7 +804,7 @@ angular.element(document).ready(function() {
                     \'ma-radio-box-has-text\': hasText,\
                     \'ma-radio-box-is-focused\': isFocused\
                 }">\
-                <span class="ma-radio-box-text">{{text || \'&nbsp;\'}}</span>\
+                <span class="ma-radio-box-text" ng-bind-html="text || \'&nbsp;\'"></span>\
                 <div class="ma-radio-box-inner"></div>\
                 <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
             </div>';

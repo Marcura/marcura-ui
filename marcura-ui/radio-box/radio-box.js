@@ -24,7 +24,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                     \'ma-radio-box-has-text\': hasText,\
                     \'ma-radio-box-is-focused\': isFocused\
                 }">\
-                <span class="ma-radio-box-text">{{text || \'&nbsp;\'}}</span>\
+                <span class="ma-radio-box-text" ng-bind-html="text || \'&nbsp;\'"></span>\
                 <div class="ma-radio-box-inner"></div>\
                 <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
             </div>';
