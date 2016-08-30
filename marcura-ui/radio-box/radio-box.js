@@ -1,8 +1,8 @@
-angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
+angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', '$sce', function(maHelper, $timeout, $sce) {
     return {
         restrict: 'E',
         scope: {
-            text: '@',
+            text: '=',
             value: '=',
             selectedValue: '=',
             isDisabled: '=',
@@ -24,7 +24,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                     \'ma-radio-box-has-text\': hasText,\
                     \'ma-radio-box-is-focused\': isFocused\
                 }">\
-                <span class="ma-radio-box-text" ng-bind-html="text || \'&nbsp;\'"></span>\
+                <span class="ma-radio-box-text" ng-bind-html="_text"></span>\
                 <div class="ma-radio-box-inner"></div>\
                 <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
             </div>';
@@ -67,6 +67,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             scope.cssClass = ' ma-radio-box-' + scope._size;
             scope.hasText = scope.text ? true : false;
             scope.isFocused = false;
+            scope._text = $sce.trustAsHtml(scope.text || '&nbsp;');
 
             scope.isChecked = function() {
                 if (scope.comparer) {
