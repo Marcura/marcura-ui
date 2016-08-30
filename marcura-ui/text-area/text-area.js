@@ -9,7 +9,8 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             isResizable: '=',
             isRequired: '=',
             validators: '=',
-            instance: '='
+            instance: '=',
+            updateOn: '@'
         },
         replace: true,
         template: function() {
@@ -42,6 +43,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 // Variables keydownValue and keyupValue help track touched state.
                 keydownValue,
                 keyupValue,
+                updateOn = scope.updateOn ? scope.updateOn : 'input',
                 getValueElementStyle = function() {
                     var style = $window.getComputedStyle(valueElement[0], null),
                         properties = {},
@@ -115,6 +117,10 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
             scope.onBlur = function() {
                 scope.isFocused = false;
+
+                if (scope.isValid && updateOn === 'blur') {
+                    scope.value = valueElement.val();
+                }
             };
 
             scope.onKeydown = function(event) {
@@ -145,7 +151,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 validate();
                 resize();
 
-                if (scope.isValid) {
+                if (scope.isValid && updateOn === 'input') {
                     scope.$apply(function() {
                         scope.value = valueElement.val();
                     });

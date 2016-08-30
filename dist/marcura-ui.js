@@ -40,6 +40,27 @@ angular.element(document).ready(function() {
     }
 });
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maButton', [function() {
     return {
         restrict: 'E',
@@ -200,27 +221,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1735,7 +1735,8 @@ angular.element(document).ready(function() {
             isResizable: '=',
             isRequired: '=',
             validators: '=',
-            instance: '='
+            instance: '=',
+            updateOn: '@'
         },
         replace: true,
         template: function() {
@@ -1768,6 +1769,7 @@ angular.element(document).ready(function() {
                 // Variables keydownValue and keyupValue help track touched state.
                 keydownValue,
                 keyupValue,
+                updateOn = scope.updateOn ? scope.updateOn : 'input',
                 getValueElementStyle = function() {
                     var style = $window.getComputedStyle(valueElement[0], null),
                         properties = {},
@@ -1841,6 +1843,10 @@ angular.element(document).ready(function() {
 
             scope.onBlur = function() {
                 scope.isFocused = false;
+
+                if (scope.isValid && updateOn === 'blur') {
+                    scope.value = valueElement.val();
+                }
             };
 
             scope.onKeydown = function(event) {
@@ -1871,7 +1877,7 @@ angular.element(document).ready(function() {
                 validate();
                 resize();
 
-                if (scope.isValid) {
+                if (scope.isValid && updateOn === 'input') {
                     scope.$apply(function() {
                         scope.value = valueElement.val();
                     });
