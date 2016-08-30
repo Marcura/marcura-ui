@@ -79,7 +79,8 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
 
             scope.onChange = function() {
                 if (!scope.isDisabled) {
-                    var valueProperty;
+                    var valueProperty,
+                        oldValue = scope.selectedValue;
                     scope.selectedValue = scope.value;
 
                     if (controllerScope && valuePropertyParts) {
@@ -101,7 +102,8 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
 
                     $timeout(function() {
                         scope.change({
-                            value: scope.value
+                            value: scope.value,
+                            oldValue: oldValue
                         });
                     });
                 }

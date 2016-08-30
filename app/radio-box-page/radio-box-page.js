@@ -21,12 +21,13 @@ function radioBoxPageController($scope, $timeout) {
     // };
 
     $scope.change = function(value) {
-        console.log('change:', value);
+        console.log('value:', value);
     };
 
-    $scope.portChange2 = function(value) {
-        // console.log('value:', value);
+    $scope.portChange2 = function(value, oldValue) {
         console.log('selectedPort:', $scope.selectedPort2);
+        console.log('value:', value);
+        console.log('oldValue:', oldValue);
     };
 
     $timeout(function() {
