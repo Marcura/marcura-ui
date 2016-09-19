@@ -252,7 +252,11 @@ describe('maDateConverter', function() {
         });
 
         it('supports time zone', function() {
+            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0, 7), 'yyyy-MM-dd HH:mm:ssZ', 'Z')).toEqual('2015-02-07 12:00:07Z');
+            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0, 7), 'yyyy-MM-dd HH:mm:ssZ', '+00:00')).toEqual('2015-02-07 12:00:07+00:00');
+            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0, 7), 'yyyy-MM-dd HH:mm:ssZ', '-00:00')).toEqual('2015-02-07 12:00:07-00:00');
             expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0, 7), 'yyyy-MM-dd HH:mm:ssZ', '+03:00')).toEqual('2015-02-07 12:00:07+03:00');
+            expect(maDateConverter.format(new Date(2015, 1, 7, 12, 0, 7), 'yyyy-MM-dd HH:mm:ssZ', '-03:00')).toEqual('2015-02-07 12:00:07-03:00');
         });
 
         it('supports different cultures', function() {

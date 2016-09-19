@@ -14,6 +14,7 @@ module.exports = function(config) {
             suite: 'unit'
         },
         files: [
+            'node_modules/jquery/dist/jquery.js',
             'node_modules/angular/angular.js',
             'node_modules/angular-mocks/angular-mocks.js',
             'node_modules/moment/min/moment.min.js',

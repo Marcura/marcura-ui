@@ -126,105 +126,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            value: '=',
-            isDisabled: '=',
-            change: '&',
-            size: '@',
-            rtl: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-check-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-check-box-is-checked\': value === true,\
-                    \'ma-check-box-is-disabled\': isDisabled,\
-                    \'ma-check-box-has-text\': hasText,\
-                    \'ma-check-box-rtl\': rtl,\
-                    \'ma-check-box-is-focused\': isFocused\
-                }">\
-                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
-                <div class="ma-check-box-inner"></div>\
-                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element) {
-            var setTabindex = function() {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-check-box-' + scope._size;
-            scope.hasText = scope.text ? true : false;
-            scope.isFocused = false;
-
-            scope.onChange = function() {
-                if (!scope.isDisabled) {
-                    scope.value = !scope.value;
-
-                    $timeout(function() {
-                        scope.change({
-                            value: scope.value
-                        });
-                    });
-                }
-            };
-
-            scope.onFocus = function() {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function() {
-                if (!scope.isDisabled) {
-                    scope.isFocused = false;
-                }
-            };
-
-            scope.onKeypress = function(event) {
-                if (event.keyCode === maHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (!scope.isDisabled) {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            scope.$watch('isDisabled', function(newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            setTabindex();
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function() {
         this.$get = function() {
@@ -694,6 +595,105 @@ angular.element(document).ready(function() {
         };
     }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            value: '=',
+            isDisabled: '=',
+            change: '&',
+            size: '@',
+            rtl: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-check-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
+                ng-click="onChange()"\
+                ng-class="{\
+                    \'ma-check-box-is-checked\': value === true,\
+                    \'ma-check-box-is-disabled\': isDisabled,\
+                    \'ma-check-box-has-text\': hasText,\
+                    \'ma-check-box-rtl\': rtl,\
+                    \'ma-check-box-is-focused\': isFocused\
+                }">\
+                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
+                <div class="ma-check-box-inner"></div>\
+                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element) {
+            var setTabindex = function() {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
+            scope._size = scope.size ? scope.size : 'xs';
+            scope.cssClass = ' ma-check-box-' + scope._size;
+            scope.hasText = scope.text ? true : false;
+            scope.isFocused = false;
+
+            scope.onChange = function() {
+                if (!scope.isDisabled) {
+                    scope.value = !scope.value;
+
+                    $timeout(function() {
+                        scope.change({
+                            value: scope.value
+                        });
+                    });
+                }
+            };
+
+            scope.onFocus = function() {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function() {
+                if (!scope.isDisabled) {
+                    scope.isFocused = false;
+                }
+            };
+
+            scope.onKeypress = function(event) {
+                if (event.keyCode === maHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (!scope.isDisabled) {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            scope.$watch('isDisabled', function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            setTabindex();
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
         restrict: 'E',
@@ -773,6 +773,35 @@ angular.element(document).ready(function() {
 
             scope.isCurrentStep = function(stepIndex) {
                 return (stepIndex + 1) <= scope.currentStep;
+            };
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            isDisabled: '=',
+            click: '&'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
+                <i class="fa fa-times"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
             };
         }
     };
@@ -925,35 +954,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            isDisabled: '=',
-            click: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-reset-value" ng-class="{\
-                    \'ma-reset-value-is-disabled\': isDisabled\
-                }"\
-                ng-click="onClick()">\
-                <i class="fa fa-times"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
         }
     };
 }]);
@@ -1727,85 +1727,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            id: '@',
-            value: '=',
-            size: '=',
-            change: '&',
-            isDisabled: '='
-        },
-        replace: true,
-        template: function($timeout) {
-            var html = '\
-            <div class="ma-text-box"\
-                ng-class="{\
-                    \'ma-text-box-is-disabled\': isDisabled\
-                }">\
-                <input class="ma-text-box-value form-control input-{{_size}}"\
-                    ng-disabled="isDisabled"\
-                    type="text"\
-                    ng-model="value"/>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element) {
-            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
-            // valueType,
-
-            // getValueInType = function(value) {
-            //     if (!value) {
-            //         return null;
-            //     } else if (dateType === 'String') {
-            //         return value.toString();
-            //     } else if (angular.isNumber(value)) {
-            //         return date;
-            //     } else {
-            //         return maDateConverter.format(date, format);
-            //     }
-            // },
-            // onChange = function (value) {
-            //     scope.change({
-            //         value: value
-            //     });
-            // };
-
-            scope._size = scope.size ? scope.size : 'sm';
-
-            $timeout(function() {
-                // move id to input
-                element.removeAttr('id');
-                valueElement.attr('id', scope.id);
-            });
-
-            // scope.$watch('value', function(newValue, oldValue) {
-            //     if (newValue === oldValue) {
-            //         return;
-            //     }
-            //
-            //     scope.change({
-            //         value: value
-            //     });
-            // });
-
-
-            // if (scope.value) {
-            //     // determine initial value type
-            //     if (maHelper.isString(scope.value)) {
-            //         valueType = 'String';
-            //     } else {
-            //         valueType = 'Number';
-            //     }
-            //
-            //     valueElement.val(scope.value);
-            // }
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', 'maValidators', function($timeout, $window, maHelper, maValidators) {
     return {
         restrict: 'E',
@@ -2022,6 +1943,85 @@ angular.element(document).ready(function() {
                     return scope.isValid;
                 };
             }
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            id: '@',
+            value: '=',
+            size: '=',
+            change: '&',
+            isDisabled: '='
+        },
+        replace: true,
+        template: function($timeout) {
+            var html = '\
+            <div class="ma-text-box"\
+                ng-class="{\
+                    \'ma-text-box-is-disabled\': isDisabled\
+                }">\
+                <input class="ma-text-box-value form-control input-{{_size}}"\
+                    ng-disabled="isDisabled"\
+                    type="text"\
+                    ng-model="value"/>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element) {
+            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
+            // valueType,
+
+            // getValueInType = function(value) {
+            //     if (!value) {
+            //         return null;
+            //     } else if (dateType === 'String') {
+            //         return value.toString();
+            //     } else if (angular.isNumber(value)) {
+            //         return date;
+            //     } else {
+            //         return maDateConverter.format(date, format);
+            //     }
+            // },
+            // onChange = function (value) {
+            //     scope.change({
+            //         value: value
+            //     });
+            // };
+
+            scope._size = scope.size ? scope.size : 'sm';
+
+            $timeout(function() {
+                // move id to input
+                element.removeAttr('id');
+                valueElement.attr('id', scope.id);
+            });
+
+            // scope.$watch('value', function(newValue, oldValue) {
+            //     if (newValue === oldValue) {
+            //         return;
+            //     }
+            //
+            //     scope.change({
+            //         value: value
+            //     });
+            // });
+
+
+            // if (scope.value) {
+            //     // determine initial value type
+            //     if (maHelper.isString(scope.value)) {
+            //         valueType = 'String';
+            //     } else {
+            //         valueType = 'Number';
+            //     }
+            //
+            //     valueElement.val(scope.value);
+            // }
         }
     };
 }]);
