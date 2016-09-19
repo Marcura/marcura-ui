@@ -20,7 +20,7 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
     $scope.date10 = '2016-07-25T16:30:00+04:00';
 
     $scope.change1 = function(date) {
-        console.log('date1:', date);
+        console.log('change:', date);
     };
 
     // $scope.change2 = function(date) {
@@ -28,7 +28,7 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
     // };
 
     $scope.change3 = function(date) {
-        console.log('date3:', date);
+        console.log('change:', date);
     };
 
     $scope.$watch('date2', function(newDate, oldDate) {

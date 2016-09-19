@@ -176,6 +176,10 @@ angular.module('marcuraUI.components')
 
                         return moment([_date.year(), _date.month(), _date.date(), Number(hoursElement.val()), Number(minutesElement.val()), 0]);
                     },
+                    resetInitialDateOffset = function () {
+                        // Override initial time zone offset after date has been changed.
+                        initialDateOffset = timeZoneOffset;
+                    },
                     initializePikaday = function() {
                         picker = new Pikaday({
                             field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
@@ -184,9 +188,8 @@ angular.module('marcuraUI.components')
                                 var date = maDateConverter.offsetUtc(picker.getDate());
 
                                 if (scope.hasTime) {
-                                    // Substruct time zone offset.
                                     date = addTimeToDate(date);
-                                    date = maDateConverter.offsetUtc(date, -(timeZoneOffset - initialDateOffset));
+                                    resetInitialDateOffset();
                                 }
 
                                 if (!hasDateChanged(date)) {
@@ -324,9 +327,7 @@ angular.module('marcuraUI.components')
 
                     if (keydownValue !== keyupValue) {
                         scope.isTouched = true;
-
-                        // Override initial time zone offset after date has been changed.
-                        initialDateOffset = timeZoneOffset;
+                        resetInitialDateOffset();
                     }
                 };
 
