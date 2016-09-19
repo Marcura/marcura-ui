@@ -87,7 +87,6 @@ angular.module('marcuraUI.components')
                     minutesElement = angular.element(element[0].querySelector('.ma-date-box-minutes')),
                     previousDate = null,
                     timeZoneOffset = moment().utcOffset(timeZone).utcOffset(),
-                    isDateSetInternally = true,
                     initialDisplayDate,
                     // Variables keydownValue and keyupValue help track touched state.
                     keydownValue,
@@ -147,8 +146,7 @@ angular.module('marcuraUI.components')
                     },
                     setCalendarDate = function(date) {
                         if (picker) {
-                            isDateSetInternally = true;
-                            picker.setDate(date ? date.toDate() : null);
+                            picker.setDate(date ? date.toDate() : null, true);
                         }
                     },
                     parseDate = function(date) {
@@ -183,13 +181,6 @@ angular.module('marcuraUI.components')
                             field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                             position: 'bottom right',
                             onSelect: function() {
-                                // This is to prevent the event from firing when the date
-                                // is set internally with setCalendarDate method.
-                                if (isDateSetInternally) {
-                                    isDateSetInternally = false;
-                                    return;
-                                }
-
                                 var date = maDateConverter.offsetUtc(picker.getDate());
 
                                 if (scope.hasTime) {
