@@ -1,4 +1,4 @@
-angular.module('marcuraUI.services').factory('maHelper', [function() {
+angular.module('marcuraUI.services').factory('maHelper', ['maDateConverter', function(maDateConverter) {
     return {
         keyCode: {
             backspace: 8,
@@ -18,14 +18,6 @@ angular.module('marcuraUI.services').factory('maHelper', [function() {
             space: 32,
             tab: 9,
             up: 38
-        },
-
-        isDate: function(value) {
-            if (!value) {
-                return false;
-            }
-
-            return Object.prototype.toString.call(value) === '[object Date]' && value.getTime && !isNaN(value.getTime());
         },
 
         isEmail: function(value) {
@@ -168,6 +160,62 @@ angular.module('marcuraUI.services').factory('maHelper', [function() {
             angular.element(textArea).remove();
 
             return height;
+        },
+
+        isGreaterThan: function(value, valueToCompare) {
+            var date1 = maDateConverter.parse(value),
+                date2 = maDateConverter.parse(valueToCompare);
+
+            if (date1 && date2) {
+                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
+                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
+
+                return moment1.diff(moment2) > 0;
+            }
+
+            return value > valueToCompare;
+        },
+
+        isGreaterThanOrEqual: function(value, valueToCompare) {
+            var date1 = maDateConverter.parse(value),
+                date2 = maDateConverter.parse(valueToCompare);
+
+            if (date1 && date2) {
+                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
+                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
+
+                return moment1.diff(moment2) >= 0;
+            }
+
+            return value >= valueToCompare;
+        },
+
+        isLessThan: function(value, valueToCompare) {
+            var date1 = maDateConverter.parse(value),
+                date2 = maDateConverter.parse(valueToCompare);
+
+            if (date1 && date2) {
+                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
+                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
+
+                return moment1.diff(moment2) < 0;
+            }
+
+            return value < valueToCompare;
+        },
+
+        isLessThanOrEqual: function(value, valueToCompare) {
+            var date1 = maDateConverter.parse(value),
+                date2 = maDateConverter.parse(valueToCompare);
+
+            if (date1 && date2) {
+                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
+                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
+
+                return moment1.diff(moment2) <= 0;
+            }
+
+            return value <= valueToCompare;
         }
     };
 }]);

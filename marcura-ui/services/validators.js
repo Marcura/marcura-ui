@@ -11,6 +11,42 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', functi
                     return !maHelper.isNullOrWhiteSpace(value);
                 }
             };
+        },
+
+        isGreaterThan: function(valueToCompare) {
+            return {
+                name: 'IsGreaterThan',
+                method: function(value) {
+                    return maHelper.isGreaterThan(value, valueToCompare);
+                }
+            };
+        },
+
+        isGreaterThanOrEqual: function(valueToCompare) {
+            return {
+                name: 'IsGreaterThanOrEqual',
+                method: function(value) {
+                    return maHelper.isGreaterThanOrEqual(value, valueToCompare);
+                }
+            };
+        },
+
+        isLessThan: function(valueToCompare) {
+            return {
+                name: 'IsLessThan',
+                method: function(value) {
+                    return maHelper.isLessThan(value, valueToCompare);
+                }
+            };
+        },
+
+        isLessThanOrEqual: function(valueToCompare) {
+            return {
+                name: 'IsLessThanOrEqual',
+                method: function(value) {
+                    return maHelper.isLessThanOrEqual(value, valueToCompare);
+                }
+            };
         }
     };
 }]);

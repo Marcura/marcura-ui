@@ -12,7 +12,6 @@
         <ma-date-box
             date="date1"
             is-resettable="false"
-            time-zone="'+09:00'"
             change="change1(date)">
         </ma-date-box>
     </div>
@@ -120,5 +119,17 @@
     </div>
     <div class="nodes-item">
         date: {{date10}}
+    </div>
+    <div class="nodes-item">
+        <h2>Min and max dates</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            date="date11"
+            min-date="date11min"
+            max-date="date11max"
+            is-resettable="false"
+            change="change1(date)">
+        </ma-date-box>
     </div>
 </div>

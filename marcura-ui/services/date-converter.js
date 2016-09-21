@@ -1,9 +1,17 @@
-angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', function(maHelper) {
+angular.module('marcuraUI.services').factory('maDateConverter', [function() {
     var months = [{
             language: 'en',
             items: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
         }],
         daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    var isDate = function(value) {
+        if (!value) {
+            return false;
+        }
+
+        return Object.prototype.toString.call(value) === '[object Date]' && value.getTime && !isNaN(value.getTime());
+    };
 
     var isMatch = function(date, substring) {
         return date.match(new RegExp(substring, 'i'));
@@ -102,6 +110,11 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
         var pattern, parts, dayAndMonth;
 
         if (value instanceof Date) {
+            return value;
+        }
+
+        // Check if the date is of maDateConverter type.
+        if (value && value.date && angular.isNumber(value.offset)) {
             return value;
         }
 
@@ -223,7 +236,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
             isMomentDate = date && date.isValid && date.isValid();
         timeZone = timeZone || '';
 
-        if (!maHelper.isDate(date) && !isMomentDate) {
+        if (!isDate(date) && !isMomentDate) {
             return null;
         }
 
@@ -387,7 +400,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
 
         timeZoneOffset = timeZoneOffset || 0;
 
-        if (maHelper.isDate(date) || (date.isValid && date.isValid())) {
+        if (isDate(date) || (date.isValid && date.isValid())) {
             return moment(date).add(timeZoneOffset, 'm');
         } else if (typeof date === 'string') {
             var _date = moment(date).minute(
@@ -401,6 +414,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', ['maHelper', fun
     return {
         parse: parse,
         format: format,
-        offsetUtc: offsetUtc
+        offsetUtc: offsetUtc,
+        isDate: isDate
     };
 }]);

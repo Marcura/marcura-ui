@@ -10,7 +10,35 @@ describe('maDateConverter', function() {
         moment = $window.moment;
     }));
 
+    describe('isDate method', function() {
+        it('determines whether a specified value is a date', function() {
+            expect(maDateConverter.isDate(new Date())).toEqual(true);
+            expect(maDateConverter.isDate(new Date('invalid'))).toEqual(false);
+            expect(maDateConverter.isDate('Mon Aug 24 2015 10:42:31 GMT+0700 (N. Central Asia Daylight Time)')).toEqual(false);
+            expect(maDateConverter.isDate('2015-02-21')).toEqual(false);
+            expect(maDateConverter.isDate('Simple string')).toEqual(false);
+            expect(maDateConverter.isDate('')).toEqual(false);
+            expect(maDateConverter.isDate(2015)).toEqual(false);
+            expect(maDateConverter.isDate([])).toEqual(false);
+            expect(maDateConverter.isDate([10, 20, 30])).toEqual(false);
+            expect(maDateConverter.isDate({})).toEqual(false);
+            expect(maDateConverter.isDate({
+                name: 'Data'
+            })).toEqual(false);
+            expect(maDateConverter.isDate(true)).toEqual(false);
+            expect(maDateConverter.isDate(false)).toEqual(false);
+            expect(maDateConverter.isDate(null)).toEqual(false);
+            expect(maDateConverter.isDate(undefined)).toEqual(false);
+            expect(maDateConverter.isDate(NaN)).toEqual(false);
+        });
+    });
+
     describe('parse method', function() {
+        it('returns passed date if it is already a valid maDateConverter object', function() {
+            var date = maDateConverter.parse('2015-02-21T10:00:00Z');
+            expect(maDateConverter.parse(date)).toEqual(date);
+        });
+
         it('parses date in dd format', function() {
             var currentMonth = maDateConverter.format(currentDate, 'MMM');
             expect(maDateConverter.parse('21').date.toString().slice(4, 15)).toEqual(currentMonth + ' 21 ' + currentYear);
