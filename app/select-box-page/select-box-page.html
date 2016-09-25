@@ -1,0 +1,31 @@
+<div class="nodes nodes-padding-bottom-m">
+    <div class="nodes-item">
+        <a href="#/home">Home</a>
+    </div>
+    <div class="nodes-item">
+        <h1>SelectBox</h1>
+    </div>
+    <div class="nodes-item">
+        <h2>Array of strings</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="currencies1"
+            selected-item="currency1"
+            is-loading="isLoading"
+            change="change1(item)">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Array of objects</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="currencies2"
+            selected-item="currency2"
+            item-text-field="code"
+            item-value-field="code"
+            change="change2(item)">
+        </ma-select-box>
+    </div>
+</div>

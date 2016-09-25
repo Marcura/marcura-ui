@@ -94,10 +94,10 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         controller: 'textBoxPageController'
     });
 
-    $stateProvider.state('select2', {
-        url: '/select2',
-        templateUrl: 'select2-page/select2-page.html',
-        controller: 'select2PageController'
+    $stateProvider.state('select-box', {
+        url: '/select-box',
+        templateUrl: 'select-box-page/select-box-page.html',
+        controller: 'selectBoxPageController'
     });
 
     $stateProvider.state('ui-select', {

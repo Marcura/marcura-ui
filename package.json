@@ -1,5 +1,5 @@
 {
-    "version": "0.17.15",
+    "version": "0.18.0",
     "name": "marcura-ui",
     "description": "Marcura UI",
     "author": "Marcura",
@@ -36,7 +36,8 @@
         "karma-junit-reporter": "1.1.0",
         "gulp-jshint": "2.0.1",
         "express": "4.13.3",
-        "ui-select": "0.19.1"
+        "ui-select": "0.19.1",
+        "pace": "git+https://github.com/HubSpot/pace.git"
     },
     "main": "server.js",
     "scripts": {

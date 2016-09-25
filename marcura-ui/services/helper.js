@@ -216,6 +216,15 @@ angular.module('marcuraUI.services').factory('maHelper', ['maDateConverter', fun
             }
 
             return value <= valueToCompare;
+        },
+
+        isJson: function(value) {
+            try {
+                JSON.parse(value);
+                return true;
+            } catch (error) {
+                return false;
+            }
         }
     };
 }]);
