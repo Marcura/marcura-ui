@@ -105,27 +105,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -221,6 +200,27 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -994,18 +994,25 @@ angular.element(document).ready(function() {
             itemValueField: '@',
             isDisabled: '=',
             isRequired: '=',
-            isSearchable: '='
+            isSearchable: '=',
+            canAddItem: '=',
+            addItemTooltip: '='
         },
         replace: true,
         template: function() {
             var html = '\
-            <div class="ma-select-box">\
+            <div class="ma-select-box"\
+                ng-class="{\
+                    \'ma-select-box-can-add-item\': canAddItem,\
+                    \'ma-select-box-is-focused\': isFocused\
+                }">\
                 <div class="ma-select-box-spinner" ng-if="isLoading">\
                     <div class="pace">\
                         <div class="pace-activity"></div>\
                     </div>\
                 </div>\
                 <select ui-select2="options"\
+                    ng-show="!addingItem"\
                     ng-disabled="isDisabled"\
                     ng-model="value"\
                     ng-change="onChange()"\
@@ -1014,6 +1021,15 @@ angular.element(document).ready(function() {
                         {{formatItem(item)}}\
                     </option>\
                 </select>\
+                <input class="ma-select-box-input" type="text" ng-show="addingItem"\
+                    ng-model="text"\
+                    ng-focus="onFocus()"\
+                    ng-blur="onBlur()"/>\
+                <ma-button ng-if="canAddItem" size="xs" modifier="secondary"\
+                    tooltip="{{getAddItemTooltip()}}"\
+                    right-icon="{{addingItem ? \'bars\' : \'plus\'}}"\
+                    click="addItem()">\
+                </ma-button>\
             </div>';
 
             return html;
@@ -1026,7 +1042,10 @@ angular.element(document).ready(function() {
                 scope.options.minimumResultsForSearch = -1;
             }
         }],
-        link: function(scope) {
+        link: function(scope, element) {
+            var inputElement = angular.element(element[0].querySelector('.ma-select-box-input'));
+
+            scope.addingItem = false;
             scope.formatItem = scope.itemTemplate ||
                 function(item) {
                     if (!item) {
@@ -1035,6 +1054,7 @@ angular.element(document).ready(function() {
 
                     return scope.itemTextField ? item[scope.itemTextField] : item.toString();
                 };
+            scope.isFocused = false;
 
             // Set initial value.
             if (scope.selectedItem) {
@@ -1047,8 +1067,70 @@ angular.element(document).ready(function() {
                 }
             }
 
+            scope.onFocus = function() {
+                scope.isFocused = true;
+            };
+
+            scope.onBlur = function() {
+                scope.isFocused = false;
+
+                if (scope.itemTextField) {
+                    if (scope.selectedItem[scope.itemTextField] === scope.text) {
+                        return;
+                    }
+
+                    scope.selectedItem = {};
+                    scope.selectedItem[scope.itemTextField] = scope.text;
+                } else {
+                    if (scope.selectedItem === scope.text) {
+                        return;
+                    }
+
+                    scope.selectedItem = scope.text;
+                }
+
+                // TODO: Only trigger change if text has changed.
+                $timeout(function() {
+                    scope.change({
+                        item: scope.selectedItem
+                    });
+                });
+            };
+
+            scope.getAddItemTooltip = function() {
+                // \u00A0 Unicode character is used here like &nbsp;.
+                if (scope.addingItem) {
+                    return 'Back\u00A0to the\u00A0list';
+                }
+
+                return scope.addItemTooltip ? scope.addItemTooltip : 'Add new\u00A0item';
+            };
+
             scope.getItemValue = function(item) {
                 return scope.itemValueField ? item[scope.itemValueField].toString() : item;
+            };
+
+            scope.addItem = function() {
+                scope.previousItem = scope.selectedItem;
+                scope.addingItem = !scope.addingItem;
+
+                // TODO: Restore previously selected or typed item.
+                if (scope.addingItem) {
+
+                } else {
+
+                }
+
+                // Focus the right component.
+                $timeout(function() {
+                    if (scope.addingItem) {
+                        inputElement.focus();
+                        scope.isFocused = true;
+                    } else {
+                        var selectElement = angular.element(element[0].querySelector('.select2-container'));
+                        selectElement.select2('focus');
+                    }
+                });
             };
 
             scope.onChange = function() {

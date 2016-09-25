@@ -10,8 +10,8 @@
     </div>
     <div class="nodes-item">
         <ma-select-box
-            items="currencies1"
-            selected-item="currency1"
+            items="ports1"
+            selected-item="port1"
             is-loading="isLoading"
             change="change1(item)">
         </ma-select-box>
@@ -21,11 +21,24 @@
     </div>
     <div class="nodes-item">
         <ma-select-box
-            items="currencies2"
-            selected-item="currency2"
-            item-text-field="code"
-            item-value-field="code"
+            items="ports2"
+            selected-item="port2"
+            item-text-field="name"
+            item-value-field="id"
             change="change2(item)">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Adding a custom item</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports2"
+            selected-item="port3"
+            item-text-field="name"
+            item-value-field="id"
+            can-add-item="true"
+            change="change3(item)">
         </ma-select-box>
     </div>
 </div>

@@ -3,6 +3,35 @@
 .ma-select-box {
     position: relative;
 
+    &-can-add-item {
+        padding-right: 35px;
+    }
+
+    &-is-focused &-input {
+        .box-shadow(@input-shadow-is-focused);
+        border-color: @input-border-color-is-focused;
+    }
+
+    .ma-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    &-input {
+        .input;
+        .input-transition;
+        .box-shadow(@input-shadow);
+        display: block;
+        padding: 4px 10px;
+        box-sizing: border-box;
+        width: 100%;
+        font-family: @font-family;
+        background-color: @input-background-color;
+        border: 1px solid @input-border-color;
+        line-height: 20px;
+    }
+
     &-spinner {
         position: absolute;
         width: 100%;

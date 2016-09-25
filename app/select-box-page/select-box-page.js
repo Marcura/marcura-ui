@@ -1,30 +1,34 @@
 angular.module('app.controllers').controller('selectBoxPageController', selectBoxPageController);
 
 function selectBoxPageController($scope, $timeout) {
-    $scope.currencies1 = [
-        'BRL',
-        'USD',
-        'AED'
-    ];
-    $scope.currency1 = $scope.currencies1[1];
-    $scope.currencies2 = [{
-        code: 'BRL',
-        country: 'Brazil'
+    $scope.ports1 = ['Tokai', 'Vladivostok', 'Navlakhi'];
+    $scope.ports2 = [{
+        id: 1,
+        name: 'Tokai'
     }, {
-        code: 'USD',
-        country: 'United States'
+        id: 2,
+        name: 'Vladivostok'
     }, {
-        code: 'AED',
-        country: 'United Arab Emirates'
+        id: 3,
+        name: 'Navlakhi'
     }];
-    $scope.currency2 = $scope.currencies2[1];
+    $scope.port1 = $scope.ports1[1];
+    $scope.port2 = $scope.ports2[1];
+    $scope.port3 = $scope.ports2[1];
 
-    $scope.change1 = function(currency) {
-        console.log('change1:', currency);
+    $scope.change1 = function(port) {
+        console.log('scope:', $scope.port1);
+        console.log('event:', port);
     };
 
-    $scope.change2 = function(currency) {
-        console.log('change2:', currency);
+    $scope.change2 = function(port) {
+        console.log('scope:', $scope.port2);
+        console.log('event:', port);
+    };
+
+    $scope.change3 = function(port) {
+        console.log('scope:', $scope.port3);
+        console.log('event:', port);
     };
 
     // $timeout(function() {
