@@ -77,18 +77,21 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                 };
             scope.isFocused = false;
 
-            // Set initial value.
-            if (scope.selectedItem) {
-                if (scope.itemValueField) {
-                    scope.value = scope.selectedItem[scope.itemValueField].toString();
-                } else if (typeof scope.selectedItem === 'string') {
-                    scope.value = scope.selectedItem;
+            var setValue = function(selectedItem) {
+                if (!selectedItem) {
+                    scope.value = null;
                 } else {
-                    scope.value = JSON.stringify(scope.selectedItem);
+                    if (scope.itemValueField) {
+                        scope.value = selectedItem[scope.itemValueField].toString();
+                    } else if (typeof selectedItem === 'string') {
+                        scope.value = selectedItem;
+                    } else {
+                        scope.value = JSON.stringify(selectedItem);
+                    }
                 }
 
                 previousSelectedItem = scope.value;
-            }
+            };
 
             scope.getAddItemTooltip = function() {
                 // \u00A0 Unicode character is used here like &nbsp;.
@@ -199,6 +202,17 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                     });
                 });
             };
+
+            scope.$watch('selectedItem', function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setValue(newValue);
+            });
+
+            // Set initial value.
+            setValue(scope.selectedItem);
         }
     };
 }]);
