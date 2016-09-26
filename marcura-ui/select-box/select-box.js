@@ -13,7 +13,7 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
             isRequired: '=',
             isSearchable: '=',
             canAddItem: '=',
-            addItemTooltip: '='
+            addItemTooltip: '@'
         },
         replace: true,
         template: function() {
