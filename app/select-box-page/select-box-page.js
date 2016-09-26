@@ -33,14 +33,16 @@ function selectBoxPageController($scope, $timeout) {
         console.log('event:', port);
     };
 
-    $timeout(function() {
-        $scope.port3SelectBox.showAddView();
-    }, 5000);
+    // API.
+    // $timeout(function() {
+    //     $scope.port3SelectBox.showAddView();
+    // }, 5000);
+    //
+    // $timeout(function() {
+    //     $scope.port3SelectBox.showSelectView();
+    // }, 10000);
 
-    $timeout(function() {
-        $scope.port3SelectBox.showSelectView();
-    }, 10000);
-
+    // Setting value from scope.
     // $timeout(function() {
     //     $scope.port3 = null;
     //     console.log('1:', $scope.port3);
@@ -61,6 +63,7 @@ function selectBoxPageController($scope, $timeout) {
     //     console.log('4:', $scope.port3);
     // }, 12000);
 
+    // Disabled.
     // $timeout(function() {
     //     $scope.isDisabled = true;
     // }, 3000);
@@ -69,6 +72,7 @@ function selectBoxPageController($scope, $timeout) {
     //     $scope.isDisabled = false;
     // }, 9000);
 
+    // Loading.
     // $timeout(function() {
     //     $scope.isLoading = true;
     // }, 3000);

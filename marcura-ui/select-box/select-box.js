@@ -83,6 +83,7 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                 if (!item) {
                     scope.value = null;
                     scope.text = null;
+                    previousAddedItem = null;
                 } else {
                     if (scope.itemValueField && item[scope.itemValueField]) {
                         scope.value = item[scope.itemValueField].toString();
@@ -164,8 +165,12 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                         return;
                     }
 
-                    scope.selectedItem = {};
-                    scope.selectedItem[scope.itemTextField] = scope.text;
+                    if (scope.text) {
+                        scope.selectedItem = {};
+                        scope.selectedItem[scope.itemTextField] = scope.text;
+                    } else {
+                        scope.selectedItem = null;
+                    }
                 } else {
                     if (scope.selectedItem === scope.text) {
                         return;
@@ -235,11 +240,15 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
             // Prepare API instance.
             if (scope.instance) {
                 scope.instance.showSelectView = function() {
-                    scope.toggleView('select');
+                    if (scope.addingItem) {
+                        scope.toggleView('select');
+                    }
                 };
 
                 scope.instance.showAddView = function() {
-                    scope.toggleView('add');
+                    if (!scope.addingItem) {
+                        scope.toggleView('add');
+                    }
                 };
             }
         }

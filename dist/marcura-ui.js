@@ -105,27 +105,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -221,6 +200,27 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1066,6 +1066,7 @@ angular.element(document).ready(function() {
                 if (!item) {
                     scope.value = null;
                     scope.text = null;
+                    previousAddedItem = null;
                 } else {
                     if (scope.itemValueField && item[scope.itemValueField]) {
                         scope.value = item[scope.itemValueField].toString();
@@ -1147,8 +1148,12 @@ angular.element(document).ready(function() {
                         return;
                     }
 
-                    scope.selectedItem = {};
-                    scope.selectedItem[scope.itemTextField] = scope.text;
+                    if (scope.text) {
+                        scope.selectedItem = {};
+                        scope.selectedItem[scope.itemTextField] = scope.text;
+                    } else {
+                        scope.selectedItem = null;
+                    }
                 } else {
                     if (scope.selectedItem === scope.text) {
                         return;
@@ -1218,11 +1223,15 @@ angular.element(document).ready(function() {
             // Prepare API instance.
             if (scope.instance) {
                 scope.instance.showSelectView = function() {
-                    scope.toggleView('select');
+                    if (scope.addingItem) {
+                        scope.toggleView('select');
+                    }
                 };
 
                 scope.instance.showAddView = function() {
-                    scope.toggleView('add');
+                    if (!scope.addingItem) {
+                        scope.toggleView('add');
+                    }
                 };
             }
         }
