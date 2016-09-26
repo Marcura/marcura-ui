@@ -168,7 +168,7 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                 var item = maHelper.isJson(scope.value) ? JSON.parse(scope.value) : scope.value;
 
                 // Get selected item from items by value field.
-                if (scope.itemValueField) {
+                if (scope.itemValueField && item) {
                     for (var i = 0; i < scope.items.length; i++) {
 
                         if (scope.items[i][scope.itemValueField].toString() === item.toString()) {
