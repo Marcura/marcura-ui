@@ -13,7 +13,8 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
             isRequired: '=',
             isSearchable: '=',
             canAddItem: '=',
-            addItemTooltip: '@'
+            addItemTooltip: '@',
+            instance: '='
         },
         replace: true,
         template: function() {
@@ -106,8 +107,18 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                 return scope.itemValueField ? item[scope.itemValueField].toString() : item;
             };
 
-            scope.toggleView = function() {
-                scope.addingItem = !scope.addingItem;
+            scope.toggleView = function(view) {
+                var isInternalCall = false;
+
+                if (view === 'select') {
+                    scope.addingItem = false;
+                    isInternalCall = true;
+                } else if (view === 'add') {
+                    scope.addingItem = true;
+                    isInternalCall = true;
+                } else {
+                    scope.addingItem = !scope.addingItem;
+                }
 
                 // Restore previously selected or added item.
                 if (scope.addingItem) {
@@ -122,21 +133,23 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                     scope.selectedItem = previousSelectedItem;
                 }
 
-                $timeout(function() {
-                    // Trigger change event as user manually swithces between custom and selected items.
-                    scope.change({
-                        item: scope.selectedItem
-                    });
+                if (!isInternalCall) {
+                    $timeout(function() {
+                        // Trigger change event as user manually swithces between custom and selected items.
+                        scope.change({
+                            item: scope.selectedItem
+                        });
 
-                    // Focus the right component.
-                    if (scope.addingItem) {
-                        inputElement.focus();
-                        scope.isFocused = true;
-                    } else {
-                        var selectElement = angular.element(element[0].querySelector('.select2-container'));
-                        selectElement.select2('focus');
-                    }
-                });
+                        // Focus the right component.
+                        if (scope.addingItem) {
+                            inputElement.focus();
+                            scope.isFocused = true;
+                        } else {
+                            var selectElement = angular.element(element[0].querySelector('.select2-container'));
+                            selectElement.select2('focus');
+                        }
+                    });
+                }
             };
 
             scope.onFocus = function() {
@@ -160,7 +173,6 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
 
                     scope.selectedItem = scope.text;
                 }
-                console.log('onBlur');
 
                 previousAddedItem = scope.selectedItem;
 
@@ -219,6 +231,17 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
 
             // Set initial value.
             setValue(scope.selectedItem);
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.showSelectView = function() {
+                    scope.toggleView('select');
+                };
+
+                scope.instance.showAddView = function() {
+                    scope.toggleView('add');
+                };
+            }
         }
     };
 }]);

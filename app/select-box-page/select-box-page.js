@@ -15,6 +15,8 @@ function selectBoxPageController($scope, $timeout) {
     $scope.port1 = $scope.ports1[1];
     $scope.port2 = $scope.ports2[1];
     $scope.port3 = $scope.ports2[1];
+    $scope.port4 = $scope.ports2[1];
+    $scope.port3SelectBox = {};
 
     $scope.change1 = function(port) {
         console.log('scope:', $scope.port1);
@@ -30,6 +32,14 @@ function selectBoxPageController($scope, $timeout) {
         console.log('scope:', $scope.port3);
         console.log('event:', port);
     };
+
+    $timeout(function() {
+        $scope.port3SelectBox.showAddView();
+    }, 5000);
+
+    $timeout(function() {
+        $scope.port3SelectBox.showSelectView();
+    }, 10000);
 
     // $timeout(function() {
     //     $scope.port3 = null;
