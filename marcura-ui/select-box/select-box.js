@@ -47,7 +47,7 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                 <ma-button ng-if="canAddItem" size="xs" modifier="secondary"\
                     tooltip="{{getAddItemTooltip()}}"\
                     right-icon="{{addingItem ? \'bars\' : \'plus\'}}"\
-                    click="addItem()"\
+                    click="toggleView()"\
                     is-disabled="isDisabled">\
                 </ma-button>\
             </div>';
@@ -106,13 +106,17 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                 return scope.itemValueField ? item[scope.itemValueField].toString() : item;
             };
 
-            scope.addItem = function() {
+            scope.toggleView = function() {
                 scope.addingItem = !scope.addingItem;
 
                 // Restore previously selected or added item.
                 if (scope.addingItem) {
                     previousSelectedItem = scope.selectedItem;
                     scope.selectedItem = previousAddedItem;
+
+                    if (scope.selectedItem) {
+                        scope.text = scope.selectedItem[scope.itemTextField];
+                    }
                 } else {
                     previousAddedItem = scope.selectedItem;
                     scope.selectedItem = previousSelectedItem;
@@ -156,6 +160,7 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
 
                     scope.selectedItem = scope.text;
                 }
+                console.log('onBlur');
 
                 previousAddedItem = scope.selectedItem;
 
