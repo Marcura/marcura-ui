@@ -105,6 +105,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -200,27 +221,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1043,7 +1043,9 @@ angular.element(document).ready(function() {
             }
         }],
         link: function(scope, element) {
-            var inputElement = angular.element(element[0].querySelector('.ma-select-box-input'));
+            var inputElement = angular.element(element[0].querySelector('.ma-select-box-input')),
+                previousSelectedItem,
+                previousAddedItem;
 
             scope.addingItem = false;
             scope.formatItem = scope.itemTemplate ||
@@ -1065,37 +1067,9 @@ angular.element(document).ready(function() {
                 } else {
                     scope.value = JSON.stringify(scope.selectedItem);
                 }
+
+                previousSelectedItem = scope.value;
             }
-
-            scope.onFocus = function() {
-                scope.isFocused = true;
-            };
-
-            scope.onBlur = function() {
-                scope.isFocused = false;
-
-                if (scope.itemTextField) {
-                    if (scope.selectedItem[scope.itemTextField] === scope.text) {
-                        return;
-                    }
-
-                    scope.selectedItem = {};
-                    scope.selectedItem[scope.itemTextField] = scope.text;
-                } else {
-                    if (scope.selectedItem === scope.text) {
-                        return;
-                    }
-
-                    scope.selectedItem = scope.text;
-                }
-
-                // TODO: Only trigger change if text has changed.
-                $timeout(function() {
-                    scope.change({
-                        item: scope.selectedItem
-                    });
-                });
-            };
 
             scope.getAddItemTooltip = function() {
                 // \u00A0 Unicode character is used here like &nbsp;.
@@ -1111,18 +1085,24 @@ angular.element(document).ready(function() {
             };
 
             scope.addItem = function() {
-                scope.previousItem = scope.selectedItem;
                 scope.addingItem = !scope.addingItem;
 
-                // TODO: Restore previously selected or typed item.
+                // Restore previously selected or added item.
                 if (scope.addingItem) {
-
+                    previousSelectedItem = scope.selectedItem;
+                    scope.selectedItem = previousAddedItem;
                 } else {
-
+                    previousAddedItem = scope.selectedItem;
+                    scope.selectedItem = previousSelectedItem;
                 }
 
-                // Focus the right component.
                 $timeout(function() {
+                    // Trigger change event as user manually swithces between custom and selected items.
+                    scope.change({
+                        item: scope.selectedItem
+                    });
+
+                    // Focus the right component.
                     if (scope.addingItem) {
                         inputElement.focus();
                         scope.isFocused = true;
@@ -1130,6 +1110,37 @@ angular.element(document).ready(function() {
                         var selectElement = angular.element(element[0].querySelector('.select2-container'));
                         selectElement.select2('focus');
                     }
+                });
+            };
+
+            scope.onFocus = function() {
+                scope.isFocused = true;
+            };
+
+            scope.onBlur = function() {
+                scope.isFocused = false;
+
+                if (scope.itemTextField) {
+                    if (scope.selectedItem && scope.selectedItem[scope.itemTextField] === scope.text) {
+                        return;
+                    }
+
+                    scope.selectedItem = {};
+                    scope.selectedItem[scope.itemTextField] = scope.text;
+                } else {
+                    if (scope.selectedItem === scope.text) {
+                        return;
+                    }
+
+                    scope.selectedItem = scope.text;
+                }
+
+                previousAddedItem = scope.selectedItem;
+
+                $timeout(function() {
+                    scope.change({
+                        item: scope.selectedItem
+                    });
                 });
             };
 
@@ -1161,6 +1172,7 @@ angular.element(document).ready(function() {
                 }
 
                 scope.selectedItem = item;
+                previousSelectedItem = item;
 
                 $timeout(function() {
                     scope.change({
