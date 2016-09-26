@@ -32,23 +32,23 @@ function selectBoxPageController($scope, $timeout) {
     };
 
     // $timeout(function() {
-    //     $scope.port2 = null;
-    //     console.log('1:', $scope.port2);
+    //     $scope.port3 = null;
+    //     console.log('1:', $scope.port3);
     // }, 3000);
     //
     // $timeout(function() {
-    //     $scope.port2 = $scope.ports2[0];
-    //     console.log('2:', $scope.port2);
+    //     $scope.port3 = $scope.ports2[0];
+    //     console.log('2:', $scope.port3);
     // }, 6000);
     //
     // $timeout(function() {
-    //     $scope.port2 = $scope.ports2[2];
-    //     console.log('3:', $scope.port2);
+    //     $scope.port3 = $scope.ports2[2];
+    //     console.log('3:', $scope.port3);
     // }, 9000);
     //
     // $timeout(function() {
-    //     $scope.port2 = null;
-    //     console.log('4:', $scope.port2);
+    //     $scope.port3 = null;
+    //     console.log('4:', $scope.port3);
     // }, 12000);
 
     // $timeout(function() {

@@ -77,20 +77,18 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                 };
             scope.isFocused = false;
 
-            var setValue = function(selectedItem) {
-                if (!selectedItem) {
+            var setValue = function(item) {
+                if (!item) {
                     scope.value = null;
                 } else {
-                    if (scope.itemValueField) {
-                        scope.value = selectedItem[scope.itemValueField].toString();
-                    } else if (typeof selectedItem === 'string') {
-                        scope.value = selectedItem;
+                    if (scope.itemValueField && item[scope.itemValueField]) {
+                        scope.value = item[scope.itemValueField].toString();
+                    } else if (typeof item === 'string') {
+                        scope.value = item;
                     } else {
-                        scope.value = JSON.stringify(selectedItem);
+                        scope.value = JSON.stringify(item);
                     }
                 }
-
-                previousSelectedItem = scope.value;
             };
 
             scope.getAddItemTooltip = function() {
