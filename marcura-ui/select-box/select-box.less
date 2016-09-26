@@ -12,6 +12,12 @@
         border-color: @input-border-color-is-focused;
     }
 
+    &-is-disabled &-input {
+        .box-shadow(none);
+        background-color: @input-background-color-is-disabled;
+        cursor: default;
+    }
+
     .ma-button {
         position: absolute;
         top: 0;

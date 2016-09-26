@@ -41,6 +41,7 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                 </select>\
                 <input class="ma-select-box-input" type="text" ng-show="addingItem"\
                     ng-model="text"\
+                    ng-disabled="isDisabled"\
                     ng-focus="onFocus()"\
                     ng-blur="onBlur()"/>\
                 <ma-button ng-if="canAddItem" size="xs" modifier="secondary"\
@@ -80,6 +81,7 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
             var setValue = function(item) {
                 if (!item) {
                     scope.value = null;
+                    scope.text = null;
                 } else {
                     if (scope.itemValueField && item[scope.itemValueField]) {
                         scope.value = item[scope.itemValueField].toString();
