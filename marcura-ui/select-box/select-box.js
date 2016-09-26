@@ -186,7 +186,8 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                 }
 
                 if (scope.itemValueField) {
-                    if (scope.selectedItem && scope.selectedItem[scope.itemValueField].toString() === item[scope.itemValueField].toString()) {
+                    if (scope.selectedItem && scope.selectedItem[scope.itemValueField] &&
+                        scope.selectedItem[scope.itemValueField].toString() === item[scope.itemValueField].toString()) {
                         return;
                     }
                 } else if (item === scope.selectedItem) {
