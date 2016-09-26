@@ -38,7 +38,32 @@
             item-text-field="name"
             item-value-field="id"
             can-add-item="true"
+            is-loading="isLoading"
             change="change3(item)">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Disabled</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports2"
+            selected-item="port3"
+            item-text-field="name"
+            item-value-field="id"
+            is-loading="isLoading"
+            is-disabled="true">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports2"
+            selected-item="port3"
+            item-text-field="name"
+            item-value-field="id"
+            can-add-item="true"
+            is-loading="isLoading"
+            is-disabled="true">
         </ma-select-box>
     </div>
 </div>

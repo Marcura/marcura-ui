@@ -21,9 +21,10 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
             <div class="ma-select-box"\
                 ng-class="{\
                     \'ma-select-box-can-add-item\': canAddItem,\
-                    \'ma-select-box-is-focused\': isFocused\
+                    \'ma-select-box-is-focused\': isFocused,\
+                    \'ma-select-box-is-disabled\': isDisabled\
                 }">\
-                <div class="ma-select-box-spinner" ng-if="isLoading">\
+                <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
                     <div class="pace">\
                         <div class="pace-activity"></div>\
                     </div>\
@@ -45,7 +46,8 @@ angular.module('marcuraUI.components').directive('maSelectBox', ['$timeout', 'ma
                 <ma-button ng-if="canAddItem" size="xs" modifier="secondary"\
                     tooltip="{{getAddItemTooltip()}}"\
                     right-icon="{{addingItem ? \'bars\' : \'plus\'}}"\
-                    click="addItem()">\
+                    click="addItem()"\
+                    is-disabled="isDisabled">\
                 </ma-button>\
             </div>';
 
