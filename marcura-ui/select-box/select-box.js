@@ -12,6 +12,7 @@ angular.module('marcuraUI.components')
         return {
             restrict: 'E',
             scope: {
+                id: '@',
                 items: '=',
                 selectedItem: '=',
                 isLoading: '=',
@@ -78,7 +79,8 @@ angular.module('marcuraUI.components')
                 var inputElement = angular.element(element[0].querySelector('.ma-select-box-input')),
                     previousSelectedItem,
                     previousAddedItem,
-                    selectElement;
+                    selectElement,
+                    labelElement = $('label[for="' + scope.id + '"]');
 
                 scope.addingItem = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -270,6 +272,17 @@ angular.module('marcuraUI.components')
                 $timeout(function() {
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
                 });
+
+                // Focus the component when label is clicked.
+                if (labelElement.length > 0) {
+                    labelElement.eq(0).click(function() {
+                        if (scope.addingItem) {
+                            inputElement.focus();
+                        } else {
+                            selectElement.select2('focus');
+                        }
+                    });
+                }
             }
         };
     }]);
