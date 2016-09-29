@@ -77,7 +77,8 @@ angular.module('marcuraUI.components')
             link: function(scope, element) {
                 var inputElement = angular.element(element[0].querySelector('.ma-select-box-input')),
                     previousSelectedItem,
-                    previousAddedItem;
+                    previousAddedItem,
+                    selectElement;
 
                 scope.addingItem = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -134,6 +135,9 @@ angular.module('marcuraUI.components')
 
                     // Restore previously selected or added item.
                     if (scope.addingItem) {
+                        // Sometimes select2 remains opened after it has lost focus.
+                        // Make sure that it is closed in 'add' view.
+                        selectElement.select2('close');
                         previousSelectedItem = scope.selectedItem;
                         scope.selectedItem = previousAddedItem;
 
@@ -157,7 +161,6 @@ angular.module('marcuraUI.components')
                                 inputElement.focus();
                                 scope.isFocused = true;
                             } else {
-                                var selectElement = angular.element(element[0].querySelector('.select2-container'));
                                 selectElement.select2('focus');
                             }
                         });
@@ -262,6 +265,11 @@ angular.module('marcuraUI.components')
                         }
                     };
                 }
+
+                // Get select2 instance.
+                $timeout(function() {
+                    selectElement = angular.element(element[0].querySelector('.select2-container'));
+                });
             }
         };
     }]);
