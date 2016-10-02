@@ -57,7 +57,7 @@ angular.module('marcuraUI.components')
                     ng-disabled="isDisabled"\
                     ng-focus="onFocus()"\
                     ng-blur="onBlur()"/>\
-                <ma-button ng-if="canAddItem" size="xs" modifier="secondary"\
+                <ma-button ng-if="canAddItem" size="xs" modifier="simple"\
                     tooltip="{{getAddItemTooltip()}}"\
                     right-icon="{{addingItem ? \'bars\' : \'plus\'}}"\
                     click="toggleView()"\
