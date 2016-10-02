@@ -8,7 +8,7 @@ angular.module('marcuraUI.components')
             return items;
         };
     }])
-    .directive('maSelectBox', ['$timeout', 'maHelper', function($timeout, maHelper) {
+    .directive('maSelectBox', ['$document', '$timeout', 'maHelper', function($document, $timeout, maHelper) {
         return {
             restrict: 'E',
             scope: {
@@ -80,7 +80,7 @@ angular.module('marcuraUI.components')
                     previousSelectedItem,
                     previousAddedItem,
                     selectElement,
-                    labelElement = $('label[for="' + scope.id + '"]');
+                    labelElement;
 
                 scope.addingItem = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -268,21 +268,22 @@ angular.module('marcuraUI.components')
                     };
                 }
 
-                // Get select2 instance.
                 $timeout(function() {
+                    // Get select2 instance.
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
-                });
+                    labelElement = $('label[for="' + scope.id + '"]');
 
-                // Focus the component when label is clicked.
-                if (labelElement.length > 0) {
-                    labelElement.eq(0).click(function() {
-                        if (scope.addingItem) {
-                            inputElement.focus();
-                        } else {
-                            selectElement.select2('focus');
-                        }
-                    });
-                }
+                    // Focus the component when label is clicked.
+                    if (labelElement.length > 0) {
+                        $($document).on('click', 'label[for="' + scope.id + '"]', function() {
+                            if (scope.addingItem) {
+                                inputElement.focus();
+                            } else {
+                                selectElement.select2('focus');
+                            }
+                        });
+                    }
+                });
             }
         };
     }]);
