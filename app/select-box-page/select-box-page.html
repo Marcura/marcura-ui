@@ -30,7 +30,18 @@
         </ma-select-box>
     </div>
     <div class="nodes-item">
-        <h2>Adding a custom item</h2>
+        <h2>Adding a custom item as string</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports1"
+            selected-item="port5"
+            can-add-item="true"
+            change="change5(item)">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Adding a custom item as object</h2>
     </div>
     <div class="nodes-item">
         <ma-select-box
@@ -39,8 +50,6 @@
             item-text-field="name"
             item-value-field="id"
             can-add-item="true"
-            is-loading="isLoading"
-            is-disabled="isDisabled"
             change="change3(item)"
             instance="port3SelectBox">
         </ma-select-box>

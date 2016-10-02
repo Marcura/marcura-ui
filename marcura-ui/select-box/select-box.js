@@ -144,7 +144,7 @@ angular.module('marcuraUI.components')
                         scope.selectedItem = previousAddedItem;
 
                         if (scope.selectedItem) {
-                            scope.text = scope.selectedItem[scope.itemTextField];
+                            scope.text = typeof scope.selectedItem === 'string' ? scope.selectedItem : scope.selectedItem[scope.itemTextField];
                         }
                     } else {
                         previousAddedItem = scope.selectedItem;
