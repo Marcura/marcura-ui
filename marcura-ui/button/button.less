@@ -19,8 +19,8 @@
     .box-shadow(0 1px 2px 0 rgba(0, 0, 0, 0.3));
     .user-select(none);
 
-    &:focus:not(&-link):not(&-default),
-    &:hover:not(&-link):not(&-default) {
+    &:focus:not(&-link):not(&-default):not(&-simple),
+    &:hover:not(&-link):not(&-default):not(&-simple) {
         text-decoration: none;
         color: #ffffff;
     }
@@ -42,7 +42,7 @@
         text-decoration: none;
     }
 
-    &:not(&-link):not(&-is-disabled):not(&-default):active {
+    &:not(&-link):not(&-is-disabled):not(&-default):not(&-simple):active {
         color: #ffffff;
     }
 
@@ -55,6 +55,10 @@
 
     &-default .ma-button-rim {
         border-color: #7d7d87;
+    }
+
+    &-simple .ma-button-rim {
+        border-color: #66afe9;
     }
 
     &-rim {
@@ -75,7 +79,8 @@
             font-size: 12px;
         }
 
-        &.ma-button-default {
+        &.ma-button-default,
+        &.ma-button-simple {
             padding-top: 3px;
             padding-bottom: 4px;
         }
@@ -90,7 +95,7 @@
     }
 
     &-icon,
-    &:not(&-link):not(&-default) &-text {
+    &:not(&-link):not(&-default):not(&-simple) &-text {
         text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
     }
 
@@ -209,6 +214,11 @@
             border: 1px solid #ccc;
         }
 
+        &.ma-button-simple .ma-button-icon {
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+        }
+
         &:not(.ma-button-is-disabled):active .ma-button-icon {
             .box-shadow(0 0 6px rgba(0, 0, 0, 0.225) inset);
         }
@@ -230,7 +240,8 @@
         background-color: #c9302c;
     }
 
-    &-default {
+    &-default,
+    &-simple {
         color: #333;
         padding-top: 7px;
         padding-bottom: 7px;
@@ -251,5 +262,10 @@
         &.ma-button-is-disabled .ma-button-icon {
             color: #d7d7e1;
         }
+    }
+
+    &-simple:not(&-link) {
+        background-color: #ffffff;
+        border: 1px solid #ccc;
     }
 }
