@@ -17,6 +17,7 @@ function selectBoxPageController($scope, $timeout) {
     $scope.port3 = $scope.ports2[1];
     $scope.port4 = $scope.ports2[1];
     $scope.port5 = $scope.ports1[1];
+    $scope.port7 = $scope.ports2[1];
     $scope.port3SelectBox = {};
 
     $scope.change1 = function(port) {
@@ -36,6 +37,11 @@ function selectBoxPageController($scope, $timeout) {
 
     $scope.change5 = function(port) {
         console.log('scope:', $scope.port5);
+        console.log('event:', port);
+    };
+
+    $scope.blur7 = function(port) {
+        console.log('scope:', $scope.port7);
         console.log('event:', port);
     };
 

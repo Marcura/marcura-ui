@@ -1000,6 +1000,7 @@ angular.element(document).ready(function() {
                 selectedItem: '=',
                 isLoading: '=',
                 change: '&',
+                blur: '&',
                 itemTemplate: '=',
                 itemTextField: '@',
                 itemValueField: '@',
@@ -1014,39 +1015,41 @@ angular.element(document).ready(function() {
             replace: true,
             template: function() {
                 var html = '\
-            <div class="ma-select-box"\
-                ng-class="{\
-                    \'ma-select-box-can-add-item\': canAddItem,\
-                    \'ma-select-box-is-focused\': isFocused,\
-                    \'ma-select-box-is-disabled\': isDisabled\
-                }">\
-                <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
-                    <div class="pace">\
-                        <div class="pace-activity"></div>\
+                <div class="ma-select-box"\
+                    ng-class="{\
+                        \'ma-select-box-can-add-item\': canAddItem,\
+                        \'ma-select-box-is-focused\': isFocused,\
+                        \'ma-select-box-is-disabled\': isDisabled\
+                    }">\
+                    <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
+                        <div class="pace">\
+                            <div class="pace-activity"></div>\
+                        </div>\
                     </div>\
-                </div>\
-                <select ui-select2="options"\
-                    ng-show="!addingItem"\
-                    ng-disabled="isDisabled"\
-                    ng-model="value"\
-                    ng-change="onChange()"\
-                    ng-required="isRequired">\
-                    <option ng-repeat="item in items | maSelectBoxOrderBy:orderBy" value="{{getItemValue(item)}}">\
-                        {{formatItem(item)}}\
-                    </option>\
-                </select>\
-                <input class="ma-select-box-input" type="text" ng-show="addingItem"\
-                    ng-model="text"\
-                    ng-disabled="isDisabled"\
-                    ng-focus="onFocus()"\
-                    ng-blur="onBlur()"/>\
-                <ma-button ng-if="canAddItem" size="xs" modifier="simple"\
-                    tooltip="{{getAddItemTooltip()}}"\
-                    right-icon="{{addingItem ? \'bars\' : \'plus\'}}"\
-                    click="toggleView()"\
-                    is-disabled="isDisabled">\
-                </ma-button>\
-            </div>';
+                    <select ui-select2="options"\
+                        ng-show="!addingItem"\
+                        ng-disabled="isDisabled"\
+                        ng-model="value"\
+                        ng-change="onChange()"\
+                        ng-required="isRequired">\
+                        <option ng-repeat="item in items | maSelectBoxOrderBy:orderBy" value="{{getItemValue(item)}}">\
+                            {{formatItem(item)}}\
+                        </option>\
+                    </select>\
+                    <input class="ma-select-box-input" type="text" ng-show="addingItem"\
+                        ng-model="text"\
+                        ng-disabled="isDisabled"\
+                        ng-focus="onFocus(\'input\')"\
+                        ng-blur="onBlur($event, \'input\')"/>\
+                    <ma-button ng-if="canAddItem" size="xs" modifier="simple"\
+                        tooltip="{{getAddItemTooltip()}}"\
+                        right-icon="{{addingItem ? \'bars\' : \'plus\'}}"\
+                        click="toggleView()"\
+                        ng-focus="onFocus()"\
+                        ng-blur="onBlur($event, \'button\')"\
+                        is-disabled="isDisabled">\
+                    </ma-button>\
+                </div>';
 
                 return html;
             },
@@ -1063,6 +1066,7 @@ angular.element(document).ready(function() {
                     previousSelectedItem,
                     previousAddedItem,
                     selectElement,
+                    selectData,
                     labelElement;
 
                 scope.addingItem = false;
@@ -1075,6 +1079,7 @@ angular.element(document).ready(function() {
                         return scope.itemTextField ? item[scope.itemTextField] : item.toString();
                     };
                 scope.isFocused = false;
+                scope.isFocusInside = false;
 
                 var setValue = function(item) {
                     if (!item) {
@@ -1152,39 +1157,55 @@ angular.element(document).ready(function() {
                     }
                 };
 
-                scope.onFocus = function() {
-                    scope.isFocused = true;
-                };
-
-                scope.onBlur = function() {
-                    scope.isFocused = false;
-
-                    if (scope.itemTextField) {
-                        if (scope.selectedItem && scope.selectedItem[scope.itemTextField] === scope.text) {
-                            return;
-                        }
-
-                        if (scope.text) {
-                            scope.selectedItem = {};
-                            scope.selectedItem[scope.itemTextField] = scope.text;
-                        } else {
-                            scope.selectedItem = null;
-                        }
-                    } else {
-                        if (scope.selectedItem === scope.text) {
-                            return;
-                        }
-
-                        scope.selectedItem = scope.text;
+                scope.onFocus = function(elementName) {
+                    if (elementName === 'input') {
+                        scope.isFocused = true;
                     }
 
-                    previousAddedItem = scope.selectedItem;
+                    scope.isFocusInside = true;
+                };
 
+                scope.onBlur = function(event, elementName) {
+                    scope.isFocused = false;
+                    scope.isFocusInside = false;
+
+                    // Trigger blur event when all component elements lose focus.
                     $timeout(function() {
-                        scope.change({
-                            item: scope.selectedItem
-                        });
+                        if (!scope.isFocusInside) {
+                            scope.blur({
+                                item: scope.selectedItem
+                            });
+                        }
                     });
+
+                    if (elementName === 'input') {
+                        if (scope.itemTextField) {
+                            if (scope.selectedItem && scope.selectedItem[scope.itemTextField] === scope.text) {
+                                return;
+                            }
+
+                            if (scope.text) {
+                                scope.selectedItem = {};
+                                scope.selectedItem[scope.itemTextField] = scope.text;
+                            } else {
+                                scope.selectedItem = null;
+                            }
+                        } else {
+                            if (scope.selectedItem === scope.text) {
+                                return;
+                            }
+
+                            scope.selectedItem = scope.text;
+                        }
+
+                        previousAddedItem = scope.selectedItem;
+
+                        $timeout(function() {
+                            scope.change({
+                                item: scope.selectedItem
+                            });
+                        });
+                    }
                 };
 
                 scope.onChange = function() {
@@ -1252,8 +1273,8 @@ angular.element(document).ready(function() {
                 }
 
                 $timeout(function() {
-                    // Get select2 instance.
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
+                    selectData = selectElement.data().select2;
                     labelElement = $('label[for="' + scope.id + '"]');
 
                     // Focus the component when label is clicked.
@@ -1266,6 +1287,22 @@ angular.element(document).ready(function() {
                             }
                         });
                     }
+
+                    selectData.focusser.on('focus', function() {
+                        scope.onFocus();
+                    });
+
+                    selectData.focusser.on('blur', function() {
+                        scope.onBlur();
+                    });
+
+                    selectData.dropdown.on('focus', '.select2-input', function() {
+                        scope.onFocus();
+                    });
+
+                    selectData.dropdown.on('blur', '.select2-input', function() {
+                        scope.onBlur();
+                    });
                 });
             }
         };
