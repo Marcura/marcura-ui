@@ -18,6 +18,7 @@ angular.module('marcuraUI.components')
                 isLoading: '=',
                 change: '&',
                 blur: '&',
+                focus: '&',
                 itemTemplate: '=',
                 itemTextField: '@',
                 itemValueField: '@',
@@ -84,7 +85,9 @@ angular.module('marcuraUI.components')
                     previousAddedItem,
                     selectElement,
                     selectData,
-                    labelElement;
+                    labelElement,
+                    isFocusInside = false,
+                    isFocusLost = true;
 
                 scope.addingItem = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -96,7 +99,6 @@ angular.module('marcuraUI.components')
                         return scope.itemTextField ? item[scope.itemTextField] : item.toString();
                     };
                 scope.isFocused = false;
-                scope.isFocusInside = false;
 
                 var setValue = function(item) {
                     if (!item) {
@@ -179,19 +181,29 @@ angular.module('marcuraUI.components')
                         scope.isFocused = true;
                     }
 
-                    scope.isFocusInside = true;
+                    isFocusInside = true;
+
+                    if (isFocusLost) {
+                        scope.focus({
+                            item: scope.selectedItem
+                        });
+                    }
+
+                    isFocusLost = false;
                 };
 
                 scope.onBlur = function(event, elementName) {
                     scope.isFocused = false;
-                    scope.isFocusInside = false;
+                    isFocusInside = false;
 
                     // Trigger blur event when all component elements lose focus.
                     $timeout(function() {
-                        if (!scope.isFocusInside) {
+                        if (!isFocusInside) {
                             scope.blur({
                                 item: scope.selectedItem
                             });
+
+                            isFocusLost = true;
                         }
                     });
 
@@ -306,7 +318,7 @@ angular.module('marcuraUI.components')
                     }
 
                     selectData.focusser.on('focus', function() {
-                        scope.onFocus();
+                        scope.onFocus('select');
                     });
 
                     selectData.focusser.on('blur', function() {

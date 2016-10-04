@@ -1001,6 +1001,7 @@ angular.element(document).ready(function() {
                 isLoading: '=',
                 change: '&',
                 blur: '&',
+                focus: '&',
                 itemTemplate: '=',
                 itemTextField: '@',
                 itemValueField: '@',
@@ -1067,7 +1068,9 @@ angular.element(document).ready(function() {
                     previousAddedItem,
                     selectElement,
                     selectData,
-                    labelElement;
+                    labelElement,
+                    isFocusInside = false,
+                    isFocusLost = true;
 
                 scope.addingItem = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -1079,7 +1082,6 @@ angular.element(document).ready(function() {
                         return scope.itemTextField ? item[scope.itemTextField] : item.toString();
                     };
                 scope.isFocused = false;
-                scope.isFocusInside = false;
 
                 var setValue = function(item) {
                     if (!item) {
@@ -1162,19 +1164,29 @@ angular.element(document).ready(function() {
                         scope.isFocused = true;
                     }
 
-                    scope.isFocusInside = true;
+                    isFocusInside = true;
+
+                    if (isFocusLost) {
+                        scope.focus({
+                            item: scope.selectedItem
+                        });
+                    }
+
+                    isFocusLost = false;
                 };
 
                 scope.onBlur = function(event, elementName) {
                     scope.isFocused = false;
-                    scope.isFocusInside = false;
+                    isFocusInside = false;
 
                     // Trigger blur event when all component elements lose focus.
                     $timeout(function() {
-                        if (!scope.isFocusInside) {
+                        if (!isFocusInside) {
                             scope.blur({
                                 item: scope.selectedItem
                             });
+
+                            isFocusLost = true;
                         }
                     });
 
@@ -1289,7 +1301,7 @@ angular.element(document).ready(function() {
                     }
 
                     selectData.focusser.on('focus', function() {
-                        scope.onFocus();
+                        scope.onFocus('select');
                     });
 
                     selectData.focusser.on('blur', function() {

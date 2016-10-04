@@ -25,6 +25,15 @@
         border-left: 0;
         .box-shadow(none);
 
+        &-is-disabled {
+            background-color: @input-background-color-is-disabled;
+
+            .ma-button-icon {
+                color: inherit;
+                opacity: 0.65;
+            }
+        }
+
         &-icon {
             font-size: 14px;
             text-shadow: none;
@@ -197,6 +206,10 @@
         &-active {
             border-color: @input-border-color-is-focused;
         }
+
+        &-above {
+            border-radius: 0 !important;
+        }
     }
 
     &-results {
@@ -206,10 +219,6 @@
 
         .select2-highlighted {
             background-color: #36a4ff;
-        }
-
-        &.select2-drop-above {
-            border-radius: 0;
         }
     }
 }

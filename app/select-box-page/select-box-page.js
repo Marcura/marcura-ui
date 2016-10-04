@@ -40,7 +40,14 @@ function selectBoxPageController($scope, $timeout) {
         console.log('event:', port);
     };
 
+    $scope.focus7 = function(port) {
+        console.log('focus');
+        console.log('scope:', $scope.port7);
+        console.log('event:', port);
+    };
+
     $scope.blur7 = function(port) {
+        console.log('blur');
         console.log('scope:', $scope.port7);
         console.log('event:', port);
     };
