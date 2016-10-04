@@ -81,8 +81,8 @@ angular.module('marcuraUI.components')
             }],
             link: function(scope, element) {
                 var inputElement = angular.element(element[0].querySelector('.ma-select-box-input')),
-                    previousSelectedItem,
-                    previousAddedItem,
+                    previousSelectedItem = null,
+                    previousAddedItem = null,
                     selectElement,
                     selectData,
                     labelElement,
