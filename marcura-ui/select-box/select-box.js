@@ -283,9 +283,6 @@ angular.module('marcuraUI.components')
                     setValue(newValue);
                 });
 
-                // Set initial value.
-                setValue(scope.selectedItem);
-
                 // Prepare API instance.
                 if (scope.instance) {
                     scope.instance.showSelectView = function() {
@@ -302,6 +299,12 @@ angular.module('marcuraUI.components')
                 }
 
                 $timeout(function() {
+                    // Set initial value.
+                    // Value is set inside timeout to ensure that we get the latest selectedItem.
+                    // If put outside timeout then there could be issues when selectedItem is set
+                    // from directive's link function, not from controller.
+                    setValue(scope.selectedItem);
+
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
                     selectData = selectElement.data().select2;
                     labelElement = $('label[for="' + scope.id + '"]');
