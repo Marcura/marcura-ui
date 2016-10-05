@@ -86,7 +86,7 @@ angular.module('marcuraUI.components')
                     selectData,
                     labelElement,
                     isFocusLost = true,
-                    isItemHovered = false;
+                    isFocusInside = false;
 
                 scope.addingItem = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -115,22 +115,11 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                // $(document).click(function (event) {
-                //     console.log('document:', event);
-                // });
-
                 var onFocusout = function(event, elementName) {
                     var elementTo = angular.element(event.relatedTarget),
                         selectInputElement = angular.element(selectData.dropdown[0].querySelector('.select2-input'));
-                    console.log('blur');
-                    // console.log($(selectData.container).hasClass('select2-container-active'));
-                    // console.log($('.select2-container-active', selectElement));
-                    // var isSelect2Active = $('.select2-container-active', selectElement).length === 1;
-                    // console.log('isSelect2Active:', isSelect2Active);
 
                     scope.isFocused = false;
-
-                    console.log('to:', elementTo.attr('class'));
 
                     // Trigger change event for text input.
                     if (elementName === 'input') {
@@ -171,7 +160,7 @@ angular.module('marcuraUI.components')
                     }
 
                     // Trigger blur event when focus goes to an element outside the component.
-                    if (!isItemHovered &&
+                    if (!isFocusInside &&
                         elementTo[0] !== buttonElement[0] &&
                         elementTo[0] !== inputElement[0] &&
                         elementTo[0] !== selectData.focusser[0] &&
@@ -184,8 +173,26 @@ angular.module('marcuraUI.components')
                         isFocusLost = true;
                     }
 
-                    isItemHovered = false;
+                    isFocusInside = false;
                 };
+
+                scope.onFocus = function(elementName) {
+                    if (elementName === 'input') {
+                        scope.isFocused = true;
+                    }
+
+                    if (isFocusLost) {
+                        scope.focus({
+                            item: scope.selectedItem
+                        });
+                    }
+
+                    isFocusLost = false;
+                };
+
+                inputElement.focusout(function(event) {
+                    onFocusout(event, 'input');
+                });
 
                 scope.getAddItemTooltip = function() {
                     // \u00A0 Unicode character is used here like &nbsp;.
@@ -246,24 +253,6 @@ angular.module('marcuraUI.components')
                         });
                     }
                 };
-
-                scope.onFocus = function(elementName) {
-                    if (elementName === 'input') {
-                        scope.isFocused = true;
-                    }
-
-                    if (isFocusLost) {
-                        scope.focus({
-                            item: scope.selectedItem
-                        });
-                    }
-
-                    isFocusLost = false;
-                };
-
-                inputElement.focusout(function(event) {
-                    onFocusout(event, 'input');
-                });
 
                 scope.onChange = function() {
                     // Validation is required if the item is a simple text, not a JSON object.
@@ -358,6 +347,9 @@ angular.module('marcuraUI.components')
                     });
 
                     selectData.dropdown.on('focus', '.select2-input', function() {
+                        // This is required for IE to keep focus when item is selectedItem
+                        // from the list using keyboard.
+                        isFocusInside = true;
                         scope.onFocus();
                     });
 
@@ -372,7 +364,13 @@ angular.module('marcuraUI.components')
                     // Detect if item in the list is hovered.
                     // This is later used for triggering blur event correctly.
                     selectData.dropdown.on('mouseenter', '.select2-result', function() {
-                        isItemHovered = true;
+                        isFocusInside = true;
+                    });
+
+                    // Detect if select2 mask is hovered.
+                    // This is later used for triggering blur event correctly in IE.
+                    $($document).on('mouseenter', '.select2-drop-mask', function() {
+                        isFocusInside = true;
                     });
                 });
             }
