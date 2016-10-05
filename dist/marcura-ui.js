@@ -40,6 +40,92 @@ angular.element(document).ready(function() {
     }
 });
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maButton', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            kind: '@',
+            leftIcon: '@',
+            rightIcon: '@',
+            isDisabled: '=',
+            click: '&',
+            size: '@',
+            modifier: '@'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <button class="ma-button{{cssClass}}"\
+                ng-click="onClick()"\
+                ng-disabled="isDisabled"\
+                ng-class="{\
+                    \'ma-button-link\': isLink(),\
+                    \'ma-button-has-left-icon\': hasLeftIcon,\
+                    \'ma-button-has-right-icon\': hasRightIcon,\
+                    \'ma-button-is-disabled\': isDisabled,\
+                    \'ma-button-has-text\': hasText\
+                }">\
+                <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
+                    <i class="fa fa-{{leftIcon}}"></i>\
+                    <span class="ma-button-rim" ng-if="isLink()"></span>\
+                </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
+                    <i class="fa fa-{{rightIcon}}"></i>\
+                    <span class="ma-button-rim" ng-if="isLink()"></span>\
+                </span>\
+                <span class="ma-button-rim" ng-if="!isLink()"></span>\
+            </button>';
+
+            return html;
+        },
+        link: function(scope) {
+            scope.hasText = false;
+            scope.hasLeftIcon = false;
+            scope.hasRightIcon = false;
+            scope.size = scope.size ? scope.size : 'md';
+            scope.cssClass = ' ma-button-' + scope.size;
+            scope.hasLeftIcon = scope.leftIcon ? true : false;
+            scope.hasRightIcon = scope.rightIcon ? true : false;
+            scope.hasText = scope.text ? true : false;
+
+            if (scope.modifier) {
+                scope.cssClass += ' ma-button-' + scope.modifier;
+            }
+
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
+
+            scope.isLink = function functionName() {
+                return scope.kind === 'link';
+            };
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -135,92 +221,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maButton', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            kind: '@',
-            leftIcon: '@',
-            rightIcon: '@',
-            isDisabled: '=',
-            click: '&',
-            size: '@',
-            modifier: '@'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <button class="ma-button{{cssClass}}"\
-                ng-click="onClick()"\
-                ng-disabled="isDisabled"\
-                ng-class="{\
-                    \'ma-button-link\': isLink(),\
-                    \'ma-button-has-left-icon\': hasLeftIcon,\
-                    \'ma-button-has-right-icon\': hasRightIcon,\
-                    \'ma-button-is-disabled\': isDisabled,\
-                    \'ma-button-has-text\': hasText\
-                }">\
-                <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
-                    <i class="fa fa-{{leftIcon}}"></i>\
-                    <span class="ma-button-rim" ng-if="isLink()"></span>\
-                </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
-                    <i class="fa fa-{{rightIcon}}"></i>\
-                    <span class="ma-button-rim" ng-if="isLink()"></span>\
-                </span>\
-                <span class="ma-button-rim" ng-if="!isLink()"></span>\
-            </button>';
-
-            return html;
-        },
-        link: function(scope) {
-            scope.hasText = false;
-            scope.hasLeftIcon = false;
-            scope.hasRightIcon = false;
-            scope.size = scope.size ? scope.size : 'md';
-            scope.cssClass = ' ma-button-' + scope.size;
-            scope.hasLeftIcon = scope.leftIcon ? true : false;
-            scope.hasRightIcon = scope.rightIcon ? true : false;
-            scope.hasText = scope.text ? true : false;
-
-            if (scope.modifier) {
-                scope.cssClass += ' ma-button-' + scope.modifier;
-            }
-
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-
-            scope.isLink = function functionName() {
-                return scope.kind === 'link';
-            };
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1010,6 +1010,7 @@ angular.element(document).ready(function() {
                 isSearchable: '=',
                 canAddItem: '=',
                 addItemTooltip: '@',
+                showAddItemTooltip: '=',
                 instance: '=',
                 orderBy: '='
             },
@@ -1069,7 +1070,8 @@ angular.element(document).ready(function() {
                     selectData,
                     labelElement,
                     isFocusLost = true,
-                    isFocusInside = false;
+                    isFocusInside = false,
+                    showAddItemTooltip = scope.showAddItemTooltip === false ? false : true;
 
                 scope.addingItem = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -1178,6 +1180,10 @@ angular.element(document).ready(function() {
                 });
 
                 scope.getAddItemTooltip = function() {
+                    if (!showAddItemTooltip) {
+                        return '';
+                    }
+
                     // \u00A0 Unicode character is used here like &nbsp;.
                     if (scope.addingItem) {
                         return 'Back\u00A0to the\u00A0list';

@@ -27,6 +27,7 @@ angular.module('marcuraUI.components')
                 isSearchable: '=',
                 canAddItem: '=',
                 addItemTooltip: '@',
+                showAddItemTooltip: '=',
                 instance: '=',
                 orderBy: '='
             },
@@ -86,7 +87,8 @@ angular.module('marcuraUI.components')
                     selectData,
                     labelElement,
                     isFocusLost = true,
-                    isFocusInside = false;
+                    isFocusInside = false,
+                    showAddItemTooltip = scope.showAddItemTooltip === false ? false : true;
 
                 scope.addingItem = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -195,6 +197,10 @@ angular.module('marcuraUI.components')
                 });
 
                 scope.getAddItemTooltip = function() {
+                    if (!showAddItemTooltip) {
+                        return '';
+                    }
+
                     // \u00A0 Unicode character is used here like &nbsp;.
                     if (scope.addingItem) {
                         return 'Back\u00A0to the\u00A0list';
