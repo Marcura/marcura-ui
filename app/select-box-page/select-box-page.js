@@ -21,35 +21,45 @@ function selectBoxPageController($scope, $timeout) {
     $scope.port3SelectBox = {};
 
     $scope.change1 = function(port) {
+        console.log('change');
         console.log('scope:', $scope.port1);
         console.log('event:', port);
     };
 
     $scope.change2 = function(port) {
+        console.log('change');
         console.log('scope:', $scope.port2);
         console.log('event:', port);
     };
 
     $scope.change3 = function(port) {
+        console.log('change');
         console.log('scope:', $scope.port3);
         console.log('event:', port);
     };
 
     $scope.change5 = function(port) {
+        console.log('change');
         console.log('scope:', $scope.port5);
         console.log('event:', port);
     };
 
     $scope.focus7 = function(port) {
         console.log('focus');
-        console.log('scope:', $scope.port7);
-        console.log('event:', port);
+        console.log('scope:', $scope.port7 ? $scope.port7.name : $scope.port7);
+        console.log('event:', port ? port.name : port);
     };
 
     $scope.blur7 = function(port) {
         console.log('blur');
-        console.log('scope:', $scope.port7);
-        console.log('event:', port);
+        console.log('scope:', $scope.port7 ? $scope.port7.name : $scope.port7);
+        console.log('event:', port ? port.name : port);
+    };
+
+    $scope.change7 = function(port) {
+        console.log('change');
+        console.log('scope:', $scope.port7 ? $scope.port7.name : $scope.port7);
+        console.log('event:', port ? port.name : port);
     };
 
     // API.
