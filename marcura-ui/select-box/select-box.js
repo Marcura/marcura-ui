@@ -57,14 +57,12 @@ angular.module('marcuraUI.components')
                     <input class="ma-select-box-input" type="text" ng-show="addingItem"\
                         ng-model="text"\
                         ng-disabled="isDisabled"\
-                        ng-focus="onFocus(\'input\')"\
-                        ng-blur="onBlur($event, \'input\')"/>\
+                        ng-focus="onFocus(\'input\')"/>\
                     <ma-button ng-if="canAddItem" size="xs" modifier="simple"\
                         tooltip="{{getAddItemTooltip()}}"\
                         right-icon="{{addingItem ? \'bars\' : \'plus\'}}"\
                         click="toggleView()"\
                         ng-focus="onFocus()"\
-                        ng-blur="onBlur($event, \'button\')"\
                         is-disabled="isDisabled">\
                     </ma-button>\
                 </div>';
@@ -83,11 +81,12 @@ angular.module('marcuraUI.components')
                 var inputElement = angular.element(element[0].querySelector('.ma-select-box-input')),
                     previousSelectedItem = null,
                     previousAddedItem = null,
+                    buttonElement,
                     selectElement,
                     selectData,
                     labelElement,
-                    isFocusInside = false,
-                    isFocusLost = true;
+                    isFocusLost = true,
+                    isFocusInside = false;
 
                 scope.addingItem = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -115,6 +114,85 @@ angular.module('marcuraUI.components')
                         }
                     }
                 };
+
+                var onFocusout = function(event, elementName) {
+                    var elementTo = angular.element(event.relatedTarget),
+                        selectInputElement = angular.element(selectData.dropdown[0].querySelector('.select2-input'));
+
+                    scope.isFocused = false;
+
+                    // Trigger change event for text input.
+                    if (elementName === 'input') {
+                        // Need to apply changes because onFocusout is triggered using jQuery
+                        // (AngularJS does not have ng-focusout event directive).
+                        scope.$apply(function() {
+                            if (scope.itemTextField) {
+                                if (scope.selectedItem && scope.selectedItem[scope.itemTextField] === scope.text) {
+                                    return;
+                                }
+
+                                if (scope.text) {
+                                    scope.selectedItem = {};
+                                    scope.selectedItem[scope.itemTextField] = scope.text;
+                                } else {
+                                    scope.selectedItem = null;
+                                }
+                            } else {
+                                if (scope.selectedItem === scope.text) {
+                                    return;
+                                }
+
+                                scope.selectedItem = scope.text;
+                            }
+
+                            previousAddedItem = scope.selectedItem;
+
+                            // Postpone change event for $apply to have time to
+                            // take effect and update scope.selectedItem,
+                            // so both 'item' parameter inside change event and scope.selectedItem have
+                            // the same values.
+                            $timeout(function() {
+                                scope.change({
+                                    item: scope.selectedItem
+                                });
+                            });
+                        });
+                    }
+
+                    // Trigger blur event when focus goes to an element outside the component.
+                    if (!isFocusInside &&
+                        elementTo[0] !== buttonElement[0] &&
+                        elementTo[0] !== inputElement[0] &&
+                        elementTo[0] !== selectData.focusser[0] &&
+                        elementTo[0] !== selectInputElement[0]
+                    ) {
+                        scope.blur({
+                            item: scope.selectedItem
+                        });
+
+                        isFocusLost = true;
+                    }
+
+                    isFocusInside = false;
+                };
+
+                scope.onFocus = function(elementName) {
+                    if (elementName === 'input') {
+                        scope.isFocused = true;
+                    }
+
+                    if (isFocusLost) {
+                        scope.focus({
+                            item: scope.selectedItem
+                        });
+                    }
+
+                    isFocusLost = false;
+                };
+
+                inputElement.focusout(function(event) {
+                    onFocusout(event, 'input');
+                });
 
                 scope.getAddItemTooltip = function() {
                     // \u00A0 Unicode character is used here like &nbsp;.
@@ -172,67 +250,6 @@ angular.module('marcuraUI.components')
                             } else {
                                 selectElement.select2('focus');
                             }
-                        });
-                    }
-                };
-
-                scope.onFocus = function(elementName) {
-                    if (elementName === 'input') {
-                        scope.isFocused = true;
-                    }
-
-                    isFocusInside = true;
-
-                    if (isFocusLost) {
-                        scope.focus({
-                            item: scope.selectedItem
-                        });
-                    }
-
-                    isFocusLost = false;
-                };
-
-                scope.onBlur = function(event, elementName) {
-                    scope.isFocused = false;
-                    isFocusInside = false;
-
-                    // Trigger blur event when all component elements lose focus.
-                    $timeout(function() {
-                        if (!isFocusInside) {
-                            scope.blur({
-                                item: scope.selectedItem
-                            });
-
-                            isFocusLost = true;
-                        }
-                    });
-
-                    if (elementName === 'input') {
-                        if (scope.itemTextField) {
-                            if (scope.selectedItem && scope.selectedItem[scope.itemTextField] === scope.text) {
-                                return;
-                            }
-
-                            if (scope.text) {
-                                scope.selectedItem = {};
-                                scope.selectedItem[scope.itemTextField] = scope.text;
-                            } else {
-                                scope.selectedItem = null;
-                            }
-                        } else {
-                            if (scope.selectedItem === scope.text) {
-                                return;
-                            }
-
-                            scope.selectedItem = scope.text;
-                        }
-
-                        previousAddedItem = scope.selectedItem;
-
-                        $timeout(function() {
-                            scope.change({
-                                item: scope.selectedItem
-                            });
                         });
                     }
                 };
@@ -308,6 +325,7 @@ angular.module('marcuraUI.components')
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
                     selectData = selectElement.data().select2;
                     labelElement = $('label[for="' + scope.id + '"]');
+                    buttonElement = angular.element(element[0].querySelector('.ma-button'));
 
                     // Focus the component when label is clicked.
                     if (labelElement.length > 0) {
@@ -324,16 +342,35 @@ angular.module('marcuraUI.components')
                         scope.onFocus('select');
                     });
 
-                    selectData.focusser.on('blur', function() {
-                        scope.onBlur();
+                    selectData.focusser.on('focusout', function(event) {
+                        onFocusout(event);
                     });
 
                     selectData.dropdown.on('focus', '.select2-input', function() {
+                        // This is required for IE to keep focus when item is selectedItem
+                        // from the list using keyboard.
+                        isFocusInside = true;
                         scope.onFocus();
                     });
 
-                    selectData.dropdown.on('blur', '.select2-input', function() {
-                        scope.onBlur();
+                    selectData.dropdown.on('focusout', '.select2-input', function(event) {
+                        onFocusout(event);
+                    });
+
+                    buttonElement.focusout(function(event) {
+                        onFocusout(event);
+                    });
+
+                    // Detect if item in the list is hovered.
+                    // This is later used for triggering blur event correctly.
+                    selectData.dropdown.on('mouseenter', '.select2-result', function() {
+                        isFocusInside = true;
+                    });
+
+                    // Detect if select2 mask is hovered.
+                    // This is later used for triggering blur event correctly in IE.
+                    $($document).on('mouseenter', '.select2-drop-mask', function() {
+                        isFocusInside = true;
                     });
                 });
             }
