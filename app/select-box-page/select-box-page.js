@@ -15,10 +15,16 @@ function selectBoxPageController($scope, $timeout) {
     $scope.port1 = $scope.ports1[1];
     $scope.port2 = $scope.ports2[1];
     $scope.port3 = $scope.ports2[1];
+    $scope.port3SelectBox = {};
     $scope.port4 = $scope.ports2[1];
     $scope.port5 = $scope.ports1[1];
     $scope.port7 = $scope.ports2[1];
-    $scope.port3SelectBox = {};
+    $scope.port8 = {
+        name: 'Moscow'
+    };
+    $scope.port8SelectBox = {};
+    // $scope.port8 = 'Moscow';
+    // $scope.port8 = $scope.ports2[1];
 
     $scope.change1 = function(port) {
         console.log('change');
@@ -37,39 +43,76 @@ function selectBoxPageController($scope, $timeout) {
         console.log('scope:', $scope.port3);
         console.log('event:', port);
     };
-
-    $scope.change5 = function(port) {
-        console.log('change');
-        console.log('scope:', $scope.port5);
-        console.log('event:', port);
-    };
+    //
+    // $scope.change5 = function(port) {
+    //     console.log('change');
+    //     console.log('scope:', $scope.port5);
+    //     console.log('event:', port);
+    // };
 
     $scope.focus7 = function(port) {
         console.log('focus');
-        console.log('scope:', $scope.port7 ? $scope.port7.name : $scope.port7);
-        console.log('event:', port ? port.name : port);
+        console.log('scope:', $scope.port7 ? $scope.port7 : $scope.port7);
+        console.log('event:', port ? port : port);
     };
 
     $scope.blur7 = function(port) {
         console.log('blur');
-        console.log('scope:', $scope.port7 ? $scope.port7.name : $scope.port7);
-        console.log('event:', port ? port.name : port);
+        console.log('scope:', $scope.port7 ? $scope.port7 : $scope.port7);
+        console.log('event:', port ? port : port);
     };
 
     $scope.change7 = function(port) {
         console.log('change');
-        console.log('scope:', $scope.port7 ? $scope.port7.name : $scope.port7);
-        console.log('event:', port ? port.name : port);
+        console.log('scope:', $scope.port7 ? $scope.port7 : $scope.port7);
+        console.log('event:', port ? port : port);
     };
 
-    // API.
+    $scope.focus8 = function(port) {
+        console.log('focus');
+        console.log('scope:', $scope.port8 ? $scope.port8 : $scope.port8);
+        console.log('event:', port ? port : port);
+    };
+
+    $scope.blur8 = function(port) {
+        console.log('blur');
+        console.log('scope:', $scope.port8 ? $scope.port8 : $scope.port8);
+        console.log('event:', port ? port : port);
+    };
+
+    $scope.change8 = function(port) {
+        console.log('change');
+        console.log('scope:', $scope.port8 ? $scope.port8 : $scope.port8);
+        console.log('event:', port ? port : port);
+    };
+
+    // API: Mode.
     // $timeout(function() {
-    //     $scope.port3SelectBox.showAddView();
+    //     $scope.port8SelectBox.switchToAddMode();
     // }, 5000);
     //
     // $timeout(function() {
-    //     $scope.port3SelectBox.showSelectView();
+    //     $scope.port8SelectBox.switchToSelectMode();
     // }, 10000);
+    //
+    // $timeout(function() {
+    //     $scope.port8SelectBox.switchToAddMode();
+    // }, 15000);
+
+    // Setting value changes mode.
+    // $timeout(function() {
+    //     $scope.port8 = $scope.ports2[2];
+    // }, 5000);
+    //
+    // $timeout(function() {
+    //     $scope.port8 = $scope.ports2[0];
+    // }, 10000);
+    //
+    // $timeout(function() {
+    //     $scope.port8 = {
+    //         name: 'Magnitogorsk'
+    //     };
+    // }, 15000);
 
     // Setting value from scope.
     // $timeout(function() {

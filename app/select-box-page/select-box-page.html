@@ -108,4 +108,20 @@
             can-add-item="true">
         </ma-select-box>
     </div>
+    <div class="nodes-item">
+        <h2>Displays in add mode if provided "selected-item" is not in the "items" array</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports2"
+            item-text-field="name"
+            item-value-field="id"
+            selected-item="port8"
+            focus="focus8(item)"
+            blur="blur8(item)"
+            change="change8(item)"
+            can-add-item="true"
+            instance="port8SelectBox">
+        </ma-select-box>
+    </div>
 </div>

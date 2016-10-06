@@ -46,7 +46,7 @@ angular.module('marcuraUI.components')
                         </div>\
                     </div>\
                     <select ui-select2="options"\
-                        ng-show="!addingItem"\
+                        ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-model="value"\
                         ng-change="onChange()"\
@@ -55,14 +55,14 @@ angular.module('marcuraUI.components')
                             {{formatItem(item)}}\
                         </option>\
                     </select>\
-                    <input class="ma-select-box-input" type="text" ng-show="addingItem"\
+                    <input class="ma-select-box-input" type="text" ng-show="isAddMode"\
                         ng-model="text"\
                         ng-disabled="isDisabled"\
                         ng-focus="onFocus(\'input\')"/>\
                     <ma-button ng-if="canAddItem" size="xs" modifier="simple"\
                         tooltip="{{getAddItemTooltip()}}"\
-                        right-icon="{{addingItem ? \'bars\' : \'plus\'}}"\
-                        click="toggleView()"\
+                        right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
+                        click="toggleMode()"\
                         ng-focus="onFocus()"\
                         is-disabled="isDisabled">\
                     </ma-button>\
@@ -90,7 +90,7 @@ angular.module('marcuraUI.components')
                     isFocusInside = false,
                     showAddItemTooltip = scope.showAddItemTooltip === false ? false : true;
 
-                scope.addingItem = false;
+                scope.isAddMode = false;
                 scope.formatItem = scope.itemTemplate ||
                     function(item) {
                         if (!item) {
@@ -101,19 +101,100 @@ angular.module('marcuraUI.components')
                     };
                 scope.isFocused = false;
 
-                var setValue = function(item) {
-                    if (!item) {
-                        scope.value = null;
-                        scope.text = null;
-                        previousAddedItem = null;
-                    } else {
-                        if (scope.itemValueField && item[scope.itemValueField]) {
-                            scope.value = item[scope.itemValueField].toString();
-                        } else if (typeof item === 'string') {
-                            scope.value = item;
+                var isExistingItem = function(item) {
+                    var isItemObject = scope.itemValueField && item[scope.itemValueField];
+
+                    for (var i = 0; i < scope.items.length; i++) {
+                        if (isItemObject) {
+                            // Search by id value field.
+                            if (scope.items[i][scope.itemValueField] === item[scope.itemValueField]) {
+                                return true;
+                            }
                         } else {
-                            scope.value = JSON.stringify(item);
+                            // Search by item itself as text.
+                            if (scope.items[i] === item) {
+                                return true;
+                            }
                         }
+                    }
+
+                    return false;
+                };
+
+                var getItemByValue = function(itemValue) {
+                    if (!itemValue) {
+                        return null;
+                    }
+
+                    // The list is an array of strings, so value is item itself.
+                    if (!scope.itemTextField) {
+                        return itemValue;
+                    }
+
+                    for (var i = 0; i < scope.items.length; i++) {
+                        if (scope.items[i][scope.itemValueField].toString() === itemValue.toString()) {
+                            return scope.items[i];
+                        }
+                    }
+
+                    return null;
+                };
+
+                var getNewItem = function(itemText) {
+                    // The list is an array of strings, so item should be a simple string.
+                    if (!scope.itemTextField) {
+                        return itemText;
+                    }
+
+                    // The list is an array of objects, so item should be an object.
+                    if (itemText) {
+                        var item = {};
+                        item[scope.itemTextField] = itemText;
+                        return item;
+                    }
+
+                    return null;
+                };
+
+                var setValue = function(item) {
+                    // Switch mode depending on whether provided item exists in the list.
+                    // This allows the component to be displayed in correct mode, let's say, in add mode,
+                    // when scope.selectedItem is initially a custom value not presented in the list.
+                    if (item) {
+                        scope.isAddMode = !isExistingItem(item);
+                    }
+
+                    if (scope.isAddMode) {
+                        if (!item) {
+                            scope.text = null;
+                        } else {
+                            if (scope.itemTextField && item[scope.itemTextField]) {
+                                // Item is an object.
+                                scope.text = item[scope.itemTextField].toString();
+                            } else {
+                                // Item is a string.
+                                scope.text = item;
+                            }
+                        }
+
+                        previousAddedItem = item;
+                        scope.toggleMode('add');
+                    } else {
+                        if (!item) {
+                            scope.value = null;
+                        } else {
+                            // Set select value.
+                            if (scope.itemValueField && item[scope.itemValueField]) {
+                                // Item is an object.
+                                scope.value = item[scope.itemValueField].toString();
+                            } else if (typeof item === 'string') {
+                                // Item is a string.
+                                scope.value = item;
+                            }
+                        }
+
+                        previousSelectedItem = item;
+                        scope.toggleMode('select');
                     }
                 };
 
@@ -133,12 +214,7 @@ angular.module('marcuraUI.components')
                                     return;
                                 }
 
-                                if (scope.text) {
-                                    scope.selectedItem = {};
-                                    scope.selectedItem[scope.itemTextField] = scope.text;
-                                } else {
-                                    scope.selectedItem = null;
-                                }
+                                scope.selectedItem = getNewItem(scope.text);
                             } else {
                                 if (scope.selectedItem === scope.text) {
                                     return;
@@ -202,7 +278,7 @@ angular.module('marcuraUI.components')
                     }
 
                     // \u00A0 Unicode character is used here like &nbsp;.
-                    if (scope.addingItem) {
+                    if (scope.isAddMode) {
                         return 'Back\u00A0to the\u00A0list';
                     }
 
@@ -213,32 +289,41 @@ angular.module('marcuraUI.components')
                     return scope.itemValueField ? item[scope.itemValueField].toString() : item;
                 };
 
-                scope.toggleView = function(view) {
+                scope.toggleMode = function(mode) {
+                    if (scope.isAddMode && mode === 'add' || !scope.isAddMode && mode === 'select') {
+                        return;
+                    }
+
                     var isInternalCall = false;
 
-                    if (view === 'select') {
-                        scope.addingItem = false;
+                    if (mode === 'select') {
+                        scope.isAddMode = false;
                         isInternalCall = true;
-                    } else if (view === 'add') {
-                        scope.addingItem = true;
+                    } else if (mode === 'add') {
+                        scope.isAddMode = true;
                         isInternalCall = true;
                     } else {
-                        scope.addingItem = !scope.addingItem;
+                        scope.isAddMode = !scope.isAddMode;
                     }
 
                     // Restore previously selected or added item.
-                    if (scope.addingItem) {
+                    if (scope.isAddMode) {
                         // Sometimes select2 remains opened after it has lost focus.
-                        // Make sure that it is closed in 'add' view.
-                        selectElement.select2('close');
-                        previousSelectedItem = scope.selectedItem;
+                        // Make sure that it is closed in add mode.
+                        if (selectElement) {
+                            // selectElement is undefined when scope.toggleMode method
+                            // is invoked from setValue initially.
+                            selectElement.select2('close');
+                        }
+
+                        previousSelectedItem = getItemByValue(scope.value);
                         scope.selectedItem = previousAddedItem;
 
                         if (scope.selectedItem) {
                             scope.text = typeof scope.selectedItem === 'string' ? scope.selectedItem : scope.selectedItem[scope.itemTextField];
                         }
                     } else {
-                        previousAddedItem = scope.selectedItem;
+                        previousAddedItem = getNewItem(scope.text);
                         scope.selectedItem = previousSelectedItem;
                     }
 
@@ -250,7 +335,7 @@ angular.module('marcuraUI.components')
                             });
 
                             // Focus the right component.
-                            if (scope.addingItem) {
+                            if (scope.isAddMode) {
                                 inputElement.focus();
                                 scope.isFocused = true;
                             } else {
@@ -308,15 +393,15 @@ angular.module('marcuraUI.components')
 
                 // Prepare API instance.
                 if (scope.instance) {
-                    scope.instance.showSelectView = function() {
-                        if (scope.addingItem) {
-                            scope.toggleView('select');
+                    scope.instance.switchToSelectMode = function() {
+                        if (scope.isAddMode) {
+                            scope.toggleMode('select');
                         }
                     };
 
-                    scope.instance.showAddView = function() {
-                        if (!scope.addingItem) {
-                            scope.toggleView('add');
+                    scope.instance.switchToAddMode = function() {
+                        if (!scope.isAddMode) {
+                            scope.toggleMode('add');
                         }
                     };
                 }
@@ -336,7 +421,7 @@ angular.module('marcuraUI.components')
                     // Focus the component when label is clicked.
                     if (labelElement.length > 0) {
                         $($document).on('click', 'label[for="' + scope.id + '"]', function() {
-                            if (scope.addingItem) {
+                            if (scope.isAddMode) {
                                 inputElement.focus();
                             } else {
                                 selectElement.select2('focus');
