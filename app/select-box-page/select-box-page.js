@@ -26,6 +26,7 @@ function selectBoxPageController($scope, $timeout) {
     // $scope.port8 = 'Moscow';
     // $scope.port8 = $scope.ports2[1];
     // $scope.port9 = $scope.ports2[1];
+    $scope.port9SelectBox = {};
 
     $scope.change1 = function(port) {
         console.log('change');

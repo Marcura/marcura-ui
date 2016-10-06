@@ -436,6 +436,10 @@ angular.module('marcuraUI.components')
                             scope.toggleMode('add');
                         }
                     };
+
+                    scope.instance.isValid = function() {
+                        return scope.isValid;
+                    };
                 }
 
                 // Set up validators.
