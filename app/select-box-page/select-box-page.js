@@ -90,6 +90,24 @@ function selectBoxPageController($scope, $timeout) {
         console.log('event:', port ? port : port);
     };
 
+    $scope.focus9 = function(port) {
+        console.log('focus');
+        console.log('scope:', $scope.port9 ? $scope.port9 : $scope.port9);
+        console.log('event:', port ? port : port);
+    };
+
+    $scope.blur9 = function(port) {
+        console.log('blur');
+        console.log('scope:', $scope.port9 ? $scope.port9 : $scope.port9);
+        console.log('event:', port ? port : port);
+    };
+
+    $scope.change9 = function(port) {
+        console.log('change');
+        console.log('scope:', $scope.port9 ? $scope.port9 : $scope.port9);
+        console.log('event:', port ? port : port);
+    };
+
     // API: Mode.
     // $timeout(function() {
     //     $scope.port8SelectBox.switchToAddMode();

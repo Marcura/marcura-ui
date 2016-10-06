@@ -38,10 +38,12 @@ angular.module('marcuraUI.components')
                 <div class="ma-select-box"\
                     ng-class="{\
                         \'ma-select-box-can-add-item\': canAddItem,\
-                        \'ma-select-box-is-focused\': isFocused,\
+                        \'ma-select-box-is-input-focused\': isInputFocused,\
                         \'ma-select-box-is-disabled\': isDisabled,\
                         \'ma-select-box-is-invalid\': !isValid,\
-                        \'ma-select-box-is-touched\': isTouched\
+                        \'ma-select-box-is-touched\': isTouched,\
+                        \'ma-select-box-mode-add\': isAddMode,\
+                        \'ma-select-box-mode-select\': !isAddMode\
                     }">\
                     <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
                         <div class="pace">\
@@ -104,7 +106,7 @@ angular.module('marcuraUI.components')
 
                         return scope.itemTextField ? item[scope.itemTextField] : item.toString();
                     };
-                scope.isFocused = false;
+                scope.isInputFocused = false;
                 scope.isValid = true;
                 scope.isTouched = false;
 
@@ -211,7 +213,7 @@ angular.module('marcuraUI.components')
                     var elementTo = angular.element(event.relatedTarget),
                         selectInputElement = angular.element(selectData.dropdown[0].querySelector('.select2-input'));
 
-                    scope.isFocused = false;
+                    scope.isInputFocused = false;
 
                     // Trigger change event for text input.
                     if (elementName === 'input') {
@@ -240,11 +242,13 @@ angular.module('marcuraUI.components')
                             // take effect and update scope.selectedItem,
                             // so both 'item' parameter inside change event and scope.selectedItem have
                             // the same values.
-                            $timeout(function() {
-                                scope.change({
-                                    item: scope.selectedItem
+                            if (scope.isValid) {
+                                $timeout(function() {
+                                    scope.change({
+                                        item: scope.selectedItem
+                                    });
                                 });
-                            });
+                            }
                         });
                     } else if (elementName === 'select') {
                         scope.$apply(function() {
@@ -283,7 +287,9 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.onFocus = function(elementName) {
-                    scope.isFocused = true;
+                    if (elementName === 'input') {
+                        scope.isInputFocused = true;
+                    }
 
                     if (isFocusLost) {
                         scope.focus({
@@ -363,11 +369,10 @@ angular.module('marcuraUI.components')
                             // Focus the right component.
                             if (scope.isAddMode) {
                                 inputElement.focus();
+                                scope.isInputFocused = true;
                             } else {
                                 selectElement.select2('focus');
                             }
-
-                            scope.isFocused = true;
                         });
                     }
                 };

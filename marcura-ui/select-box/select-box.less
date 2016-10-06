@@ -7,7 +7,7 @@
         padding-right: 29px;
     }
 
-    &-is-focused &-input {
+    &-is-input-focused &-input {
         .box-shadow(@input-shadow-focused);
         border-color: @input-border-color-focused;
     }
@@ -19,7 +19,7 @@
     }
 
     &-is-invalid&-is-touched {
-        &.ma-select-box-is-focused .ma-select-box-input,
+        &.ma-select-box-is-input-focused .ma-select-box-input,
         .select2-container-active:not(.select2-dropdown-open) .select2-choice {
             .box-shadow(@input-shadow-invalid);
         }
