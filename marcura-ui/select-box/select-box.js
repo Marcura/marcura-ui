@@ -8,7 +8,7 @@ angular.module('marcuraUI.components')
             return items;
         };
     }])
-    .directive('maSelectBox', ['$document', '$timeout', 'maHelper', function($document, $timeout, maHelper) {
+    .directive('maSelectBox', ['$document', '$timeout', 'maHelper', 'maValidators', function($document, $timeout, maHelper, maValidators) {
         return {
             restrict: 'E',
             scope: {
@@ -24,6 +24,7 @@ angular.module('marcuraUI.components')
                 itemValueField: '@',
                 isDisabled: '=',
                 isRequired: '=',
+                validators: '=',
                 isSearchable: '=',
                 canAddItem: '=',
                 addItemTooltip: '@',
@@ -38,7 +39,9 @@ angular.module('marcuraUI.components')
                     ng-class="{\
                         \'ma-select-box-can-add-item\': canAddItem,\
                         \'ma-select-box-is-focused\': isFocused,\
-                        \'ma-select-box-is-disabled\': isDisabled\
+                        \'ma-select-box-is-disabled\': isDisabled,\
+                        \'ma-select-box-is-invalid\': !isValid,\
+                        \'ma-select-box-is-touched\': isTouched\
                     }">\
                     <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
                         <div class="pace">\
@@ -49,8 +52,7 @@ angular.module('marcuraUI.components')
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-model="value"\
-                        ng-change="onChange()"\
-                        ng-required="isRequired">\
+                        ng-change="onChange()">\
                         <option ng-repeat="item in items | maSelectBoxOrderBy:orderBy" value="{{getItemValue(item)}}">\
                             {{formatItem(item)}}\
                         </option>\
@@ -88,7 +90,10 @@ angular.module('marcuraUI.components')
                     labelElement,
                     isFocusLost = true,
                     isFocusInside = false,
-                    showAddItemTooltip = scope.showAddItemTooltip === false ? false : true;
+                    showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
+                    validators = scope.validators ? angular.copy(scope.validators) : [],
+                    isRequired = scope.isRequired,
+                    hasIsNotEmptyValidator = false;
 
                 scope.isAddMode = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -100,6 +105,8 @@ angular.module('marcuraUI.components')
                         return scope.itemTextField ? item[scope.itemTextField] : item.toString();
                     };
                 scope.isFocused = false;
+                scope.isValid = true;
+                scope.isTouched = false;
 
                 var isExistingItem = function(item) {
                     var isItemObject = scope.itemValueField && item[scope.itemValueField];
@@ -164,6 +171,8 @@ angular.module('marcuraUI.components')
                         scope.isAddMode = !isExistingItem(item);
                     }
 
+                    validate(item);
+
                     if (scope.isAddMode) {
                         if (!item) {
                             scope.text = null;
@@ -209,6 +218,8 @@ angular.module('marcuraUI.components')
                         // Need to apply changes because onFocusout is triggered using jQuery
                         // (AngularJS does not have ng-focusout event directive).
                         scope.$apply(function() {
+                            scope.isTouched = true;
+
                             if (scope.itemTextField) {
                                 if (scope.selectedItem && scope.selectedItem[scope.itemTextField] === scope.text) {
                                     return;
@@ -235,6 +246,10 @@ angular.module('marcuraUI.components')
                                 });
                             });
                         });
+                    } else if (elementName === 'select') {
+                        scope.$apply(function() {
+                            scope.isTouched = true;
+                        });
                     }
 
                     // Trigger blur event when focus goes to an element outside the component.
@@ -254,10 +269,21 @@ angular.module('marcuraUI.components')
                     isFocusInside = false;
                 };
 
-                scope.onFocus = function(elementName) {
-                    if (elementName === 'input') {
-                        scope.isFocused = true;
+                var validate = function(value) {
+                    scope.isValid = true;
+
+                    if (validators && validators.length) {
+                        for (var i = 0; i < validators.length; i++) {
+                            if (!validators[i].method(value)) {
+                                scope.isValid = false;
+                                break;
+                            }
+                        }
                     }
+                };
+
+                scope.onFocus = function(elementName) {
+                    scope.isFocused = true;
 
                     if (isFocusLost) {
                         scope.focus({
@@ -337,10 +363,11 @@ angular.module('marcuraUI.components')
                             // Focus the right component.
                             if (scope.isAddMode) {
                                 inputElement.focus();
-                                scope.isFocused = true;
                             } else {
                                 selectElement.select2('focus');
                             }
+
+                            scope.isFocused = true;
                         });
                     }
                 };
@@ -391,6 +418,11 @@ angular.module('marcuraUI.components')
                     setValue(newValue);
                 });
 
+                // Validate text while it is being typed.
+                scope.$watch('text', function(newValue, oldValue) {
+                    validate(newValue);
+                });
+
                 // Prepare API instance.
                 if (scope.instance) {
                     scope.instance.switchToSelectMode = function() {
@@ -404,6 +436,22 @@ angular.module('marcuraUI.components')
                             scope.toggleMode('add');
                         }
                     };
+                }
+
+                // Set up validators.
+                for (var i = 0; i < validators.length; i++) {
+                    if (validators[i].name === 'IsNotEmpty') {
+                        hasIsNotEmptyValidator = true;
+                        break;
+                    }
+                }
+
+                if (!hasIsNotEmptyValidator && isRequired) {
+                    validators.unshift(maValidators.isNotEmpty());
+                }
+
+                if (hasIsNotEmptyValidator) {
+                    isRequired = true;
                 }
 
                 $timeout(function() {
@@ -434,7 +482,7 @@ angular.module('marcuraUI.components')
                     });
 
                     selectData.focusser.on('focusout', function(event) {
-                        onFocusout(event);
+                        onFocusout(event, 'select');
                     });
 
                     selectData.dropdown.on('focus', '.select2-input', function() {
@@ -445,7 +493,7 @@ angular.module('marcuraUI.components')
                     });
 
                     selectData.dropdown.on('focusout', '.select2-input', function(event) {
-                        onFocusout(event);
+                        onFocusout(event, 'select');
                     });
 
                     buttonElement.focusout(function(event) {

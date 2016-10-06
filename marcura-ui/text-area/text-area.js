@@ -117,10 +117,13 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
             scope.onBlur = function() {
                 scope.isFocused = false;
+                scope.isTouched = true;
 
                 if (scope.isValid && updateOn === 'blur') {
                     scope.value = valueElement.val();
                 }
+
+                validate();
             };
 
             scope.onKeydown = function(event) {

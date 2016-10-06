@@ -8,14 +8,26 @@
     }
 
     &-is-focused &-input {
-        .box-shadow(@input-shadow-is-focused);
-        border-color: @input-border-color-is-focused;
+        .box-shadow(@input-shadow-focused);
+        border-color: @input-border-color-focused;
     }
 
     &-is-disabled &-input {
         .box-shadow(none);
-        background-color: @input-background-color-is-disabled;
+        background-color: @input-background-color-disabled;
         cursor: default;
+    }
+
+    &-is-invalid&-is-touched {
+        &.ma-select-box-is-focused .ma-select-box-input,
+        .select2-container-active:not(.select2-dropdown-open) .select2-choice {
+            .box-shadow(@input-shadow-invalid);
+        }
+
+        .ma-select-box-input,
+        .select2-container:not(.select2-dropdown-open) .select2-choice {
+            border-color: @input-border-color-invalid;
+        }
     }
 
     .ma-button {
@@ -26,7 +38,7 @@
         .box-shadow(none);
 
         &-is-disabled {
-            background-color: @input-background-color-is-disabled;
+            background-color: @input-background-color-disabled;
 
             .ma-button-icon {
                 color: inherit;
@@ -108,6 +120,7 @@
             background-image: none;
             width: 100%;
             max-width: 100%;
+            padding-left: 10px;
             .input-transition;
             .box-shadow(@input-shadow);
 
@@ -141,9 +154,9 @@
         }
 
         &-active .select2-choice {
-            border-color: @input-border-color-is-focused;
+            border-color: @input-border-color-focused;
             outline: 0;
-            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+            box-shadow: @input-shadow-focused;
         }
 
         &-multi {
@@ -186,13 +199,13 @@
 
     &-dropdown-open {
         .select2-choice {
-            border-color: @input-border-color-is-focused;
+            border-color: @input-border-color-focused;
             border-radius: 0;
             background-color: #fff;
         }
 
         .select2-choices {
-            border-color: @input-border-color-is-focused;
+            border-color: @input-border-color-focused;
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
         }
@@ -204,7 +217,7 @@
         border-radius: 0;
 
         &-active {
-            border-color: @input-border-color-is-focused;
+            border-color: @input-border-color-focused;
         }
 
         &-above {

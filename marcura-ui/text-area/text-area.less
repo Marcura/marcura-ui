@@ -4,8 +4,8 @@
     position: relative;
 
     &-is-focused &-value {
-        .box-shadow(@input-shadow-is-focused);
-        border-color: @input-border-color-is-focused;
+        .box-shadow(@input-shadow-focused);
+        border-color: @input-border-color-focused;
     }
 
     &-fit-content-height &-value {
@@ -14,17 +14,17 @@
 
     &-is-disabled &-value {
         .box-shadow(none);
-        background-color: @input-background-color-is-disabled;
+        background-color: @input-background-color-disabled;
         cursor: default;
     }
 
     &-is-invalid&-is-touched {
         &.ma-text-area-is-focused .ma-text-area-value {
-            .box-shadow(@input-shadow-is-invalid);
+            .box-shadow(@input-shadow-invalid);
         }
 
         .ma-text-area-value {
-            border-color: #843534;
+            border-color: @input-border-color-invalid;
         }
     }
 

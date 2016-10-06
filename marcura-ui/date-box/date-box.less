@@ -14,13 +14,13 @@
     .input-transition;
 
     &-is-disabled {
-        background-color: @input-background-color-is-disabled;
+        background-color: @input-background-color-disabled;
         .box-shadow(none);
 
         .ma-date-box-date,
         .ma-date-box-hours,
         .ma-date-box-minutes {
-            background-color: @input-background-color-is-disabled;
+            background-color: @input-background-color-disabled;
             cursor: default;
         }
 
@@ -35,8 +35,8 @@
     }
 
     &-is-focused {
-        .box-shadow(@input-shadow-is-focused);
-        border-color: @input-border-color-is-focused;
+        .box-shadow(@input-shadow-focused);
+        border-color: @input-border-color-focused;
     }
 
     &-is-resettable {
@@ -57,10 +57,10 @@
 
     &-is-invalid&-is-touched {
         &.ma-date-box-is-focused {
-            .box-shadow(@input-shadow-is-invalid);
+            .box-shadow(@input-shadow-invalid);
         }
 
-        border-color: #843534;
+        border-color: @input-border-color-invalid;
     }
 
     &-has-time {

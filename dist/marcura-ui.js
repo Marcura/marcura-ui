@@ -40,6 +40,71 @@ angular.element(document).ready(function() {
     }
 });
 })();
+(function(){angular.module('marcuraUI.components').directive('maButton', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            kind: '@',
+            leftIcon: '@',
+            rightIcon: '@',
+            isDisabled: '=',
+            click: '&',
+            size: '@',
+            modifier: '@'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <button class="ma-button{{cssClass}}"\
+                ng-click="onClick()"\
+                ng-disabled="isDisabled"\
+                ng-class="{\
+                    \'ma-button-link\': isLink(),\
+                    \'ma-button-has-left-icon\': hasLeftIcon,\
+                    \'ma-button-has-right-icon\': hasRightIcon,\
+                    \'ma-button-is-disabled\': isDisabled,\
+                    \'ma-button-has-text\': hasText\
+                }">\
+                <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
+                    <i class="fa fa-{{leftIcon}}"></i>\
+                    <span class="ma-button-rim" ng-if="isLink()"></span>\
+                </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
+                    <i class="fa fa-{{rightIcon}}"></i>\
+                    <span class="ma-button-rim" ng-if="isLink()"></span>\
+                </span>\
+                <span class="ma-button-rim" ng-if="!isLink()"></span>\
+            </button>';
+
+            return html;
+        },
+        link: function(scope) {
+            scope.hasText = false;
+            scope.hasLeftIcon = false;
+            scope.hasRightIcon = false;
+            scope.size = scope.size ? scope.size : 'md';
+            scope.cssClass = ' ma-button-' + scope.size;
+            scope.hasLeftIcon = scope.leftIcon ? true : false;
+            scope.hasRightIcon = scope.rightIcon ? true : false;
+            scope.hasText = scope.text ? true : false;
+
+            if (scope.modifier) {
+                scope.cssClass += ' ma-button-' + scope.modifier;
+            }
+
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
+
+            scope.isLink = function functionName() {
+                return scope.kind === 'link';
+            };
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
     return {
         restrict: 'E',
@@ -156,71 +221,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maButton', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            kind: '@',
-            leftIcon: '@',
-            rightIcon: '@',
-            isDisabled: '=',
-            click: '&',
-            size: '@',
-            modifier: '@'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <button class="ma-button{{cssClass}}"\
-                ng-click="onClick()"\
-                ng-disabled="isDisabled"\
-                ng-class="{\
-                    \'ma-button-link\': isLink(),\
-                    \'ma-button-has-left-icon\': hasLeftIcon,\
-                    \'ma-button-has-right-icon\': hasRightIcon,\
-                    \'ma-button-is-disabled\': isDisabled,\
-                    \'ma-button-has-text\': hasText\
-                }">\
-                <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
-                    <i class="fa fa-{{leftIcon}}"></i>\
-                    <span class="ma-button-rim" ng-if="isLink()"></span>\
-                </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
-                    <i class="fa fa-{{rightIcon}}"></i>\
-                    <span class="ma-button-rim" ng-if="isLink()"></span>\
-                </span>\
-                <span class="ma-button-rim" ng-if="!isLink()"></span>\
-            </button>';
-
-            return html;
-        },
-        link: function(scope) {
-            scope.hasText = false;
-            scope.hasLeftIcon = false;
-            scope.hasRightIcon = false;
-            scope.size = scope.size ? scope.size : 'md';
-            scope.cssClass = ' ma-button-' + scope.size;
-            scope.hasLeftIcon = scope.leftIcon ? true : false;
-            scope.hasRightIcon = scope.rightIcon ? true : false;
-            scope.hasText = scope.text ? true : false;
-
-            if (scope.modifier) {
-                scope.cssClass += ' ma-button-' + scope.modifier;
-            }
-
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-
-            scope.isLink = function functionName() {
-                return scope.kind === 'link';
-            };
         }
     };
 }]);
@@ -737,70 +737,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            scope.calculateLeft = function(stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function() {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function(stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', '$sce', function(maHelper, $timeout, $sce) {
     return {
         restrict: 'E',
@@ -952,6 +888,70 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            scope.calculateLeft = function(stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function() {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function(stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
     return {
         restrict: 'E',
@@ -991,7 +991,7 @@ angular.element(document).ready(function() {
             return items;
         };
     }])
-    .directive('maSelectBox', ['$document', '$timeout', 'maHelper', function($document, $timeout, maHelper) {
+    .directive('maSelectBox', ['$document', '$timeout', 'maHelper', 'maValidators', function($document, $timeout, maHelper, maValidators) {
         return {
             restrict: 'E',
             scope: {
@@ -1007,6 +1007,7 @@ angular.element(document).ready(function() {
                 itemValueField: '@',
                 isDisabled: '=',
                 isRequired: '=',
+                validators: '=',
                 isSearchable: '=',
                 canAddItem: '=',
                 addItemTooltip: '@',
@@ -1021,7 +1022,9 @@ angular.element(document).ready(function() {
                     ng-class="{\
                         \'ma-select-box-can-add-item\': canAddItem,\
                         \'ma-select-box-is-focused\': isFocused,\
-                        \'ma-select-box-is-disabled\': isDisabled\
+                        \'ma-select-box-is-disabled\': isDisabled,\
+                        \'ma-select-box-is-invalid\': !isValid,\
+                        \'ma-select-box-is-touched\': isTouched\
                     }">\
                     <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
                         <div class="pace">\
@@ -1032,8 +1035,7 @@ angular.element(document).ready(function() {
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-model="value"\
-                        ng-change="onChange()"\
-                        ng-required="isRequired">\
+                        ng-change="onChange()">\
                         <option ng-repeat="item in items | maSelectBoxOrderBy:orderBy" value="{{getItemValue(item)}}">\
                             {{formatItem(item)}}\
                         </option>\
@@ -1071,7 +1073,10 @@ angular.element(document).ready(function() {
                     labelElement,
                     isFocusLost = true,
                     isFocusInside = false,
-                    showAddItemTooltip = scope.showAddItemTooltip === false ? false : true;
+                    showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
+                    validators = scope.validators ? angular.copy(scope.validators) : [],
+                    isRequired = scope.isRequired,
+                    hasIsNotEmptyValidator = false;
 
                 scope.isAddMode = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -1083,6 +1088,8 @@ angular.element(document).ready(function() {
                         return scope.itemTextField ? item[scope.itemTextField] : item.toString();
                     };
                 scope.isFocused = false;
+                scope.isValid = true;
+                scope.isTouched = false;
 
                 var isExistingItem = function(item) {
                     var isItemObject = scope.itemValueField && item[scope.itemValueField];
@@ -1147,6 +1154,8 @@ angular.element(document).ready(function() {
                         scope.isAddMode = !isExistingItem(item);
                     }
 
+                    validate(item);
+
                     if (scope.isAddMode) {
                         if (!item) {
                             scope.text = null;
@@ -1192,6 +1201,8 @@ angular.element(document).ready(function() {
                         // Need to apply changes because onFocusout is triggered using jQuery
                         // (AngularJS does not have ng-focusout event directive).
                         scope.$apply(function() {
+                            scope.isTouched = true;
+
                             if (scope.itemTextField) {
                                 if (scope.selectedItem && scope.selectedItem[scope.itemTextField] === scope.text) {
                                     return;
@@ -1218,6 +1229,10 @@ angular.element(document).ready(function() {
                                 });
                             });
                         });
+                    } else if (elementName === 'select') {
+                        scope.$apply(function() {
+                            scope.isTouched = true;
+                        });
                     }
 
                     // Trigger blur event when focus goes to an element outside the component.
@@ -1237,10 +1252,21 @@ angular.element(document).ready(function() {
                     isFocusInside = false;
                 };
 
-                scope.onFocus = function(elementName) {
-                    if (elementName === 'input') {
-                        scope.isFocused = true;
+                var validate = function(value) {
+                    scope.isValid = true;
+
+                    if (validators && validators.length) {
+                        for (var i = 0; i < validators.length; i++) {
+                            if (!validators[i].method(value)) {
+                                scope.isValid = false;
+                                break;
+                            }
+                        }
                     }
+                };
+
+                scope.onFocus = function(elementName) {
+                    scope.isFocused = true;
 
                     if (isFocusLost) {
                         scope.focus({
@@ -1320,10 +1346,11 @@ angular.element(document).ready(function() {
                             // Focus the right component.
                             if (scope.isAddMode) {
                                 inputElement.focus();
-                                scope.isFocused = true;
                             } else {
                                 selectElement.select2('focus');
                             }
+
+                            scope.isFocused = true;
                         });
                     }
                 };
@@ -1374,6 +1401,11 @@ angular.element(document).ready(function() {
                     setValue(newValue);
                 });
 
+                // Validate text while it is being typed.
+                scope.$watch('text', function(newValue, oldValue) {
+                    validate(newValue);
+                });
+
                 // Prepare API instance.
                 if (scope.instance) {
                     scope.instance.switchToSelectMode = function() {
@@ -1387,6 +1419,22 @@ angular.element(document).ready(function() {
                             scope.toggleMode('add');
                         }
                     };
+                }
+
+                // Set up validators.
+                for (var i = 0; i < validators.length; i++) {
+                    if (validators[i].name === 'IsNotEmpty') {
+                        hasIsNotEmptyValidator = true;
+                        break;
+                    }
+                }
+
+                if (!hasIsNotEmptyValidator && isRequired) {
+                    validators.unshift(maValidators.isNotEmpty());
+                }
+
+                if (hasIsNotEmptyValidator) {
+                    isRequired = true;
                 }
 
                 $timeout(function() {
@@ -1417,7 +1465,7 @@ angular.element(document).ready(function() {
                     });
 
                     selectData.focusser.on('focusout', function(event) {
-                        onFocusout(event);
+                        onFocusout(event, 'select');
                     });
 
                     selectData.dropdown.on('focus', '.select2-input', function() {
@@ -1428,7 +1476,7 @@ angular.element(document).ready(function() {
                     });
 
                     selectData.dropdown.on('focusout', '.select2-input', function(event) {
-                        onFocusout(event);
+                        onFocusout(event, 'select');
                     });
 
                     buttonElement.focusout(function(event) {
@@ -2446,10 +2494,13 @@ angular.element(document).ready(function() {
 
             scope.onBlur = function() {
                 scope.isFocused = false;
+                scope.isTouched = true;
 
                 if (scope.isValid && updateOn === 'blur') {
                     scope.value = valueElement.val();
                 }
+
+                validate();
             };
 
             scope.onKeydown = function(event) {
