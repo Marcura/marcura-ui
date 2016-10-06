@@ -105,27 +105,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -221,6 +200,27 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -801,35 +801,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            isDisabled: '=',
-            click: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-reset-value" ng-class="{\
-                    \'ma-reset-value-is-disabled\': isDisabled\
-                }"\
-                ng-click="onClick()">\
-                <i class="fa fa-times"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', '$sce', function(maHelper, $timeout, $sce) {
     return {
         restrict: 'E',
@@ -977,6 +948,35 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            isDisabled: '=',
+            click: '&'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
+                <i class="fa fa-times"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
         }
     };
 }]);
