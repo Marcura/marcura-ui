@@ -425,6 +425,10 @@ angular.module('marcuraUI.components')
 
                 // Validate text while it is being typed.
                 scope.$watch('text', function(newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
                     scope.isTouched = true;
                     validate(newValue);
                 });
