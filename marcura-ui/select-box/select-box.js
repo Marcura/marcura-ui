@@ -172,10 +172,10 @@ angular.module('marcuraUI.components')
                 };
 
                 var setValue = function(item) {
-                    // Switch mode depending on whether provided item exists in the list.
-                    // This allows the component to be displayed in correct mode, let's say, in add mode,
-                    // when scope.selectedItem is initially a custom value not presented in the list.
-                    if (item) {
+                    if (scope.canAddItem && item) {
+                        // Switch mode depending on whether provided item exists in the list.
+                        // This allows the component to be displayed in correct mode, let's say, in add mode,
+                        // when scope.selectedItem is initially a custom value not presented in the list.
                         scope.isAddMode = !isExistingItem(item);
                     }
 
@@ -328,6 +328,10 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.toggleMode = function(mode) {
+                    if (!scope.canAddItem) {
+                        return;
+                    }
+
                     if (scope.isAddMode && mode === 'add' || !scope.isAddMode && mode === 'select') {
                         return;
                     }

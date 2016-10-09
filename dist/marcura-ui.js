@@ -105,27 +105,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -221,6 +200,27 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1155,10 +1155,10 @@ angular.element(document).ready(function() {
                 };
 
                 var setValue = function(item) {
-                    // Switch mode depending on whether provided item exists in the list.
-                    // This allows the component to be displayed in correct mode, let's say, in add mode,
-                    // when scope.selectedItem is initially a custom value not presented in the list.
-                    if (item) {
+                    if (scope.canAddItem && item) {
+                        // Switch mode depending on whether provided item exists in the list.
+                        // This allows the component to be displayed in correct mode, let's say, in add mode,
+                        // when scope.selectedItem is initially a custom value not presented in the list.
                         scope.isAddMode = !isExistingItem(item);
                     }
 
@@ -1311,6 +1311,10 @@ angular.element(document).ready(function() {
                 };
 
                 scope.toggleMode = function(mode) {
+                    if (!scope.canAddItem) {
+                        return;
+                    }
+
                     if (scope.isAddMode && mode === 'add' || !scope.isAddMode && mode === 'select') {
                         return;
                     }
