@@ -111,6 +111,10 @@ angular.module('marcuraUI.components')
                 scope.isTouched = false;
 
                 var isExistingItem = function(item) {
+                    if (!angular.isArray(scope.items)) {
+                        return false;
+                    }
+
                     var isItemObject = scope.itemValueField && item[scope.itemValueField];
 
                     for (var i = 0; i < scope.items.length; i++) {
@@ -140,9 +144,11 @@ angular.module('marcuraUI.components')
                         return itemValue;
                     }
 
-                    for (var i = 0; i < scope.items.length; i++) {
-                        if (scope.items[i][scope.itemValueField].toString() === itemValue.toString()) {
-                            return scope.items[i];
+                    if (angular.isArray(scope.items)) {
+                        for (var i = 0; i < scope.items.length; i++) {
+                            if (scope.items[i][scope.itemValueField].toString() === itemValue.toString()) {
+                                return scope.items[i];
+                            }
                         }
                     }
 
