@@ -1013,35 +1013,50 @@ angular.element(document).ready(function() {
                 addItemTooltip: '@',
                 showAddItemTooltip: '=',
                 instance: '=',
-                orderBy: '='
+                orderBy: '=',
+                ajax: '='
             },
             replace: true,
-            template: function() {
+            template: function(element, attributes) {
+                var isAjax = !maHelper.isNullOrWhiteSpace(attributes.ajax);
+
                 var html = '\
-                <div class="ma-select-box"\
-                    ng-class="{\
-                        \'ma-select-box-can-add-item\': canAddItem,\
-                        \'ma-select-box-is-input-focused\': isInputFocused,\
-                        \'ma-select-box-is-disabled\': isDisabled,\
-                        \'ma-select-box-is-invalid\': !isValid,\
-                        \'ma-select-box-is-touched\': isTouched,\
-                        \'ma-select-box-mode-add\': isAddMode,\
-                        \'ma-select-box-mode-select\': !isAddMode\
-                    }">\
-                    <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
-                        <div class="pace">\
-                            <div class="pace-activity"></div>\
-                        </div>\
-                    </div>\
-                    <select ui-select2="options"\
+                    <div class="ma-select-box"\
+                        ng-class="{\
+                            \'ma-select-box-can-add-item\': canAddItem,\
+                            \'ma-select-box-is-input-focused\': isInputFocused,\
+                            \'ma-select-box-is-disabled\': isDisabled,\
+                            \'ma-select-box-is-invalid\': !isValid,\
+                            \'ma-select-box-is-touched\': isTouched,\
+                            \'ma-select-box-mode-add\': isAddMode,\
+                            \'ma-select-box-mode-select\': !isAddMode\
+                        }">\
+                        <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
+                            <div class="pace">\
+                                <div class="pace-activity"></div>\
+                            </div>\
+                        </div>';
+
+                if (isAjax) {
+                    html += '<input ui-select2="options"\
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
-                        ng-model="value"\
-                        ng-change="onChange()">\
-                        <option ng-repeat="item in items | maSelectBoxOrderBy:orderBy" value="{{getItemValue(item)}}">\
-                            {{formatItem(item)}}\
-                        </option>\
-                    </select>\
+                        ng-change="onChange()"\
+                        ng-model="value"/>';
+                } else {
+                    html += '\
+                        <select ui-select2="options"\
+                            ng-show="!isAddMode"\
+                            ng-disabled="isDisabled"\
+                            ng-model="value"\
+                            ng-change="onChange()">\
+                            <option ng-repeat="item in items | maSelectBoxOrderBy:orderBy" value="{{getItemValue(item)}}">\
+                                {{formatItem(item)}}\
+                            </option>\
+                        </select>';
+                }
+
+                html += '\
                     <input class="ma-select-box-input" type="text" ng-show="isAddMode"\
                         ng-model="text"\
                         ng-disabled="isDisabled"\
@@ -1064,10 +1079,34 @@ angular.element(document).ready(function() {
                 if (!scope.isSearchable) {
                     scope.options.minimumResultsForSearch = -1;
                 }
+
+                // AJAX options.
+                if (scope.ajax) {
+                    scope.options.ajax = scope.ajax;
+                    scope.options.minimumInputLength = 3;
+                    scope.options.escapeMarkup = function(markup) {
+                        return markup;
+                    };
+                    scope.options.initSelection = function initSelection(element, callback) {
+                        // Run init function only once to set initial port.
+                        initSelection.runs = initSelection.runs ? initSelection.runs : 1;
+
+                        if (initSelection.runs === 1 && scope.selectedItem && scope.selectedItem[scope.itemValueField]) {
+                            var item = angular.copy(scope.selectedItem);
+                            item.text = item[scope.itemTextField];
+                            item.id = item[scope.itemValueField];
+                            scope.previousSelectedItem = item;
+                            callback(item);
+                        } else {
+                            callback();
+                        }
+
+                        initSelection.runs++;
+                    };
+                }
             }],
             link: function(scope, element) {
                 var inputElement = angular.element(element[0].querySelector('.ma-select-box-input')),
-                    previousSelectedItem = null,
                     previousAddedItem = null,
                     buttonElement,
                     selectElement,
@@ -1080,6 +1119,7 @@ angular.element(document).ready(function() {
                     isRequired = scope.isRequired,
                     hasIsNotEmptyValidator = false;
 
+                scope.previousSelectedItem = scope.previousSelectedItem || null;
                 scope.isAddMode = false;
                 scope.formatItem = scope.itemTemplate ||
                     function(item) {
@@ -1092,6 +1132,7 @@ angular.element(document).ready(function() {
                 scope.isInputFocused = false;
                 scope.isValid = true;
                 scope.isTouched = false;
+                scope.isAjax = angular.isObject(scope.ajax);
 
                 var isExistingItem = function(item) {
                     if (!angular.isArray(scope.items)) {
@@ -1182,8 +1223,9 @@ angular.element(document).ready(function() {
                     } else {
                         if (!item) {
                             scope.value = null;
-                        } else {
+                        } else if (!scope.isAjax) {
                             // Set select value.
+                            // When in AJAX mode Select2 sets values by itself.
                             if (scope.itemValueField && item[scope.itemValueField]) {
                                 // Item is an object.
                                 scope.value = item[scope.itemValueField].toString();
@@ -1193,7 +1235,7 @@ angular.element(document).ready(function() {
                             }
                         }
 
-                        previousSelectedItem = item;
+                        scope.previousSelectedItem = item;
                         scope.toggleMode('select');
                     }
                 };
@@ -1206,6 +1248,8 @@ angular.element(document).ready(function() {
 
                     // Trigger change event for text input.
                     if (elementName === 'input') {
+                        isFocusInside = false;
+
                         // Need to apply changes because onFocusout is triggered using jQuery
                         // (AngularJS does not have ng-focusout event directive).
                         scope.$apply(function() {
@@ -1246,17 +1290,25 @@ angular.element(document).ready(function() {
                     }
 
                     // Trigger blur event when focus goes to an element outside the component.
-                    if (!isFocusInside &&
-                        elementTo[0] !== buttonElement[0] &&
-                        elementTo[0] !== inputElement[0] &&
-                        elementTo[0] !== selectData.focusser[0] &&
-                        elementTo[0] !== selectInputElement[0]
-                    ) {
+                    if (scope.canAddItem) {
+                        // Compare buttonElement only if it exists, to avoid comparing
+                        // two undefineds: elementTo[0] and buttonElement[0].
+                        isFocusLost = !isFocusInside &&
+                            elementTo[0] !== buttonElement[0] &&
+                            elementTo[0] !== inputElement[0] &&
+                            elementTo[0] !== selectData.focusser[0] &&
+                            elementTo[0] !== selectInputElement[0];
+                    } else {
+                        isFocusLost = !isFocusInside &&
+                            elementTo[0] !== inputElement[0] &&
+                            elementTo[0] !== selectData.focusser[0] &&
+                            elementTo[0] !== selectInputElement[0];
+                    }
+
+                    if (isFocusLost) {
                         scope.blur({
                             item: scope.selectedItem
                         });
-
-                        isFocusLost = true;
                     }
 
                     isFocusInside = false;
@@ -1341,7 +1393,7 @@ angular.element(document).ready(function() {
                             selectElement.select2('close');
                         }
 
-                        previousSelectedItem = getItemByValue(scope.value);
+                        scope.previousSelectedItem = getItemByValue(scope.value);
                         scope.selectedItem = previousAddedItem;
 
                         if (scope.selectedItem) {
@@ -1349,7 +1401,7 @@ angular.element(document).ready(function() {
                         }
                     } else {
                         previousAddedItem = getNewItem(scope.text);
-                        scope.selectedItem = previousSelectedItem;
+                        scope.selectedItem = scope.previousSelectedItem;
                     }
 
                     if (!isInternalCall) {
@@ -1374,13 +1426,30 @@ angular.element(document).ready(function() {
                     // Validation is required if the item is a simple text, not a JSON object.
                     var item = maHelper.isJson(scope.value) ? JSON.parse(scope.value) : scope.value;
 
-                    // Get selected item from items by value field.
-                    if (scope.itemValueField && item) {
-                        for (var i = 0; i < scope.items.length; i++) {
+                    // The change event works differently in AJAX mode.
+                    if (scope.isAjax) {
+                        // The change event fires first time even if scope.selectedItem has not changed.
+                        if (item === scope.previousSelectedItem) {
+                            return;
+                        }
 
-                            if (scope.items[i][scope.itemValueField].toString() === item.toString()) {
-                                item = scope.items[i];
-                                break;
+                        // When item is selected, change event fires multiple times.
+                        // The last time, when item is an object, is the correct one - all others must be ignored.
+                        if (!angular.isObject(item)) {
+                            return;
+                        }
+                    }
+
+                    // Get selected item from items by value field.
+                    // There is no 'items' array in AJAX mode.
+                    if (!scope.isAjax) {
+                        if (scope.itemValueField && item) {
+                            for (var i = 0; i < scope.items.length; i++) {
+
+                                if (scope.items[i][scope.itemValueField].toString() === item.toString()) {
+                                    item = scope.items[i];
+                                    break;
+                                }
                             }
                         }
                     }
@@ -1399,7 +1468,7 @@ angular.element(document).ready(function() {
                     }
 
                     scope.selectedItem = item;
-                    previousSelectedItem = item;
+                    scope.previousSelectedItem = item;
 
                     $timeout(function() {
                         scope.change({
