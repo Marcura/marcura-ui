@@ -1,17 +1,8 @@
 angular.module('app.controllers').controller('selectBoxPageController', selectBoxPageController);
 
-function selectBoxPageController($scope, $timeout) {
+function selectBoxPageController($scope, $timeout, helper) {
     $scope.ports1 = ['Tokai', 'Vladivostok', 'Navlakhi'];
-    $scope.ports2 = [{
-        id: 1,
-        name: 'Tokai'
-    }, {
-        id: 2,
-        name: 'Vladivostok'
-    }, {
-        id: 3,
-        name: 'Navlakhi'
-    }];
+    $scope.ports2 = helper.getPorts();
     $scope.port1 = $scope.ports1[1];
     $scope.port2 = $scope.ports2[1];
     $scope.port3 = $scope.ports2[1];
@@ -29,19 +20,35 @@ function selectBoxPageController($scope, $timeout) {
         name: 'Moscow'
     };
     $scope.port9SelectBox = {};
+    $scope.port10 = $scope.ports2[2];
+    $scope.port10Ajax = {
+        url: '/api/ports',
+        results: function(ports, page) {
+            for (var i = 0; i < ports.length; i++) {
+                ports[i].text = ports[i].name;
+            }
 
+            return {
+                results: ports
+            };
+        }
+    };
+
+    // port1.
     $scope.change1 = function(port) {
         console.log('change');
         console.log('scope:', $scope.port1);
         console.log('event:', port);
     };
 
+    // port2.
     $scope.change2 = function(port) {
         console.log('change');
         console.log('scope:', $scope.port2);
         console.log('event:', port);
     };
 
+    // port3.
     $scope.change3 = function(port) {
         console.log('change');
         console.log('scope:', $scope.port3);
@@ -54,6 +61,7 @@ function selectBoxPageController($scope, $timeout) {
     //     console.log('event:', port);
     // };
 
+    // port7.
     $scope.focus7 = function(port) {
         console.log('focus');
         console.log('scope:', $scope.port7 ? $scope.port7 : $scope.port7);
@@ -72,24 +80,26 @@ function selectBoxPageController($scope, $timeout) {
         console.log('event:', port ? port : port);
     };
 
+    // port8.
     $scope.focus8 = function(port) {
         console.log('focus');
-        console.log('scope:', $scope.port8 ? $scope.port8 : $scope.port8);
-        console.log('event:', port ? port : port);
+        // console.log('scope:', $scope.port8 ? $scope.port8 : $scope.port8);
+        // console.log('event:', port ? port : port);
     };
 
     $scope.blur8 = function(port) {
         console.log('blur');
-        console.log('scope:', $scope.port8 ? $scope.port8 : $scope.port8);
-        console.log('event:', port ? port : port);
+        // console.log('scope:', $scope.port8 ? $scope.port8 : $scope.port8);
+        // console.log('event:', port ? port : port);
     };
 
     $scope.change8 = function(port) {
         console.log('change');
-        console.log('scope:', $scope.port8 ? $scope.port8 : $scope.port8);
-        console.log('event:', port ? port : port);
+        // console.log('scope:', $scope.port8 ? $scope.port8 : $scope.port8);
+        // console.log('event:', port ? port : port);
     };
 
+    // port9.
     $scope.focus9 = function(port) {
         console.log('focus');
         console.log('scope:', $scope.port9 ? $scope.port9 : $scope.port9);
@@ -105,6 +115,25 @@ function selectBoxPageController($scope, $timeout) {
     $scope.change9 = function(port) {
         console.log('change');
         console.log('scope:', $scope.port9 ? $scope.port9 : $scope.port9);
+        console.log('event:', port ? port : port);
+    };
+
+    // port10.
+    $scope.focus10 = function(port) {
+        console.log('focus');
+        console.log('scope:', $scope.port10 ? $scope.port10 : $scope.port10);
+        console.log('event:', port ? port : port);
+    };
+
+    $scope.blur10 = function(port) {
+        console.log('blur');
+        console.log('scope:', $scope.port10 ? $scope.port10 : $scope.port10);
+        console.log('event:', port ? port : port);
+    };
+
+    $scope.change10 = function(port) {
+        console.log('change');
+        console.log('scope:', $scope.port10 ? $scope.port10 : $scope.port10);
         console.log('event:', port ? port : port);
     };
 

@@ -66,6 +66,19 @@ function helper() {
                     date: '2016-05-17T00:00:00.000Z'
                 }]
             }];
+        },
+
+        getPorts: function() {
+            return [{
+                id: 1,
+                name: 'Tokai'
+            }, {
+                id: 2,
+                name: 'Vladivostok'
+            }, {
+                id: 3,
+                name: 'Navlakhi'
+            }];
         }
     };
 }

@@ -9,7 +9,8 @@ var app = angular.module('app', [
     'ngSanitize',
     'marcuraUI',
     'app.services',
-    'app.controllers'
+    'app.controllers',
+    'ngMockE2E'
 ]);
 
 app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationProvider) {
@@ -149,4 +150,14 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
     });
 
     $urlRouterProvider.otherwise('/home');
+});
+
+// Mock backend.
+app.run(function($httpBackend, helper) {
+    $httpBackend.when('GET', '/api/ports').respond(function(method, url, data) {
+        return [200, helper.getPorts(), {}];
+    });
+
+    // Pass through all other requests.
+    $httpBackend.when('GET', /[\s\S]*/).passThrough();
 });
