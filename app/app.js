@@ -9,8 +9,7 @@ var app = angular.module('app', [
     'ngSanitize',
     'marcuraUI',
     'app.services',
-    'app.controllers',
-    'ngMockE2E'
+    'app.controllers'
 ]);
 
 app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationProvider) {
