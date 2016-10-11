@@ -153,9 +153,7 @@
             focus="focus10(item)"
             blur="blur10(item)"
             change="change10(item)"
-            can-reset="true"
-            placeholder="Port"
-            text-placeholder="Port2">
+            can-reset="true">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -171,9 +169,22 @@
             blur="blur11(item)"
             change="change11(item)"
             can-add-item="true"
+            can-reset="true">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Placeholder (different for select mode and add mode)</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports2"
+            selected-item="port12"
+            item-text-field="name"
+            item-value-field="id"
+            can-add-item="true"
             can-reset="true"
-            placeholder="Port"
-            text-placeholder="Port2">
+            placeholder="Select port"
+            text-placeholder="Enter port">
         </ma-select-box>
     </div>
 </div>
