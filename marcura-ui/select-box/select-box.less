@@ -12,24 +12,24 @@
         padding-right: 58px;
     }
 
-    &-is-input-focused &-input {
+    &-is-text-focused &-text {
         .box-shadow(@input-shadow-focused);
         border-color: @input-border-color-focused;
     }
 
-    &-is-disabled &-input {
+    &-is-disabled &-text {
         .box-shadow(none);
         background-color: @input-background-color-disabled;
         cursor: default;
     }
 
     &-is-invalid&-is-touched {
-        &.ma-select-box-is-input-focused .ma-select-box-input,
+        &.ma-select-box-is-text-focused .ma-select-box-text,
         .select2-container-active:not(.select2-dropdown-open) .select2-choice {
             .box-shadow(@input-shadow-invalid);
         }
 
-        .ma-select-box-input,
+        .ma-select-box-text,
         .select2-container:not(.select2-dropdown-open) .select2-choice {
             border-color: @input-border-color-invalid;
         }
@@ -76,7 +76,7 @@
         color: #868686;
     }
 
-    &-input {
+    &-text {
         .input;
         .input-transition;
         .box-shadow(@input-shadow);
@@ -145,6 +145,7 @@
             width: 100%;
             max-width: 100%;
             padding-left: 10px;
+            color: @input-color;
             .input-transition;
             .box-shadow(@input-shadow);
 
@@ -175,6 +176,10 @@
                     }
                 }
             }
+        }
+
+        .select2-default .select2-arrow b {
+            color: @input-color;
         }
 
         &-active .select2-choice {

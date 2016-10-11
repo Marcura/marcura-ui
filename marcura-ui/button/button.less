@@ -150,13 +150,13 @@
     }
 
     &-link {
-        color: #333;
+        color: @input-color;
         background: none;
         .box-shadow(none);
 
         &:focus,
         &:hover {
-            color: #333;
+            color: @input-color;
         }
 
         .ma-button-text {
@@ -242,7 +242,7 @@
 
     &-default,
     &-simple {
-        color: #333;
+        color: @input-color;
         padding-top: 7px;
         padding-bottom: 7px;
 
@@ -252,7 +252,7 @@
         }
 
         .ma-button-icon {
-            color: #333333;
+            color: @input-color;
         }
 
         &.ma-button-xs.ma-button-has-right-icon:not(.ma-button-has-text) {

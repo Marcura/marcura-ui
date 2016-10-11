@@ -1015,7 +1015,9 @@ angular.element(document).ready(function() {
                 instance: '=',
                 orderBy: '=',
                 ajax: '=',
-                canReset: '='
+                canReset: '=',
+                placeholder: '@',
+                textPlaceholder: '@'
             },
             replace: true,
             template: function(element, attributes) {
@@ -1025,7 +1027,7 @@ angular.element(document).ready(function() {
                     <div class="ma-select-box"\
                         ng-class="{\
                             \'ma-select-box-can-add-item\': canAddItem,\
-                            \'ma-select-box-is-input-focused\': isInputFocused,\
+                            \'ma-select-box-is-text-focused\': isTextFocused,\
                             \'ma-select-box-is-disabled\': isDisabled,\
                             \'ma-select-box-is-invalid\': !isValid,\
                             \'ma-select-box-is-touched\': isTouched,\
@@ -1044,14 +1046,19 @@ angular.element(document).ready(function() {
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-change="onChange()"\
-                        ng-model="value"/>';
+                        ng-model="value"\
+                        placeholder="{{placeholder}}"/>';
                 } else {
+                    // Add an empty option (<option></option>) as first item for the placeholder to work.
+                    // It's strange, but that's how Select2 works.
                     html += '\
                         <select ui-select2="options"\
                             ng-show="!isAddMode"\
                             ng-disabled="isDisabled"\
                             ng-model="value"\
-                            ng-change="onChange()">\
+                            ng-change="onChange()"\
+                            placeholder="{{placeholder}}">\
+                            <option></option>\
                             <option ng-repeat="item in items | maSelectBoxOrderBy:orderBy" value="{{getItemValue(item)}}">\
                                 {{formatItem(item)}}\
                             </option>\
@@ -1059,10 +1066,11 @@ angular.element(document).ready(function() {
                 }
 
                 html += '\
-                    <input class="ma-select-box-input" type="text" ng-show="isAddMode"\
+                    <input class="ma-select-box-text" type="text" ng-show="isAddMode"\
                         ng-model="text"\
                         ng-disabled="isDisabled"\
-                        ng-focus="onFocus(\'input\')"/>\
+                        ng-focus="onFocus(\'text\')"\
+                        placeholder="{{textPlaceholder}}"/>\
                     <ma-button class="ma-button-switch"\
                         ng-if="canAddItem" size="xs" modifier="simple"\
                         tooltip="{{getAddItemTooltip()}}"\
@@ -1116,7 +1124,7 @@ angular.element(document).ready(function() {
                 }
             }],
             link: function(scope, element) {
-                var inputElement = angular.element(element[0].querySelector('.ma-select-box-input')),
+                var textElement = angular.element(element[0].querySelector('.ma-select-box-text')),
                     previousAddedItem = null,
                     switchButtonElement,
                     resetButtonElement,
@@ -1140,7 +1148,7 @@ angular.element(document).ready(function() {
 
                         return scope.itemTextField ? item[scope.itemTextField] : item.toString();
                     };
-                scope.isInputFocused = false;
+                scope.isTextFocused = false;
                 scope.isValid = true;
                 scope.isTouched = false;
                 scope.isAjax = angular.isObject(scope.ajax);
@@ -1255,10 +1263,10 @@ angular.element(document).ready(function() {
                     var elementTo = angular.element(event.relatedTarget),
                         selectInputElement = angular.element(selectData.dropdown[0].querySelector('.select2-input'));
 
-                    scope.isInputFocused = false;
+                    scope.isTextFocused = false;
 
-                    // Trigger change event for text input.
-                    if (elementName === 'input') {
+                    // Trigger change event for text element.
+                    if (elementName === 'text') {
                         isFocusInside = false;
 
                         // Need to apply changes because onFocusout is triggered using jQuery
@@ -1307,13 +1315,13 @@ angular.element(document).ready(function() {
                         isFocusLost = !isFocusInside &&
                             elementTo[0] !== switchButtonElement[0] &&
                             elementTo[0] !== resetButtonElement[0] &&
-                            elementTo[0] !== inputElement[0] &&
+                            elementTo[0] !== textElement[0] &&
                             elementTo[0] !== selectData.focusser[0] &&
                             elementTo[0] !== selectInputElement[0];
                     } else {
                         isFocusLost = !isFocusInside &&
                             elementTo[0] !== resetButtonElement[0] &&
-                            elementTo[0] !== inputElement[0] &&
+                            elementTo[0] !== textElement[0] &&
                             elementTo[0] !== selectData.focusser[0] &&
                             elementTo[0] !== selectInputElement[0];
                     }
@@ -1343,8 +1351,8 @@ angular.element(document).ready(function() {
                 var setFocus = function() {
                     // Focus the right element.
                     if (scope.isAddMode) {
-                        inputElement.focus();
-                        scope.isInputFocused = true;
+                        textElement.focus();
+                        scope.isTextFocused = true;
                     } else {
                         selectElement.select2('focus');
                     }
@@ -1375,8 +1383,8 @@ angular.element(document).ready(function() {
                 };
 
                 scope.onFocus = function(elementName) {
-                    if (elementName === 'input') {
-                        scope.isInputFocused = true;
+                    if (elementName === 'text') {
+                        scope.isTextFocused = true;
                     }
 
                     if (isFocusLost) {
@@ -1388,8 +1396,8 @@ angular.element(document).ready(function() {
                     isFocusLost = false;
                 };
 
-                inputElement.focusout(function(event) {
-                    onFocusout(event, 'input');
+                textElement.focusout(function(event) {
+                    onFocusout(event, 'text');
                 });
 
                 scope.getAddItemTooltip = function() {
@@ -2339,75 +2347,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-side-menu">\
-                <div class="ma-side-menu-item" ng-repeat="item in items" ng-class="{\
-                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
-                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
-                    }"\
-                    ng-click="onSelect(item)">\
-                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
-                    <div class="ma-side-menu-text">{{item.text}}</div>\
-                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function(item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function(item) {
-                if (item.isDisabled) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -2506,6 +2445,75 @@ angular.element(document).ready(function() {
                     }
                 });
             });
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-side-menu">\
+                <div class="ma-side-menu-item" ng-repeat="item in items" ng-class="{\
+                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
+                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
+                    }"\
+                    ng-click="onSelect(item)">\
+                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
+                    <div class="ma-side-menu-text">{{item.text}}</div>\
+                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function(item) {
+                if (item.isDisabled) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function(item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
         }
     };
 }]);
