@@ -25,7 +25,7 @@ angular.module('marcuraUI.components')
                 isDisabled: '=',
                 isRequired: '=',
                 validators: '=',
-                isSearchable: '=',
+                canSearch: '=',
                 canAddItem: '=',
                 addItemTooltip: '@',
                 showAddItemTooltip: '=',
@@ -111,7 +111,7 @@ angular.module('marcuraUI.components')
                 // Setting Select2 options does not work from link function, so they are set here.
                 scope.options = {};
 
-                if (!scope.isSearchable) {
+                if (!scope.canSearch) {
                     scope.options.minimumResultsForSearch = -1;
                 }
 
