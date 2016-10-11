@@ -1014,7 +1014,8 @@ angular.element(document).ready(function() {
                 showAddItemTooltip: '=',
                 instance: '=',
                 orderBy: '=',
-                ajax: '='
+                ajax: '=',
+                canReset: '='
             },
             replace: true,
             template: function(element, attributes) {
@@ -1029,7 +1030,8 @@ angular.element(document).ready(function() {
                             \'ma-select-box-is-invalid\': !isValid,\
                             \'ma-select-box-is-touched\': isTouched,\
                             \'ma-select-box-mode-add\': isAddMode,\
-                            \'ma-select-box-mode-select\': !isAddMode\
+                            \'ma-select-box-mode-select\': !isAddMode,\
+                            \'ma-select-box-can-reset\': canReset\
                         }">\
                         <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
                             <div class="pace">\
@@ -1061,12 +1063,20 @@ angular.element(document).ready(function() {
                         ng-model="text"\
                         ng-disabled="isDisabled"\
                         ng-focus="onFocus(\'input\')"/>\
-                    <ma-button ng-if="canAddItem" size="xs" modifier="simple"\
+                    <ma-button class="ma-button-switch"\
+                        ng-if="canAddItem" size="xs" modifier="simple"\
                         tooltip="{{getAddItemTooltip()}}"\
                         right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
                         click="toggleMode()"\
                         ng-focus="onFocus()"\
                         is-disabled="isDisabled">\
+                    </ma-button>\
+                    <ma-button class="ma-button-reset"\
+                        ng-show="canReset" size="xs" modifier="simple"\
+                        right-icon="times-circle"\
+                        click="onReset()"\
+                        ng-focus="onFocus()"\
+                        is-disabled="!isResetEnabled()">\
                     </ma-button>\
                 </div>';
 
@@ -1108,7 +1118,8 @@ angular.element(document).ready(function() {
             link: function(scope, element) {
                 var inputElement = angular.element(element[0].querySelector('.ma-select-box-input')),
                     previousAddedItem = null,
-                    buttonElement,
+                    switchButtonElement,
+                    resetButtonElement,
                     selectElement,
                     selectData,
                     labelElement,
@@ -1291,15 +1302,17 @@ angular.element(document).ready(function() {
 
                     // Trigger blur event when focus goes to an element outside the component.
                     if (scope.canAddItem) {
-                        // Compare buttonElement only if it exists, to avoid comparing
-                        // two undefineds: elementTo[0] and buttonElement[0].
+                        // Compare switchButtonElement only if it exists, to avoid comparing
+                        // two undefineds: elementTo[0] and switchButtonElement[0].
                         isFocusLost = !isFocusInside &&
-                            elementTo[0] !== buttonElement[0] &&
+                            elementTo[0] !== switchButtonElement[0] &&
+                            elementTo[0] !== resetButtonElement[0] &&
                             elementTo[0] !== inputElement[0] &&
                             elementTo[0] !== selectData.focusser[0] &&
                             elementTo[0] !== selectInputElement[0];
                     } else {
                         isFocusLost = !isFocusInside &&
+                            elementTo[0] !== resetButtonElement[0] &&
                             elementTo[0] !== inputElement[0] &&
                             elementTo[0] !== selectData.focusser[0] &&
                             elementTo[0] !== selectInputElement[0];
@@ -1325,6 +1338,40 @@ angular.element(document).ready(function() {
                             }
                         }
                     }
+                };
+
+                var setFocus = function() {
+                    // Focus the right element.
+                    if (scope.isAddMode) {
+                        inputElement.focus();
+                        scope.isInputFocused = true;
+                    } else {
+                        selectElement.select2('focus');
+                    }
+                };
+
+                scope.isResetEnabled = function() {
+                    if (scope.isDisabled) {
+                        return false;
+                    }
+
+                    // When in add mode check scope.text as user changes it.
+                    if (scope.isAddMode) {
+                        return !maHelper.isNullOrWhiteSpace(scope.text);
+                    }
+
+                    return scope.selectedItem !== null;
+                };
+
+                scope.onReset = function() {
+                    scope.selectedItem = null;
+                    setFocus();
+
+                    $timeout(function() {
+                        scope.change({
+                            item: scope.selectedItem
+                        });
+                    });
                 };
 
                 scope.onFocus = function(elementName) {
@@ -1411,13 +1458,7 @@ angular.element(document).ready(function() {
                                 item: scope.selectedItem
                             });
 
-                            // Focus the right component.
-                            if (scope.isAddMode) {
-                                inputElement.focus();
-                                scope.isInputFocused = true;
-                            } else {
-                                selectElement.select2('focus');
-                            }
+                            setFocus();
                         });
                     }
                 };
@@ -1540,16 +1581,13 @@ angular.element(document).ready(function() {
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
                     selectData = selectElement.data().select2;
                     labelElement = $('label[for="' + scope.id + '"]');
-                    buttonElement = angular.element(element[0].querySelector('.ma-button'));
+                    switchButtonElement = angular.element(element[0].querySelector('.ma-button-switch'));
+                    resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset'));
 
                     // Focus the component when label is clicked.
                     if (labelElement.length > 0) {
                         $($document).on('click', 'label[for="' + scope.id + '"]', function() {
-                            if (scope.isAddMode) {
-                                inputElement.focus();
-                            } else {
-                                selectElement.select2('focus');
-                            }
+                            setFocus();
                         });
                     }
 
@@ -1572,7 +1610,11 @@ angular.element(document).ready(function() {
                         onFocusout(event, 'select');
                     });
 
-                    buttonElement.focusout(function(event) {
+                    switchButtonElement.focusout(function(event) {
+                        onFocusout(event);
+                    });
+
+                    resetButtonElement.focusout(function(event) {
                         onFocusout(event);
                     });
 

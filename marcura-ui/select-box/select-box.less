@@ -3,8 +3,13 @@
 .ma-select-box {
     position: relative;
 
-    &-can-add-item {
+    &-can-add-item,
+    &-can-reset {
         padding-right: 29px;
+    }
+
+    &-can-add-item&-can-reset {
+        padding-right: 58px;
     }
 
     &-is-input-focused &-input {
@@ -30,26 +35,45 @@
         }
     }
 
-    .ma-button {
+    .ma-button-reset,
+    .ma-button-switch {
         position: absolute;
         top: 0;
         right: 0;
         border-left: 0;
         .box-shadow(none);
+    }
 
-        &-is-disabled {
-            background-color: @input-background-color-disabled;
-
-            .ma-button-icon {
-                color: inherit;
-                opacity: 0.65;
-            }
+    &-can-add-item&-can-reset {
+        .ma-button-switch {
+            right: 29px;
         }
+    }
 
-        &-icon {
-            font-size: 14px;
-            text-shadow: none;
-        }
+    .ma-button-reset .ma-button-icon,
+    .ma-button-switch .ma-button-icon {
+        font-size: 14px;
+        text-shadow: none;
+    }
+
+    .ma-button-reset.ma-button-is-disabled,
+    .ma-button-switch.ma-button-is-disabled {
+        background-color: @input-background-color-disabled;
+    }
+
+    .ma-button-switch.ma-button-is-disabled .ma-button-icon {
+        color: inherit;
+        opacity: 0.65;
+    }
+
+    .ma-button-reset.ma-button-is-disabled .ma-button-icon {
+        color: inherit;
+        opacity: 0.45;
+    }
+
+    .ma-button-reset .ma-button-icon {
+        font-size: 20px;
+        color: #868686;
     }
 
     &-input {
