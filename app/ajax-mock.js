@@ -2,13 +2,22 @@ $.ajax = function(parameters) {
     if (parameters.url === '/api/ports') {
         var ports = [{
             id: 1,
-            name: 'Tokai'
+            name: 'Tokai',
+            country: {
+                name: 'Japan'
+            }
         }, {
             id: 2,
-            name: 'Vladivostok'
+            name: 'Vladivostok',
+            country: {
+                name: 'Russia'
+            }
         }, {
             id: 3,
-            name: 'Navlakhi'
+            name: 'Navlakhi',
+            country: {
+                name: 'India'
+            }
         }];
 
         parameters.success(ports);

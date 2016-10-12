@@ -129,7 +129,7 @@ angular.module('marcuraUI.components')
 
                         if (initSelection.runs === 1 && scope.selectedItem && scope.selectedItem[scope.itemValueField]) {
                             var item = angular.copy(scope.selectedItem);
-                            item.text = item[scope.itemTextField];
+                            item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
                             item.id = item[scope.itemValueField];
                             scope.previousSelectedItem = item;
                             callback(item);

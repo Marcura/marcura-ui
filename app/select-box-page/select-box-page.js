@@ -21,11 +21,14 @@ function selectBoxPageController($scope, $timeout, helper) {
     };
     $scope.port9SelectBox = {};
     $scope.port10 = $scope.ports2[2];
+    $scope.port10ItemTemplate = function(port) {
+        return port.name + ' (' + port.country.name + ')';
+    };
     $scope.port10Ajax = {
         url: '/api/ports',
         results: function(ports, page) {
             for (var i = 0; i < ports.length; i++) {
-                ports[i].text = ports[i].name;
+                ports[i].text = $scope.port10ItemTemplate(ports[i]);
             }
 
             return {
