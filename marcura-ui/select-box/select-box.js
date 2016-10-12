@@ -51,7 +51,7 @@ angular.module('marcuraUI.components')
                             \'ma-select-box-mode-add\': isAddMode,\
                             \'ma-select-box-mode-select\': !isAddMode,\
                             \'ma-select-box-can-reset\': canReset,\
-                            \'ma-select-box-is-reset-disabled\': canReset && !isResetEnabled()\
+                            \'ma-select-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled()\
                         }">\
                         <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
                             <div class="pace">\
