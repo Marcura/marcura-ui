@@ -38,6 +38,10 @@ angular.module('marcuraUI.services').factory('maHelper', ['maDateConverter', fun
             return value.toString().replace(/\s/g, '').length < 1;
         },
 
+        isNullOrUndefined: function(value) {
+            return value === null || angular.isUndefined(value);
+        },
+
         formatString: function(value) {
             // Source: http://ajaxcontroltoolkit.codeplex.com/SourceControl/latest#Client/MicrosoftAjax/Extensions/String.js
             var formattedString = '';
