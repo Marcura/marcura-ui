@@ -1,6 +1,6 @@
 angular.module('app.services').factory('helper', helper);
 
-function helper() {
+function helper($window) {
     return {
         getCostItems: function() {
             return [{
@@ -69,25 +69,7 @@ function helper() {
         },
 
         getPorts: function() {
-            return [{
-                id: 1,
-                name: 'Tokai',
-                country: {
-                    name: 'Japan'
-                }
-            }, {
-                id: 2,
-                name: 'Vladivostok',
-                country: {
-                    name: 'Russia'
-                }
-            }, {
-                id: 3,
-                name: 'Navlakhi',
-                country: {
-                    name: 'India'
-                }
-            }];
+            return $window.marcuraApp.ports;
         }
     };
 }

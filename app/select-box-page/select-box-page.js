@@ -1,8 +1,13 @@
 angular.module('app.controllers').controller('selectBoxPageController', selectBoxPageController);
 
 function selectBoxPageController($scope, $timeout, helper) {
-    $scope.ports1 = ['Tokai', 'Vladivostok', 'Navlakhi'];
     $scope.ports2 = helper.getPorts();
+    $scope.ports1 = [];
+
+    angular.forEach($scope.ports2, function (port) {
+        $scope.ports1.push(port.name);
+    });
+
     $scope.port1 = $scope.ports1[1];
     $scope.port2 = $scope.ports2[1];
     $scope.port3 = $scope.ports2[1];

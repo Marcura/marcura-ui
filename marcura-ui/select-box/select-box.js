@@ -510,7 +510,7 @@ angular.module('marcuraUI.components')
                     // Get selected item from items by value field.
                     // There is no 'items' array in AJAX mode.
                     if (!scope.isAjax) {
-                        if (scope.itemValueField && item) {
+                        if (scope.itemValueField && !maHelper.isNullOrWhiteSpace(item)) {
                             for (var i = 0; i < scope.items.length; i++) {
 
                                 if (scope.items[i][scope.itemValueField].toString() === item.toString()) {
