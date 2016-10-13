@@ -315,7 +315,7 @@ angular.module('marcuraUI.components')
                             if (scope.isValid) {
                                 $timeout(function() {
                                     scope.change({
-                                        item: scope.selectedItem
+                                        maItem: scope.selectedItem
                                     });
                                 });
                             }
@@ -395,7 +395,7 @@ angular.module('marcuraUI.components')
 
                     $timeout(function() {
                         scope.change({
-                            item: scope.selectedItem
+                            maItem: scope.selectedItem
                         });
                     });
                 };
@@ -481,7 +481,7 @@ angular.module('marcuraUI.components')
                         $timeout(function() {
                             // Trigger change event as user manually swithces between custom and selected items.
                             scope.change({
-                                item: scope.selectedItem
+                                maItem: scope.selectedItem
                             });
 
                             setFocus();
@@ -539,7 +539,7 @@ angular.module('marcuraUI.components')
 
                     $timeout(function() {
                         scope.change({
-                            item: item
+                            maItem: item
                         });
                     });
                 };

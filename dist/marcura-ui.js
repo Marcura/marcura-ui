@@ -801,6 +801,35 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            isDisabled: '=',
+            click: '&'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
+                <i class="fa fa-times"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', '$sce', function(maHelper, $timeout, $sce) {
     return {
         restrict: 'E',
@@ -948,35 +977,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            isDisabled: '=',
-            click: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-reset-value" ng-class="{\
-                    \'ma-reset-value-is-disabled\': isDisabled\
-                }"\
-                ng-click="onClick()">\
-                <i class="fa fa-times"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
         }
     };
 }]);
@@ -1298,7 +1298,7 @@ angular.element(document).ready(function() {
                             if (scope.isValid) {
                                 $timeout(function() {
                                     scope.change({
-                                        item: scope.selectedItem
+                                        maItem: scope.selectedItem
                                     });
                                 });
                             }
@@ -1378,7 +1378,7 @@ angular.element(document).ready(function() {
 
                     $timeout(function() {
                         scope.change({
-                            item: scope.selectedItem
+                            maItem: scope.selectedItem
                         });
                     });
                 };
@@ -1464,7 +1464,7 @@ angular.element(document).ready(function() {
                         $timeout(function() {
                             // Trigger change event as user manually swithces between custom and selected items.
                             scope.change({
-                                item: scope.selectedItem
+                                maItem: scope.selectedItem
                             });
 
                             setFocus();
@@ -1522,7 +1522,7 @@ angular.element(document).ready(function() {
 
                     $timeout(function() {
                         scope.change({
-                            item: item
+                            maItem: item
                         });
                     });
                 };
