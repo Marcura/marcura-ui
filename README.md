@@ -22,6 +22,14 @@ Download it using npm:
 `npm install marcura-ui --save`
 
 ## Getting started
+
+Include third-party dependencies:
+
+`<link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css">`  
+`<link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">`
+
+Include Marcura UI assets:
+
 `<link rel="stylesheet" href="node_modules/marcura-ui/dist/marcura-ui.min.css">`  
 `<script src="node_modules/marcura-ui/dist/marcura-ui.min.js"></script>`
 
