@@ -35,9 +35,19 @@ Download it using npm:
 
 Include third-party dependencies:
 
-`<link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">`  
-`<link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">`
-`<script src="node_modules/jquery/dist/jquery.min.js"></script>`
+`<link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">`  
+`<link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">`  
+`<link href="node_modules/pikaday/css/pikaday.css" rel="stylesheet">`  
+`<link href="node_modules/select2/select2.css" rel="stylesheet">`
+
+`<script src="node_modules/jquery/dist/jquery.min.js"></script>`  
+`<script src="node_modules/angular/angular.min.js"></script>`  
+`<script src="node_modules/angular-sanitize/angular-sanitize.min.js"></script>`  
+`<script src="node_modules/angular-ui-router/release/angular-ui-router.min.js"></script>`  
+`<script src="node_modules/moment/min/moment.min.js"></script>`  
+`<script src="node_modules/pikaday/pikaday.js"></script>`  
+`<script src="node_modules/select2/select2.js"></script>`  
+`<script src="node_modules/angular-ui-select2/src/select2.js"></script>`
 
 Include Marcura UI assets:
 
