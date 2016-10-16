@@ -9,12 +9,22 @@
 https://marcura-ui.herokuapp.com/#/home
 
 ## Dependencies
+* [jQuery](https://jquery.com/) (2.2.0 or higher)
 * [Angular](https://angularjs.org/) (1.3.8 or higher)
-* [Angular UI Router](https://github.com/angular-ui/ui-router/wiki) (0.2.14 or higher)
-* [Pikaday](https://github.com/dbushell/Pikaday) (1.3.2 or higher)
+* [Angular UI Router](https://github.com/angular-ui/ui-router/wiki) (0.2.14 or higher)  
+Required for [SideMenu](../../wiki/sidemenu) and [Tabs](../../wiki/tabs).
+* [Angular Sanitize](https://www.npmjs.com/package/angular-sanitize) (1.3.8 or higher)  
+Required for [RadioBox](../../wiki/radiobox).
 * [Font Awesome](http://fontawesome.io/) (4.4.0 or higher)
 * [Bootstrap](http://getbootstrap.com/) (3.3.4 or higher)
-* [Moment.js](http://momentjs.com/) (2.10.2 or higher)
+* [Pikaday](https://github.com/dbushell/Pikaday) (1.3.2 or higher)  
+Required for [DateBox](../../wiki/datebox).
+* [Moment.js](http://momentjs.com/) (2.10.2 or higher)  
+Required for [DateBox](../../wiki/datebox).
+* [Select2](https://www.npmjs.com/package/select2) (3.5.1)  
+Required for [SelectBox](../../wiki/selectbox).
+* [Angular Select2](https://www.npmjs.com/package/angular-ui-select2) (0.0.5)  
+Required for [SelectBox](../../wiki/selectbox).
 
 ## Download
 Download it using npm:
@@ -25,8 +35,9 @@ Download it using npm:
 
 Include third-party dependencies:
 
-`<link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css">`  
+`<link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">`  
 `<link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">`
+`<script src="node_modules/jquery/dist/jquery.min.js"></script>`
 
 Include Marcura UI assets:
 
