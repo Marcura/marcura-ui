@@ -155,9 +155,10 @@
             width: 100%;
             max-width: 100%;
             padding-left: 10px;
-            color: @input-color;
+            color: @text-color;
             .input-transition;
             .box-shadow(@input-shadow);
+            .box-sizing(border-box);
 
             .select2-arrow {
                 background-color: transparent;
@@ -189,7 +190,7 @@
         }
 
         .select2-default .select2-arrow b {
-            color: @input-color;
+            color: @text-color;
         }
 
         &-active .select2-choice {

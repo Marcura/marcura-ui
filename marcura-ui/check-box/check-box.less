@@ -7,6 +7,7 @@
     cursor: pointer;
     outline: 0;
     .user-select(none);
+    color: @text-color;
 
     &-is-disabled {
         cursor: default;
@@ -49,6 +50,7 @@
         border: 1px solid @input-border-color;
         background-color: @input-background-color;
         .box-shadow(inset 0 1px 1px rgba(0, 0, 0, .075));
+        .box-sizing(border-box);
     }
 
     &-icon.fa {

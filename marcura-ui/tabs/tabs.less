@@ -5,6 +5,17 @@
         margin: 0;
         padding: 0;
         border-bottom: 1px solid #c3c3cd;
+
+        &:before {
+            display: table;
+            content: ' ';
+        }
+
+        &:after {
+            display: table;
+            content: ' ';
+            clear: both;
+        }
     }
 
     &-item {
@@ -33,7 +44,7 @@
         }
 
         &-is-selected .ma-tabs-link {
-            color: @input-color;
+            color: @text-color;
             cursor: default;
             background-color: #fff;
         }
