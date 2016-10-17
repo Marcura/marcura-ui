@@ -14,7 +14,7 @@ angular.module('marcuraUI.components')
             scope: {
                 id: '@',
                 items: '=',
-                selectedItem: '=',
+                value: '=',
                 isLoading: '=',
                 change: '&',
                 blur: '&',
@@ -64,7 +64,7 @@ angular.module('marcuraUI.components')
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-change="onChange()"\
-                        ng-model="value"\
+                        ng-model="selectedItem"\
                         placeholder="{{placeholder}}"/>';
                 } else {
                     // Add an empty option (<option></option>) as first item for the placeholder to work.
@@ -73,7 +73,7 @@ angular.module('marcuraUI.components')
                         <select ui-select2="options"\
                             ng-show="!isAddMode"\
                             ng-disabled="isDisabled"\
-                            ng-model="value"\
+                            ng-model="selectedItem"\
                             ng-change="onChange()"\
                             placeholder="{{placeholder}}">\
                             <option></option>\
@@ -127,8 +127,8 @@ angular.module('marcuraUI.components')
                         // Run init function only once to set initial port.
                         initSelection.runs = initSelection.runs ? initSelection.runs : 1;
 
-                        if (initSelection.runs === 1 && scope.selectedItem && scope.selectedItem[scope.itemValueField]) {
-                            var item = angular.copy(scope.selectedItem);
+                        if (initSelection.runs === 1 && scope.value && scope.value[scope.itemValueField]) {
+                            var item = angular.copy(scope.value);
                             item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
                             item.id = item[scope.itemValueField];
                             scope.previousSelectedItem = item;
@@ -180,7 +180,7 @@ angular.module('marcuraUI.components')
 
                     for (var i = 0; i < scope.items.length; i++) {
                         if (isItemObject) {
-                            // Search by id value field.
+                            // Search by value field.
                             if (scope.items[i][scope.itemValueField] === item[scope.itemValueField]) {
                                 return true;
                             }
@@ -236,7 +236,7 @@ angular.module('marcuraUI.components')
                     if (scope.canAddItem && item) {
                         // Switch mode depending on whether provided item exists in the list.
                         // This allows the component to be displayed in correct mode, let's say, in add mode,
-                        // when scope.selectedItem is initially a custom value not presented in the list.
+                        // when scope.value is initially a custom value not presented in the list.
                         scope.isAddMode = !isExistingItem(item);
                     }
 
@@ -259,16 +259,16 @@ angular.module('marcuraUI.components')
                         scope.toggleMode('add');
                     } else {
                         if (!item) {
-                            scope.value = null;
+                            scope.selectedItem = null;
                         } else if (!scope.isAjax) {
                             // Set select value.
                             // When in AJAX mode Select2 sets values by itself.
                             if (scope.itemValueField && item[scope.itemValueField]) {
                                 // Item is an object.
-                                scope.value = item[scope.itemValueField].toString();
+                                scope.selectedItem = item[scope.itemValueField].toString();
                             } else if (typeof item === 'string') {
                                 // Item is a string.
-                                scope.value = item;
+                                scope.selectedItem = item;
                             }
                         }
 
@@ -293,29 +293,28 @@ angular.module('marcuraUI.components')
                             scope.isTouched = true;
 
                             if (scope.itemTextField) {
-                                if (scope.selectedItem && scope.selectedItem[scope.itemTextField] === scope.text) {
+                                if (scope.value && scope.value[scope.itemTextField] === scope.text) {
                                     return;
                                 }
 
-                                scope.selectedItem = getNewItem(scope.text);
+                                scope.value = getNewItem(scope.text);
                             } else {
-                                if (scope.selectedItem === scope.text) {
+                                if (scope.value === scope.text) {
                                     return;
                                 }
 
-                                scope.selectedItem = scope.text;
+                                scope.value = scope.text;
                             }
 
-                            previousAddedItem = scope.selectedItem;
+                            previousAddedItem = scope.value;
 
-                            // Postpone change event for $apply to have time to
-                            // take effect and update scope.selectedItem,
-                            // so both 'item' parameter inside change event and scope.selectedItem have
-                            // the same values.
+                            // Postpone change event for $apply to have time to take effect and
+                            // update scope.value, so both 'item' parameter inside change
+                            // event and scope.value have the same values.
                             if (scope.isValid) {
                                 $timeout(function() {
                                     scope.change({
-                                        maItem: scope.selectedItem
+                                        maValue: scope.value
                                     });
                                 });
                             }
@@ -346,7 +345,7 @@ angular.module('marcuraUI.components')
 
                     if (isFocusLost) {
                         scope.blur({
-                            item: scope.selectedItem
+                            item: scope.value
                         });
                     }
 
@@ -386,16 +385,16 @@ angular.module('marcuraUI.components')
                         return !maHelper.isNullOrWhiteSpace(scope.text);
                     }
 
-                    return !maHelper.isNullOrUndefined(scope.selectedItem);
+                    return !maHelper.isNullOrUndefined(scope.value);
                 };
 
                 scope.onReset = function() {
-                    scope.selectedItem = null;
+                    scope.value = null;
                     setFocus();
 
                     $timeout(function() {
                         scope.change({
-                            maItem: scope.selectedItem
+                            maValue: scope.value
                         });
                     });
                 };
@@ -407,7 +406,7 @@ angular.module('marcuraUI.components')
 
                     if (isFocusLost) {
                         scope.focus({
-                            item: scope.selectedItem
+                            item: scope.value
                         });
                     }
 
@@ -466,22 +465,22 @@ angular.module('marcuraUI.components')
                             selectElement.select2('close');
                         }
 
-                        scope.previousSelectedItem = getItemByValue(scope.value);
-                        scope.selectedItem = previousAddedItem;
+                        scope.previousSelectedItem = getItemByValue(scope.selectedItem);
+                        scope.value = previousAddedItem;
 
-                        if (scope.selectedItem) {
-                            scope.text = typeof scope.selectedItem === 'string' ? scope.selectedItem : scope.selectedItem[scope.itemTextField];
+                        if (scope.value) {
+                            scope.text = typeof scope.value === 'string' ? scope.value : scope.value[scope.itemTextField];
                         }
                     } else {
                         previousAddedItem = getNewItem(scope.text);
-                        scope.selectedItem = scope.previousSelectedItem;
+                        scope.value = scope.previousSelectedItem;
                     }
 
                     if (!isInternalCall) {
                         $timeout(function() {
                             // Trigger change event as user manually swithces between custom and selected items.
                             scope.change({
-                                maItem: scope.selectedItem
+                                maValue: scope.value
                             });
 
                             setFocus();
@@ -491,11 +490,11 @@ angular.module('marcuraUI.components')
 
                 scope.onChange = function() {
                     // Validation is required if the item is a simple text, not a JSON object.
-                    var item = maHelper.isJson(scope.value) ? JSON.parse(scope.value) : scope.value;
+                    var item = maHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
 
                     // The change event works differently in AJAX mode.
                     if (scope.isAjax) {
-                        // The change event fires first time even if scope.selectedItem has not changed.
+                        // The change event fires first time even if scope.value has not changed.
                         if (item === scope.previousSelectedItem) {
                             return;
                         }
@@ -521,30 +520,30 @@ angular.module('marcuraUI.components')
                         }
                     }
 
-                    if (!item && !scope.selectedItem) {
+                    if (!item && !scope.value) {
                         return;
                     }
 
                     if (scope.itemValueField) {
-                        if (scope.selectedItem && scope.selectedItem[scope.itemValueField] &&
-                            scope.selectedItem[scope.itemValueField].toString() === item[scope.itemValueField].toString()) {
+                        if (scope.value && scope.value[scope.itemValueField] &&
+                            scope.value[scope.itemValueField].toString() === item[scope.itemValueField].toString()) {
                             return;
                         }
-                    } else if (item === scope.selectedItem) {
+                    } else if (item === scope.value) {
                         return;
                     }
 
-                    scope.selectedItem = item;
+                    scope.value = item;
                     scope.previousSelectedItem = item;
 
                     $timeout(function() {
                         scope.change({
-                            maItem: item
+                            maValue: item
                         });
                     });
                 };
 
-                scope.$watch('selectedItem', function(newValue, oldValue) {
+                scope.$watch('value', function(newValue, oldValue) {
                     if (newValue === oldValue) {
                         return;
                     }
@@ -599,10 +598,10 @@ angular.module('marcuraUI.components')
 
                 $timeout(function() {
                     // Set initial value.
-                    // Value is set inside timeout to ensure that we get the latest selectedItem.
-                    // If put outside timeout then there could be issues when selectedItem is set
+                    // Value is set inside timeout to ensure that we get the latest value.
+                    // If put outside timeout then there could be issues when value is set
                     // from directive's link function, not from controller.
-                    setValue(scope.selectedItem);
+                    setValue(scope.value);
 
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
                     selectData = selectElement.data().select2;
@@ -626,7 +625,7 @@ angular.module('marcuraUI.components')
                     });
 
                     selectData.dropdown.on('focus', '.select2-input', function() {
-                        // This is required for IE to keep focus when item is selectedItem
+                        // This is required for IE to keep focus when an item is selected
                         // from the list using keyboard.
                         isFocusInside = true;
                         scope.onFocus();

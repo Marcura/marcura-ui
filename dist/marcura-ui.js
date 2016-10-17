@@ -997,7 +997,7 @@ angular.element(document).ready(function() {
             scope: {
                 id: '@',
                 items: '=',
-                selectedItem: '=',
+                value: '=',
                 isLoading: '=',
                 change: '&',
                 blur: '&',
@@ -1047,7 +1047,7 @@ angular.element(document).ready(function() {
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-change="onChange()"\
-                        ng-model="value"\
+                        ng-model="selectedItem"\
                         placeholder="{{placeholder}}"/>';
                 } else {
                     // Add an empty option (<option></option>) as first item for the placeholder to work.
@@ -1056,7 +1056,7 @@ angular.element(document).ready(function() {
                         <select ui-select2="options"\
                             ng-show="!isAddMode"\
                             ng-disabled="isDisabled"\
-                            ng-model="value"\
+                            ng-model="selectedItem"\
                             ng-change="onChange()"\
                             placeholder="{{placeholder}}">\
                             <option></option>\
@@ -1110,8 +1110,8 @@ angular.element(document).ready(function() {
                         // Run init function only once to set initial port.
                         initSelection.runs = initSelection.runs ? initSelection.runs : 1;
 
-                        if (initSelection.runs === 1 && scope.selectedItem && scope.selectedItem[scope.itemValueField]) {
-                            var item = angular.copy(scope.selectedItem);
+                        if (initSelection.runs === 1 && scope.value && scope.value[scope.itemValueField]) {
+                            var item = angular.copy(scope.value);
                             item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
                             item.id = item[scope.itemValueField];
                             scope.previousSelectedItem = item;
@@ -1163,7 +1163,7 @@ angular.element(document).ready(function() {
 
                     for (var i = 0; i < scope.items.length; i++) {
                         if (isItemObject) {
-                            // Search by id value field.
+                            // Search by value field.
                             if (scope.items[i][scope.itemValueField] === item[scope.itemValueField]) {
                                 return true;
                             }
@@ -1219,7 +1219,7 @@ angular.element(document).ready(function() {
                     if (scope.canAddItem && item) {
                         // Switch mode depending on whether provided item exists in the list.
                         // This allows the component to be displayed in correct mode, let's say, in add mode,
-                        // when scope.selectedItem is initially a custom value not presented in the list.
+                        // when scope.value is initially a custom value not presented in the list.
                         scope.isAddMode = !isExistingItem(item);
                     }
 
@@ -1242,16 +1242,16 @@ angular.element(document).ready(function() {
                         scope.toggleMode('add');
                     } else {
                         if (!item) {
-                            scope.value = null;
+                            scope.selectedItem = null;
                         } else if (!scope.isAjax) {
                             // Set select value.
                             // When in AJAX mode Select2 sets values by itself.
                             if (scope.itemValueField && item[scope.itemValueField]) {
                                 // Item is an object.
-                                scope.value = item[scope.itemValueField].toString();
+                                scope.selectedItem = item[scope.itemValueField].toString();
                             } else if (typeof item === 'string') {
                                 // Item is a string.
-                                scope.value = item;
+                                scope.selectedItem = item;
                             }
                         }
 
@@ -1276,29 +1276,28 @@ angular.element(document).ready(function() {
                             scope.isTouched = true;
 
                             if (scope.itemTextField) {
-                                if (scope.selectedItem && scope.selectedItem[scope.itemTextField] === scope.text) {
+                                if (scope.value && scope.value[scope.itemTextField] === scope.text) {
                                     return;
                                 }
 
-                                scope.selectedItem = getNewItem(scope.text);
+                                scope.value = getNewItem(scope.text);
                             } else {
-                                if (scope.selectedItem === scope.text) {
+                                if (scope.value === scope.text) {
                                     return;
                                 }
 
-                                scope.selectedItem = scope.text;
+                                scope.value = scope.text;
                             }
 
-                            previousAddedItem = scope.selectedItem;
+                            previousAddedItem = scope.value;
 
-                            // Postpone change event for $apply to have time to
-                            // take effect and update scope.selectedItem,
-                            // so both 'item' parameter inside change event and scope.selectedItem have
-                            // the same values.
+                            // Postpone change event for $apply to have time to take effect and
+                            // update scope.value, so both 'item' parameter inside change
+                            // event and scope.value have the same values.
                             if (scope.isValid) {
                                 $timeout(function() {
                                     scope.change({
-                                        maItem: scope.selectedItem
+                                        maValue: scope.value
                                     });
                                 });
                             }
@@ -1329,7 +1328,7 @@ angular.element(document).ready(function() {
 
                     if (isFocusLost) {
                         scope.blur({
-                            item: scope.selectedItem
+                            item: scope.value
                         });
                     }
 
@@ -1369,16 +1368,16 @@ angular.element(document).ready(function() {
                         return !maHelper.isNullOrWhiteSpace(scope.text);
                     }
 
-                    return !maHelper.isNullOrUndefined(scope.selectedItem);
+                    return !maHelper.isNullOrUndefined(scope.value);
                 };
 
                 scope.onReset = function() {
-                    scope.selectedItem = null;
+                    scope.value = null;
                     setFocus();
 
                     $timeout(function() {
                         scope.change({
-                            maItem: scope.selectedItem
+                            maValue: scope.value
                         });
                     });
                 };
@@ -1390,7 +1389,7 @@ angular.element(document).ready(function() {
 
                     if (isFocusLost) {
                         scope.focus({
-                            item: scope.selectedItem
+                            item: scope.value
                         });
                     }
 
@@ -1449,22 +1448,22 @@ angular.element(document).ready(function() {
                             selectElement.select2('close');
                         }
 
-                        scope.previousSelectedItem = getItemByValue(scope.value);
-                        scope.selectedItem = previousAddedItem;
+                        scope.previousSelectedItem = getItemByValue(scope.selectedItem);
+                        scope.value = previousAddedItem;
 
-                        if (scope.selectedItem) {
-                            scope.text = typeof scope.selectedItem === 'string' ? scope.selectedItem : scope.selectedItem[scope.itemTextField];
+                        if (scope.value) {
+                            scope.text = typeof scope.value === 'string' ? scope.value : scope.value[scope.itemTextField];
                         }
                     } else {
                         previousAddedItem = getNewItem(scope.text);
-                        scope.selectedItem = scope.previousSelectedItem;
+                        scope.value = scope.previousSelectedItem;
                     }
 
                     if (!isInternalCall) {
                         $timeout(function() {
                             // Trigger change event as user manually swithces between custom and selected items.
                             scope.change({
-                                maItem: scope.selectedItem
+                                maValue: scope.value
                             });
 
                             setFocus();
@@ -1474,11 +1473,11 @@ angular.element(document).ready(function() {
 
                 scope.onChange = function() {
                     // Validation is required if the item is a simple text, not a JSON object.
-                    var item = maHelper.isJson(scope.value) ? JSON.parse(scope.value) : scope.value;
+                    var item = maHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
 
                     // The change event works differently in AJAX mode.
                     if (scope.isAjax) {
-                        // The change event fires first time even if scope.selectedItem has not changed.
+                        // The change event fires first time even if scope.value has not changed.
                         if (item === scope.previousSelectedItem) {
                             return;
                         }
@@ -1504,30 +1503,30 @@ angular.element(document).ready(function() {
                         }
                     }
 
-                    if (!item && !scope.selectedItem) {
+                    if (!item && !scope.value) {
                         return;
                     }
 
                     if (scope.itemValueField) {
-                        if (scope.selectedItem && scope.selectedItem[scope.itemValueField] &&
-                            scope.selectedItem[scope.itemValueField].toString() === item[scope.itemValueField].toString()) {
+                        if (scope.value && scope.value[scope.itemValueField] &&
+                            scope.value[scope.itemValueField].toString() === item[scope.itemValueField].toString()) {
                             return;
                         }
-                    } else if (item === scope.selectedItem) {
+                    } else if (item === scope.value) {
                         return;
                     }
 
-                    scope.selectedItem = item;
+                    scope.value = item;
                     scope.previousSelectedItem = item;
 
                     $timeout(function() {
                         scope.change({
-                            maItem: item
+                            maValue: item
                         });
                     });
                 };
 
-                scope.$watch('selectedItem', function(newValue, oldValue) {
+                scope.$watch('value', function(newValue, oldValue) {
                     if (newValue === oldValue) {
                         return;
                     }
@@ -1582,10 +1581,10 @@ angular.element(document).ready(function() {
 
                 $timeout(function() {
                     // Set initial value.
-                    // Value is set inside timeout to ensure that we get the latest selectedItem.
-                    // If put outside timeout then there could be issues when selectedItem is set
+                    // Value is set inside timeout to ensure that we get the latest value.
+                    // If put outside timeout then there could be issues when value is set
                     // from directive's link function, not from controller.
-                    setValue(scope.selectedItem);
+                    setValue(scope.value);
 
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
                     selectData = selectElement.data().select2;
@@ -1609,7 +1608,7 @@ angular.element(document).ready(function() {
                     });
 
                     selectData.dropdown.on('focus', '.select2-input', function() {
-                        // This is required for IE to keep focus when item is selectedItem
+                        // This is required for IE to keep focus when an item is selected
                         // from the list using keyboard.
                         isFocusInside = true;
                         scope.onFocus();
@@ -2523,85 +2522,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            id: '@',
-            value: '=',
-            size: '=',
-            change: '&',
-            isDisabled: '='
-        },
-        replace: true,
-        template: function($timeout) {
-            var html = '\
-            <div class="ma-text-box"\
-                ng-class="{\
-                    \'ma-text-box-is-disabled\': isDisabled\
-                }">\
-                <input class="ma-text-box-value form-control input-{{_size}}"\
-                    ng-disabled="isDisabled"\
-                    type="text"\
-                    ng-model="value"/>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element) {
-            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
-            // valueType,
-
-            // getValueInType = function(value) {
-            //     if (!value) {
-            //         return null;
-            //     } else if (dateType === 'String') {
-            //         return value.toString();
-            //     } else if (angular.isNumber(value)) {
-            //         return date;
-            //     } else {
-            //         return maDateConverter.format(date, format);
-            //     }
-            // },
-            // onChange = function (value) {
-            //     scope.change({
-            //         value: value
-            //     });
-            // };
-
-            scope._size = scope.size ? scope.size : 'sm';
-
-            $timeout(function() {
-                // move id to input
-                element.removeAttr('id');
-                valueElement.attr('id', scope.id);
-            });
-
-            // scope.$watch('value', function(newValue, oldValue) {
-            //     if (newValue === oldValue) {
-            //         return;
-            //     }
-            //
-            //     scope.change({
-            //         value: value
-            //     });
-            // });
-
-
-            // if (scope.value) {
-            //     // determine initial value type
-            //     if (maHelper.isString(scope.value)) {
-            //         valueType = 'String';
-            //     } else {
-            //         valueType = 'Number';
-            //     }
-            //
-            //     valueElement.val(scope.value);
-            // }
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', 'maValidators', function($timeout, $window, maHelper, maValidators) {
     return {
         restrict: 'E',
@@ -2821,6 +2741,85 @@ angular.element(document).ready(function() {
                     return scope.isValid;
                 };
             }
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            id: '@',
+            value: '=',
+            size: '=',
+            change: '&',
+            isDisabled: '='
+        },
+        replace: true,
+        template: function($timeout) {
+            var html = '\
+            <div class="ma-text-box"\
+                ng-class="{\
+                    \'ma-text-box-is-disabled\': isDisabled\
+                }">\
+                <input class="ma-text-box-value form-control input-{{_size}}"\
+                    ng-disabled="isDisabled"\
+                    type="text"\
+                    ng-model="value"/>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element) {
+            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
+            // valueType,
+
+            // getValueInType = function(value) {
+            //     if (!value) {
+            //         return null;
+            //     } else if (dateType === 'String') {
+            //         return value.toString();
+            //     } else if (angular.isNumber(value)) {
+            //         return date;
+            //     } else {
+            //         return maDateConverter.format(date, format);
+            //     }
+            // },
+            // onChange = function (value) {
+            //     scope.change({
+            //         value: value
+            //     });
+            // };
+
+            scope._size = scope.size ? scope.size : 'sm';
+
+            $timeout(function() {
+                // move id to input
+                element.removeAttr('id');
+                valueElement.attr('id', scope.id);
+            });
+
+            // scope.$watch('value', function(newValue, oldValue) {
+            //     if (newValue === oldValue) {
+            //         return;
+            //     }
+            //
+            //     scope.change({
+            //         value: value
+            //     });
+            // });
+
+
+            // if (scope.value) {
+            //     // determine initial value type
+            //     if (maHelper.isString(scope.value)) {
+            //         valueType = 'String';
+            //     } else {
+            //         valueType = 'Number';
+            //     }
+            //
+            //     valueElement.val(scope.value);
+            // }
         }
     };
 }]);
