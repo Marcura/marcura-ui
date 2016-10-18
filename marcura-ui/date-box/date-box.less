@@ -5,18 +5,13 @@
     min-width: 120px;
     width: 100%;
     display: inline-block;
-    .box-shadow(@input-shadow);
-    border: 1px solid @input-border-color;
-    height: 30px;
-    padding: 5px 30px 5px 10px;
     position: relative;
-    background-color: @input-background-color;
-    .input-transition;
-    .box-sizing(border-box);
 
     &-is-disabled {
-        background-color: @input-background-color-disabled;
-        .box-shadow(none);
+        .ma-date-box-inner {
+            background-color: @input-background-color-disabled;
+            .box-shadow(none);
+        }
 
         .ma-date-box-date,
         .ma-date-box-hours,
@@ -36,39 +31,73 @@
     }
 
     &-is-focused {
-        .box-shadow(@input-shadow-focused);
-        border-color: @input-border-color-focused;
+        .ma-date-box-inner {
+            .box-shadow(@input-shadow-focused);
+            border-color: @input-border-color-focused;
+        }
     }
 
-    &-is-resettable {
-        padding-right: 60px;
-
-        .ma-date-box-hours {
-            right: 89px;
-        }
-
-        .ma-date-box-minutes {
-            right: 65px;
-        }
-
-        .ma-date-box-colon {
-            right: 88px;
-        }
+    &-can-reset {
+        padding-right: 29px;
     }
 
     &-is-invalid&-is-touched {
-        &.ma-date-box-is-focused {
+        &.ma-date-box-is-focused .ma-date-box-inner {
             .box-shadow(@input-shadow-invalid);
         }
 
-        border-color: @input-border-color-invalid;
+        .ma-date-box-inner {
+            border-color: @input-border-color-invalid;
+        }
     }
 
     &-has-time {
-        padding-right: 86px;
+        .ma-date-box-inner {
+            padding-right: 86px;
+        }
+    }
 
-        &.ma-date-box-is-resettable {
-            padding-right: 116px;
+    &-inner {
+        height: 30px;
+        position: relative;
+        padding: 5px 30px 5px 10px;
+        border: 1px solid @input-border-color;
+        background-color: @input-background-color;
+        .box-shadow(@input-shadow);
+        .input-transition;
+        .box-sizing(border-box);
+    }
+
+    .ma-button-reset {
+        position: absolute;
+        top: 0;
+        right: 0;
+        border-left: 0;
+        .box-shadow(none);
+    }
+
+    .ma-button-reset .ma-button-icon {
+        font-size: 20px;
+        text-shadow: none;
+        color: #bebebe;
+    }
+
+    .ma-button-reset.ma-button-is-disabled {
+        background-color: @input-background-color-disabled;
+    }
+
+    .ma-button-reset.ma-button-is-disabled .ma-button-icon {
+        color: inherit;
+        opacity: 0.45;
+    }
+
+    &-is-reset-disabled {
+        .ma-button-reset.ma-button-is-disabled {
+            background-color: #ffffff;
+
+            .ma-button-icon {
+                opacity: 0.15;
+            }
         }
     }
 
@@ -136,11 +165,6 @@
             top: 7px;
             position: relative;
         }
-    }
-
-    .ma-reset-value {
-        right: 35px;
-        top: 4px;
     }
 }
 

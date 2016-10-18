@@ -32,40 +32,44 @@ angular.module('marcuraUI.components')
                         \'ma-date-box-has-time\': hasTime,\
                         \'ma-date-box-is-invalid\': !_isValid,\
                         \'ma-date-box-is-disabled\': isDisabled,\
-                        \'ma-date-box-is-resettable\': _isResettable,\
                         \'ma-date-box-is-focused\': isFocused,\
-                        \'ma-date-box-is-touched\': isTouched\
+                        \'ma-date-box-is-touched\': isTouched,\
+                        \'ma-date-box-can-reset\': _isResettable,\
+                        \'ma-date-box-is-reset-disabled\': _isResettable && !isDisabled && !isResetEnabled()\
                     }">\
-                    <input class="ma-date-box-date" type="text" id="{{id}}"\
-                        ng-disabled="isDisabled"\
-                        ng-focus="onFocus()"\
-                        ng-keydown="onKeydown($event)"\
-                        ng-keyup="onKeyup($event)"\
-                        ng-blur="onBlur()"/><input class="ma-date-box-hours"\
-                            maxlength="2"\
+                    <div class="ma-date-box-inner">\
+                        <input class="ma-date-box-date" type="text" id="{{id}}"\
                             ng-disabled="isDisabled"\
-                            ng-show="hasTime"\
                             ng-focus="onFocus()"\
                             ng-keydown="onKeydown($event)"\
                             ng-keyup="onKeyup($event)"\
-                            ng-blur="onBlur()"\
-                            ng-keydown="onTimeKeydown($event)"\
-                            /><div class="ma-date-box-colon" ng-if="hasTime">:</div><input \
-                            class="ma-date-box-minutes" type="text"\
-                            maxlength="2"\
-                            ng-disabled="isDisabled"\
-                            ng-show="hasTime"\
-                            ng-focus="onFocus()"\
-                            ng-keydown="onKeydown($event)"\
-                            ng-keyup="onKeyup($event)"\
-                            ng-blur="onBlur()"\
-                            ng-keydown="onTimeKeydown($event)"/>\
-                    <i class="ma-date-box-icon fa fa-calendar"></i>\
-                    <ma-reset-value\
-                        is-disabled="!isResetEnabled()"\
+                            ng-blur="onBlur()"/><input class="ma-date-box-hours"\
+                                maxlength="2"\
+                                ng-disabled="isDisabled"\
+                                ng-show="hasTime"\
+                                ng-focus="onFocus()"\
+                                ng-keydown="onKeydown($event)"\
+                                ng-keyup="onKeyup($event)"\
+                                ng-blur="onBlur()"\
+                                ng-keydown="onTimeKeydown($event)"\
+                                /><div class="ma-date-box-colon" ng-if="hasTime">:</div><input \
+                                class="ma-date-box-minutes" type="text"\
+                                maxlength="2"\
+                                ng-disabled="isDisabled"\
+                                ng-show="hasTime"\
+                                ng-focus="onFocus()"\
+                                ng-keydown="onKeydown($event)"\
+                                ng-keyup="onKeyup($event)"\
+                                ng-blur="onBlur()"\
+                                ng-keydown="onTimeKeydown($event)"/>\
+                        <i class="ma-date-box-icon fa fa-calendar"></i>\
+                    </div>\
+                    <ma-button class="ma-button-reset"\
+                        ng-show="_isResettable" size="xs" modifier="simple"\
+                        right-icon="times-circle"\
                         click="onReset()"\
-                        ng-show="_isResettable">\
-                    </ma-reset-value>\
+                        is-disabled="!isResetEnabled()">\
+                    </ma-button>\
                 </div>';
 
                 return html;
@@ -403,6 +407,9 @@ angular.module('marcuraUI.components')
                     } else {
                         onChange();
                     }
+
+                    scope.isTouched = true;
+                    dateElement.focus();
                 };
 
                 // Set initial date.

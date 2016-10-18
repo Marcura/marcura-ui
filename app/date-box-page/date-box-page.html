@@ -25,7 +25,8 @@
         <ma-date-box
             date="date2"
             time-zone="'+09:00'"
-            change="change2(date)">
+            change="change2(date)"
+            is-resettable="false">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -37,7 +38,8 @@
     <div class="nodes-item">
         <ma-date-box
             has-time="true"
-            date="date3">
+            date="date3"
+            is-resettable="false">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -82,7 +84,8 @@
     <div class="nodes-item">
         <ma-date-box
             date="date7"
-            is-required="true">
+            is-required="true"
+            is-resettable="false">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -92,44 +95,32 @@
         <ma-date-box
             has-time="true"
             date="date8"
-            is-required="true">
+            is-required="true"
+            is-resettable="false">
         </ma-date-box>
     </div>
     <div class="nodes-item">
         date: {{date8}}
     </div>
     <div class="nodes-item">
-        <h2>Set validity</h2>
-    </div>
-    <div class="nodes-item">
-        <ma-date-box
-            instance="date9Instance"
-            date="date9"
-            is-required="true">
-        </ma-date-box>
-    </div>
-    <div class="nodes-item">
-        date: {{date9}}
-    </div>
-    <div class="nodes-item">
-        <ma-date-box
-            has-time="true"
-            date="date10">
-        </ma-date-box>
-    </div>
-    <div class="nodes-item">
-        date: {{date10}}
-    </div>
-    <div class="nodes-item">
         <h2>Min and max dates</h2>
     </div>
     <div class="nodes-item">
         <ma-date-box
-            date="date11"
-            min-date="date11min"
-            max-date="date11max"
+            date="date9"
+            min-date="date9min"
+            max-date="date9max"
             is-resettable="false"
             change="change1(date)">
+        </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Reset button</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            date="date10"
+            is-resettable="true">
         </ma-date-box>
     </div>
 </div>

@@ -43,6 +43,7 @@ function selectBoxPageController($scope, $timeout, helper) {
     };
     $scope.port11 = $scope.ports2[1];
     $scope.port12 = null;
+    $scope.port13 = $scope.ports2[1];
 
     // port1.
     $scope.change1 = function(port) {
