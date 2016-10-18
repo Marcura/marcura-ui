@@ -114,8 +114,14 @@ angular.module('marcuraUI.components')
                     }
 
                     scope.date = date ? maDateConverter.format(date, format, timeZone) : null;
-                    scope.change({
-                        date: scope.date
+
+                    // Postpone change event for $apply (which is being invoked by $timeout)
+                    // to have time to take effect and update scope.value,
+                    // so both maValue and scope.value have the same values eventually.
+                    $timeout(function() {
+                        scope.change({
+                            date: scope.date
+                        });
                     });
                 };
 
@@ -217,9 +223,7 @@ angular.module('marcuraUI.components')
 
                             previousDate = date;
 
-                            $timeout(function() {
-                                onChange(date);
-                            });
+                            onChange(date);
                         }
                     });
 

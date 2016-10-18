@@ -308,9 +308,9 @@ angular.module('marcuraUI.components')
 
                             previousAddedItem = scope.value;
 
-                            // Postpone change event for $apply to have time to take effect and
-                            // update scope.value, so both 'item' parameter inside change
-                            // event and scope.value have the same values.
+                            // Postpone change event for $apply (which is being invoked by $timeout)
+                            // to have time to take effect and update scope.value,
+                            // so both maValue and scope.value have the same values eventually.
                             if (scope.isValid) {
                                 $timeout(function() {
                                     scope.change({

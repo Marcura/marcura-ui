@@ -105,27 +105,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -221,6 +200,27 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -341,8 +341,14 @@ angular.element(document).ready(function() {
                     }
 
                     scope.date = date ? maDateConverter.format(date, format, timeZone) : null;
-                    scope.change({
-                        date: scope.date
+
+                    // Postpone change event for $apply (which is being invoked by $timeout)
+                    // to have time to take effect and update scope.value,
+                    // so both maValue and scope.value have the same values eventually.
+                    $timeout(function() {
+                        scope.change({
+                            date: scope.date
+                        });
                     });
                 };
 
@@ -444,9 +450,7 @@ angular.element(document).ready(function() {
 
                             previousDate = date;
 
-                            $timeout(function() {
-                                onChange(date);
-                            });
+                            onChange(date);
                         }
                     });
 
@@ -1291,9 +1295,9 @@ angular.element(document).ready(function() {
 
                             previousAddedItem = scope.value;
 
-                            // Postpone change event for $apply to have time to take effect and
-                            // update scope.value, so both 'item' parameter inside change
-                            // event and scope.value have the same values.
+                            // Postpone change event for $apply (which is being invoked by $timeout)
+                            // to have time to take effect and update scope.value,
+                            // so both maValue and scope.value have the same values eventually.
                             if (scope.isValid) {
                                 $timeout(function() {
                                     scope.change({

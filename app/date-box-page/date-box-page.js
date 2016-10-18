@@ -23,7 +23,8 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
     $scope.date11max = maDateConverter.format(moment().add(5, 'day'), 'yyyy-MM-ddT00:00:00Z');
 
     $scope.change1 = function(date) {
-        console.log('change:', date);
+        console.log('event:', date);
+        console.log('scope:', $scope.date1);
     };
 
     // $scope.change2 = function(date) {
@@ -34,9 +35,9 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
         console.log('change:', date);
     };
 
-    $scope.$watch('date2', function(newDate, oldDate) {
-        console.log('change:', newDate);
-    });
+    // $scope.$watch('date2', function(newDate, oldDate) {
+    //     console.log('change:', newDate);
+    // });
 
     $timeout(function() {
         // $scope.date4 = '2016-07-25T18:30:00+03:00';
