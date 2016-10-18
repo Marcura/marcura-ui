@@ -9,13 +9,13 @@ angular.module('marcuraUI.components')
             restrict: 'E',
             scope: {
                 id: '@',
-                date: '=',
+                value: '=',
                 timeZone: '=',
                 culture: '=',
                 isDisabled: '=',
                 isRequired: '=',
                 change: '&',
-                isResettable: '=',
+                canReset: '=',
                 displayFormat: '=',
                 format: '=',
                 hasTime: '=',
@@ -34,8 +34,8 @@ angular.module('marcuraUI.components')
                         \'ma-date-box-is-disabled\': isDisabled,\
                         \'ma-date-box-is-focused\': isFocused,\
                         \'ma-date-box-is-touched\': isTouched,\
-                        \'ma-date-box-can-reset\': _isResettable,\
-                        \'ma-date-box-is-reset-disabled\': _isResettable && !isDisabled && !isResetEnabled()\
+                        \'ma-date-box-can-reset\': canReset,\
+                        \'ma-date-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled()\
                     }">\
                     <div class="ma-date-box-inner">\
                         <input class="ma-date-box-date" type="text" id="{{id}}"\
@@ -65,7 +65,7 @@ angular.module('marcuraUI.components')
                         <i class="ma-date-box-icon fa fa-calendar"></i>\
                     </div>\
                     <ma-button class="ma-button-reset"\
-                        ng-show="_isResettable" size="xs" modifier="simple"\
+                        ng-show="canReset" size="xs" modifier="simple"\
                         right-icon="times-circle"\
                         click="onReset()"\
                         is-disabled="!isResetEnabled()">\
@@ -117,14 +117,14 @@ angular.module('marcuraUI.components')
                             .seconds(0);
                     }
 
-                    scope.date = date ? maDateConverter.format(date, format, timeZone) : null;
+                    scope.value = date ? maDateConverter.format(date, format, timeZone) : null;
 
                     // Postpone change event for $apply (which is being invoked by $timeout)
                     // to have time to take effect and update scope.value,
                     // so both maValue and scope.value have the same values eventually.
                     $timeout(function() {
                         scope.change({
-                            date: scope.date
+                            maValue: scope.value
                         });
                     });
                 };
@@ -139,7 +139,7 @@ angular.module('marcuraUI.components')
                     return true;
                 };
 
-                var setDisplayDate = function(maDate, offset) {
+                var setDisplayDate = function(maDate) {
                     var displayDate = null;
 
                     if (maDate && maDate.date) {
@@ -282,7 +282,6 @@ angular.module('marcuraUI.components')
                 };
 
                 prepareValidators();
-                scope._isResettable = scope.isResettable === false ? false : true;
                 scope.isFocused = false;
                 scope._isValid = true;
                 scope.isTouched = false;
@@ -413,13 +412,13 @@ angular.module('marcuraUI.components')
                 };
 
                 // Set initial date.
-                if (scope.date) {
+                if (scope.value) {
                     var maDate = {
                         date: null,
                         offset: 0
                     };
 
-                    maDate = maDateConverter.parse(scope.date, scope.culture) || maDate;
+                    maDate = maDateConverter.parse(scope.value, scope.culture) || maDate;
                     maDate.date = maDateConverter.offsetUtc(maDate.date);
 
                     if (!maDate.date) {
@@ -441,7 +440,7 @@ angular.module('marcuraUI.components')
                     dateElement.attr('id', scope.id);
                 });
 
-                scope.$watch('date', function(newDate, oldDate) {
+                scope.$watch('value', function(newDate, oldDate) {
                     if (newDate === null && oldDate === null) {
                         return;
                     }
@@ -485,12 +484,12 @@ angular.module('marcuraUI.components')
                     scope.instance.validate = function() {
                         scope.isTouched = true;
 
-                        if (isRequired && !scope.date) {
+                        if (isRequired && !scope.value) {
                             scope._isValid = false;
                             return;
                         }
 
-                        validate(parseDate(scope.date));
+                        validate(parseDate(scope.value));
                     };
 
                     scope.instance.isValid = function() {

@@ -11,7 +11,6 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
     $scope.date4 = '2016-07-25T16:30:00+04:00';
     $scope.date4Disabled = false;
     $scope.date4Instance = {};
-    $scope.date5 = '2016-07-25T16:30:00Z';
     $scope.date6 = '2016-07-25T16:30:00Z';
     $scope.date7 = '2016-07-25T00:00:00Z';
     $scope.date8 = '2016-07-25T16:30:00+04:00';

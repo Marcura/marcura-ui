@@ -105,27 +105,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -225,6 +204,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function() {
         this.$get = function() {
@@ -236,13 +236,13 @@ angular.element(document).ready(function() {
             restrict: 'E',
             scope: {
                 id: '@',
-                date: '=',
+                value: '=',
                 timeZone: '=',
                 culture: '=',
                 isDisabled: '=',
                 isRequired: '=',
                 change: '&',
-                isResettable: '=',
+                canReset: '=',
                 displayFormat: '=',
                 format: '=',
                 hasTime: '=',
@@ -261,8 +261,8 @@ angular.element(document).ready(function() {
                         \'ma-date-box-is-disabled\': isDisabled,\
                         \'ma-date-box-is-focused\': isFocused,\
                         \'ma-date-box-is-touched\': isTouched,\
-                        \'ma-date-box-can-reset\': _isResettable,\
-                        \'ma-date-box-is-reset-disabled\': _isResettable && !isDisabled && !isResetEnabled()\
+                        \'ma-date-box-can-reset\': canReset,\
+                        \'ma-date-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled()\
                     }">\
                     <div class="ma-date-box-inner">\
                         <input class="ma-date-box-date" type="text" id="{{id}}"\
@@ -292,7 +292,7 @@ angular.element(document).ready(function() {
                         <i class="ma-date-box-icon fa fa-calendar"></i>\
                     </div>\
                     <ma-button class="ma-button-reset"\
-                        ng-show="_isResettable" size="xs" modifier="simple"\
+                        ng-show="canReset" size="xs" modifier="simple"\
                         right-icon="times-circle"\
                         click="onReset()"\
                         is-disabled="!isResetEnabled()">\
@@ -344,14 +344,14 @@ angular.element(document).ready(function() {
                             .seconds(0);
                     }
 
-                    scope.date = date ? maDateConverter.format(date, format, timeZone) : null;
+                    scope.value = date ? maDateConverter.format(date, format, timeZone) : null;
 
                     // Postpone change event for $apply (which is being invoked by $timeout)
                     // to have time to take effect and update scope.value,
                     // so both maValue and scope.value have the same values eventually.
                     $timeout(function() {
                         scope.change({
-                            date: scope.date
+                            maValue: scope.value
                         });
                     });
                 };
@@ -366,7 +366,7 @@ angular.element(document).ready(function() {
                     return true;
                 };
 
-                var setDisplayDate = function(maDate, offset) {
+                var setDisplayDate = function(maDate) {
                     var displayDate = null;
 
                     if (maDate && maDate.date) {
@@ -509,7 +509,6 @@ angular.element(document).ready(function() {
                 };
 
                 prepareValidators();
-                scope._isResettable = scope.isResettable === false ? false : true;
                 scope.isFocused = false;
                 scope._isValid = true;
                 scope.isTouched = false;
@@ -640,13 +639,13 @@ angular.element(document).ready(function() {
                 };
 
                 // Set initial date.
-                if (scope.date) {
+                if (scope.value) {
                     var maDate = {
                         date: null,
                         offset: 0
                     };
 
-                    maDate = maDateConverter.parse(scope.date, scope.culture) || maDate;
+                    maDate = maDateConverter.parse(scope.value, scope.culture) || maDate;
                     maDate.date = maDateConverter.offsetUtc(maDate.date);
 
                     if (!maDate.date) {
@@ -668,7 +667,7 @@ angular.element(document).ready(function() {
                     dateElement.attr('id', scope.id);
                 });
 
-                scope.$watch('date', function(newDate, oldDate) {
+                scope.$watch('value', function(newDate, oldDate) {
                     if (newDate === null && oldDate === null) {
                         return;
                     }
@@ -712,12 +711,12 @@ angular.element(document).ready(function() {
                     scope.instance.validate = function() {
                         scope.isTouched = true;
 
-                        if (isRequired && !scope.date) {
+                        if (isRequired && !scope.value) {
                             scope._isValid = false;
                             return;
                         }
 
-                        validate(parseDate(scope.date));
+                        validate(parseDate(scope.value));
                     };
 
                     scope.instance.isValid = function() {
@@ -2533,6 +2532,85 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            id: '@',
+            value: '=',
+            size: '=',
+            change: '&',
+            isDisabled: '='
+        },
+        replace: true,
+        template: function($timeout) {
+            var html = '\
+            <div class="ma-text-box"\
+                ng-class="{\
+                    \'ma-text-box-is-disabled\': isDisabled\
+                }">\
+                <input class="ma-text-box-value form-control input-{{_size}}"\
+                    ng-disabled="isDisabled"\
+                    type="text"\
+                    ng-model="value"/>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element) {
+            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
+            // valueType,
+
+            // getValueInType = function(value) {
+            //     if (!value) {
+            //         return null;
+            //     } else if (dateType === 'String') {
+            //         return value.toString();
+            //     } else if (angular.isNumber(value)) {
+            //         return date;
+            //     } else {
+            //         return maDateConverter.format(date, format);
+            //     }
+            // },
+            // onChange = function (value) {
+            //     scope.change({
+            //         value: value
+            //     });
+            // };
+
+            scope._size = scope.size ? scope.size : 'sm';
+
+            $timeout(function() {
+                // move id to input
+                element.removeAttr('id');
+                valueElement.attr('id', scope.id);
+            });
+
+            // scope.$watch('value', function(newValue, oldValue) {
+            //     if (newValue === oldValue) {
+            //         return;
+            //     }
+            //
+            //     scope.change({
+            //         value: value
+            //     });
+            // });
+
+
+            // if (scope.value) {
+            //     // determine initial value type
+            //     if (maHelper.isString(scope.value)) {
+            //         valueType = 'String';
+            //     } else {
+            //         valueType = 'Number';
+            //     }
+            //
+            //     valueElement.val(scope.value);
+            // }
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', 'maValidators', function($timeout, $window, maHelper, maValidators) {
     return {
         restrict: 'E',
@@ -2752,85 +2830,6 @@ angular.element(document).ready(function() {
                     return scope.isValid;
                 };
             }
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            id: '@',
-            value: '=',
-            size: '=',
-            change: '&',
-            isDisabled: '='
-        },
-        replace: true,
-        template: function($timeout) {
-            var html = '\
-            <div class="ma-text-box"\
-                ng-class="{\
-                    \'ma-text-box-is-disabled\': isDisabled\
-                }">\
-                <input class="ma-text-box-value form-control input-{{_size}}"\
-                    ng-disabled="isDisabled"\
-                    type="text"\
-                    ng-model="value"/>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element) {
-            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
-            // valueType,
-
-            // getValueInType = function(value) {
-            //     if (!value) {
-            //         return null;
-            //     } else if (dateType === 'String') {
-            //         return value.toString();
-            //     } else if (angular.isNumber(value)) {
-            //         return date;
-            //     } else {
-            //         return maDateConverter.format(date, format);
-            //     }
-            // },
-            // onChange = function (value) {
-            //     scope.change({
-            //         value: value
-            //     });
-            // };
-
-            scope._size = scope.size ? scope.size : 'sm';
-
-            $timeout(function() {
-                // move id to input
-                element.removeAttr('id');
-                valueElement.attr('id', scope.id);
-            });
-
-            // scope.$watch('value', function(newValue, oldValue) {
-            //     if (newValue === oldValue) {
-            //         return;
-            //     }
-            //
-            //     scope.change({
-            //         value: value
-            //     });
-            // });
-
-
-            // if (scope.value) {
-            //     // determine initial value type
-            //     if (maHelper.isString(scope.value)) {
-            //         valueType = 'String';
-            //     } else {
-            //         valueType = 'Number';
-            //     }
-            //
-            //     valueElement.val(scope.value);
-            // }
         }
     };
 }]);

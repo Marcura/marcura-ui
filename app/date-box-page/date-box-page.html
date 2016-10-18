@@ -10,27 +10,25 @@
     </div>
     <div class="nodes-item">
         <ma-date-box
-            date="date1"
-            is-resettable="false"
-            change="change1(date)">
+            value="date1"
+            change="change1(maValue)">
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        date: {{date1}}
+        value: {{date1}}
     </div>
     <div class="nodes-item">
         <h2>Date in UTC+09:00</h2>
     </div>
     <div class="nodes-item">
         <ma-date-box
-            date="date2"
+            value="date2"
             time-zone="'+09:00'"
-            change="change2(date)"
-            is-resettable="false">
+            change="change2(maValue)">
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        date: {{date2}}
+        value: {{date2}}
     </div>
     <div class="nodes-item">
         <h2>Date and time</h2>
@@ -38,12 +36,11 @@
     <div class="nodes-item">
         <ma-date-box
             has-time="true"
-            date="date3"
-            is-resettable="false">
+            value="date3">
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        date: {{date3}}
+        value: {{date3}}
     </div>
     <div class="nodes-item">
         <h2>Date and time in UTC+09:00</h2>
@@ -51,31 +48,25 @@
     <div class="nodes-item">
         <ma-date-box
             instance="date4Instance"
-            is-resettable="false"
             has-time="true"
-            date="date4"
+            value="date4"
             time-zone="'+09:00'"
             is-disabled="date4Disabled">
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        date: {{date4}}
+        value: {{date4}}
     </div>
     <div class="nodes-item">
         <h2>Disabled</h2>
     </div>
     <div class="nodes-item">
         <ma-date-box
-            date="date5"
-            is-disabled="true">
-        </ma-date-box>
-    </div>
-    <div class="nodes-item">
-        <ma-date-box
             has-time="true"
-            date="date6"
+            value="date6"
             is-disabled="true"
-            time-zone="'+09:00'">
+            time-zone="'+09:00'"
+            can-reset="true">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -83,35 +74,32 @@
     </div>
     <div class="nodes-item">
         <ma-date-box
-            date="date7"
-            is-required="true"
-            is-resettable="false">
+            value="date7"
+            is-required="true">
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        date: {{date7}}
+        value: {{date7}}
     </div>
     <div class="nodes-item">
         <ma-date-box
             has-time="true"
-            date="date8"
-            is-required="true"
-            is-resettable="false">
+            value="date8"
+            is-required="true">
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        date: {{date8}}
+        value: {{date8}}
     </div>
     <div class="nodes-item">
         <h2>Min and max dates</h2>
     </div>
     <div class="nodes-item">
         <ma-date-box
-            date="date9"
+            value="date9"
             min-date="date9min"
             max-date="date9max"
-            is-resettable="false"
-            change="change1(date)">
+            change="change1(maValue)">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -119,8 +107,8 @@
     </div>
     <div class="nodes-item">
         <ma-date-box
-            date="date10"
-            is-resettable="true">
+            value="date10"
+            can-reset="true">
         </ma-date-box>
     </div>
 </div>
