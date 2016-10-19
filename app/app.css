@@ -168,3 +168,13 @@ a:hover {
     border-radius: 3px;
     background-color: #cccccc;
 }
+
+.api-documentation {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+pre {
+    border: none;
+    margin: 0;
+}

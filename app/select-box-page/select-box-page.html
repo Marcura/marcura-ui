@@ -3,7 +3,10 @@
         <a href="#/home">Home</a>
     </div>
     <div class="nodes-item">
-        <h1>SelectBox (<a href="https://github.com/Marcura/marcura-ui/wiki/selectbox">API documentation</a>)</h1>
+        <h1>SelectBox</h1>
+        <div class="api-documentation">
+            <a href="https://github.com/Marcura/marcura-ui/wiki/selectbox">API documentation</a>
+        </div>
     </div>
     <div class="nodes-item">
         <h2>Array of strings</h2>
@@ -15,6 +18,9 @@
             is-loading="isLoading"
             change="change1(maValue)">
         </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{port1 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Array of objects</h2>
@@ -30,6 +36,9 @@
         </ma-select-box>
     </div>
     <div class="nodes-item">
+        <pre>{{(port2 || 'null') | json}}</pre>
+    </div>
+    <div class="nodes-item">
         <h2>Adding a custom item as string</h2>
     </div>
     <div class="nodes-item">
@@ -39,6 +48,9 @@
             can-add-item="true"
             change="change5(maValue)">
         </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{port5 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Adding a custom item as object</h2>
@@ -53,6 +65,9 @@
             change="change3(maValue)"
             instance="port3SelectBox">
         </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(port3 || null) | json}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Disabled</h2>
@@ -114,7 +129,6 @@
             focus="focus7(item)"
             blur="blur7(item)"
             change="change7(maValue)"
-            show-add-item-tooltip="false"
             can-add-item="true">
         </ma-select-box>
     </div>
@@ -135,6 +149,9 @@
         </ma-select-box>
     </div>
     <div class="nodes-item">
+        <pre>{{(port8 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
         <h2>Required</h2>
     </div>
     <div class="nodes-item">
@@ -152,7 +169,13 @@
         </ma-select-box>
     </div>
     <div class="nodes-item">
+        <pre>{{(port9 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
         <h2>AJAX</h2>
+    </div>
+    <div class="nodes-item">
+        Enter 3 any characters.
     </div>
     <div class="nodes-item">
         <ma-select-box
@@ -166,6 +189,9 @@
             change="change10(maValue)"
             can-reset="true">
         </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(port10 || null) | json}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Reset button</h2>
@@ -182,6 +208,9 @@
             can-add-item="true"
             can-reset="true">
         </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(port11 || null) | json}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Placeholder</h2>

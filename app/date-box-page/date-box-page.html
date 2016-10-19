@@ -3,7 +3,10 @@
         <a href="#/home">Home</a>
     </div>
     <div class="nodes-item">
-        <h1>DateBox (<a href="https://github.com/Marcura/marcura-ui/wiki/datebox">API documentation</a>)</h1>
+        <h1>DateBox</h1>
+        <div class="api-documentation">
+            <a href="https://github.com/Marcura/marcura-ui/wiki/datebox">API documentation</a>
+        </div>
     </div>
     <div class="nodes-item">
         <h2>Date in UTC</h2>
@@ -15,7 +18,7 @@
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        value: {{date1}}
+        <pre>{{date1 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Date in UTC+09:00</h2>
@@ -28,7 +31,7 @@
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        value: {{date2}}
+        <pre>{{date2 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Date and time</h2>
@@ -40,7 +43,7 @@
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        value: {{date3}}
+        <pre>{{date3 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Date and time in UTC+09:00</h2>
@@ -55,7 +58,7 @@
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        value: {{date4}}
+        <pre>{{date4 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Disabled</h2>
@@ -79,7 +82,7 @@
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        value: {{date7}}
+        <pre>{{date7}}</pre>
     </div>
     <div class="nodes-item">
         <ma-date-box
@@ -89,7 +92,7 @@
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        value: {{date8}}
+        <pre>{{date8 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Min and max dates</h2>
@@ -103,6 +106,13 @@
         </ma-date-box>
     </div>
     <div class="nodes-item">
+        <pre>minDate: {{date9min}}
+maxDate: {{date9max}}</pre>
+    </div>
+    <div class="nodes-item">
+        <pre>{{date9 || 'null'}}</pre>
+    </div>
+    <div class="nodes-item">
         <h2>Reset button</h2>
     </div>
     <div class="nodes-item">
@@ -110,5 +120,8 @@
             value="date10"
             can-reset="true">
         </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{date10 || 'null'}}</pre>
     </div>
 </div>

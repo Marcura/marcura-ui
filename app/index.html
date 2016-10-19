@@ -1,58 +1,59 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en" ng-app="app">
-<head class="app">
-    <meta charset="utf-8">
-    <title>Marcura UI</title>
-    <link href="../node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet"/>
-    <link href="../node_modules/pikaday/css/pikaday.css" rel="stylesheet"/>
-    <link href="../node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
-    <link href="../node_modules/select2/select2.css" rel="stylesheet"/>
-    <link href="../node_modules/ui-select/dist/select.min.css" rel="stylesheet"/>
-    <link href="../node_modules/pace/themes/blue/pace-theme-flash.css" rel="stylesheet"/>
-    <link href="../dist/marcura-ui.min.css" rel="stylesheet"/>
-    <link href="app.css" rel="stylesheet"/>
-    <link href="date-box-page/date-box-page.css" rel="stylesheet"/>
-    <link href="select-box-page/select-box-page.css" rel="stylesheet"/>
-    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="ajax-mock.js"></script>
-    <script src="../node_modules/angular/angular.js"></script>
-    <script src="../node_modules/angular-sanitize/angular-sanitize.min.js"></script>
-    <script src="../node_modules/angular-ui-router/release/angular-ui-router.min.js"></script>
-    <script src="../node_modules/moment/min/moment.min.js"></script>
-    <script src="../node_modules/pikaday/pikaday.js"></script>
-    <script src="../node_modules/select2/select2.js"></script>
-    <script src="../node_modules/angular-bootstrap-npm/dist/angular-bootstrap.min.js"></script>
-    <script src="../node_modules/pace/pace.min.js"></script>
-    <script src="../node_modules/angular-ui-select2/src/select2.js"></script>
-    <script src="../node_modules/ui-select/dist/select.min.js"></script>
-    <script src="../dist/marcura-ui.js"></script>
-    <script src="app.js"></script>
-    <script src="services/helper.js"></script>
-    <script src="home/home.js"></script>
-    <script src="button-page/button-page.js"></script>
-    <script src="date-box-page/date-box-page.js"></script>
-    <script src="grid-page/grid-page.js"></script>
-    <script src="side-menu-page/side-menu-page.js"></script>
-    <script src="tabs-page/tabs-page.js"></script>
-    <script src="progress-page/progress-page.js"></script>
-    <script src="text-box-page/text-box-page.js"></script>
-    <script src="text-area-page/text-area-page.js"></script>
-    <script src="check-box-page/check-box-page.js"></script>
-    <script src="radio-box-page/radio-box-page.js"></script>
-    <script src="select-box-page/select-box-page.js"></script>
-    <script src="ui-select-page/ui-select-page.js"></script>
-    <script src="costs-grid-page/costs-grid-page.js"></script>
-    <script src="reset-value-page/reset-value-page.js"></script>
-    <script src="form-page/form-page.js"></script>
-    <script src="modal-page/modal-page.js"></script>
-    <script src="modal-page/modal/modal.js"></script>
-</head>
-<body class="app-body">
-<div class="app-header">
-    <h1>Marcura UI</h1>
-</div>
-<div class="app-inner">
-    <div ui-view></div>
-</div>
-</body>
+    <head class="app">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8">
+        <title>Marcura UI</title>
+        <link href="../node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet"/>
+        <link href="../node_modules/pikaday/css/pikaday.css" rel="stylesheet"/>
+        <link href="../node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+        <link href="../node_modules/select2/select2.css" rel="stylesheet"/>
+        <link href="../node_modules/ui-select/dist/select.min.css" rel="stylesheet"/>
+        <link href="../node_modules/pace/themes/blue/pace-theme-flash.css" rel="stylesheet"/>
+        <link href="../dist/marcura-ui.min.css" rel="stylesheet"/>
+        <link href="app.css" rel="stylesheet"/>
+        <link href="date-box-page/date-box-page.css" rel="stylesheet"/>
+        <link href="select-box-page/select-box-page.css" rel="stylesheet"/>
+        <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="ajax-mock.js"></script>
+        <script src="../node_modules/angular/angular.js"></script>
+        <script src="../node_modules/angular-sanitize/angular-sanitize.min.js"></script>
+        <script src="../node_modules/angular-ui-router/release/angular-ui-router.min.js"></script>
+        <script src="../node_modules/moment/min/moment.min.js"></script>
+        <script src="../node_modules/pikaday/pikaday.js"></script>
+        <script src="../node_modules/select2/select2.js"></script>
+        <script src="../node_modules/angular-bootstrap-npm/dist/angular-bootstrap.min.js"></script>
+        <script src="../node_modules/pace/pace.min.js"></script>
+        <script src="../node_modules/angular-ui-select2/src/select2.js"></script>
+        <script src="../node_modules/ui-select/dist/select.min.js"></script>
+        <script src="../dist/marcura-ui.js"></script>
+        <script src="app.js"></script>
+        <script src="services/helper.js"></script>
+        <script src="home/home.js"></script>
+        <script src="button-page/button-page.js"></script>
+        <script src="date-box-page/date-box-page.js"></script>
+        <script src="grid-page/grid-page.js"></script>
+        <script src="side-menu-page/side-menu-page.js"></script>
+        <script src="tabs-page/tabs-page.js"></script>
+        <script src="progress-page/progress-page.js"></script>
+        <script src="text-box-page/text-box-page.js"></script>
+        <script src="text-area-page/text-area-page.js"></script>
+        <script src="check-box-page/check-box-page.js"></script>
+        <script src="radio-box-page/radio-box-page.js"></script>
+        <script src="select-box-page/select-box-page.js"></script>
+        <script src="ui-select-page/ui-select-page.js"></script>
+        <script src="costs-grid-page/costs-grid-page.js"></script>
+        <script src="reset-value-page/reset-value-page.js"></script>
+        <script src="form-page/form-page.js"></script>
+        <script src="modal-page/modal-page.js"></script>
+        <script src="modal-page/modal/modal.js"></script>
+    </head>
+    <body class="app-body">
+        <div class="app-header">
+            <h1>Marcura UI</h1>
+        </div>
+        <div class="app-inner">
+            <div ui-view></div>
+        </div>
+    </body>
 </html>

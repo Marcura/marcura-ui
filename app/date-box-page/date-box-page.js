@@ -2,6 +2,7 @@ angular.module('app.controllers').controller('dateBoxPageController', dateBoxPag
 
 function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) {
     $scope.maValidators = maValidators;
+    $scope.maDateConverter = maDateConverter;
 
     // Moment string.
     $scope.date1 = '2016-07-25T00:00:00Z';
@@ -13,7 +14,7 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
     $scope.date4Instance = {};
     $scope.date6 = '2016-07-25T16:30:00Z';
     $scope.date7 = '2016-07-25T00:00:00Z';
-    $scope.date8 = '2016-07-25T16:30:00+04:00';
+    $scope.date8 = '2016-07-25T16:30:00Z';
     $scope.date9 = maDateConverter.format(moment(), 'yyyy-MM-ddT00:00:00Z');
     $scope.date9min = maDateConverter.format(moment().add(-5, 'day'), 'yyyy-MM-ddT00:00:00Z');
     $scope.date9max = maDateConverter.format(moment().add(5, 'day'), 'yyyy-MM-ddT00:00:00Z');
