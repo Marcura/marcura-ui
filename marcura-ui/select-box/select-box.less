@@ -23,7 +23,7 @@
         cursor: default;
     }
 
-    &-is-invalid&-is-touched {
+    :not( &-is-loading)&-is-invalid&-is-touched {
         &.ma-select-box-is-text-focused .ma-select-box-text,
         .select2-container-active:not(.select2-dropdown-open) .select2-choice {
             .box-shadow(@input-shadow-invalid);

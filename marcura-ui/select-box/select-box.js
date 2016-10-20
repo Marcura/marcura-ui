@@ -51,7 +51,8 @@ angular.module('marcuraUI.components')
                             \'ma-select-box-mode-add\': isAddMode,\
                             \'ma-select-box-mode-select\': !isAddMode,\
                             \'ma-select-box-can-reset\': canReset,\
-                            \'ma-select-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled()\
+                            \'ma-select-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
+                            \'ma-select-box-is-loading\': isLoading\
                         }">\
                         <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
                             <div class="pace">\
@@ -586,16 +587,35 @@ angular.module('marcuraUI.components')
                     };
                 }
 
+                // Create a custom 'IsNotEmpty' validator, which also checks that
+                // a selected item is in the list.
+                var isNotEmptyAndInListValidator = {
+                    name: 'IsNotEmpty',
+                    method: function(value) {
+                        if (maHelper.isNullOrWhiteSpace(value)) {
+                            return false;
+                        }
+
+                        // In select mode check that a selected item is in the list.
+                        if (!scope.isAddMode && !isExistingItem(value)) {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                };
+
                 // Set up validators.
                 for (var i = 0; i < validators.length; i++) {
                     if (validators[i].name === 'IsNotEmpty') {
                         hasIsNotEmptyValidator = true;
+                        validators[i] = isNotEmptyAndInListValidator;
                         break;
                     }
                 }
 
                 if (!hasIsNotEmptyValidator && isRequired) {
-                    validators.unshift(maValidators.isNotEmpty());
+                    validators.unshift(isNotEmptyAndInListValidator);
                 }
 
                 if (hasIsNotEmptyValidator) {
