@@ -13,7 +13,7 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
     $scope.date4Disabled = false;
     $scope.date4Instance = {};
     $scope.date6 = '2016-07-25T16:30:00Z';
-    $scope.date7 = '2016-07-25T00:00:00Z';
+    // $scope.date7 = '2016-07-25T00:00:00Z';
     $scope.date8 = '2016-07-25T16:30:00Z';
     $scope.date9 = maDateConverter.format(moment(), 'yyyy-MM-ddT00:00:00Z');
     $scope.date9min = maDateConverter.format(moment().add(-5, 'day'), 'yyyy-MM-ddT00:00:00Z');
@@ -31,6 +31,11 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
 
     $scope.change3 = function(date) {
         console.log('change:', date);
+    };
+
+    $scope.change10 = function(date) {
+        console.log('event:', date);
+        console.log('scope:', $scope.date10);
     };
 
     // $scope.$watch('date2', function(newDate, oldDate) {

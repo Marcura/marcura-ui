@@ -78,11 +78,12 @@
     <div class="nodes-item">
         <ma-date-box
             value="date7"
-            is-required="true">
+            is-required="true"
+            can-reset="true">
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        <pre>{{date7}}</pre>
+        <pre>{{date7 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
         <ma-date-box
@@ -118,7 +119,8 @@ maxDate: {{date9max}}</pre>
     <div class="nodes-item">
         <ma-date-box
             value="date10"
-            can-reset="true">
+            can-reset="true"
+            change="change10(maValue)">
         </ma-date-box>
     </div>
     <div class="nodes-item">

@@ -30,7 +30,7 @@ angular.module('marcuraUI.components')
                 var html = '\
                 <div class="ma-date-box" ng-class="{\
                         \'ma-date-box-has-time\': hasTime,\
-                        \'ma-date-box-is-invalid\': !_isValid,\
+                        \'ma-date-box-is-invalid\': !isValid,\
                         \'ma-date-box-is-disabled\': isDisabled,\
                         \'ma-date-box-is-focused\': isFocused,\
                         \'ma-date-box-is-touched\': isTouched,\
@@ -105,6 +105,7 @@ angular.module('marcuraUI.components')
 
                 var onChange = function(internalDate) {
                     var date = null;
+                    previousDate = internalDate;
 
                     if (internalDate) {
                         date = moment(new Date());
@@ -213,7 +214,7 @@ angular.module('marcuraUI.components')
                             // Use $timeout to apply scope changes instead of $apply,
                             // which throws digest error at this point.
                             $timeout(function() {
-                                scope._isValid = true;
+                                scope.isValid = true;
                             });
 
                             if (scope.hasTime) {
@@ -224,8 +225,6 @@ angular.module('marcuraUI.components')
                             if (!hasDateChanged(date)) {
                                 return;
                             }
-
-                            previousDate = date;
 
                             onChange(date);
                         }
@@ -241,14 +240,14 @@ angular.module('marcuraUI.components')
                 };
 
                 var validate = function(date) {
-                    if (!validators || !validators.length) {
-                        return;
-                    }
+                    scope.isValid = true;
 
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].method(date)) {
-                            scope._isValid = false;
-                            break;
+                    if (validators && validators.length) {
+                        for (var i = 0; i < validators.length; i++) {
+                            if (!validators[i].method(date)) {
+                                scope.isValid = false;
+                                break;
+                            }
                         }
                     }
                 };
@@ -283,7 +282,7 @@ angular.module('marcuraUI.components')
 
                 prepareValidators();
                 scope.isFocused = false;
-                scope._isValid = true;
+                scope.isValid = true;
                 scope.isTouched = false;
 
                 scope.isResetEnabled = function() {
@@ -296,6 +295,7 @@ angular.module('marcuraUI.components')
 
                 scope.onBlur = function() {
                     scope.isFocused = false;
+                    scope.isTouched = true;
 
                     var date = dateElement.val().trim(),
                         isEmpty = date === '',
@@ -311,44 +311,48 @@ angular.module('marcuraUI.components')
                         maDate = parseDate(date) || maDate;
                         maDate.offset = initialDateOffset;
                     } else {
-                        scope._isValid = false;
+                        scope.isValid = false;
                         return;
                     }
 
-                    // Date is incorrect (has not been parsed) or is empty and touched.
-                    if ((!isEmpty && !maDate.date) || (isEmpty && scope.isTouched && isRequired)) {
-                        scope._isValid = false;
-                        return;
-                    }
+                    // Date has been emptied.
+                    if (isEmpty) {
+                        validate(maDate.date);
 
-                    if (maDate.date) {
-                        if (scope.hasTime || (!scope.isTouched && initialDisplayDate === date)) {
-                            // Substruct time zone offset.
-                            maDate.date = addTimeToDate(maDate.date);
-                            maDate.date = maDateConverter.offsetUtc(maDate.date, -(timeZoneOffset - initialDateOffset));
+                        if (scope.isValid) {
+                            setDisplayDate();
+                            onChange();
                         }
+
+                        return;
                     }
+
+                    // Failed to parse the date.
+                    if (!maDate.date) {
+                        scope.isValid = false;
+                        return;
+                    }
+
+                    if (maDate.date && (scope.hasTime || initialDisplayDate === date)) {
+                        // Substruct time zone offset.
+                        maDate.date = addTimeToDate(maDate.date);
+                        maDate.date = maDateConverter.offsetUtc(maDate.date, -(timeZoneOffset - initialDateOffset));
+                    }
+
+                    validate(maDate.date);
 
                     if (!hasDateChanged(maDate.date)) {
+                        // Refresh diplay date in case the user changed its format, e.g.
+                        // from 12 Oct 16 to 12Oct16. We need to set it back to 12 Oct 16.
                         setDisplayDate(maDate);
-                        // Validate date to ensure that _isValid has correct value.
-                        scope._isValid = true;
-                        validate(maDate.date);
                         return;
                     }
 
                     if (maDate.date) {
                         setDisplayDate(maDate);
-                        previousDate = maDate.date;
                     }
 
-                    // Validate date.
-                    if (validators && validators.length) {
-                        scope._isValid = true;
-                        validate(maDate.date);
-                    }
-
-                    if (!scope._isValid) {
+                    if (!scope.isValid) {
                         return;
                     }
 
@@ -399,15 +403,11 @@ angular.module('marcuraUI.components')
                     }
 
                     previousDate = null;
-
-                    if (isRequired) {
-                        scope._isValid = false;
-                        setDisplayDate();
-                    } else {
-                        onChange();
-                    }
-
+                    scope.isValid = !isRequired;
                     scope.isTouched = true;
+
+                    onChange();
+                    setDisplayDate();
                     dateElement.focus();
                 };
 
@@ -485,7 +485,7 @@ angular.module('marcuraUI.components')
                         scope.isTouched = true;
 
                         if (isRequired && !scope.value) {
-                            scope._isValid = false;
+                            scope.isValid = false;
                             return;
                         }
 
@@ -493,7 +493,7 @@ angular.module('marcuraUI.components')
                     };
 
                     scope.instance.isValid = function() {
-                        return scope._isValid;
+                        return scope.isValid;
                     };
                 }
             }
