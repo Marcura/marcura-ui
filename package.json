@@ -1,5 +1,5 @@
 {
-    "version": "0.18.45",
+    "version": "0.18.46",
     "name": "marcura-ui",
     "description": "Marcura UI",
     "author": "Marcura",
@@ -42,5 +42,14 @@
     "main": "server.js",
     "scripts": {
         "start": "node server.js"
-    }
+    },
+    "keywords": [
+        "angular ui",
+        "angular components",
+        "angular select",
+        "angular select box",
+        "angular checkbox",
+        "angular radio",
+        "angular radiobox"
+    ]
 }

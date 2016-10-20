@@ -578,6 +578,12 @@ angular.module('marcuraUI.components')
                     scope.instance.isValid = function() {
                         return scope.isValid;
                     };
+
+                    scope.instance.validate = function() {
+                        scope.isTouched = true;
+
+                        validate(scope.value);
+                    };
                 }
 
                 // Set up validators.
