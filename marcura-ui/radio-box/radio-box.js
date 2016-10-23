@@ -138,9 +138,9 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                     var hasChanged = true;
 
                     if (isStringArray) {
-                        hasChanged = scope.item !== oldValue;
+                        hasChanged = oldValue !== scope.item;
                     } else if (scope.itemValueField) {
-                        hasChanged = scope.item[scope.itemValueField] !== oldValue[scope.itemValueField];
+                        hasChanged = oldValue && oldValue[scope.itemValueField] !== scope.item[scope.itemValueField];
                     }
 
                     if (hasChanged) {
