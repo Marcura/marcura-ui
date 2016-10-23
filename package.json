@@ -44,12 +44,13 @@
         "start": "node server.js"
     },
     "keywords": [
-        "angular ui",
-        "angular components",
-        "angular select",
-        "angular select box",
-        "angular checkbox",
-        "angular radio",
-        "angular radiobox"
+        "angular",
+        "ui",
+        "components",
+        "select",
+        "date picker",
+        "checkbox",
+        "radiobox",
+        "button"
     ]
 }
