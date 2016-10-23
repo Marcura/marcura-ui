@@ -141,6 +141,9 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                         hasChanged = oldValue !== scope.item;
                     } else if (scope.itemValueField) {
                         hasChanged = oldValue && oldValue[scope.itemValueField] !== scope.item[scope.itemValueField];
+                    } else {
+                        // Compare objects if itemValueField is not provided.
+                        hasChanged = oldValue && JSON.stringify(oldValue) === JSON.stringify(scope.item);
                     }
 
                     if (hasChanged) {
