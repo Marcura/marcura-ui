@@ -105,6 +105,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -200,27 +221,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -823,8 +823,7 @@ angular.element(document).ready(function() {
             isDisabled: '=',
             hideText: '=',
             change: '&',
-            size: '@',
-            comparer: '='
+            size: '@'
         },
         replace: true,
         template: function() {
@@ -915,11 +914,14 @@ angular.element(document).ready(function() {
             };
 
             scope.isChecked = function() {
-                if (scope.comparer) {
-                    return scope.comparer(scope.item, scope.value);
+                if (isStringArray) {
+                    return scope.item === scope.value;
+                } else if (scope.itemValueField) {
+                    return scope.item && scope.value &&
+                        scope.item[scope.itemValueField] === scope.value[scope.itemValueField];
                 }
 
-                return JSON.stringify(scope.item) === JSON.stringify(scope.value);
+                return false;
             };
 
             scope.onChange = function() {
@@ -930,7 +932,7 @@ angular.element(document).ready(function() {
 
                     if (controllerScope && valuePropertyParts) {
                         // When the component is inside ng-repeat normal binding like
-                        // selected-value="selectedPort" won't work.
+                        // value="port" won't work.
                         // This is to workaround the problem.
                         valueProperty = controllerScope;
 
@@ -945,12 +947,23 @@ angular.element(document).ready(function() {
                         controllerScope[attributes.value] = scope.item;
                     }
 
-                    $timeout(function() {
-                        scope.change({
-                            maValue: scope.item,
-                            maOldValue: oldValue
+                    // Check that value has changed.
+                    var hasChanged = true;
+
+                    if (isStringArray) {
+                        hasChanged = scope.item !== oldValue;
+                    } else if (scope.itemValueField) {
+                        hasChanged = scope.item[scope.itemValueField] !== oldValue[scope.itemValueField];
+                    }
+
+                    if (hasChanged) {
+                        $timeout(function() {
+                            scope.change({
+                                maValue: scope.item,
+                                maOldValue: oldValue
+                            });
                         });
-                    });
+                    }
                 }
             };
 

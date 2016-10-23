@@ -10,8 +10,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             isDisabled: '=',
             hideText: '=',
             change: '&',
-            size: '@',
-            comparer: '='
+            size: '@'
         },
         replace: true,
         template: function() {
@@ -102,11 +101,14 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             };
 
             scope.isChecked = function() {
-                if (scope.comparer) {
-                    return scope.comparer(scope.item, scope.value);
+                if (isStringArray) {
+                    return scope.item === scope.value;
+                } else if (scope.itemValueField) {
+                    return scope.item && scope.value &&
+                        scope.item[scope.itemValueField] === scope.value[scope.itemValueField];
                 }
 
-                return JSON.stringify(scope.item) === JSON.stringify(scope.value);
+                return false;
             };
 
             scope.onChange = function() {
@@ -117,7 +119,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
 
                     if (controllerScope && valuePropertyParts) {
                         // When the component is inside ng-repeat normal binding like
-                        // selected-value="selectedPort" won't work.
+                        // value="port" won't work.
                         // This is to workaround the problem.
                         valueProperty = controllerScope;
 
@@ -132,12 +134,23 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                         controllerScope[attributes.value] = scope.item;
                     }
 
-                    $timeout(function() {
-                        scope.change({
-                            maValue: scope.item,
-                            maOldValue: oldValue
+                    // Check that value has changed.
+                    var hasChanged = true;
+
+                    if (isStringArray) {
+                        hasChanged = scope.item !== oldValue;
+                    } else if (scope.itemValueField) {
+                        hasChanged = scope.item[scope.itemValueField] !== oldValue[scope.itemValueField];
+                    }
+
+                    if (hasChanged) {
+                        $timeout(function() {
+                            scope.change({
+                                maValue: scope.item,
+                                maOldValue: oldValue
+                            });
                         });
-                    });
+                    }
                 }
             };
 

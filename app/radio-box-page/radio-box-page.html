@@ -38,18 +38,21 @@
         <ma-radio-box
             item="ports2[0]"
             item-text-field="name"
+            item-value-field="id"
             value="port2"
             change="change2(maValue)">
         </ma-radio-box><!--
         --><ma-radio-box
             item="ports2[1]"
             item-text-field="name"
+            item-value-field="id"
             value="port2"
             change="change2(maValue)">
         </ma-radio-box><!--
         --><ma-radio-box
             item="ports2[2]"
             item-text-field="name"
+            item-value-field="id"
             value="port2"
             change="change2(maValue)">
         </ma-radio-box>
@@ -129,10 +132,6 @@
     <div class="nodes-item">
         <pre>{{port6 || 'null'}}</pre>
     </div>
-
-
-
-
     <div class="nodes-item">
         <h2>A custom template for item (HTML is supported)</h1>
     </div>
@@ -140,23 +139,25 @@
         <ma-radio-box
             item="ports2[0]"
             item-text-field="name"
+            item-value-field="id"
             value="port7">
         </ma-radio-box><!--
         --><ma-radio-box
             item="ports2[1]"
             item-template="port7ItemTemplate"
+            item-value-field="id"
             value="port7">
         </ma-radio-box><!--
         --><ma-radio-box
             item="ports2[2]"
             item-text-field="name"
+            item-value-field="id"
             value="port7">
         </ma-radio-box>
     </div>
     <div class="nodes-item">
         <pre>{{(port7 || 'null') | json}}</pre>
     </div>
-
     <div class="nodes-item">
         <h2>Inside ng-repeat</h1>
     </div>
@@ -165,6 +166,7 @@
             <ma-radio-box
                 item="port"
                 item-text-field="name"
+                item-value-field="id"
                 value="port5"
                 change="change5(maValue, maOldValue)">
             </ma-radio-box>
