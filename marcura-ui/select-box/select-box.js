@@ -597,7 +597,8 @@ angular.module('marcuraUI.components')
                         }
 
                         // In select mode check that a selected item is in the list.
-                        if (!scope.isAddMode && !isExistingItem(value)) {
+                        // In AJAX mode there is no items array and we can not check it.
+                        if (!scope.isAjax && !scope.isAddMode && !isExistingItem(value)) {
                             return false;
                         }
 
