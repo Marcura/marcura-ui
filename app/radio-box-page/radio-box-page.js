@@ -1,40 +1,50 @@
 angular.module('app.controllers').controller('radioBoxPageController', radioBoxPageController);
 
-function radioBoxPageController($scope, $timeout) {
-    $scope.selectedPortName = 'top';
-    $scope.ports = [{
-        id: 1,
-        name: 'Tokai'
-    }, {
-        id: 2,
-        name: 'Vladivostok'
-    }, {
-        id: 3,
-        name: 'Navlakhi'
-    }];
-    $scope.ports2 = angular.copy($scope.ports);
-    $scope.selectedPort = null;
-    $scope.selectedPort2 = null;
+function radioBoxPageController($scope, $timeout, helper) {
+    $scope.ports2 = helper.getPorts();
+    $scope.ports1 = [];
 
-    // $scope.portComparer = function(port, selectedPort) {
-    //     return port && selectedPort && port.id === selectedPort.id;
-    // };
+    angular.forEach($scope.ports2, function(port) {
+        $scope.ports1.push(port.name);
+    });
 
-    $scope.change = function(value) {
-        console.log('value:', value);
+    $scope.port1 = $scope.ports1[1];
+    $scope.port2 = $scope.ports2[1];
+    $scope.port3 = $scope.ports1[1];
+    $scope.port4 = $scope.ports1[1];
+    $scope.port5 = $scope.ports2[1];
+    $scope.port6 = $scope.ports1[1];
+    $scope.port7 = $scope.ports2[1];
+    $scope.port7ItemTemplate = function(port) {
+        return '<strong>' + port.name + '</strong>' + ' (' + port.country.name + ')';
     };
 
-    $scope.portChange2 = function(value, oldValue) {
-        console.log('selectedPort:', $scope.selectedPort2);
-        console.log('value:', value);
-        console.log('oldValue:', oldValue);
+    $scope.change1 = function(port) {
+        console.log('change');
+        console.log('scope:', $scope.port1);
+        console.log('event:', port);
     };
 
-    $timeout(function() {
-        // $scope.selectedPort2 = {
-        //     id: 3,
-        //     name: 'Navlakhi'
-        // };
-        $scope.selectedPort2 = $scope.ports2[1];
-    }, 4000);
+    $scope.change2 = function(port) {
+        console.log('change');
+        console.log('scope:', $scope.port2);
+        console.log('event:', port);
+    };
+
+    $scope.change5 = function(port, oldPort) {
+        console.log('change');
+        console.log('scope:', $scope.port5);
+        console.log('event:', port);
+        console.log('old value:', oldPort);
+    };
+
+    $scope.change6 = function(port) {
+        console.log('change');
+        console.log('scope:', $scope.port6);
+        console.log('event:', port);
+    };
+
+    // $timeout(function() {
+    //     $scope.port2 = $scope.ports2[0];
+    // }, 4000);
 }

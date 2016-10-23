@@ -204,6 +204,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function() {
         this.$get = function() {
@@ -706,27 +727,6 @@ angular.element(document).ready(function() {
         };
     }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
         restrict: 'E',
@@ -815,10 +815,13 @@ angular.element(document).ready(function() {
     return {
         restrict: 'E',
         scope: {
-            text: '=',
+            item: '=',
+            itemTemplate: '=',
+            itemTextField: '@',
+            itemValueField: '@',
             value: '=',
-            selectedValue: '=',
             isDisabled: '=',
+            hideText: '=',
             change: '&',
             size: '@',
             comparer: '='
@@ -834,10 +837,10 @@ angular.element(document).ready(function() {
                 ng-class="{\
                     \'ma-radio-box-is-checked\': isChecked(),\
                     \'ma-radio-box-is-disabled\': isDisabled,\
-                    \'ma-radio-box-has-text\': hasText,\
+                    \'ma-radio-box-has-text\': hasText(),\
                     \'ma-radio-box-is-focused\': isFocused\
                 }">\
-                <span class="ma-radio-box-text" ng-bind-html="_text"></span>\
+                <span class="ma-radio-box-text" ng-bind-html="getItemText()"></span>\
                 <div class="ma-radio-box-inner"></div>\
                 <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
             </div>';
@@ -845,56 +848,85 @@ angular.element(document).ready(function() {
             return html;
         },
         link: function(scope, element, attributes) {
-            var valuePropertyParts = null,
-                setTabindex = function() {
-                    if (scope.isDisabled) {
-                        element.removeAttr('tabindex');
+            var nbspCharacter = '&nbsp;',
+                valuePropertyParts = null,
+                isStringArray = !scope.itemTextField && !scope.itemValueField;
+
+            var setTabindex = function() {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
+            var getControllerScope = function() {
+                var controllerScope = null,
+                    initialScope = scope.$parent,
+                    property = attributes.value;
+
+                // In case of a nested property binding like 'company.port.id'.
+                if (property.indexOf('.') !== -1) {
+                    valuePropertyParts = property.split('.');
+                    property = valuePropertyParts[0];
+                }
+
+                while (initialScope && !controllerScope) {
+                    if (initialScope.hasOwnProperty(property)) {
+                        controllerScope = initialScope;
                     } else {
-                        element.attr('tabindex', '0');
+                        initialScope = initialScope.$parent;
                     }
-                },
-                getControllerScope = function() {
-                    var controllerScope = null,
-                        initialScope = scope.$parent,
-                        property = attributes.selectedValue;
+                }
 
-                    // In case of a nested property binding like 'company.port.id'.
-                    if (property.indexOf('.') !== -1) {
-                        valuePropertyParts = property.split('.');
-                        property = valuePropertyParts[0];
-                    }
+                return controllerScope;
+            };
 
-                    while (initialScope && !controllerScope) {
-                        if (initialScope.hasOwnProperty(property)) {
-                            controllerScope = initialScope;
-                        } else {
-                            initialScope = initialScope.$parent;
-                        }
-                    }
-
-                    return controllerScope;
-                },
-                controllerScope = getControllerScope();
+            var controllerScope = getControllerScope();
 
             scope._size = scope.size ? scope.size : 'xs';
             scope.cssClass = ' ma-radio-box-' + scope._size;
-            scope.hasText = scope.text ? true : false;
             scope.isFocused = false;
-            scope._text = $sce.trustAsHtml(scope.text || '&nbsp;');
+
+            scope.getItemText = function() {
+                if (scope.hideText) {
+                    return nbspCharacter;
+                }
+
+                var text;
+
+                if (scope.itemTemplate) {
+                    text = scope.itemTemplate(scope.item);
+                } else if (isStringArray) {
+                    text = scope.item;
+                } else if (scope.itemTextField) {
+                    text = scope.item[scope.itemTextField];
+                }
+
+                if (!angular.isString(text) || !text) {
+                    text = nbspCharacter;
+                }
+
+                return $sce.trustAsHtml(text);
+            };
+
+            scope.hasText = function() {
+                return scope.getItemText() !== nbspCharacter;
+            };
 
             scope.isChecked = function() {
                 if (scope.comparer) {
-                    return scope.comparer(scope.value, scope.selectedValue);
+                    return scope.comparer(scope.item, scope.value);
                 }
 
-                return JSON.stringify(scope.value) === JSON.stringify(scope.selectedValue);
+                return JSON.stringify(scope.item) === JSON.stringify(scope.value);
             };
 
             scope.onChange = function() {
                 if (!scope.isDisabled) {
                     var valueProperty,
-                        oldValue = scope.selectedValue;
-                    scope.selectedValue = scope.value;
+                        oldValue = scope.value;
+                    scope.value = scope.item;
 
                     if (controllerScope && valuePropertyParts) {
                         // When the component is inside ng-repeat normal binding like
@@ -907,16 +939,16 @@ angular.element(document).ready(function() {
                             valueProperty = valueProperty[valuePropertyParts[i]];
                         }
 
-                        valueProperty = scope.value;
+                        valueProperty = scope.item;
                     } else {
-                        valueProperty = controllerScope[attributes.selectedValue];
-                        controllerScope[attributes.selectedValue] = scope.value;
+                        valueProperty = controllerScope[attributes.value];
+                        controllerScope[attributes.value] = scope.item;
                     }
 
                     $timeout(function() {
                         scope.change({
-                            value: scope.value,
-                            oldValue: oldValue
+                            maValue: scope.item,
+                            maOldValue: oldValue
                         });
                     });
                 }
