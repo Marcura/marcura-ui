@@ -204,27 +204,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function() {
         this.$get = function() {
@@ -727,6 +706,27 @@ angular.element(document).ready(function() {
         };
     }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
         restrict: 'E',
@@ -1226,7 +1226,7 @@ angular.element(document).ready(function() {
                     return null;
                 };
 
-                var setValue = function(item) {
+                var setInternalValue = function(item) {
                     if (scope.canAddItem && item) {
                         // Switch mode depending on whether provided item exists in the list.
                         // This allows the component to be displayed in correct mode, let's say, in add mode,
@@ -1285,21 +1285,29 @@ angular.element(document).ready(function() {
                         // (AngularJS does not have ng-focusout event directive).
                         scope.$apply(function() {
                             scope.isTouched = true;
+                            var value;
 
                             if (scope.itemTextField) {
                                 if (scope.value && scope.value[scope.itemTextField] === scope.text) {
                                     return;
                                 }
 
-                                scope.value = getNewItem(scope.text);
+                                value = getNewItem(scope.text);
                             } else {
                                 if (scope.value === scope.text) {
                                     return;
                                 }
 
-                                scope.value = scope.text;
+                                value = scope.text;
                             }
 
+                            validate(value);
+
+                            if (!scope.isValid) {
+                                return;
+                            }
+
+                            scope.value = value;
                             previousAddedItem = scope.value;
 
                             // Postpone change event for $apply (which is being invoked by $timeout)
@@ -1455,7 +1463,7 @@ angular.element(document).ready(function() {
                         // Make sure that it is closed in add mode.
                         if (selectElement) {
                             // selectElement is undefined when scope.toggleMode method
-                            // is invoked from setValue initially.
+                            // is invoked from setInternalValue initially.
                             selectElement.select2('close');
                         }
 
@@ -1542,7 +1550,7 @@ angular.element(document).ready(function() {
                         return;
                     }
 
-                    setValue(newValue);
+                    setInternalValue(newValue);
                 });
 
                 // Validate text while it is being typed.
@@ -1621,7 +1629,7 @@ angular.element(document).ready(function() {
                     // Value is set inside timeout to ensure that we get the latest value.
                     // If put outside timeout then there could be issues when value is set
                     // from directive's link function, not from controller.
-                    setValue(scope.value);
+                    setInternalValue(scope.value);
 
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
                     selectData = selectElement.data().select2;
