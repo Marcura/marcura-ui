@@ -175,4 +175,30 @@
     <div class="nodes-item">
         <pre>{{(port5 || 'null') | json}}</pre>
     </div>
+    <div class="nodes-item">
+        <h2>Required</h1>
+    </div>
+    <div class="nodes-item">
+        <ma-radio-box
+            id="port8"
+            item="ports1[0]"
+            value="port8"
+            is-required="true">
+        </ma-radio-box><!--
+        --><ma-radio-box
+            id="port8"
+            item="ports1[1]"
+            value="port8"
+            is-required="true">
+        </ma-radio-box><!--
+        --><ma-radio-box
+            id="port8"
+            item="ports1[2]"
+            value="port8"
+            is-required="true">
+        </ma-radio-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{port8 || 'null'}}</pre>
+    </div>
 </div>

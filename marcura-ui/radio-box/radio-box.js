@@ -1,4 +1,6 @@
-angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', '$sce', function(maHelper, $timeout, $sce) {
+angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', '$sce', 'maValidators', function(maHelper, $timeout, $sce, maValidators) {
+    var radioBoxes = {};
+
     return {
         restrict: 'E',
         scope: {
@@ -10,7 +12,11 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             isDisabled: '=',
             hideText: '=',
             change: '&',
-            size: '@'
+            size: '@',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+            id: '@'
         },
         replace: true,
         template: function() {
@@ -24,7 +30,9 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                     \'ma-radio-box-is-checked\': isChecked(),\
                     \'ma-radio-box-is-disabled\': isDisabled,\
                     \'ma-radio-box-has-text\': hasText(),\
-                    \'ma-radio-box-is-focused\': isFocused\
+                    \'ma-radio-box-is-focused\': isFocused,\
+                    \'ma-radio-box-is-invalid\': !isValid,\
+                    \'ma-radio-box-is-touched\': isTouched\
                 }">\
                 <span class="ma-radio-box-text" ng-bind-html="getItemText()"></span>\
                 <div class="ma-radio-box-inner"></div>\
@@ -36,7 +44,11 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
         link: function(scope, element, attributes) {
             var nbspCharacter = '&nbsp;',
                 valuePropertyParts = null,
-                isStringArray = !scope.itemTextField && !scope.itemValueField;
+                isStringArray = !scope.itemTextField && !scope.itemValueField,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
 
             var setTabindex = function() {
                 if (scope.isDisabled) {
@@ -73,6 +85,44 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             scope._size = scope.size ? scope.size : 'xs';
             scope.cssClass = ' ma-radio-box-' + scope._size;
             scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            if (scope.id) {
+                if (!radioBoxes[scope.id]) {
+                    radioBoxes[scope.id] = [];
+                }
+
+                radioBoxes[scope.id].push(scope);
+            }
+
+            var validate = function(value) {
+                if (radioBoxes[scope.id]) {
+                    // Validate a group of components.
+                    for (var i = 0; i < radioBoxes[scope.id].length; i++) {
+                        var radioBox = radioBoxes[scope.id][i];
+                        radioBox.isTouched = true;
+                        radioBox.validateThis(radioBox.value);
+                    }
+                } else {
+                    // Validate only the current component.
+                    scope.isTouched = true;
+                    scope.validateThis(value);
+                }
+            };
+
+            scope.validateThis = function(value) {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].method(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
 
             scope.getItemText = function() {
                 if (scope.hideText) {
@@ -148,6 +198,8 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
 
                     if (hasChanged) {
                         $timeout(function() {
+                            validate(scope.value);
+
                             scope.change({
                                 maValue: scope.item,
                                 maOldValue: oldValue
@@ -164,9 +216,13 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             };
 
             scope.onBlur = function() {
-                if (!scope.isDisabled) {
-                    scope.isFocused = false;
+                if (scope.isDisabled) {
+                    return;
                 }
+
+                scope.isFocused = false;
+
+                validate(scope.value);
             };
 
             scope.onKeypress = function(event) {
@@ -190,6 +246,40 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                 }
 
                 setTabindex();
+            });
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(maValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isValid = function() {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function() {
+                    validate(scope.value);
+                };
+            }
+
+            $timeout(function() {
+                // Now id is used only for grouping radioBoxes, so remove it from the element.
+                if (scope.id) {
+                    element.removeAttr('id');
+                }
             });
 
             setTabindex();

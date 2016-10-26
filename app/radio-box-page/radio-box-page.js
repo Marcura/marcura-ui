@@ -18,6 +18,7 @@ function radioBoxPageController($scope, $timeout, helper) {
     $scope.port7ItemTemplate = function(port) {
         return '<strong>' + port.name + '</strong>' + ' (' + port.country.name + ')';
     };
+    $scope.port8 = null;
 
     $scope.change1 = function(port) {
         console.log('change');
