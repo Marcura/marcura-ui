@@ -133,6 +133,8 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 validate();
             };
 
+            var caretPosition;
+
             scope.onKeydown = function(event) {
                 // Ignore tab key.
                 if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
@@ -150,6 +152,9 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
                 keyupValue = angular.element(event.target).val();
 
+                // caretPosition = valueElement.prop('selectionStart');
+                // console.log('caretPosition:', caretPosition);
+
                 if (keydownValue !== keyupValue) {
                     scope.isTouched = true;
                 }
@@ -160,6 +165,8 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             valueElement.on('input', function(event) {
                 validate();
                 resize();
+                // caretPosition = valueElement.prop('selectionStart');
+                // console.log('caretPosition:', caretPosition);
 
                 if (scope.isValid && updateOn === 'input') {
                     scope.$apply(function() {
@@ -210,7 +217,18 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
                 scope.isValid = true;
                 scope.isTouched = false;
+
+                var caretPosition = valueElement.prop('selectionStart');
+                // console.log('caretPosition:', caretPosition);
+                // console.log('string:', newValue.length);
                 valueElement.val(newValue);
+
+                // Restore caret position.
+                valueElement.prop({
+                    selectionStart: caretPosition,
+                    selectionEnd: caretPosition
+                });
+
                 resize();
             });
 
