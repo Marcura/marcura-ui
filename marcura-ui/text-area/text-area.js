@@ -43,61 +43,64 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 // Variables keydownValue and keyupValue help track touched state.
                 keydownValue,
                 keyupValue,
-                updateOn = scope.updateOn ? scope.updateOn : 'input',
-                getValueElementStyle = function() {
-                    var style = $window.getComputedStyle(valueElement[0], null),
-                        properties = {},
-                        paddingHeight = parseInt(style.getPropertyValue('padding-top')) + parseInt(style.getPropertyValue('padding-bottom')),
-                        paddingWidth = parseInt(style.getPropertyValue('padding-left')) + parseInt(style.getPropertyValue('padding-right')),
-                        borderHeight = parseInt(style.getPropertyValue('border-top-width')) + parseInt(style.getPropertyValue('border-bottom-width')),
-                        borderWidth = parseInt(style.getPropertyValue('border-left-width')) + parseInt(style.getPropertyValue('border-right-width'));
+                updateOn = scope.updateOn ? scope.updateOn : 'input';
 
-                    properties.width = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('width')) - paddingWidth;
-                    properties.height = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('height')) - paddingHeight;
-                    properties.paddingHeight = paddingHeight;
-                    properties.paddingWidth = paddingWidth;
-                    properties.borderHeight = borderHeight;
-                    properties.borderWidth = borderWidth;
-                    properties.lineHeight = style.getPropertyValue('line-height');
+            var getValueElementStyle = function() {
+                var style = $window.getComputedStyle(valueElement[0], null),
+                    properties = {},
+                    paddingHeight = parseInt(style.getPropertyValue('padding-top')) + parseInt(style.getPropertyValue('padding-bottom')),
+                    paddingWidth = parseInt(style.getPropertyValue('padding-left')) + parseInt(style.getPropertyValue('padding-right')),
+                    borderHeight = parseInt(style.getPropertyValue('border-top-width')) + parseInt(style.getPropertyValue('border-bottom-width')),
+                    borderWidth = parseInt(style.getPropertyValue('border-left-width')) + parseInt(style.getPropertyValue('border-right-width'));
 
-                    // IE and Firefox do not support 'font' property, so we need to get it ourselves.
-                    properties.font = style.getPropertyValue('font-style') + ' ' +
-                        style.getPropertyValue('font-variant') + ' ' +
-                        style.getPropertyValue('font-weight') + ' ' +
-                        style.getPropertyValue('font-size') + ' ' +
-                        style.getPropertyValue('font-height') + ' ' +
-                        style.getPropertyValue('font-family');
+                properties.width = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('width')) - paddingWidth;
+                properties.height = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('height')) - paddingHeight;
+                properties.paddingHeight = paddingHeight;
+                properties.paddingWidth = paddingWidth;
+                properties.borderHeight = borderHeight;
+                properties.borderWidth = borderWidth;
+                properties.lineHeight = style.getPropertyValue('line-height');
 
-                    return properties;
-                },
-                resize = function() {
-                    if (!scope.fitContentHeight) {
-                        return;
-                    }
+                // IE and Firefox do not support 'font' property, so we need to get it ourselves.
+                properties.font = style.getPropertyValue('font-style') + ' ' +
+                    style.getPropertyValue('font-variant') + ' ' +
+                    style.getPropertyValue('font-weight') + ' ' +
+                    style.getPropertyValue('font-size') + ' ' +
+                    style.getPropertyValue('font-height') + ' ' +
+                    style.getPropertyValue('font-family');
 
-                    var valueElementStyle = getValueElementStyle(),
-                        textHeight = maHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
-                        height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
+                return properties;
+            };
 
-                    if (height < 40) {
-                        height = 30;
-                    }
+            var resize = function() {
+                if (!scope.fitContentHeight) {
+                    return;
+                }
 
-                    valueElement[0].style.height = height + 'px';
-                    element[0].style.height = height + 'px';
-                },
-                validate = function() {
-                    scope.isValid = true;
+                var valueElementStyle = getValueElementStyle(),
+                    textHeight = maHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
+                    height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
 
-                    if (validators && validators.length) {
-                        for (var i = 0; i < validators.length; i++) {
-                            if (!validators[i].method(valueElement.val())) {
-                                scope.isValid = false;
-                                break;
-                            }
+                if (height < 40) {
+                    height = 30;
+                }
+
+                valueElement[0].style.height = height + 'px';
+                element[0].style.height = height + 'px';
+            };
+
+            var validate = function() {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].method(valueElement.val())) {
+                            scope.isValid = false;
+                            break;
                         }
                     }
-                };
+                }
+            };
 
             scope.isFocused = false;
             scope.isTouched = false;
@@ -133,8 +136,6 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 validate();
             };
 
-            var caretPosition;
-
             scope.onKeydown = function(event) {
                 // Ignore tab key.
                 if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
@@ -152,9 +153,6 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
                 keyupValue = angular.element(event.target).val();
 
-                // caretPosition = valueElement.prop('selectionStart');
-                // console.log('caretPosition:', caretPosition);
-
                 if (keydownValue !== keyupValue) {
                     scope.isTouched = true;
                 }
@@ -165,8 +163,6 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             valueElement.on('input', function(event) {
                 validate();
                 resize();
-                // caretPosition = valueElement.prop('selectionStart');
-                // console.log('caretPosition:', caretPosition);
 
                 if (scope.isValid && updateOn === 'input') {
                     scope.$apply(function() {
@@ -218,9 +214,9 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 scope.isValid = true;
                 scope.isTouched = false;
 
+                // IE 11.0 version moves the caret at the end when textarea value is fully replaced.
+                // In IE 11.126+ the issue has been fixed.
                 var caretPosition = valueElement.prop('selectionStart');
-                // console.log('caretPosition:', caretPosition);
-                // console.log('string:', newValue.length);
                 valueElement.val(newValue);
 
                 // Restore caret position.
