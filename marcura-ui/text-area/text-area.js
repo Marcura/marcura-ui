@@ -59,7 +59,14 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     properties.borderHeight = borderHeight;
                     properties.borderWidth = borderWidth;
                     properties.lineHeight = style.getPropertyValue('line-height');
-                    properties.font = style.getPropertyValue('font');
+
+                    // IE and Firefox do not support 'font' property, so we need to get it ourselves.
+                    properties.font = style.getPropertyValue('font-style') + ' ' +
+                        style.getPropertyValue('font-variant') + ' ' +
+                        style.getPropertyValue('font-weight') + ' ' +
+                        style.getPropertyValue('font-size') + ' ' +
+                        style.getPropertyValue('font-height') + ' ' +
+                        style.getPropertyValue('font-family');
 
                     return properties;
                 },
