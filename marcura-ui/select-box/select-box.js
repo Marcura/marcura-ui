@@ -78,7 +78,7 @@ angular.module('marcuraUI.components')
                             ng-change="onChange()"\
                             placeholder="{{placeholder}}">\
                             <option></option>\
-                            <option ng-repeat="item in items | maSelectBoxOrderBy:orderBy" value="{{getItemValue(item)}}">\
+                            <option ng-repeat="item in items | maSelectBoxOrderBy:orderBy" value="{{getOptionValue(item)}}">\
                                 {{formatItem(item)}}\
                             </option>\
                         </select>';
@@ -110,6 +110,27 @@ angular.module('marcuraUI.components')
                 return html;
             },
             controller: ['$scope', function(scope) {
+                // Gets a value from itemValueField if an item is object.
+                scope.getItemValue = function(item) {
+                    if (!item || !scope.itemValueField) {
+                        return null;
+                    }
+
+                    // In case of a nested property binding like 'company.port.id'.
+                    var parts = scope.itemValueField.split('.'),
+                        value = item[parts[0]];
+
+                    for (var i = 1; i < parts.length; i++) {
+                        value = value[parts[i]];
+                    }
+
+                    if (maHelper.isNullOrUndefined(value)) {
+                        return null;
+                    }
+
+                    return value.toString();
+                };
+
                 // Setting Select2 options does not work from link function, so they are set here.
                 scope.options = {};
 
@@ -128,10 +149,10 @@ angular.module('marcuraUI.components')
                         // Run init function only once to set initial port.
                         initSelection.runs = initSelection.runs ? initSelection.runs : 1;
 
-                        if (initSelection.runs === 1 && scope.value && scope.value[scope.itemValueField]) {
+                        if (initSelection.runs === 1 && scope.getItemValue(scope.value)) {
                             var item = angular.copy(scope.value);
                             item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
-                            item.id = item[scope.itemValueField];
+                            item.id = scope.getItemValue(item);
                             scope.previousSelectedItem = item;
                             callback(item);
                         } else {
@@ -177,12 +198,12 @@ angular.module('marcuraUI.components')
                         return false;
                     }
 
-                    var isItemObject = scope.itemValueField && item[scope.itemValueField];
+                    var isItemObject = scope.getItemValue(item) !== null;
 
                     for (var i = 0; i < scope.items.length; i++) {
                         if (isItemObject) {
                             // Search by value field.
-                            if (scope.items[i][scope.itemValueField] === item[scope.itemValueField]) {
+                            if (scope.getItemValue(scope.items[i]) === scope.getItemValue(item)) {
                                 return true;
                             }
                         } else {
@@ -208,7 +229,7 @@ angular.module('marcuraUI.components')
 
                     if (angular.isArray(scope.items)) {
                         for (var i = 0; i < scope.items.length; i++) {
-                            if (scope.items[i][scope.itemValueField].toString() === itemValue.toString()) {
+                            if (scope.getItemValue(scope.items[i]) === itemValue.toString()) {
                                 return scope.items[i];
                             }
                         }
@@ -264,9 +285,9 @@ angular.module('marcuraUI.components')
                         } else if (!scope.isAjax) {
                             // Set select value.
                             // When in AJAX mode Select2 sets values by itself.
-                            if (scope.itemValueField && item[scope.itemValueField]) {
+                            if (scope.getItemValue(item) !== null) {
                                 // Item is an object.
-                                scope.selectedItem = item[scope.itemValueField].toString();
+                                scope.selectedItem = scope.getItemValue(item);
                             } else if (typeof item === 'string') {
                                 // Item is a string.
                                 scope.selectedItem = item;
@@ -439,8 +460,8 @@ angular.module('marcuraUI.components')
                     return scope.addItemTooltip ? scope.addItemTooltip : 'Add new\u00A0item';
                 };
 
-                scope.getItemValue = function(item) {
-                    return scope.itemValueField ? item[scope.itemValueField].toString() : item;
+                scope.getOptionValue = function(item) {
+                    return scope.itemValueField ? scope.getItemValue(item) : item;
                 };
 
                 scope.toggleMode = function(mode) {
@@ -521,7 +542,7 @@ angular.module('marcuraUI.components')
                         if (scope.itemValueField && !maHelper.isNullOrWhiteSpace(item)) {
                             for (var i = 0; i < scope.items.length; i++) {
 
-                                if (scope.items[i][scope.itemValueField].toString() === item.toString()) {
+                                if (scope.getItemValue(scope.items[i]) === item.toString()) {
                                     item = scope.items[i];
                                     break;
                                 }
@@ -534,8 +555,9 @@ angular.module('marcuraUI.components')
                     }
 
                     if (scope.itemValueField) {
-                        if (scope.value && scope.value[scope.itemValueField] &&
-                            scope.value[scope.itemValueField].toString() === item[scope.itemValueField].toString()) {
+                        var value = scope.getItemValue(scope.value);
+
+                        if (value && value === scope.getItemValue(item)) {
                             return;
                         }
                     } else if (item === scope.value) {
