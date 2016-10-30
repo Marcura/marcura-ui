@@ -231,7 +231,7 @@ angular.element(document).ready(function() {
             return this;
         };
     })
-    .directive('maDateBox', ['$timeout', 'maDateConverter', 'maHelper', 'maValidators', function($timeout, maDateConverter, maHelper, maValidators) {
+    .directive('maDateBox', ['$timeout', 'MaDate', 'maHelper', 'maValidators', function($timeout, MaDate, maHelper, maValidators) {
         return {
             restrict: 'E',
             scope: {
@@ -319,7 +319,7 @@ angular.element(document).ready(function() {
                     hoursElement = angular.element(element[0].querySelector('.ma-date-box-hours')),
                     minutesElement = angular.element(element[0].querySelector('.ma-date-box-minutes')),
                     previousDate = null,
-                    timeZoneOffset = moment().utcOffset(timeZone).utcOffset(),
+                    timeZoneOffset = MaDate.parseTimeZone(timeZone),
                     initialDisplayDate,
                     // Variables keydownValue and keyupValue help track touched state.
                     keydownValue,
@@ -327,8 +327,8 @@ angular.element(document).ready(function() {
                     initialDateOffset = 0,
                     validators = scope.validators ? angular.copy(scope.validators) : [],
                     isRequired = scope.isRequired,
-                    minDate = maDateConverter.parse(scope.minDate),
-                    maxDate = maDateConverter.parse(scope.maxDate);
+                    minDate = new MaDate(scope.minDate),
+                    maxDate = new MaDate(scope.maxDate);
 
                 var onChange = function(internalDate) {
                     var date = null;
@@ -345,7 +345,7 @@ angular.element(document).ready(function() {
                             .seconds(0);
                     }
 
-                    scope.value = date ? maDateConverter.format(date, format, timeZone) : null;
+                    scope.value = date ? MaDate.format(date, format, timeZone) : null;
 
                     // Postpone change event for $apply (which is being invoked by $timeout)
                     // to have time to take effect and update scope.value,
@@ -372,10 +372,10 @@ angular.element(document).ready(function() {
 
                     if (maDate && maDate.date) {
                         // Adjust time zone offset.
-                        displayDate = maDateConverter.offsetUtc(maDate.date, timeZoneOffset - maDate.offset);
-                        dateElement.val(maDateConverter.format(displayDate, displayFormat));
-                        hoursElement.val(maDateConverter.format(displayDate, 'HH'));
-                        minutesElement.val(maDateConverter.format(displayDate, 'mm'));
+                        displayDate = MaDate.offsetUtc(maDate.date, timeZoneOffset - maDate.offset);
+                        dateElement.val(MaDate.format(displayDate, displayFormat));
+                        hoursElement.val(MaDate.format(displayDate, 'HH'));
+                        minutesElement.val(MaDate.format(displayDate, 'mm'));
 
                         if (!initialDisplayDate) {
                             initialDisplayDate = dateElement.val();
@@ -396,26 +396,21 @@ angular.element(document).ready(function() {
                 };
 
                 var parseDate = function(date) {
-                    if (!date) {
-                        return null;
-                    }
+                    var maDate = new MaDate();
 
-                    var parsedDate = null;
+                    if (!date) {
+                        return maDate;
+                    }
 
                     if (scope.parser) {
-                        parsedDate = scope.parser(date);
+                        maDate = scope.parser(date);
                     } else {
-                        parsedDate = maDateConverter.parse(date, scope.culture);
-
-                        if (!parsedDate) {
-                            return null;
-                        }
+                        maDate = MaDate.parse(date, scope.culture);
                     }
 
-                    return {
-                        date: moment(parsedDate.date),
-                        offset: parsedDate.offset
-                    };
+                    maDate.date = moment(maDate.date);
+
+                    return maDate;
                 };
 
                 var addTimeToDate = function(date) {
@@ -433,10 +428,10 @@ angular.element(document).ready(function() {
                     picker = new Pikaday({
                         field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                         position: 'bottom right',
-                        minDate: minDate ? minDate.date : null,
-                        maxDate: maxDate ? maxDate.date : null,
+                        minDate: minDate.isEmpty() ? null : minDate.date,
+                        maxDate: maxDate.isEmpty() ? null : maxDate.date,
                         onSelect: function() {
-                            var date = maDateConverter.offsetUtc(picker.getDate());
+                            var date = MaDate.offsetUtc(picker.getDate());
 
                             // Use $timeout to apply scope changes instead of $apply,
                             // which throws digest error at this point.
@@ -469,9 +464,13 @@ angular.element(document).ready(function() {
                 var validate = function(date) {
                     scope.isValid = true;
 
+                    // Date comes in Moment format which we do not want to expose,
+                    // so convert it to string.
+                    var dateString = MaDate.format(date, format);
+
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
-                            if (!validators[i].method(date)) {
+                            if (!validators[i].method(dateString)) {
                                 scope.isValid = false;
                                 break;
                             }
@@ -498,12 +497,12 @@ angular.element(document).ready(function() {
                         isRequired = true;
                     }
 
-                    if (minDate) {
-                        validators.push(maValidators.isGreaterThanOrEqual(minDate.date));
+                    if (!minDate.isEmpty()) {
+                        validators.push(maValidators.isGreaterThanOrEqual(minDate));
                     }
 
-                    if (maxDate) {
-                        validators.push(maValidators.isLessThanOrEqual(maxDate.date));
+                    if (!maxDate.isEmpty()) {
+                        validators.push(maValidators.isLessThanOrEqual(maxDate));
                     }
                 };
 
@@ -528,14 +527,11 @@ angular.element(document).ready(function() {
                         isEmpty = date === '',
                         hours = Number(hoursElement.val()),
                         minutes = Number(minutesElement.val()),
-                        maDate = {
-                            date: null,
-                            offset: 0
-                        };
+                        maDate = new MaDate();
 
                     // Check time.
                     if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
-                        maDate = parseDate(date) || maDate;
+                        maDate = parseDate(date);
                         maDate.offset = initialDateOffset;
                     } else {
                         scope.isValid = false;
@@ -563,7 +559,7 @@ angular.element(document).ready(function() {
                     if (maDate.date && (scope.hasTime || initialDisplayDate === date)) {
                         // Substruct time zone offset.
                         maDate.date = addTimeToDate(maDate.date);
-                        maDate.date = maDateConverter.offsetUtc(maDate.date, -(timeZoneOffset - initialDateOffset));
+                        maDate.date = MaDate.offsetUtc(maDate.date, -(timeZoneOffset - initialDateOffset));
                     }
 
                     validate(maDate.date);
@@ -645,8 +641,8 @@ angular.element(document).ready(function() {
                         offset: 0
                     };
 
-                    maDate = maDateConverter.parse(scope.value, scope.culture) || maDate;
-                    maDate.date = maDateConverter.offsetUtc(maDate.date);
+                    maDate = MaDate.parse(scope.value, scope.culture) || maDate;
+                    maDate.date = MaDate.offsetUtc(maDate.date);
 
                     if (!maDate.date) {
                         return;
@@ -672,12 +668,7 @@ angular.element(document).ready(function() {
                         return;
                     }
 
-                    var maDate = {
-                        date: null,
-                        offset: 0
-                    };
-
-                    maDate = parseDate(newDate) || maDate;
+                    var maDate = parseDate(newDate);
 
                     if (maDate.date === null) {
                         previousDate = null;
@@ -716,7 +707,7 @@ angular.element(document).ready(function() {
                             return;
                         }
 
-                        validate(parseDate(scope.value));
+                        validate(parseDate(scope.value).date);
                     };
 
                     scope.instance.isValid = function() {
@@ -1855,7 +1846,7 @@ angular.element(document).ready(function() {
         };
     }]);
 })();
-(function(){angular.module('marcuraUI.services').factory('maDateConverter', [function() {
+(function(){angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
             language: 'en',
             items: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -1875,7 +1866,8 @@ angular.element(document).ready(function() {
     };
 
     var getTotalDate = function(year, month, day, hours, minutes, seconds, offset) {
-        var finalMonth;
+        var finalMonth,
+            maDate = new MaDate();
         day = day.toString();
         month = month.toString();
         hours = hours || 0;
@@ -1913,24 +1905,24 @@ angular.element(document).ready(function() {
             }
 
             if (!finalMonth) {
-                return null;
+                return maDate;
             }
 
             month = finalMonth;
         }
 
         if (month > 12) {
-            return null;
+            return maDate;
         }
 
         if (day > daysPerMonth[month - 1]) {
-            return null;
+            return maDate;
         }
 
-        return {
-            date: new Date(year, month - 1, day, hours, minutes, seconds),
-            offset: offset
-        };
+        maDate.date = new Date(year, month - 1, day, hours, minutes, seconds);
+        maDate.offset = offset;
+
+        return maDate;
     };
 
     var getDayAndMonth = function(day, month, culture) {
@@ -1964,19 +1956,16 @@ angular.element(document).ready(function() {
     };
 
     var parse = function(value, culture) {
-        var pattern, parts, dayAndMonth;
+        var pattern, parts, dayAndMonth,
+            maDate = new MaDate();
 
-        if (value instanceof Date) {
-            return value;
-        }
-
-        // Check if the date is of maDateConverter type.
-        if (value && value.date && angular.isNumber(value.offset)) {
+        // Check if a date requires parsing.
+        if (value instanceof Date || value instanceof MaDate) {
             return value;
         }
 
         if (!angular.isString(value)) {
-            return null;
+            return maDate;
         }
 
         // 21
@@ -1996,7 +1985,7 @@ angular.element(document).ready(function() {
             dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
 
             if (!dayAndMonth.isValid) {
-                return null;
+                return maDate;
             }
 
             return getTotalDate(new Date().getFullYear(), dayAndMonth.month, dayAndMonth.day);
@@ -2050,7 +2039,7 @@ angular.element(document).ready(function() {
             dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
 
             if (!dayAndMonth.isValid) {
-                return null;
+                return maDate;
             }
 
             return getTotalDate(parts[5], dayAndMonth.month, dayAndMonth.day);
@@ -2085,7 +2074,7 @@ angular.element(document).ready(function() {
             return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], offset);
         }
 
-        return null;
+        return maDate;
     };
 
     var format = function(date, format, timeZone) {
@@ -2268,15 +2257,99 @@ angular.element(document).ready(function() {
         }
     };
 
-    return {
-        parse: parse,
-        format: format,
-        offsetUtc: offsetUtc,
-        isDate: isDate
+    var valueOf = function(date) {
+        if (!date) {
+            return null;
+        }
+
+        var maDate = parse(date);
+
+        if (!maDate) {
+            return null;
+        }
+
+        var time = maDate.date.valueOf();
+
+        // Add offset which is in minutes, and thus should be converted to milliseconds.
+        if (maDate.offset !== 0) {
+            time -= maDate.offset * 60000;
+        }
+
+        return time;
     };
+
+    var difference = function(date1, date2) {
+        var time1 = date1 ? valueOf(date1) : 0,
+            time2 = date2 ? valueOf(date2) : 0;
+
+        return time1 - time2;
+    };
+
+    var parseTimeZone = function(timeZone) {
+        if (!timeZone) {
+            return 0;
+        }
+
+        timeZone = timeZone.replace(/GMT/gi, '');
+
+        var parts = /^(?:Z|([+-]?)(2[0-3]|[01][0-9]):([0-5][0-9]))$/.exec(timeZone);
+
+        if (!parts || parts.length !== 4) {
+            return 0;
+        }
+
+        if (parts[0] === 'Z') {
+            return 0;
+        }
+
+        // Calculate time zone offset in minutes.
+        var offset = Number(parts[2]) * 60 + Number(parts[3]);
+
+        if (offset !== 0 && parts[1] === '-') {
+            offset *= -1;
+        }
+
+        return offset;
+    };
+
+    function MaDate(date, offset) {
+        this.date = date || null;
+        this.offset = offset || 0;
+
+        // MaDate is provided - just copy it.
+        if (date instanceof MaDate) {
+            this.date = date.date;
+            this.offset = date.offset;
+        }
+
+        // Parse date.
+        if (angular.isString(date)) {
+            var maDate = parse(date);
+            this.date = maDate.date;
+            this.offset = maDate.offset;
+        }
+    }
+
+    MaDate.prototype.isEmpty = function() {
+        return !this.date;
+    };
+
+    MaDate.prototype.difference = function(date) {
+        return difference(this, date);
+    };
+
+    MaDate.parse = parse;
+    MaDate.parseTimeZone = parseTimeZone;
+    MaDate.format = format;
+    MaDate.offsetUtc = offsetUtc;
+    MaDate.isDate = isDate;
+    MaDate.valueOf = valueOf;
+    MaDate.difference = difference;
+
+    return MaDate;
 }]);
 })();
-(function(){angular.module('marcuraUI.services').factory('maHelper', ['maDateConverter', function(maDateConverter) {
+(function(){angular.module('marcuraUI.services').factory('maHelper', ['MaDate', function(MaDate) {
     return {
         keyCode: {
             backspace: 8,
@@ -2445,56 +2518,44 @@ angular.element(document).ready(function() {
         },
 
         isGreaterThan: function(value, valueToCompare) {
-            var date1 = maDateConverter.parse(value),
-                date2 = maDateConverter.parse(valueToCompare);
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare);
 
-            if (date1 && date2) {
-                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
-                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
-
-                return moment1.diff(moment2) > 0;
+            if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.difference(date2) > 0;
             }
 
             return value > valueToCompare;
         },
 
         isGreaterThanOrEqual: function(value, valueToCompare) {
-            var date1 = maDateConverter.parse(value),
-                date2 = maDateConverter.parse(valueToCompare);
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare);
 
-            if (date1 && date2) {
-                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
-                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
-
-                return moment1.diff(moment2) >= 0;
+            if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.difference(date2) >= 0;
             }
 
             return value >= valueToCompare;
         },
 
         isLessThan: function(value, valueToCompare) {
-            var date1 = maDateConverter.parse(value),
-                date2 = maDateConverter.parse(valueToCompare);
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare);
 
-            if (date1 && date2) {
-                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
-                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
-
-                return moment1.diff(moment2) < 0;
+            if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.difference(date2) < 0;
             }
 
             return value < valueToCompare;
         },
 
         isLessThanOrEqual: function(value, valueToCompare) {
-            var date1 = maDateConverter.parse(value),
-                date2 = maDateConverter.parse(valueToCompare);
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare);
 
-            if (date1 && date2) {
-                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
-                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
-
-                return moment1.diff(moment2) <= 0;
+            if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.difference(date2) <= 0;
             }
 
             return value <= valueToCompare;
@@ -3016,7 +3077,7 @@ angular.element(document).ready(function() {
             //     } else if (angular.isNumber(value)) {
             //         return date;
             //     } else {
-            //         return maDateConverter.format(date, format);
+            //         return MaDate.format(date, format);
             //     }
             // },
             // onChange = function (value) {

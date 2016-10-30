@@ -1,8 +1,7 @@
 angular.module('app.controllers').controller('dateBoxPageController', dateBoxPageController);
 
-function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) {
+function dateBoxPageController($scope, $timeout, MaDate, maValidators, maHelper) {
     $scope.maValidators = maValidators;
-    $scope.maDateConverter = maDateConverter;
 
     // Moment string.
     $scope.date1 = '2016-07-25T00:00:00Z';
@@ -14,11 +13,19 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
     $scope.date4Instance = {};
     $scope.date6 = '2016-07-25T16:30:00Z';
     // $scope.date7 = '2016-07-25T00:00:00Z';
+    $scope.change7Validator = {
+        method: function(date) {
+            console.log('validate:', date);
+            return true;
+        }
+    };
     $scope.date8 = '2016-07-25T16:30:00Z';
-    $scope.date9 = maDateConverter.format(moment(), 'yyyy-MM-ddT00:00:00Z');
-    $scope.date9min = maDateConverter.format(moment().add(-5, 'day'), 'yyyy-MM-ddT00:00:00Z');
-    $scope.date9max = maDateConverter.format(moment().add(5, 'day'), 'yyyy-MM-ddT00:00:00Z');
+    $scope.date9 = MaDate.format(moment(), 'yyyy-MM-ddT00:00:00Z');
+    $scope.date9min = MaDate.format(moment().add(-5, 'day'), 'yyyy-MM-ddT00:00:00Z');
+    $scope.date9max = MaDate.format(moment().add(5, 'day'), 'yyyy-MM-ddT00:00:00Z');
     $scope.date10 = '2016-07-25T00:00:00Z';
+
+    maHelper.isGreaterThanOrEqual('2016-10-12T00:00:00Z', '2016-10-12T00:00:00Z');
 
     $scope.change1 = function(date) {
         console.log('event:', date);
@@ -30,6 +37,10 @@ function dateBoxPageController($scope, $timeout, maDateConverter, maValidators) 
     // };
 
     $scope.change3 = function(date) {
+        console.log('change:', date);
+    };
+
+    $scope.change7 = function(date) {
         console.log('change:', date);
     };
 

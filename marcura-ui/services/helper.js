@@ -1,4 +1,4 @@
-angular.module('marcuraUI.services').factory('maHelper', ['maDateConverter', function(maDateConverter) {
+angular.module('marcuraUI.services').factory('maHelper', ['MaDate', function(MaDate) {
     return {
         keyCode: {
             backspace: 8,
@@ -167,56 +167,44 @@ angular.module('marcuraUI.services').factory('maHelper', ['maDateConverter', fun
         },
 
         isGreaterThan: function(value, valueToCompare) {
-            var date1 = maDateConverter.parse(value),
-                date2 = maDateConverter.parse(valueToCompare);
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare);
 
-            if (date1 && date2) {
-                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
-                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
-
-                return moment1.diff(moment2) > 0;
+            if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.difference(date2) > 0;
             }
 
             return value > valueToCompare;
         },
 
         isGreaterThanOrEqual: function(value, valueToCompare) {
-            var date1 = maDateConverter.parse(value),
-                date2 = maDateConverter.parse(valueToCompare);
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare);
 
-            if (date1 && date2) {
-                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
-                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
-
-                return moment1.diff(moment2) >= 0;
+            if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.difference(date2) >= 0;
             }
 
             return value >= valueToCompare;
         },
 
         isLessThan: function(value, valueToCompare) {
-            var date1 = maDateConverter.parse(value),
-                date2 = maDateConverter.parse(valueToCompare);
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare);
 
-            if (date1 && date2) {
-                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
-                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
-
-                return moment1.diff(moment2) < 0;
+            if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.difference(date2) < 0;
             }
 
             return value < valueToCompare;
         },
 
         isLessThanOrEqual: function(value, valueToCompare) {
-            var date1 = maDateConverter.parse(value),
-                date2 = maDateConverter.parse(valueToCompare);
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare);
 
-            if (date1 && date2) {
-                var moment1 = moment(date1.date).add(-date1.offset, 'minute'),
-                    moment2 = moment(date2.date).add(-date2.offset, 'minute');
-
-                return moment1.diff(moment2) <= 0;
+            if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.difference(date2) <= 0;
             }
 
             return value <= valueToCompare;

@@ -4,7 +4,7 @@ angular.module('marcuraUI.components')
             return this;
         };
     })
-    .directive('maDateBox', ['$timeout', 'maDateConverter', 'maHelper', 'maValidators', function($timeout, maDateConverter, maHelper, maValidators) {
+    .directive('maDateBox', ['$timeout', 'MaDate', 'maHelper', 'maValidators', function($timeout, MaDate, maHelper, maValidators) {
         return {
             restrict: 'E',
             scope: {
@@ -92,7 +92,7 @@ angular.module('marcuraUI.components')
                     hoursElement = angular.element(element[0].querySelector('.ma-date-box-hours')),
                     minutesElement = angular.element(element[0].querySelector('.ma-date-box-minutes')),
                     previousDate = null,
-                    timeZoneOffset = moment().utcOffset(timeZone).utcOffset(),
+                    timeZoneOffset = MaDate.parseTimeZone(timeZone),
                     initialDisplayDate,
                     // Variables keydownValue and keyupValue help track touched state.
                     keydownValue,
@@ -100,8 +100,8 @@ angular.module('marcuraUI.components')
                     initialDateOffset = 0,
                     validators = scope.validators ? angular.copy(scope.validators) : [],
                     isRequired = scope.isRequired,
-                    minDate = maDateConverter.parse(scope.minDate),
-                    maxDate = maDateConverter.parse(scope.maxDate);
+                    minDate = new MaDate(scope.minDate),
+                    maxDate = new MaDate(scope.maxDate);
 
                 var onChange = function(internalDate) {
                     var date = null;
@@ -118,7 +118,7 @@ angular.module('marcuraUI.components')
                             .seconds(0);
                     }
 
-                    scope.value = date ? maDateConverter.format(date, format, timeZone) : null;
+                    scope.value = date ? MaDate.format(date, format, timeZone) : null;
 
                     // Postpone change event for $apply (which is being invoked by $timeout)
                     // to have time to take effect and update scope.value,
@@ -145,10 +145,10 @@ angular.module('marcuraUI.components')
 
                     if (maDate && maDate.date) {
                         // Adjust time zone offset.
-                        displayDate = maDateConverter.offsetUtc(maDate.date, timeZoneOffset - maDate.offset);
-                        dateElement.val(maDateConverter.format(displayDate, displayFormat));
-                        hoursElement.val(maDateConverter.format(displayDate, 'HH'));
-                        minutesElement.val(maDateConverter.format(displayDate, 'mm'));
+                        displayDate = MaDate.offsetUtc(maDate.date, timeZoneOffset - maDate.offset);
+                        dateElement.val(MaDate.format(displayDate, displayFormat));
+                        hoursElement.val(MaDate.format(displayDate, 'HH'));
+                        minutesElement.val(MaDate.format(displayDate, 'mm'));
 
                         if (!initialDisplayDate) {
                             initialDisplayDate = dateElement.val();
@@ -169,26 +169,21 @@ angular.module('marcuraUI.components')
                 };
 
                 var parseDate = function(date) {
-                    if (!date) {
-                        return null;
-                    }
+                    var maDate = new MaDate();
 
-                    var parsedDate = null;
+                    if (!date) {
+                        return maDate;
+                    }
 
                     if (scope.parser) {
-                        parsedDate = scope.parser(date);
+                        maDate = scope.parser(date);
                     } else {
-                        parsedDate = maDateConverter.parse(date, scope.culture);
-
-                        if (!parsedDate) {
-                            return null;
-                        }
+                        maDate = MaDate.parse(date, scope.culture);
                     }
 
-                    return {
-                        date: moment(parsedDate.date),
-                        offset: parsedDate.offset
-                    };
+                    maDate.date = moment(maDate.date);
+
+                    return maDate;
                 };
 
                 var addTimeToDate = function(date) {
@@ -206,10 +201,10 @@ angular.module('marcuraUI.components')
                     picker = new Pikaday({
                         field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                         position: 'bottom right',
-                        minDate: minDate ? minDate.date : null,
-                        maxDate: maxDate ? maxDate.date : null,
+                        minDate: minDate.isEmpty() ? null : minDate.date,
+                        maxDate: maxDate.isEmpty() ? null : maxDate.date,
                         onSelect: function() {
-                            var date = maDateConverter.offsetUtc(picker.getDate());
+                            var date = MaDate.offsetUtc(picker.getDate());
 
                             // Use $timeout to apply scope changes instead of $apply,
                             // which throws digest error at this point.
@@ -242,9 +237,13 @@ angular.module('marcuraUI.components')
                 var validate = function(date) {
                     scope.isValid = true;
 
+                    // Date comes in Moment format which we do not want to expose,
+                    // so convert it to string.
+                    var dateString = MaDate.format(date, format);
+
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
-                            if (!validators[i].method(date)) {
+                            if (!validators[i].method(dateString)) {
                                 scope.isValid = false;
                                 break;
                             }
@@ -271,12 +270,12 @@ angular.module('marcuraUI.components')
                         isRequired = true;
                     }
 
-                    if (minDate) {
-                        validators.push(maValidators.isGreaterThanOrEqual(minDate.date));
+                    if (!minDate.isEmpty()) {
+                        validators.push(maValidators.isGreaterThanOrEqual(minDate));
                     }
 
-                    if (maxDate) {
-                        validators.push(maValidators.isLessThanOrEqual(maxDate.date));
+                    if (!maxDate.isEmpty()) {
+                        validators.push(maValidators.isLessThanOrEqual(maxDate));
                     }
                 };
 
@@ -301,14 +300,11 @@ angular.module('marcuraUI.components')
                         isEmpty = date === '',
                         hours = Number(hoursElement.val()),
                         minutes = Number(minutesElement.val()),
-                        maDate = {
-                            date: null,
-                            offset: 0
-                        };
+                        maDate = new MaDate();
 
                     // Check time.
                     if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
-                        maDate = parseDate(date) || maDate;
+                        maDate = parseDate(date);
                         maDate.offset = initialDateOffset;
                     } else {
                         scope.isValid = false;
@@ -336,7 +332,7 @@ angular.module('marcuraUI.components')
                     if (maDate.date && (scope.hasTime || initialDisplayDate === date)) {
                         // Substruct time zone offset.
                         maDate.date = addTimeToDate(maDate.date);
-                        maDate.date = maDateConverter.offsetUtc(maDate.date, -(timeZoneOffset - initialDateOffset));
+                        maDate.date = MaDate.offsetUtc(maDate.date, -(timeZoneOffset - initialDateOffset));
                     }
 
                     validate(maDate.date);
@@ -418,8 +414,8 @@ angular.module('marcuraUI.components')
                         offset: 0
                     };
 
-                    maDate = maDateConverter.parse(scope.value, scope.culture) || maDate;
-                    maDate.date = maDateConverter.offsetUtc(maDate.date);
+                    maDate = MaDate.parse(scope.value, scope.culture) || maDate;
+                    maDate.date = MaDate.offsetUtc(maDate.date);
 
                     if (!maDate.date) {
                         return;
@@ -445,12 +441,7 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
-                    var maDate = {
-                        date: null,
-                        offset: 0
-                    };
-
-                    maDate = parseDate(newDate) || maDate;
+                    var maDate = parseDate(newDate);
 
                     if (maDate.date === null) {
                         previousDate = null;
@@ -489,7 +480,7 @@ angular.module('marcuraUI.components')
                             return;
                         }
 
-                        validate(parseDate(scope.value));
+                        validate(parseDate(scope.value).date);
                     };
 
                     scope.instance.isValid = function() {

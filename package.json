@@ -1,5 +1,5 @@
 {
-    "version": "0.19.7",
+    "version": "0.20.0",
     "name": "marcura-ui",
     "description": "Marcura UI",
     "author": "Marcura",
@@ -45,9 +45,11 @@
     },
     "keywords": [
         "angular",
+        "angularjs",
         "ui",
         "components",
         "select",
+        "combobox",
         "date picker",
         "checkbox",
         "radiobox",

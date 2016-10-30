@@ -1,4 +1,4 @@
-angular.module('marcuraUI.services').factory('maDateConverter', [function() {
+angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
             language: 'en',
             items: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -18,7 +18,8 @@ angular.module('marcuraUI.services').factory('maDateConverter', [function() {
     };
 
     var getTotalDate = function(year, month, day, hours, minutes, seconds, offset) {
-        var finalMonth;
+        var finalMonth,
+            maDate = new MaDate();
         day = day.toString();
         month = month.toString();
         hours = hours || 0;
@@ -56,24 +57,24 @@ angular.module('marcuraUI.services').factory('maDateConverter', [function() {
             }
 
             if (!finalMonth) {
-                return null;
+                return maDate;
             }
 
             month = finalMonth;
         }
 
         if (month > 12) {
-            return null;
+            return maDate;
         }
 
         if (day > daysPerMonth[month - 1]) {
-            return null;
+            return maDate;
         }
 
-        return {
-            date: new Date(year, month - 1, day, hours, minutes, seconds),
-            offset: offset
-        };
+        maDate.date = new Date(year, month - 1, day, hours, minutes, seconds);
+        maDate.offset = offset;
+
+        return maDate;
     };
 
     var getDayAndMonth = function(day, month, culture) {
@@ -107,19 +108,16 @@ angular.module('marcuraUI.services').factory('maDateConverter', [function() {
     };
 
     var parse = function(value, culture) {
-        var pattern, parts, dayAndMonth;
+        var pattern, parts, dayAndMonth,
+            maDate = new MaDate();
 
-        if (value instanceof Date) {
-            return value;
-        }
-
-        // Check if the date is of maDateConverter type.
-        if (value && value.date && angular.isNumber(value.offset)) {
+        // Check if a date requires parsing.
+        if (value instanceof Date || value instanceof MaDate) {
             return value;
         }
 
         if (!angular.isString(value)) {
-            return null;
+            return maDate;
         }
 
         // 21
@@ -139,7 +137,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', [function() {
             dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
 
             if (!dayAndMonth.isValid) {
-                return null;
+                return maDate;
             }
 
             return getTotalDate(new Date().getFullYear(), dayAndMonth.month, dayAndMonth.day);
@@ -193,7 +191,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', [function() {
             dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
 
             if (!dayAndMonth.isValid) {
-                return null;
+                return maDate;
             }
 
             return getTotalDate(parts[5], dayAndMonth.month, dayAndMonth.day);
@@ -228,7 +226,7 @@ angular.module('marcuraUI.services').factory('maDateConverter', [function() {
             return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], offset);
         }
 
-        return null;
+        return maDate;
     };
 
     var format = function(date, format, timeZone) {
@@ -411,10 +409,94 @@ angular.module('marcuraUI.services').factory('maDateConverter', [function() {
         }
     };
 
-    return {
-        parse: parse,
-        format: format,
-        offsetUtc: offsetUtc,
-        isDate: isDate
+    var valueOf = function(date) {
+        if (!date) {
+            return null;
+        }
+
+        var maDate = parse(date);
+
+        if (!maDate) {
+            return null;
+        }
+
+        var time = maDate.date.valueOf();
+
+        // Add offset which is in minutes, and thus should be converted to milliseconds.
+        if (maDate.offset !== 0) {
+            time -= maDate.offset * 60000;
+        }
+
+        return time;
     };
+
+    var difference = function(date1, date2) {
+        var time1 = date1 ? valueOf(date1) : 0,
+            time2 = date2 ? valueOf(date2) : 0;
+
+        return time1 - time2;
+    };
+
+    var parseTimeZone = function(timeZone) {
+        if (!timeZone) {
+            return 0;
+        }
+
+        timeZone = timeZone.replace(/GMT/gi, '');
+
+        var parts = /^(?:Z|([+-]?)(2[0-3]|[01][0-9]):([0-5][0-9]))$/.exec(timeZone);
+
+        if (!parts || parts.length !== 4) {
+            return 0;
+        }
+
+        if (parts[0] === 'Z') {
+            return 0;
+        }
+
+        // Calculate time zone offset in minutes.
+        var offset = Number(parts[2]) * 60 + Number(parts[3]);
+
+        if (offset !== 0 && parts[1] === '-') {
+            offset *= -1;
+        }
+
+        return offset;
+    };
+
+    function MaDate(date, offset) {
+        this.date = date || null;
+        this.offset = offset || 0;
+
+        // MaDate is provided - just copy it.
+        if (date instanceof MaDate) {
+            this.date = date.date;
+            this.offset = date.offset;
+        }
+
+        // Parse date.
+        if (angular.isString(date)) {
+            var maDate = parse(date);
+            this.date = maDate.date;
+            this.offset = maDate.offset;
+        }
+    }
+
+    MaDate.prototype.isEmpty = function() {
+        return !this.date;
+    };
+
+    MaDate.prototype.difference = function(date) {
+        return difference(this, date);
+    };
+
+    MaDate.parse = parse;
+    MaDate.parseTimeZone = parseTimeZone;
+    MaDate.format = format;
+    MaDate.offsetUtc = offsetUtc;
+    MaDate.isDate = isDate;
+    MaDate.valueOf = valueOf;
+    MaDate.difference = difference;
+
+    return MaDate;
 }]);

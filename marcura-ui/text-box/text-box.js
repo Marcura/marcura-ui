@@ -35,7 +35,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', funct
             //     } else if (angular.isNumber(value)) {
             //         return date;
             //     } else {
-            //         return maDateConverter.format(date, format);
+            //         return MaDate.format(date, format);
             //     }
             // },
             // onChange = function (value) {
