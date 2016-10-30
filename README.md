@@ -1,9 +1,11 @@
 [npm-image]: https://img.shields.io/npm/v/marcura-ui.svg
 [npm-url]: https://npmjs.org/package/marcura-ui
+[downloads-image]: https://img.shields.io/npm/dm/marcura-ui.svg
 
 # Marcura UI
 
 [![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][npm-url]
 
 ## Demos
 https://marcura-ui.herokuapp.com/#/home
