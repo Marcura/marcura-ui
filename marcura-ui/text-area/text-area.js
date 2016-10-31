@@ -94,7 +94,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].method(valueElement.val())) {
+                        if (!validators[i].validate(valueElement.val())) {
                             scope.isValid = false;
                             break;
                         }

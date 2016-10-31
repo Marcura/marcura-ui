@@ -253,7 +253,7 @@ angular.element(document).ready(function() {
                 maxDate: '='
             },
             replace: true,
-            template: function() {
+            template: function(element, attributes) {
                 var html = '\
                 <div class="ma-date-box" ng-class="{\
                         \'ma-date-box-has-time\': hasTime,\
@@ -325,7 +325,7 @@ angular.element(document).ready(function() {
                     keydownValue,
                     keyupValue,
                     initialDateOffset = 0,
-                    validators = scope.validators ? angular.copy(scope.validators) : [],
+                    validators = [],
                     isRequired = scope.isRequired,
                     minDate = new MaDate(scope.minDate),
                     maxDate = new MaDate(scope.maxDate);
@@ -395,6 +395,42 @@ angular.element(document).ready(function() {
                     }
                 };
 
+                var setMaxDate = function() {
+                    if (!picker) {
+                        return;
+                    }
+
+                    maxDate = new MaDate(scope.maxDate);
+                    var date = maxDate.date;
+
+                    // Pikaday does no support clearing maxDate by providing null value.
+                    // So we just set maxDate to 100 years ahead.
+                    if (!date) {
+                        date = new Date();
+                        date = new Date(date.setFullYear(date.getFullYear() + 100));
+                    }
+
+                    picker.setMaxDate(date);
+                };
+
+                var setMinDate = function() {
+                    if (!picker) {
+                        return;
+                    }
+
+                    minDate = new MaDate(scope.minDate);
+                    var date = minDate.date;
+
+                    // Pikaday does no support clearing minDate by providing null value.
+                    // So we just set minDate to 100 years before.
+                    if (!date) {
+                        date = new Date();
+                        date = new Date(date.setFullYear(date.getFullYear() - 100));
+                    }
+
+                    picker.setMinDate(date);
+                };
+
                 var parseDate = function(date) {
                     var maDate = new MaDate();
 
@@ -408,7 +444,9 @@ angular.element(document).ready(function() {
                         maDate = MaDate.parse(date, scope.culture);
                     }
 
-                    maDate.date = moment(maDate.date);
+                    if (!maDate.isEmpty()) {
+                        maDate.date = moment(maDate.date);
+                    }
 
                     return maDate;
                 };
@@ -428,31 +466,40 @@ angular.element(document).ready(function() {
                     picker = new Pikaday({
                         field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                         position: 'bottom right',
-                        minDate: minDate.isEmpty() ? null : minDate.date,
-                        maxDate: maxDate.isEmpty() ? null : maxDate.date,
                         onSelect: function() {
-                            var date = MaDate.offsetUtc(picker.getDate());
+                            var maDate = new MaDate(picker.getDate());
+                            maDate.date = MaDate.offsetUtc(maDate.date);
+
+                            if (scope.hasTime) {
+                                maDate.date = addTimeToDate(maDate.date);
+                                resetInitialDateOffset();
+                            }
 
                             // Use $timeout to apply scope changes instead of $apply,
                             // which throws digest error at this point.
                             $timeout(function() {
-                                scope.isValid = true;
+                                validate(maDate.date);
                             });
 
-                            if (scope.hasTime) {
-                                date = addTimeToDate(date);
-                                resetInitialDateOffset();
-                            }
-
-                            if (!hasDateChanged(date)) {
+                            if (!hasDateChanged(maDate.date)) {
+                                // Refresh display date in case the following scenario.
+                                // 1. maxDate is set to 30/10/2016.
+                                // 2. The user enteres greater date by hand 31/10/2016, which
+                                // will not be excepted and become invalid.
+                                // 3. The user then selects the same 30/10/2016 date from the calendar,
+                                // but display date will not be changed as previous date is still 30/10/2016
+                                // (hasDateChanged will return false).
+                                setDisplayDate(maDate);
                                 return;
                             }
 
-                            onChange(date);
+                            onChange(maDate.date);
                         }
                     });
 
                     setCalendarDate(previousDate);
+                    setMaxDate();
+                    setMinDate();
                 };
 
                 var destroyPikaday = function() {
@@ -461,27 +508,31 @@ angular.element(document).ready(function() {
                     }
                 };
 
+                var failedValidator = null;
+
                 var validate = function(date) {
                     scope.isValid = true;
+                    failedValidator = null;
 
                     // Date comes in Moment format which we do not want to expose,
                     // so convert it to string.
-                    var dateString = MaDate.format(date, format);
+                    var dateString = date ? MaDate.format(date, format) : null;
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
-                            if (!validators[i].method(dateString)) {
+                            if (!validators[i].validate(dateString)) {
                                 scope.isValid = false;
+                                failedValidator = validators[i];
                                 break;
                             }
                         }
                     }
                 };
 
-                var prepareValidators = function() {
+                var setValidators = function() {
                     var hasIsNotEmptyValidator = false;
+                    validators = scope.validators ? angular.copy(scope.validators) : [];
 
-                    // Set up validators.
                     for (var i = 0; i < validators.length; i++) {
                         if (validators[i].name === 'IsNotEmpty') {
                             hasIsNotEmptyValidator = true;
@@ -502,11 +553,11 @@ angular.element(document).ready(function() {
                     }
 
                     if (!maxDate.isEmpty()) {
-                        validators.push(maValidators.isLessThanOrEqual(maxDate));
+                        validators.push(maValidators.isLessThanOrEqual(maxDate, true));
                     }
                 };
 
-                prepareValidators();
+                setValidators();
                 scope.isFocused = false;
                 scope.isValid = true;
                 scope.isTouched = false;
@@ -626,8 +677,8 @@ angular.element(document).ready(function() {
                     }
 
                     previousDate = null;
-                    scope.isValid = !isRequired;
                     scope.isTouched = true;
+                    validate(null);
 
                     onChange();
                     setDisplayDate();
@@ -636,15 +687,10 @@ angular.element(document).ready(function() {
 
                 // Set initial date.
                 if (scope.value) {
-                    var maDate = {
-                        date: null,
-                        offset: 0
-                    };
-
-                    maDate = MaDate.parse(scope.value, scope.culture) || maDate;
+                    var maDate = MaDate.parse(scope.value, scope.culture);
                     maDate.date = MaDate.offsetUtc(maDate.date);
 
-                    if (!maDate.date) {
+                    if (maDate.isEmpty()) {
                         return;
                     }
 
@@ -697,8 +743,39 @@ angular.element(document).ready(function() {
                     }
                 });
 
+                var minMaxDateWatcher = function(newValue, oldValue, dateName) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    var maDate = parseDate(dateElement.val().trim());
+
+                    if (dateName === 'maxDate') {
+                        setMaxDate();
+                    } else {
+                        setMinDate();
+                    }
+
+                    setValidators();
+                    validate(maDate.date);
+
+                    if (scope.isValid) {
+                        onChange(maDate.date);
+                    }
+                };
+
+                scope.$watch('maxDate', function(newValue, oldValue) {
+                    minMaxDateWatcher(newValue, oldValue, 'maxDate');
+                });
+
+                scope.$watch('minDate', function(newValue, oldValue) {
+                    minMaxDateWatcher(newValue, oldValue, 'minDate');
+                });
+
                 // Prepare API instance.
                 if (scope.instance) {
+                    scope.instance.isInitialized = true;
+
                     scope.instance.validate = function() {
                         scope.isTouched = true;
 
@@ -712,6 +789,10 @@ angular.element(document).ready(function() {
 
                     scope.instance.isValid = function() {
                         return scope.isValid;
+                    };
+
+                    scope.instance.failedValidator = function() {
+                        return failedValidator;
                     };
                 }
             }
@@ -920,7 +1001,7 @@ angular.element(document).ready(function() {
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].method(value)) {
+                        if (!validators[i].validate(value)) {
                             scope.isValid = false;
                             break;
                         }
@@ -1095,35 +1176,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            isDisabled: '=',
-            click: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-reset-value" ng-class="{\
-                    \'ma-reset-value-is-disabled\': isDisabled\
-                }"\
-                ng-click="onClick()">\
-                <i class="fa fa-times"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
         }
     };
 }]);
@@ -1517,7 +1569,7 @@ angular.element(document).ready(function() {
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
-                            if (!validators[i].method(value)) {
+                            if (!validators[i].validate(value)) {
                                 scope.isValid = false;
                                 break;
                             }
@@ -1751,7 +1803,7 @@ angular.element(document).ready(function() {
                 // a selected item is in the list.
                 var isNotEmptyAndInListValidator = {
                     name: 'IsNotEmpty',
-                    method: function(value) {
+                    validate: function(value) {
                         if (maHelper.isNullOrWhiteSpace(value)) {
                             return false;
                         }
@@ -1845,6 +1897,35 @@ angular.element(document).ready(function() {
             }
         };
     }]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            isDisabled: '=',
+            click: '&'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
+                <i class="fa fa-times"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
+        }
+    };
+}]);
 })();
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
@@ -2338,6 +2419,10 @@ angular.element(document).ready(function() {
         return difference(this, date);
     };
 
+    MaDate.prototype.format = function(_format, timeZone) {
+        return format(this.date, _format, timeZone);
+    };
+
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;
     MaDate.format = format;
@@ -2572,12 +2657,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.services').factory('maValidators', ['maHelper', function(maHelper) {
+(function(){angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDate', function(maHelper, MaDate) {
+    var formatValueToCompare = function(value) {
+        if (!value) {
+            return null;
+        }
+
+        var formattedValue = value.toString();
+
+        if (value instanceof MaDate) {
+            formattedValue = value.format('dd MMM yyyy');
+        }
+
+        return formattedValue;
+    };
+
     return {
         isNotEmpty: function() {
             return {
                 name: 'IsNotEmpty',
-                method: function(value) {
+                message: 'This field can not be empty.',
+                validate: function(value) {
                     if (angular.isArray(value)) {
                         return value.length > 0;
                     }
@@ -2587,37 +2687,81 @@ angular.element(document).ready(function() {
             };
         },
 
-        isGreaterThan: function(valueToCompare) {
+        isGreaterThan: function(valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field can not be less than or equal to ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
             return {
                 name: 'IsGreaterThan',
-                method: function(value) {
+                message: message,
+                validate: function(value) {
+                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
                     return maHelper.isGreaterThan(value, valueToCompare);
                 }
             };
         },
 
-        isGreaterThanOrEqual: function(valueToCompare) {
+        isGreaterThanOrEqual: function(valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field can not be less than ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
             return {
                 name: 'IsGreaterThanOrEqual',
-                method: function(value) {
+                message: message,
+                validate: function(value) {
+                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
                     return maHelper.isGreaterThanOrEqual(value, valueToCompare);
                 }
             };
         },
 
-        isLessThan: function(valueToCompare) {
+        isLessThan: function(valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field can not be greater than or equal to ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
             return {
                 name: 'IsLessThan',
-                method: function(value) {
+                message: message,
+                validate: function(value) {
+                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
                     return maHelper.isLessThan(value, valueToCompare);
                 }
             };
         },
 
-        isLessThanOrEqual: function(valueToCompare) {
+        isLessThanOrEqual: function(valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field can not be greater than ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
             return {
                 name: 'IsLessThanOrEqual',
-                method: function(value) {
+                message: message,
+                validate: function(value) {
+                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
                     return maHelper.isLessThanOrEqual(value, valueToCompare);
                 }
             };
@@ -2892,7 +3036,7 @@ angular.element(document).ready(function() {
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].method(valueElement.val())) {
+                        if (!validators[i].validate(valueElement.val())) {
                             scope.isValid = false;
                             break;
                         }

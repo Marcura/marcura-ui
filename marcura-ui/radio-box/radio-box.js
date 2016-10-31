@@ -116,7 +116,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].method(value)) {
+                        if (!validators[i].validate(value)) {
                             scope.isValid = false;
                             break;
                         }

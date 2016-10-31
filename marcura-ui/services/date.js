@@ -490,6 +490,10 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return difference(this, date);
     };
 
+    MaDate.prototype.format = function(_format, timeZone) {
+        return format(this.date, _format, timeZone);
+    };
+
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;
     MaDate.format = format;

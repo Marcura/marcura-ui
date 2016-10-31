@@ -387,7 +387,7 @@ angular.module('marcuraUI.components')
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
-                            if (!validators[i].method(value)) {
+                            if (!validators[i].validate(value)) {
                                 scope.isValid = false;
                                 break;
                             }
@@ -621,7 +621,7 @@ angular.module('marcuraUI.components')
                 // a selected item is in the list.
                 var isNotEmptyAndInListValidator = {
                     name: 'IsNotEmpty',
-                    method: function(value) {
+                    validate: function(value) {
                         if (maHelper.isNullOrWhiteSpace(value)) {
                             return false;
                         }

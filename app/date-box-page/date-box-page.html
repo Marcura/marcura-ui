@@ -80,8 +80,7 @@
             value="date7"
             is-required="true"
             can-reset="true"
-            change="change7(maValue)"
-            validators="[change7Validator]">
+            change="change7(maValue)">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -103,14 +102,14 @@
     <div class="nodes-item">
         <ma-date-box
             value="date9"
-            min-date="date9min"
-            max-date="date9max"
+            min-date="date9Min"
+            max-date="date9Max"
             change="change1(maValue)">
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        <pre>minDate: {{date9min}}
-maxDate: {{date9max}}</pre>
+        <pre>minDate: {{date9Min}}
+maxDate: {{date9Max}}</pre>
     </div>
     <div class="nodes-item">
         <pre>{{date9 || 'null'}}</pre>
@@ -127,5 +126,54 @@ maxDate: {{date9max}}</pre>
     </div>
     <div class="nodes-item">
         <pre>{{date10 || 'null'}}</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>An example of maxDate validation between two components</h2>
+    </div>
+    <div class="nodes-item">
+        Start date can not be greater than end date.
+    </div>
+    <div class="nodes-item">
+        <form class="form">
+            <div class="form-group form-group-labels-on-top">
+                <div class="form-col col-xs-12 col-sm-3">
+                    <div class="form-label">
+                        <label for="date20">Start</label>
+                    </div>
+                    <ma-date-box
+                        id="date20"
+                        value="date20"
+                        max-date="date21"
+                        can-reset="true"
+                        change="change20(maValue)"
+                        validators="[date20Validator]"
+                        instance="date20DateBox">
+                    </ma-date-box>
+                </div>
+                <div class="form-col col-xs-12 col-sm-3">
+                    <div class="form-label">
+                        <label for="date21">End</label>
+                    </div>
+                    <ma-date-box
+                        value="date21"
+                        can-reset="true">
+                    </ma-date-box>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-col col-xs-12">
+                    <pre>// Start:
+maxDate: {{date21 || 'null'}}
+value: {{date20 || 'null'}}
+failedValidator: {{(date20DateBox.failedValidator() || null) | json}}</pre>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-col col-xs-12">
+                    <pre>// End:
+value: {{date21 || 'null'}}</pre>
+                </div>
+            </div>
+        </form>
     </div>
 </div>

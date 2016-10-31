@@ -13,7 +13,7 @@ describe('maHelper service', function() {
             var validator = maValidators.isNotEmpty();
 
             expect(validator.name).toEqual('IsNotEmpty');
-            expect(validator.method('Paul Smith')).toEqual(true);
+            expect(validator.validate('Paul Smith')).toEqual(true);
         });
     });
 
@@ -22,7 +22,7 @@ describe('maHelper service', function() {
             var validator = maValidators.isGreaterThan();
 
             expect(validator.name).toEqual('IsGreaterThan');
-            expect(maValidators.isGreaterThan(1).method(2)).toEqual(true);
+            expect(maValidators.isGreaterThan(1).validate(2)).toEqual(true);
         });
     });
 
@@ -31,7 +31,7 @@ describe('maHelper service', function() {
             var validator = maValidators.isLessThan();
 
             expect(validator.name).toEqual('IsLessThan');
-            expect(maValidators.isLessThan(2).method(1)).toEqual(true);
+            expect(maValidators.isLessThan(2).validate(1)).toEqual(true);
         });
     });
 });
