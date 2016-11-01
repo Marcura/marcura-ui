@@ -324,7 +324,7 @@ angular.module('marcuraUI.components')
                     }
 
                     if (!minDate.isEmpty()) {
-                        validators.push(maValidators.isGreaterThanOrEqual(minDate));
+                        validators.push(maValidators.isGreaterThanOrEqual(minDate, true));
                     }
 
                     if (!maxDate.isEmpty()) {
