@@ -362,6 +362,12 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
+                    // Date is empty and remains unchanged.
+                    if (isEmpty && previousDate === null) {
+                        validate(null);
+                        return;
+                    }
+
                     // Date has been emptied.
                     if (isEmpty) {
                         validate(maDate.date);
@@ -530,9 +536,40 @@ angular.module('marcuraUI.components')
                     }
 
                     setValidators();
-                    validate(maDate.date);
 
-                    if (scope.isValid) {
+                    // Run only min/max validators to avoid the component being highligthed as invalid
+                    // by other validators like IsNotEmpty, when minDate/maxDate is changed.
+                    var minMaxValidators = [];
+
+                    for (var i = 0; i < validators.length; i++) {
+                        if (validators[i].name === 'IsGreaterThanOrEqual' || validators[i].name === 'IsLessThanOrEqual') {
+                            minMaxValidators.push(validators[i]);
+                        }
+                    }
+
+                    if (minMaxValidators.length) {
+                        var dateString = maDate.date ? MaDate.format(maDate.date, format) : null;
+
+                        // Empty failedValidator if it is min/max validator.
+                        if (failedValidator && (failedValidator.name === 'IsGreaterThanOrEqual' || failedValidator.name === 'IsLessThanOrEqual')) {
+                            failedValidator = null;
+                            scope.isValid = true;
+                        }
+
+                        for (i = 0; i < minMaxValidators.length; i++) {
+                            if (!minMaxValidators[i].validate(dateString)) {
+                                scope.isValid = false;
+                                failedValidator = minMaxValidators[i];
+                                break;
+                            }
+                        }
+
+                        if (!scope.isValid) {
+                            scope.isTouched = true;
+                        }
+                    }
+
+                    if (scope.isValid && hasDateChanged(maDate.date)) {
                         onChange(maDate.date);
                     }
                 };

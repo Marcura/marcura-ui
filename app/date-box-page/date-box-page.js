@@ -15,7 +15,7 @@ function dateBoxPageController($scope, $timeout, MaDate, maValidators) {
     $scope.date9Min = MaDate.format(moment().add(-5, 'day'), 'yyyy-MM-ddT00:00:00Z');
     $scope.date9Max = MaDate.format(moment().add(5, 'day'), 'yyyy-MM-ddT00:00:00Z');
     $scope.date10 = '2016-07-25T00:00:00Z';
-    $scope.date21 = '2016-10-20T00:00:00Z';
+    $scope.date21 = MaDate.format(new Date(), 'yyyy-MM-ddT00:00:00Z');
     $scope.date20DateBox = {};
     $scope.date20Validator = {
         validate: function(date) {
@@ -25,6 +25,7 @@ function dateBoxPageController($scope, $timeout, MaDate, maValidators) {
     };
 
     $scope.change1 = function(date) {
+        console.log('change');
         console.log('event:', date);
         console.log('scope:', $scope.date1);
     };
@@ -35,16 +36,19 @@ function dateBoxPageController($scope, $timeout, MaDate, maValidators) {
     // };
 
     $scope.change7 = function(date) {
+        console.log('change');
         console.log('event:', date);
         console.log('scope:', $scope.date7);
     };
 
     $scope.change10 = function(date) {
+        console.log('change');
         console.log('event:', date);
         console.log('scope:', $scope.date10);
     };
 
     $scope.change20 = function(date) {
+        console.log('change');
         console.log('event:', date);
         console.log('scope:', $scope.date20);
     };
