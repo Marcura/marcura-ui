@@ -181,6 +181,7 @@ angular.module('marcuraUI.components')
                     if (!date) {
                         date = new Date();
                         date = new Date(date.setFullYear(date.getFullYear() + 100));
+                        maxDate = new MaDate(date);
                     }
 
                     picker.setMaxDate(date);
@@ -199,6 +200,7 @@ angular.module('marcuraUI.components')
                     if (!date) {
                         date = new Date();
                         date = new Date(date.setFullYear(date.getFullYear() - 100));
+                        minDate = new MaDate(date);
                     }
 
                     picker.setMinDate(date);
