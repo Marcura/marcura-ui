@@ -176,7 +176,8 @@ angular.module('marcuraUI.components')
                     showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
                     validators = scope.validators ? angular.copy(scope.validators) : [],
                     isRequired = scope.isRequired,
-                    hasIsNotEmptyValidator = false;
+                    hasIsNotEmptyValidator = false,
+                    previousValue;
 
                 scope.previousSelectedItem = scope.previousSelectedItem || null;
                 scope.isAddMode = false;
@@ -335,6 +336,7 @@ angular.module('marcuraUI.components')
                                 return;
                             }
 
+                            previousValue = scope.value || null;
                             scope.value = value;
                             previousAddedItem = scope.value;
 
@@ -344,7 +346,8 @@ angular.module('marcuraUI.components')
                             if (scope.isValid) {
                                 $timeout(function() {
                                     scope.change({
-                                        maValue: scope.value
+                                        maValue: scope.value,
+                                        maOldValue: previousValue
                                     });
                                 });
                             }
@@ -375,7 +378,7 @@ angular.module('marcuraUI.components')
 
                     if (isFocusLost) {
                         scope.blur({
-                            item: scope.value
+                            maValue: scope.value
                         });
                     }
 
@@ -419,12 +422,14 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.onReset = function() {
+                    previousValue = scope.value;
                     scope.value = null;
                     setFocus();
 
                     $timeout(function() {
                         scope.change({
-                            maValue: scope.value
+                            maValue: scope.value,
+                            maOldValue: previousValue
                         });
                     });
                 };
@@ -436,7 +441,7 @@ angular.module('marcuraUI.components')
 
                     if (isFocusLost) {
                         scope.focus({
-                            item: scope.value
+                            maValue: scope.value
                         });
                     }
 
@@ -474,6 +479,7 @@ angular.module('marcuraUI.components')
                     }
 
                     var isInternalCall = false;
+                    previousValue = scope.value || null;
 
                     if (mode === 'select') {
                         scope.isAddMode = false;
@@ -510,7 +516,8 @@ angular.module('marcuraUI.components')
                         $timeout(function() {
                             // Trigger change event as user manually swithces between custom and selected items.
                             scope.change({
-                                maValue: scope.value
+                                maValue: scope.value,
+                                maOldValue: previousValue
                             });
 
                             setFocus();
@@ -564,12 +571,14 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
+                    previousValue = scope.value;
                     scope.value = item;
                     scope.previousSelectedItem = item;
 
                     $timeout(function() {
                         scope.change({
-                            maValue: item
+                            maValue: item,
+                            maOldValue: previousValue
                         });
                     });
                 };

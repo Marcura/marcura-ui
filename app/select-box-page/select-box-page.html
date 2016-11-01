@@ -16,7 +16,7 @@
             items="ports1"
             value="port1"
             is-loading="isLoading"
-            change="change1(maValue)">
+            change="change1(maValue, maOldValue)">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -32,7 +32,7 @@
             item-text-field="name"
             item-value-field="id"
             order-by="'name'"
-            change="change2(maValue)">
+            change="change2(maValue, maOldValue)">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -46,7 +46,7 @@
             items="ports1"
             value="port5"
             can-add-item="true"
-            change="change5(maValue)">
+            change="change5(maValue, maOldValue)">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -62,7 +62,7 @@
             item-text-field="name"
             item-value-field="id"
             can-add-item="true"
-            change="change3(maValue)"
+            change="change3(maValue, maOldValue)"
             instance="port3SelectBox">
         </ma-select-box>
     </div>
@@ -126,8 +126,8 @@
             value="port7"
             item-text-field="name"
             item-value-field="id"
-            focus="focus7(item)"
-            blur="blur7(item)"
+            focus="focus7(maValue)"
+            blur="blur7(maValue)"
             change="change7(maValue)"
             can-add-item="true">
         </ma-select-box>
@@ -141,8 +141,8 @@
             item-text-field="name"
             item-value-field="id"
             value="port8"
-            focus="focus8(item)"
-            blur="blur8(item)"
+            focus="focus8(maValue)"
+            blur="blur8(maValue)"
             change="change8(maValue)"
             can-add-item="true"
             instance="port8SelectBox">
@@ -162,8 +162,8 @@
             item-value-field="id"
             is-required="true"
             can-add-item="true"
-            focus="focus9(item)"
-            blur="blur9(item)"
+            focus="focus9(maValue)"
+            blur="blur9(maValue)"
             change="change9(maValue)"
             instance="port9SelectBox">
         </ma-select-box>
@@ -184,9 +184,9 @@
             item-text-field="name"
             item-value-field="id"
             item-template="port10ItemTemplate"
-            focus="focus10(item)"
-            blur="blur10(item)"
-            change="change10(maValue)"
+            focus="focus10(maValue)"
+            blur="blur10(maValue)"
+            change="change10(maValue, maOldValue)"
             can-reset="true">
         </ma-select-box>
     </div>
@@ -202,8 +202,8 @@
             value="port11"
             item-text-field="name"
             item-value-field="id"
-            focus="focus11(item)"
-            blur="blur11(item)"
+            focus="focus11(maValue)"
+            blur="blur11(maValue)"
             change="change11(maValue)"
             can-add-item="true"
             can-reset="true">
