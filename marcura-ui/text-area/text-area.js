@@ -10,7 +10,8 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             isRequired: '=',
             validators: '=',
             instance: '=',
-            updateOn: '@'
+            updateOn: '@',
+            change: '&'
         },
         replace: true,
         template: function() {
@@ -43,6 +44,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 // Variables keydownValue and keyupValue help track touched state.
                 keydownValue,
                 keyupValue,
+                previousValue,
                 updateOn = scope.updateOn ? scope.updateOn : 'input';
 
             var getValueElementStyle = function() {
@@ -102,6 +104,20 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 }
             };
 
+            var onChange = function(value) {
+                if (previousValue === value) {
+                    return;
+                }
+
+                previousValue = value;
+
+                $timeout(function() {
+                    scope.change({
+                        maValue: value
+                    });
+                });
+            };
+
             scope.isFocused = false;
             scope.isTouched = false;
 
@@ -131,6 +147,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
                 if (scope.isValid && updateOn === 'blur') {
                     scope.value = valueElement.val();
+                    onChange(scope.value);
                 }
 
                 validate();
@@ -231,6 +248,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             // Set initial value.
             valueElement.val(scope.value);
             validate();
+            previousValue = scope.value;
 
             // Prepare API instance.
             if (scope.instance) {

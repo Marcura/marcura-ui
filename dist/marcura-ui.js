@@ -105,6 +105,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -817,27 +838,6 @@ angular.element(document).ready(function() {
         };
     }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
         restrict: 'E',
@@ -854,70 +854,6 @@ angular.element(document).ready(function() {
             </div>';
 
             return html;
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            scope.calculateLeft = function(stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function() {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function(stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
         }
     };
 }]);
@@ -1215,6 +1151,70 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            scope.calculateLeft = function(stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function() {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function(stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
         }
     };
 }]);
@@ -2979,85 +2979,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            id: '@',
-            value: '=',
-            size: '=',
-            change: '&',
-            isDisabled: '='
-        },
-        replace: true,
-        template: function($timeout) {
-            var html = '\
-            <div class="ma-text-box"\
-                ng-class="{\
-                    \'ma-text-box-is-disabled\': isDisabled\
-                }">\
-                <input class="ma-text-box-value form-control input-{{_size}}"\
-                    ng-disabled="isDisabled"\
-                    type="text"\
-                    ng-model="value"/>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element) {
-            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
-            // valueType,
-
-            // getValueInType = function(value) {
-            //     if (!value) {
-            //         return null;
-            //     } else if (dateType === 'String') {
-            //         return value.toString();
-            //     } else if (angular.isNumber(value)) {
-            //         return date;
-            //     } else {
-            //         return MaDate.format(date, format);
-            //     }
-            // },
-            // onChange = function (value) {
-            //     scope.change({
-            //         value: value
-            //     });
-            // };
-
-            scope._size = scope.size ? scope.size : 'sm';
-
-            $timeout(function() {
-                // move id to input
-                element.removeAttr('id');
-                valueElement.attr('id', scope.id);
-            });
-
-            // scope.$watch('value', function(newValue, oldValue) {
-            //     if (newValue === oldValue) {
-            //         return;
-            //     }
-            //
-            //     scope.change({
-            //         value: value
-            //     });
-            // });
-
-
-            // if (scope.value) {
-            //     // determine initial value type
-            //     if (maHelper.isString(scope.value)) {
-            //         valueType = 'String';
-            //     } else {
-            //         valueType = 'Number';
-            //     }
-            //
-            //     valueElement.val(scope.value);
-            // }
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', 'maValidators', function($timeout, $window, maHelper, maValidators) {
     return {
         restrict: 'E',
@@ -3070,7 +2991,8 @@ angular.element(document).ready(function() {
             isRequired: '=',
             validators: '=',
             instance: '=',
-            updateOn: '@'
+            updateOn: '@',
+            change: '&'
         },
         replace: true,
         template: function() {
@@ -3103,6 +3025,7 @@ angular.element(document).ready(function() {
                 // Variables keydownValue and keyupValue help track touched state.
                 keydownValue,
                 keyupValue,
+                previousValue,
                 updateOn = scope.updateOn ? scope.updateOn : 'input';
 
             var getValueElementStyle = function() {
@@ -3162,6 +3085,20 @@ angular.element(document).ready(function() {
                 }
             };
 
+            var onChange = function(value) {
+                if (previousValue === value) {
+                    return;
+                }
+
+                previousValue = value;
+
+                $timeout(function() {
+                    scope.change({
+                        maValue: value
+                    });
+                });
+            };
+
             scope.isFocused = false;
             scope.isTouched = false;
 
@@ -3191,6 +3128,7 @@ angular.element(document).ready(function() {
 
                 if (scope.isValid && updateOn === 'blur') {
                     scope.value = valueElement.val();
+                    onChange(scope.value);
                 }
 
                 validate();
@@ -3291,6 +3229,7 @@ angular.element(document).ready(function() {
             // Set initial value.
             valueElement.val(scope.value);
             validate();
+            previousValue = scope.value;
 
             // Prepare API instance.
             if (scope.instance) {
@@ -3298,6 +3237,85 @@ angular.element(document).ready(function() {
                     return scope.isValid;
                 };
             }
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            id: '@',
+            value: '=',
+            size: '=',
+            change: '&',
+            isDisabled: '='
+        },
+        replace: true,
+        template: function($timeout) {
+            var html = '\
+            <div class="ma-text-box"\
+                ng-class="{\
+                    \'ma-text-box-is-disabled\': isDisabled\
+                }">\
+                <input class="ma-text-box-value form-control input-{{_size}}"\
+                    ng-disabled="isDisabled"\
+                    type="text"\
+                    ng-model="value"/>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element) {
+            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
+            // valueType,
+
+            // getValueInType = function(value) {
+            //     if (!value) {
+            //         return null;
+            //     } else if (dateType === 'String') {
+            //         return value.toString();
+            //     } else if (angular.isNumber(value)) {
+            //         return date;
+            //     } else {
+            //         return MaDate.format(date, format);
+            //     }
+            // },
+            // onChange = function (value) {
+            //     scope.change({
+            //         value: value
+            //     });
+            // };
+
+            scope._size = scope.size ? scope.size : 'sm';
+
+            $timeout(function() {
+                // move id to input
+                element.removeAttr('id');
+                valueElement.attr('id', scope.id);
+            });
+
+            // scope.$watch('value', function(newValue, oldValue) {
+            //     if (newValue === oldValue) {
+            //         return;
+            //     }
+            //
+            //     scope.change({
+            //         value: value
+            //     });
+            // });
+
+
+            // if (scope.value) {
+            //     // determine initial value type
+            //     if (maHelper.isString(scope.value)) {
+            //         valueType = 'String';
+            //     } else {
+            //         valueType = 'Number';
+            //     }
+            //
+            //     valueElement.val(scope.value);
+            // }
         }
     };
 }]);
