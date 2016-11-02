@@ -105,27 +105,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -221,6 +200,27 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -372,7 +372,7 @@ angular.element(document).ready(function() {
 
                     if (maDate && maDate.date) {
                         // Adjust time zone offset.
-                        displayDate = MaDate.offsetUtc(maDate.date, timeZoneOffset - maDate.offset);
+                        displayDate = MaDate.offsetUtc(maDate.date, timeZoneOffset - maDate.offset());
                         dateElement.val(MaDate.format(displayDate, displayFormat));
                         hoursElement.val(MaDate.format(displayDate, 'HH'));
                         minutesElement.val(MaDate.format(displayDate, 'mm'));
@@ -585,7 +585,7 @@ angular.element(document).ready(function() {
                     // Check time.
                     if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
                         maDate = parseDate(date);
-                        maDate.offset = initialDateOffset;
+                        maDate.offset(initialDateOffset);
                     } else {
                         scope.isValid = false;
                         return;
@@ -704,7 +704,7 @@ angular.element(document).ready(function() {
 
                     setDisplayDate(maDate);
                     previousDate = maDate.date;
-                    initialDateOffset = maDate.offset;
+                    initialDateOffset = maDate.offset();
                 }
 
                 $timeout(function() {
@@ -736,7 +736,7 @@ angular.element(document).ready(function() {
 
                     setDisplayDate(maDate);
                     previousDate = maDate.date;
-                    initialDateOffset = maDate.offset;
+                    initialDateOffset = maDate.offset();
                 });
 
                 scope.$watch('isDisabled', function(newValue, oldValue) {
@@ -2054,7 +2054,7 @@ angular.element(document).ready(function() {
         }
 
         maDate.date = new Date(year, month - 1, day, hours, minutes, seconds);
-        maDate.offset = offset;
+        maDate.offset(offset);
 
         return maDate;
     };
@@ -2405,8 +2405,8 @@ angular.element(document).ready(function() {
         var time = maDate.date.valueOf();
 
         // Add offset which is in minutes, and thus should be converted to milliseconds.
-        if (maDate.offset !== 0) {
-            time -= maDate.offset * 60000;
+        if (maDate.offset() !== 0) {
+            time -= maDate.offset() * 60000;
         }
 
         return time;
@@ -2448,21 +2448,29 @@ angular.element(document).ready(function() {
 
     function MaDate(date, offset) {
         this.date = date || null;
-        this.offset = offset || 0;
+        this._offset = offset || 0;
 
         // MaDate is provided - just copy it.
         if (date instanceof MaDate) {
             this.date = date.date;
-            this.offset = date.offset;
+            this._offset = date.offset();
         }
 
         // Parse date.
         if (angular.isString(date)) {
             var maDate = parse(date);
             this.date = maDate.date;
-            this.offset = maDate.offset;
+            this._offset = maDate.offset();
         }
     }
+
+    MaDate.prototype.offset = function(offset) {
+        if (arguments.length === 0) {
+            return this._offset;
+        }
+
+        this._offset = offset;
+    };
 
     MaDate.prototype.isEmpty = function() {
         return !this.date;

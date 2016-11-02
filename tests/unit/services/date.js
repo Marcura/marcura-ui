@@ -14,13 +14,13 @@ describe('MaDate', function() {
         it('creates empty instance', function() {
             var maDate = new MaDate();
             expect(maDate.date).toEqual(null);
-            expect(maDate.offset).toEqual(0);
+            expect(maDate.offset()).toEqual(0);
         });
 
         it('creates instance', function() {
             var maDate = new MaDate(new Date(1987, 6, 1, 0, 0, 0), 60);
             expect(maDate.date.toString().slice(4, 15)).toEqual('Jul 01 1987');
-            expect(maDate.offset).toEqual(60);
+            expect(maDate.offset()).toEqual(60);
         });
 
         it('parses date if it is string', function() {
@@ -227,13 +227,13 @@ describe('MaDate', function() {
         it('parses date with UTC time zone', function() {
             var date = MaDate.parse('2015-02-21T10:00:00Z');
             expect(date.date.toString().slice(4, 24)).toEqual('Feb 21 2015 10:00:00');
-            expect(date.offset).toEqual(0);
+            expect(date.offset()).toEqual(0);
         });
 
         it('ignores time zones other than UTC', function() {
             var date = MaDate.parse('2015-02-21T10:00:00-03:00');
             expect(date.date.toString().slice(4, 24)).toEqual('Feb 21 2015 10:00:00');
-            expect(date.offset).toEqual(-180);
+            expect(date.offset()).toEqual(-180);
         });
 
         it('supports specific en-GB formats', function() {

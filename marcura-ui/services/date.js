@@ -72,7 +72,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
 
         maDate.date = new Date(year, month - 1, day, hours, minutes, seconds);
-        maDate.offset = offset;
+        maDate.offset(offset);
 
         return maDate;
     };
@@ -423,8 +423,8 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         var time = maDate.date.valueOf();
 
         // Add offset which is in minutes, and thus should be converted to milliseconds.
-        if (maDate.offset !== 0) {
-            time -= maDate.offset * 60000;
+        if (maDate.offset() !== 0) {
+            time -= maDate.offset() * 60000;
         }
 
         return time;
@@ -466,21 +466,29 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
 
     function MaDate(date, offset) {
         this.date = date || null;
-        this.offset = offset || 0;
+        this._offset = offset || 0;
 
         // MaDate is provided - just copy it.
         if (date instanceof MaDate) {
             this.date = date.date;
-            this.offset = date.offset;
+            this._offset = date.offset();
         }
 
         // Parse date.
         if (angular.isString(date)) {
             var maDate = parse(date);
             this.date = maDate.date;
-            this.offset = maDate.offset;
+            this._offset = maDate.offset();
         }
     }
+
+    MaDate.prototype.offset = function(offset) {
+        if (arguments.length === 0) {
+            return this._offset;
+        }
+
+        this._offset = offset;
+    };
 
     MaDate.prototype.isEmpty = function() {
         return !this.date;

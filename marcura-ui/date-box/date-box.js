@@ -145,7 +145,7 @@ angular.module('marcuraUI.components')
 
                     if (maDate && maDate.date) {
                         // Adjust time zone offset.
-                        displayDate = MaDate.offsetUtc(maDate.date, timeZoneOffset - maDate.offset);
+                        displayDate = MaDate.offsetUtc(maDate.date, timeZoneOffset - maDate.offset());
                         dateElement.val(MaDate.format(displayDate, displayFormat));
                         hoursElement.val(MaDate.format(displayDate, 'HH'));
                         minutesElement.val(MaDate.format(displayDate, 'mm'));
@@ -358,7 +358,7 @@ angular.module('marcuraUI.components')
                     // Check time.
                     if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
                         maDate = parseDate(date);
-                        maDate.offset = initialDateOffset;
+                        maDate.offset(initialDateOffset);
                     } else {
                         scope.isValid = false;
                         return;
@@ -477,7 +477,7 @@ angular.module('marcuraUI.components')
 
                     setDisplayDate(maDate);
                     previousDate = maDate.date;
-                    initialDateOffset = maDate.offset;
+                    initialDateOffset = maDate.offset();
                 }
 
                 $timeout(function() {
@@ -509,7 +509,7 @@ angular.module('marcuraUI.components')
 
                     setDisplayDate(maDate);
                     previousDate = maDate.date;
-                    initialDateOffset = maDate.offset;
+                    initialDateOffset = maDate.offset();
                 });
 
                 scope.$watch('isDisabled', function(newValue, oldValue) {
