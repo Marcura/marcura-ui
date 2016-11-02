@@ -350,17 +350,17 @@ describe('MaDate', function() {
     describe('valueOf method', function() {
         it('returns the primitive value of a date', function() {
             // Date.
-            expect(MaDate.valueOf('2016-09-26T00:00:00Z')).toEqual(1474833600000);
+            expect(new MaDate('2016-09-26T00:00:00Z').valueOf()).toEqual(1474833600000);
 
             // Date and time.
-            expect(MaDate.valueOf('2016-09-26T01:00:00Z')).toEqual(1474837200000);
+            expect(new MaDate('2016-09-26T01:00:00Z').valueOf()).toEqual(1474837200000);
 
             // Date with time zone.
-            expect(MaDate.valueOf('2016-09-26T10:00:00+01:00')).toEqual(1474866000000);
+            expect(new MaDate('2016-09-26T10:00:00+01:00').valueOf()).toEqual(1474866000000);
         });
     });
 
-    describe('valueOf difference', function() {
+    describe('difference method', function() {
         it('returns difference in milliseconds between two dates', function() {
             expect(MaDate.difference('2016-09-26T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(0);
             expect(MaDate.difference('2016-09-26T00:00:01Z', '2016-09-26T00:00:00Z')).toEqual(1000);
@@ -389,6 +389,54 @@ describe('MaDate', function() {
             expect(MaDate.parseTimeZone('--00:00')).toEqual(0);
             expect(MaDate.parseTimeZone('24:00')).toEqual(0);
             expect(MaDate.parseTimeZone('00:60')).toEqual(0);
+        });
+    });
+
+    describe('second method', function() {
+        it('returns seconds', function() {
+            var maDate = new MaDate('2015-02-21T10:45:30Z');
+            expect(maDate.second()).toEqual(30);
+        });
+
+        it('sets seconds', function() {
+            var maDate = new MaDate('2015-02-21T10:45:30Z');
+            maDate.second(10);
+            expect(maDate.second()).toEqual(10);
+            expect(maDate.minute()).toEqual(45);
+
+            maDate.second(80);
+            expect(maDate.second()).toEqual(20);
+            expect(maDate.minute()).toEqual(46);
+        });
+    });
+
+    describe('minute method', function() {
+        it('returns minutes', function() {
+            var maDate = new MaDate('2015-02-21T10:45:00Z');
+            expect(maDate.minute()).toEqual(45);
+        });
+
+        it('sets minutes', function() {
+            var maDate = new MaDate('2015-02-21T10:45:30Z');
+            maDate.minute(10);
+            expect(maDate.minute()).toEqual(10);
+
+            maDate.minute(80);
+            expect(maDate.minute()).toEqual(20);
+            expect(maDate.hour()).toEqual(11);
+        });
+    });
+
+    describe('hour method', function() {
+        it('returns hours', function() {
+            var maDate = new MaDate('2015-02-21T10:45:00Z');
+            expect(maDate.hour()).toEqual(10);
+        });
+
+        it('sets hours', function() {
+            var maDate = new MaDate('2015-02-21T10:45:30Z');
+            maDate.hour(20);
+            expect(maDate.hour()).toEqual(20);
         });
     });
 });

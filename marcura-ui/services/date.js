@@ -71,7 +71,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return maDate;
         }
 
-        maDate.date(new Date(year, month - 1, day, hours, minutes, seconds));
+        maDate = new MaDate(new Date(year, month - 1, day, hours, minutes, seconds));
         maDate.offset(offset);
 
         return maDate;
@@ -409,32 +409,8 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
-    var valueOf = function(date) {
-        if (!date) {
-            return null;
-        }
-
-        var maDate = parse(date);
-
-        if (maDate.isEmpty()) {
-            return null;
-        }
-
-        var time = maDate.date().valueOf();
-
-        // Add offset which is in minutes, and thus should be converted to milliseconds.
-        if (maDate.offset() !== 0) {
-            time -= maDate.offset() * 60000;
-        }
-
-        return time;
-    };
-
     var difference = function(date1, date2) {
-        var time1 = date1 ? valueOf(date1) : 0,
-            time2 = date2 ? valueOf(date2) : 0;
-
-        return time1 - time2;
+        return new MaDate(date1).valueOf() - new MaDate(date2).valueOf();
     };
 
     var parseTimeZone = function(timeZone) {
@@ -499,15 +475,72 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
     };
 
     MaDate.prototype.isEmpty = function() {
-        return !this.date();
+        return !this._date;
     };
 
     MaDate.prototype.difference = function(date) {
         return difference(this, date);
     };
 
+    MaDate.prototype.valueOf = function() {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        var time = this._date.valueOf();
+
+        // Add offset which is in minutes, and thus should be converted to milliseconds.
+        if (this._offset !== 0) {
+            time -= this._offset * 60000;
+        }
+
+        return time;
+    };
+
     MaDate.prototype.format = function(_format, timeZone) {
-        return format(this.date(), _format, timeZone);
+        return format(this._date, _format, timeZone);
+    };
+
+    // MaDate.prototype.add = function(number, period) {
+    //
+    //
+    //     return this;
+    // };
+
+    MaDate.prototype.second = function(second) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getSeconds();
+        } else {
+            this._date.setSeconds(second);
+        }
+    };
+
+    MaDate.prototype.minute = function(minute) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getMinutes();
+        } else {
+            this._date.setMinutes(minute);
+        }
+    };
+
+    MaDate.prototype.hour = function(hour) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getHours();
+        } else {
+            this._date.setHours(hour);
+        }
     };
 
     MaDate.parse = parse;
@@ -515,7 +548,6 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
     MaDate.format = format;
     MaDate.offsetUtc = offsetUtc;
     MaDate.isDate = isDate;
-    MaDate.valueOf = valueOf;
     MaDate.difference = difference;
 
     return MaDate;
