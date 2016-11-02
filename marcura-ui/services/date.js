@@ -71,7 +71,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return maDate;
         }
 
-        maDate.date = new Date(year, month - 1, day, hours, minutes, seconds);
+        maDate.date(new Date(year, month - 1, day, hours, minutes, seconds));
         maDate.offset(offset);
 
         return maDate;
@@ -416,11 +416,11 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
 
         var maDate = parse(date);
 
-        if (!maDate) {
+        if (maDate.isEmpty()) {
             return null;
         }
 
-        var time = maDate.date.valueOf();
+        var time = maDate.date().valueOf();
 
         // Add offset which is in minutes, and thus should be converted to milliseconds.
         if (maDate.offset() !== 0) {
@@ -465,22 +465,30 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
     };
 
     function MaDate(date, offset) {
-        this.date = date || null;
+        this._date = date || null;
         this._offset = offset || 0;
 
         // MaDate is provided - just copy it.
         if (date instanceof MaDate) {
-            this.date = date.date;
+            this._date = date.date();
             this._offset = date.offset();
         }
 
         // Parse date.
         if (angular.isString(date)) {
             var maDate = parse(date);
-            this.date = maDate.date;
+            this._date = maDate.date();
             this._offset = maDate.offset();
         }
     }
+
+    MaDate.prototype.date = function(date) {
+        if (arguments.length === 0) {
+            return this._date;
+        }
+
+        this._date = date;
+    };
 
     MaDate.prototype.offset = function(offset) {
         if (arguments.length === 0) {
@@ -491,7 +499,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
     };
 
     MaDate.prototype.isEmpty = function() {
-        return !this.date;
+        return !this.date();
     };
 
     MaDate.prototype.difference = function(date) {
@@ -499,7 +507,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
     };
 
     MaDate.prototype.format = function(_format, timeZone) {
-        return format(this.date, _format, timeZone);
+        return format(this.date(), _format, timeZone);
     };
 
     MaDate.parse = parse;
