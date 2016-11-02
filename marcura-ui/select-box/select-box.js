@@ -603,6 +603,8 @@ angular.module('marcuraUI.components')
 
                 // Prepare API instance.
                 if (scope.instance) {
+                    scope.instance.isInitialized = true;
+
                     scope.instance.switchToSelectMode = function() {
                         if (scope.isAddMode) {
                             scope.toggleMode('select');
