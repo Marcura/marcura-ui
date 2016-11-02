@@ -207,7 +207,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var parseDate = function(date) {
-                    var maDate = new MaDate();
+                    var maDate = MaDate.createEmpty();
 
                     if (!date) {
                         return maDate;
@@ -353,7 +353,7 @@ angular.module('marcuraUI.components')
                         isEmpty = date === '',
                         hours = Number(hoursElement.val()),
                         minutes = Number(minutesElement.val()),
-                        maDate = new MaDate();
+                        maDate = MaDate.createEmpty();
 
                     // Check time.
                     if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {

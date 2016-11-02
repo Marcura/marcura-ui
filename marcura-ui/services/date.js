@@ -19,7 +19,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
 
     var getTotalDate = function(year, month, day, hours, minutes, seconds, offset) {
         var finalMonth,
-            maDate = new MaDate();
+            maDate = MaDate.createEmpty();
         day = day.toString();
         month = month.toString();
         hours = hours || 0;
@@ -109,7 +109,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
 
     var parse = function(value, culture) {
         var pattern, parts, dayAndMonth,
-            maDate = new MaDate();
+            maDate = MaDate.createEmpty();
 
         // Check if a date requires parsing.
         if (value instanceof Date || value instanceof MaDate) {
@@ -232,13 +232,10 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
     var format = function(date, format, timeZone) {
         var languageIndex = 0,
             isMomentDate = date && date.isValid && date.isValid();
+        format = angular.isString(format) ? format : 'yyyy-MM-ddTHH:mm:ssZ';
         timeZone = timeZone || '';
 
         if (!isDate(date) && !isMomentDate) {
-            return null;
-        }
-
-        if (!angular.isString(format)) {
             return null;
         }
 
@@ -456,6 +453,11 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             this._date = maDate.date();
             this._offset = maDate.offset();
         }
+
+        // Create a current date.
+        if (arguments.length === 0) {
+            this._date = new Date();
+        }
     }
 
     MaDate.prototype.date = function(date) {
@@ -498,14 +500,24 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
     };
 
     MaDate.prototype.format = function(_format, timeZone) {
+        if (this.isEmpty()) {
+            return null;
+        }
+
         return format(this._date, _format, timeZone);
     };
 
-    // MaDate.prototype.add = function(number, period) {
-    //
-    //
-    //     return this;
-    // };
+    MaDate.prototype.add = function(number, period) {
+        if (this.isEmpty() || !number) {
+            return this;
+        }
+
+        if (period === 'day') {
+            this._date.setTime(this._date.valueOf() + number * 86400000);
+        }
+
+        return this;
+    };
 
     MaDate.prototype.second = function(second) {
         if (this.isEmpty()) {
@@ -541,6 +553,10 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         } else {
             this._date.setHours(hour);
         }
+    };
+
+    MaDate.createEmpty = function() {
+        return new MaDate(null);
     };
 
     MaDate.parse = parse;

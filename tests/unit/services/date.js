@@ -11,10 +11,14 @@ describe('MaDate', function() {
     }));
 
     describe('constructor', function() {
-        it('creates empty instance', function() {
+        it('uses current date if date is not passed', function() {
             var maDate = new MaDate();
-            expect(maDate.date()).toEqual(null);
-            expect(maDate.offset()).toEqual(0);
+            expect(maDate.difference(new MaDate(new Date))).toEqual(0);
+        });
+
+        it('creates empty instance if passed date is incorrect', function() {
+            var maDate = new MaDate(undefined);
+            expect(maDate.isEmpty()).toEqual(true);
         });
 
         it('creates instance', function() {
@@ -268,11 +272,12 @@ describe('MaDate', function() {
     });
 
     describe('format method', function() {
-        it('returns an null if it can not the date', function() {
-            expect(MaDate.format(new Date(2015, 1, 21), null)).toEqual(null);
-            expect(MaDate.format(new Date(2015, 1, 21), true)).toEqual(null);
-            expect(MaDate.format(new Date(2015, 1, 21), false)).toEqual(null);
-            expect(MaDate.format(new Date(2015, 1, 21), undefined)).toEqual(null);
+        it('uses yyyy-MM-ddTHH:mm:ssZ format by default', function() {
+            expect(MaDate.format(new Date(2015, 1, 21))).toEqual('2015-02-21T00:00:00Z');
+            expect(MaDate.format(new Date(2015, 1, 21), null)).toEqual('2015-02-21T00:00:00Z');
+            expect(MaDate.format(new Date(2015, 1, 21), true)).toEqual('2015-02-21T00:00:00Z');
+            expect(MaDate.format(new Date(2015, 1, 21), false)).toEqual('2015-02-21T00:00:00Z');
+            expect(MaDate.format(new Date(2015, 1, 21), undefined)).toEqual('2015-02-21T00:00:00Z');
         });
 
         it('supports day format', function() {
@@ -389,6 +394,27 @@ describe('MaDate', function() {
             expect(MaDate.parseTimeZone('--00:00')).toEqual(0);
             expect(MaDate.parseTimeZone('24:00')).toEqual(0);
             expect(MaDate.parseTimeZone('00:60')).toEqual(0);
+        });
+    });
+
+    describe('createEmpty method', function() {
+        it('creates empty instance', function() {
+            var maDate = MaDate.createEmpty();
+            expect(maDate.isEmpty()).toEqual(true);
+        });
+    });
+
+    describe('add method', function() {
+        it('adds days', function() {
+            var maDate = new MaDate('2015-02-21T10:45:00Z');
+            maDate.add(2, 'day');
+            expect(maDate.format('yyyy-MM-ddTHH:mm:ssZ')).toEqual('2015-02-23T10:45:00Z');
+        });
+
+        it('substructs days', function() {
+            var maDate = new MaDate('2015-02-21T10:45:00Z');
+            maDate.add(-2, 'day');
+            expect(maDate.format('yyyy-MM-ddTHH:mm:ssZ')).toEqual('2015-02-19T10:45:00Z');
         });
     });
 

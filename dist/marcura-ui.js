@@ -40,71 +40,6 @@ angular.element(document).ready(function() {
     }
 });
 })();
-(function(){angular.module('marcuraUI.components').directive('maButton', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            kind: '@',
-            leftIcon: '@',
-            rightIcon: '@',
-            isDisabled: '=',
-            click: '&',
-            size: '@',
-            modifier: '@'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <button class="ma-button{{cssClass}}"\
-                ng-click="onClick()"\
-                ng-disabled="isDisabled"\
-                ng-class="{\
-                    \'ma-button-link\': isLink(),\
-                    \'ma-button-has-left-icon\': hasLeftIcon,\
-                    \'ma-button-has-right-icon\': hasRightIcon,\
-                    \'ma-button-is-disabled\': isDisabled,\
-                    \'ma-button-has-text\': hasText\
-                }">\
-                <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
-                    <i class="fa fa-{{leftIcon}}"></i>\
-                    <span class="ma-button-rim" ng-if="isLink()"></span>\
-                </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
-                    <i class="fa fa-{{rightIcon}}"></i>\
-                    <span class="ma-button-rim" ng-if="isLink()"></span>\
-                </span>\
-                <span class="ma-button-rim" ng-if="!isLink()"></span>\
-            </button>';
-
-            return html;
-        },
-        link: function(scope) {
-            scope.hasText = false;
-            scope.hasLeftIcon = false;
-            scope.hasRightIcon = false;
-            scope.size = scope.size ? scope.size : 'md';
-            scope.cssClass = ' ma-button-' + scope.size;
-            scope.hasLeftIcon = scope.leftIcon ? true : false;
-            scope.hasRightIcon = scope.rightIcon ? true : false;
-            scope.hasText = scope.text ? true : false;
-
-            if (scope.modifier) {
-                scope.cssClass += ' ma-button-' + scope.modifier;
-            }
-
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-
-            scope.isLink = function functionName() {
-                return scope.kind === 'link';
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -200,6 +135,71 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maButton', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            kind: '@',
+            leftIcon: '@',
+            rightIcon: '@',
+            isDisabled: '=',
+            click: '&',
+            size: '@',
+            modifier: '@'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <button class="ma-button{{cssClass}}"\
+                ng-click="onClick()"\
+                ng-disabled="isDisabled"\
+                ng-class="{\
+                    \'ma-button-link\': isLink(),\
+                    \'ma-button-has-left-icon\': hasLeftIcon,\
+                    \'ma-button-has-right-icon\': hasRightIcon,\
+                    \'ma-button-is-disabled\': isDisabled,\
+                    \'ma-button-has-text\': hasText\
+                }">\
+                <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
+                    <i class="fa fa-{{leftIcon}}"></i>\
+                    <span class="ma-button-rim" ng-if="isLink()"></span>\
+                </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
+                    <i class="fa fa-{{rightIcon}}"></i>\
+                    <span class="ma-button-rim" ng-if="isLink()"></span>\
+                </span>\
+                <span class="ma-button-rim" ng-if="!isLink()"></span>\
+            </button>';
+
+            return html;
+        },
+        link: function(scope) {
+            scope.hasText = false;
+            scope.hasLeftIcon = false;
+            scope.hasRightIcon = false;
+            scope.size = scope.size ? scope.size : 'md';
+            scope.cssClass = ' ma-button-' + scope.size;
+            scope.hasLeftIcon = scope.leftIcon ? true : false;
+            scope.hasRightIcon = scope.rightIcon ? true : false;
+            scope.hasText = scope.text ? true : false;
+
+            if (scope.modifier) {
+                scope.cssClass += ' ma-button-' + scope.modifier;
+            }
+
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
+
+            scope.isLink = function functionName() {
+                return scope.kind === 'link';
+            };
         }
     };
 }]);
@@ -434,7 +434,7 @@ angular.element(document).ready(function() {
                 };
 
                 var parseDate = function(date) {
-                    var maDate = new MaDate();
+                    var maDate = MaDate.createEmpty();
 
                     if (!date) {
                         return maDate;
@@ -580,7 +580,7 @@ angular.element(document).ready(function() {
                         isEmpty = date === '',
                         hours = Number(hoursElement.val()),
                         minutes = Number(minutesElement.val()),
-                        maDate = new MaDate();
+                        maDate = MaDate.createEmpty();
 
                     // Check time.
                     if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
@@ -2001,7 +2001,7 @@ angular.element(document).ready(function() {
 
     var getTotalDate = function(year, month, day, hours, minutes, seconds, offset) {
         var finalMonth,
-            maDate = new MaDate();
+            maDate = MaDate.createEmpty();
         day = day.toString();
         month = month.toString();
         hours = hours || 0;
@@ -2053,7 +2053,7 @@ angular.element(document).ready(function() {
             return maDate;
         }
 
-        maDate.date(new Date(year, month - 1, day, hours, minutes, seconds));
+        maDate = new MaDate(new Date(year, month - 1, day, hours, minutes, seconds));
         maDate.offset(offset);
 
         return maDate;
@@ -2091,7 +2091,7 @@ angular.element(document).ready(function() {
 
     var parse = function(value, culture) {
         var pattern, parts, dayAndMonth,
-            maDate = new MaDate();
+            maDate = MaDate.createEmpty();
 
         // Check if a date requires parsing.
         if (value instanceof Date || value instanceof MaDate) {
@@ -2214,13 +2214,10 @@ angular.element(document).ready(function() {
     var format = function(date, format, timeZone) {
         var languageIndex = 0,
             isMomentDate = date && date.isValid && date.isValid();
+        format = angular.isString(format) ? format : 'yyyy-MM-ddTHH:mm:ssZ';
         timeZone = timeZone || '';
 
         if (!isDate(date) && !isMomentDate) {
-            return null;
-        }
-
-        if (!angular.isString(format)) {
             return null;
         }
 
@@ -2391,32 +2388,8 @@ angular.element(document).ready(function() {
         }
     };
 
-    var valueOf = function(date) {
-        if (!date) {
-            return null;
-        }
-
-        var maDate = parse(date);
-
-        if (maDate.isEmpty()) {
-            return null;
-        }
-
-        var time = maDate.date().valueOf();
-
-        // Add offset which is in minutes, and thus should be converted to milliseconds.
-        if (maDate.offset() !== 0) {
-            time -= maDate.offset() * 60000;
-        }
-
-        return time;
-    };
-
     var difference = function(date1, date2) {
-        var time1 = date1 ? valueOf(date1) : 0,
-            time2 = date2 ? valueOf(date2) : 0;
-
-        return time1 - time2;
+        return new MaDate(date1).valueOf() - new MaDate(date2).valueOf();
     };
 
     var parseTimeZone = function(timeZone) {
@@ -2462,6 +2435,11 @@ angular.element(document).ready(function() {
             this._date = maDate.date();
             this._offset = maDate.offset();
         }
+
+        // Create a current date.
+        if (arguments.length === 0) {
+            this._date = new Date();
+        }
     }
 
     MaDate.prototype.date = function(date) {
@@ -2481,15 +2459,86 @@ angular.element(document).ready(function() {
     };
 
     MaDate.prototype.isEmpty = function() {
-        return !this.date();
+        return !this._date;
     };
 
     MaDate.prototype.difference = function(date) {
         return difference(this, date);
     };
 
+    MaDate.prototype.valueOf = function() {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        var time = this._date.valueOf();
+
+        // Add offset which is in minutes, and thus should be converted to milliseconds.
+        if (this._offset !== 0) {
+            time -= this._offset * 60000;
+        }
+
+        return time;
+    };
+
     MaDate.prototype.format = function(_format, timeZone) {
-        return format(this.date(), _format, timeZone);
+        if (this.isEmpty()) {
+            return null;
+        }
+
+        return format(this._date, _format, timeZone);
+    };
+
+    MaDate.prototype.add = function(number, period) {
+        if (this.isEmpty() || !number) {
+            return this;
+        }
+
+        if (period === 'day') {
+            this._date.setTime(this._date.valueOf() + number * 86400000);
+        }
+
+        return this;
+    };
+
+    MaDate.prototype.second = function(second) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getSeconds();
+        } else {
+            this._date.setSeconds(second);
+        }
+    };
+
+    MaDate.prototype.minute = function(minute) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getMinutes();
+        } else {
+            this._date.setMinutes(minute);
+        }
+    };
+
+    MaDate.prototype.hour = function(hour) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getHours();
+        } else {
+            this._date.setHours(hour);
+        }
+    };
+
+    MaDate.createEmpty = function() {
+        return new MaDate(null);
     };
 
     MaDate.parse = parse;
@@ -2497,7 +2546,6 @@ angular.element(document).ready(function() {
     MaDate.format = format;
     MaDate.offsetUtc = offsetUtc;
     MaDate.isDate = isDate;
-    MaDate.valueOf = valueOf;
     MaDate.difference = difference;
 
     return MaDate;
