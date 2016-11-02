@@ -134,7 +134,10 @@ angular.module('marcuraUI.components')
                 // Setting Select2 options does not work from link function, so they are set here.
                 scope.options = {};
 
-                if (!scope.canSearch) {
+                // In AJAX mode search field is always displayed no matter minimumResultsForSearch parameter.
+                // However, setting minimumResultsForSearch to -1 in AJAX mode prevents the list from opening
+                // when user starts typing. So minimumResultsForSearch should not bet set in AJAX mode.
+                if (!scope.canSearch && !scope.ajax) {
                     scope.options.minimumResultsForSearch = -1;
                 }
 
