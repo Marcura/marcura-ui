@@ -21,8 +21,6 @@ Required for [RadioBox](../../wiki/radiobox).
 * [Bootstrap](http://getbootstrap.com/) (3.3.4 or higher)
 * [Pikaday](https://github.com/dbushell/Pikaday) (1.3.2 or higher)  
 Required for [DateBox](../../wiki/datebox).
-* [Moment.js](http://momentjs.com/) (2.10.2 or higher)  
-Required for [DateBox](../../wiki/datebox).
 * [Select2](https://www.npmjs.com/package/select2) (3.5.1)  
 Required for [SelectBox](../../wiki/selectbox).
 * [Angular Select2](https://www.npmjs.com/package/angular-ui-select2) (0.0.5)  
@@ -46,7 +44,6 @@ Include third-party dependencies:
 `<script src="node_modules/angular/angular.min.js"></script>`  
 `<script src="node_modules/angular-sanitize/angular-sanitize.min.js"></script>`  
 `<script src="node_modules/angular-ui-router/release/angular-ui-router.min.js"></script>`  
-`<script src="node_modules/moment/min/moment.min.js"></script>`  
 `<script src="node_modules/pikaday/pikaday.js"></script>`  
 `<script src="node_modules/select2/select2.js"></script>`  
 `<script src="node_modules/angular-ui-select2/src/select2.js"></script>`

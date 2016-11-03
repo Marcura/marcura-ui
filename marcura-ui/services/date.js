@@ -1,7 +1,7 @@
 angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
             language: 'en',
-            items: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
         }],
         daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -48,8 +48,8 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         // Convert month to number.
         if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
             for (var j = 0; j < months.length; j++) {
-                for (var i = 0; i < months[j].items.length; i++) {
-                    if (isMatch(month, months[j].items[i].slice(0, 3))) {
+                for (var i = 0; i < months[j].months.length; i++) {
+                    if (isMatch(month, months[j].months[i].slice(0, 3))) {
                         finalMonth = i + 1;
                         break;
                     }
@@ -230,12 +230,11 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
     };
 
     var format = function(date, format, timeZone) {
-        var languageIndex = 0,
-            isMomentDate = date && date.isValid && date.isValid();
+        var languageIndex = 0;
         format = angular.isString(format) ? format : 'yyyy-MM-ddTHH:mm:ssZ';
         timeZone = timeZone || '';
 
-        if (!isDate(date) && !isMomentDate) {
+        if (!isDate(date)) {
             return null;
         }
 
@@ -272,12 +271,12 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return (string + number).slice(-length);
         };
 
-        var day = isMomentDate ? date.date() : date.getDate(),
-            month = isMomentDate ? date.month() : date.getMonth(),
-            year = isMomentDate ? date.year() : date.getFullYear(),
-            hours = isMomentDate ? date.hours() : date.getHours(),
-            minutes = isMomentDate ? date.minutes() : date.getMinutes(),
-            seconds = isMomentDate ? date.seconds() : date.getSeconds();
+        var day = date.getDate(),
+            month = date.getMonth(),
+            year = date.getFullYear(),
+            hours = date.getHours(),
+            minutes = date.getMinutes(),
+            seconds = date.getSeconds();
 
         // Formats date parts.
         var formatDatePart = function(datePartFormat) {
@@ -311,13 +310,13 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
                 case datePartFormats.M[2]:
                     // MMM
                     {
-                        datePart = months[languageIndex].items[month].substr(0, 3);
+                        datePart = months[languageIndex].months[month].substr(0, 3);
                         break;
                     }
                 case datePartFormats.M[3]:
                     // MMMM
                     {
-                        datePart = months[languageIndex].items[month];
+                        datePart = months[languageIndex].months[month];
                         break;
                     }
                 case datePartFormats.y[0]:
@@ -388,24 +387,6 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             .replace(/Z+/, dateParts.timeZone);
     };
 
-    var offsetUtc = function(date, timeZoneOffset) {
-        if (!date) {
-            return null;
-        }
-
-        timeZoneOffset = timeZoneOffset || 0;
-
-        if (isDate(date) || (date.isValid && date.isValid())) {
-            return moment(date).add(timeZoneOffset, 'm');
-        } else if (typeof date === 'string') {
-            var _date = moment(date).minute(
-                moment(date).minute() + (moment().utcOffset() * -1) + timeZoneOffset
-            );
-
-            return _date.isValid() ? _date : null;
-        }
-    };
-
     var difference = function(date1, date2) {
         return new MaDate(date1).valueOf() - new MaDate(date2).valueOf();
     };
@@ -437,20 +418,27 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return offset;
     };
 
-    function MaDate(date, offset) {
-        this._date = date || null;
-        this._offset = offset || 0;
+    function MaDate(date) {
+        this._date = null;
+        this._offset = 0;
+
+        if (isDate(date)) {
+            this._date = new Date(date.valueOf());
+        }
 
         // MaDate is provided - just copy it.
         if (date instanceof MaDate) {
-            this._date = date.date();
+            if (!date.isEmpty()) {
+                this._date = new Date(date.toDate().valueOf());
+            }
+
             this._offset = date.offset();
         }
 
         // Parse date.
         if (angular.isString(date)) {
             var maDate = parse(date);
-            this._date = maDate.date();
+            this._date = maDate.toDate();
             this._offset = maDate.offset();
         }
 
@@ -459,6 +447,18 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             this._date = new Date();
         }
     }
+
+    MaDate.createEmpty = function() {
+        return new MaDate(null);
+    };
+
+    MaDate.prototype.copy = function() {
+        return new MaDate(this);
+    };
+
+    MaDate.prototype.toDate = function() {
+        return this._date;
+    };
 
     MaDate.prototype.date = function(date) {
         if (arguments.length === 0) {
@@ -474,6 +474,18 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
 
         this._offset = offset;
+        return this;
+    };
+
+    MaDate.prototype.toUtc = function() {
+        if (this.isEmpty() || this._offset === 0) {
+            return this;
+        }
+
+        this.add(-this._offset, 'minute');
+        this._offset = 0;
+
+        return this;
     };
 
     MaDate.prototype.isEmpty = function() {
@@ -512,9 +524,37 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return this;
         }
 
-        if (period === 'day') {
-            this._date.setTime(this._date.valueOf() + number * 86400000);
+        // Don't change original date.
+        var date = new Date(this._date);
+
+        switch (period) {
+            case 'year':
+                date.setFullYear(date.getFullYear() + number);
+                break;
+            case 'quarter':
+                date.setMonth(date.getMonth() + 3 * number);
+                break;
+            case 'month':
+                date.setMonth(date.getMonth() + number);
+                break;
+            case 'week':
+                date.setDate(date.getDate() + 7 * number);
+                break;
+            case 'day':
+                date.setDate(date.getDate() + number);
+                break;
+            case 'hour':
+                date.setTime(date.getTime() + number * 3600000);
+                break;
+            case 'minute':
+                date.setTime(date.getTime() + number * 60000);
+                break;
+            case 'second':
+                date.setTime(date.getTime() + number * 1000);
+                break;
         }
+
+        this._date = date;
 
         return this;
     };
@@ -528,6 +568,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return this._date.getSeconds();
         } else {
             this._date.setSeconds(second);
+            return this;
         }
     };
 
@@ -540,6 +581,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return this._date.getMinutes();
         } else {
             this._date.setMinutes(minute);
+            return this;
         }
     };
 
@@ -552,17 +594,13 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return this._date.getHours();
         } else {
             this._date.setHours(hour);
+            return this;
         }
-    };
-
-    MaDate.createEmpty = function() {
-        return new MaDate(null);
     };
 
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;
     MaDate.format = format;
-    MaDate.offsetUtc = offsetUtc;
     MaDate.isDate = isDate;
     MaDate.difference = difference;
 

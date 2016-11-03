@@ -40,6 +40,71 @@ angular.element(document).ready(function() {
     }
 });
 })();
+(function(){angular.module('marcuraUI.components').directive('maButton', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            kind: '@',
+            leftIcon: '@',
+            rightIcon: '@',
+            isDisabled: '=',
+            click: '&',
+            size: '@',
+            modifier: '@'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <button class="ma-button{{cssClass}}"\
+                ng-click="onClick()"\
+                ng-disabled="isDisabled"\
+                ng-class="{\
+                    \'ma-button-link\': isLink(),\
+                    \'ma-button-has-left-icon\': hasLeftIcon,\
+                    \'ma-button-has-right-icon\': hasRightIcon,\
+                    \'ma-button-is-disabled\': isDisabled,\
+                    \'ma-button-has-text\': hasText\
+                }">\
+                <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
+                    <i class="fa fa-{{leftIcon}}"></i>\
+                    <span class="ma-button-rim" ng-if="isLink()"></span>\
+                </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
+                    <i class="fa fa-{{rightIcon}}"></i>\
+                    <span class="ma-button-rim" ng-if="isLink()"></span>\
+                </span>\
+                <span class="ma-button-rim" ng-if="!isLink()"></span>\
+            </button>';
+
+            return html;
+        },
+        link: function(scope) {
+            scope.hasText = false;
+            scope.hasLeftIcon = false;
+            scope.hasRightIcon = false;
+            scope.size = scope.size ? scope.size : 'md';
+            scope.cssClass = ' ma-button-' + scope.size;
+            scope.hasLeftIcon = scope.leftIcon ? true : false;
+            scope.hasRightIcon = scope.rightIcon ? true : false;
+            scope.hasText = scope.text ? true : false;
+
+            if (scope.modifier) {
+                scope.cssClass += ' ma-button-' + scope.modifier;
+            }
+
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
+
+            scope.isLink = function functionName() {
+                return scope.kind === 'link';
+            };
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -135,71 +200,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maButton', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            kind: '@',
-            leftIcon: '@',
-            rightIcon: '@',
-            isDisabled: '=',
-            click: '&',
-            size: '@',
-            modifier: '@'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <button class="ma-button{{cssClass}}"\
-                ng-click="onClick()"\
-                ng-disabled="isDisabled"\
-                ng-class="{\
-                    \'ma-button-link\': isLink(),\
-                    \'ma-button-has-left-icon\': hasLeftIcon,\
-                    \'ma-button-has-right-icon\': hasRightIcon,\
-                    \'ma-button-is-disabled\': isDisabled,\
-                    \'ma-button-has-text\': hasText\
-                }">\
-                <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
-                    <i class="fa fa-{{leftIcon}}"></i>\
-                    <span class="ma-button-rim" ng-if="isLink()"></span>\
-                </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
-                    <i class="fa fa-{{rightIcon}}"></i>\
-                    <span class="ma-button-rim" ng-if="isLink()"></span>\
-                </span>\
-                <span class="ma-button-rim" ng-if="!isLink()"></span>\
-            </button>';
-
-            return html;
-        },
-        link: function(scope) {
-            scope.hasText = false;
-            scope.hasLeftIcon = false;
-            scope.hasRightIcon = false;
-            scope.size = scope.size ? scope.size : 'md';
-            scope.cssClass = ' ma-button-' + scope.size;
-            scope.hasLeftIcon = scope.leftIcon ? true : false;
-            scope.hasRightIcon = scope.rightIcon ? true : false;
-            scope.hasText = scope.text ? true : false;
-
-            if (scope.modifier) {
-                scope.cssClass += ' ma-button-' + scope.modifier;
-            }
-
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-
-            scope.isLink = function functionName() {
-                return scope.kind === 'link';
-            };
         }
     };
 }]);
@@ -310,7 +310,7 @@ angular.element(document).ready(function() {
                 scope.configuration.timeZone = (scope.timeZone || maDateBoxConfiguration.timeZone || 'Z')
                     .replace(/GMT/g, '');
             }],
-            link: function(scope, element) {
+            link: function(scope, element, attributes) {
                 var picker = null,
                     displayFormat = scope.configuration.displayFormat,
                     format = scope.configuration.format,
@@ -318,7 +318,7 @@ angular.element(document).ready(function() {
                     dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
                     hoursElement = angular.element(element[0].querySelector('.ma-date-box-hours')),
                     minutesElement = angular.element(element[0].querySelector('.ma-date-box-minutes')),
-                    previousDate = null,
+                    previousDate = MaDate.createEmpty(),
                     timeZoneOffset = MaDate.parseTimeZone(timeZone),
                     initialDisplayDate,
                     // Variables keydownValue and keyupValue help track touched state.
@@ -330,22 +330,9 @@ angular.element(document).ready(function() {
                     minDate = new MaDate(scope.minDate),
                     maxDate = new MaDate(scope.maxDate);
 
-                var onChange = function(internalDate) {
-                    var date = null;
-                    previousDate = internalDate;
-
-                    if (internalDate) {
-                        date = moment(new Date());
-
-                        date.year(internalDate.year())
-                            .month(internalDate.month())
-                            .date(internalDate.date())
-                            .hours(internalDate.hours())
-                            .minutes(internalDate.minutes())
-                            .seconds(0);
-                    }
-
-                    scope.value = date ? MaDate.format(date, format, timeZone) : null;
+                var onChange = function(maDate) {
+                    previousDate = maDate || MaDate.createEmpty();
+                    scope.value = maDate ? maDate.format(format, timeZone) : null;
 
                     // Postpone change event for $apply (which is being invoked by $timeout)
                     // to have time to take effect and update scope.value,
@@ -357,8 +344,11 @@ angular.element(document).ready(function() {
                     });
                 };
 
-                var hasDateChanged = function(date) {
-                    if ((previousDate === null && date === null) || (previousDate && date && previousDate.diff(date) === 0)) {
+                var hasDateChanged = function(maDate) {
+                    if (
+                        (previousDate.isEmpty() && maDate.isEmpty()) ||
+                        (!previousDate.isEmpty() && !maDate.isEmpty() && previousDate.difference(maDate) === 0)
+                    ) {
                         return false;
                     }
 
@@ -367,15 +357,15 @@ angular.element(document).ready(function() {
                     return true;
                 };
 
-                var setDisplayDate = function(maDate) {
+                var setDisplayDate = function(date) {
                     var displayDate = null;
 
-                    if (maDate && !maDate.isEmpty()) {
-                        // Adjust time zone offset.
-                        displayDate = MaDate.offsetUtc(maDate.date(), timeZoneOffset - maDate.offset());
-                        dateElement.val(MaDate.format(displayDate, displayFormat));
-                        hoursElement.val(MaDate.format(displayDate, 'HH'));
-                        minutesElement.val(MaDate.format(displayDate, 'mm'));
+                    if (date && !date.isEmpty()) {
+                        // Adjust display date offset.
+                        displayDate = date.copy().toUtc().add(timeZoneOffset, 'minute');
+                        dateElement.val(displayDate.format(displayFormat));
+                        hoursElement.val(displayDate.format('HH'));
+                        minutesElement.val(displayDate.format('mm'));
 
                         if (!initialDisplayDate) {
                             initialDisplayDate = dateElement.val();
@@ -401,17 +391,14 @@ angular.element(document).ready(function() {
                     }
 
                     maxDate = new MaDate(scope.maxDate);
-                    var date = maxDate.date();
 
                     // Pikaday does no support clearing maxDate by providing null value.
                     // So we just set maxDate to 100 years ahead.
-                    if (!date) {
-                        date = new Date();
-                        date = new Date(date.setFullYear(date.getFullYear() + 100));
-                        maxDate = new MaDate(date);
+                    if (maxDate.isEmpty()) {
+                        maxDate = new MaDate().add(100, 'year');
                     }
 
-                    picker.setMaxDate(date);
+                    picker.setMaxDate(maxDate.toDate());
                 };
 
                 var setMinDate = function() {
@@ -420,17 +407,14 @@ angular.element(document).ready(function() {
                     }
 
                     minDate = new MaDate(scope.minDate);
-                    var date = minDate.date();
 
                     // Pikaday does no support clearing minDate by providing null value.
                     // So we just set minDate to 100 years before.
-                    if (!date) {
-                        date = new Date();
-                        date = new Date(date.setFullYear(date.getFullYear() - 100));
-                        minDate = new MaDate(date);
+                    if (minDate.isEmpty()) {
+                        minDate = new MaDate().add(-100, 'year');
                     }
 
-                    picker.setMinDate(date);
+                    picker.setMinDate(minDate.toDate());
                 };
 
                 var parseDate = function(date) {
@@ -446,17 +430,13 @@ angular.element(document).ready(function() {
                         maDate = MaDate.parse(date, scope.culture);
                     }
 
-                    if (!maDate.isEmpty()) {
-                        maDate.date(moment(maDate.date()));
-                    }
-
                     return maDate;
                 };
 
-                var addTimeToDate = function(date) {
-                    var _date = moment(date);
-
-                    return moment([_date.year(), _date.month(), _date.date(), Number(hoursElement.val()), Number(minutesElement.val()), 0]);
+                var setDateTime = function(date) {
+                    date.hour(Number(hoursElement.val()))
+                        .minute(Number(minutesElement.val()))
+                        .second(0);
                 };
 
                 var resetInitialDateOffset = function() {
@@ -470,20 +450,19 @@ angular.element(document).ready(function() {
                         position: 'bottom right',
                         onSelect: function() {
                             var maDate = new MaDate(picker.getDate());
-                            maDate.date(MaDate.offsetUtc(maDate.date()));
 
                             if (scope.hasTime) {
-                                maDate.date(addTimeToDate(maDate.date()));
+                                setDateTime(maDate);
                                 resetInitialDateOffset();
                             }
 
                             // Use $timeout to apply scope changes instead of $apply,
                             // which throws digest error at this point.
                             $timeout(function() {
-                                validate(maDate.date());
+                                validate(maDate);
                             });
 
-                            if (!hasDateChanged(maDate.date())) {
+                            if (!hasDateChanged(maDate)) {
                                 // Refresh display date in case the following scenario.
                                 // 1. maxDate is set to 30/10/2016.
                                 // 2. The user enteres greater date by hand 31/10/2016, which
@@ -495,7 +474,7 @@ angular.element(document).ready(function() {
                                 return;
                             }
 
-                            onChange(maDate.date());
+                            onChange(maDate);
                         }
                     });
 
@@ -515,14 +494,11 @@ angular.element(document).ready(function() {
                 var validate = function(date) {
                     scope.isValid = true;
                     failedValidator = null;
-
-                    // Date comes in Moment format which we do not want to expose,
-                    // so convert it to string.
-                    var dateString = date ? MaDate.format(date, format) : null;
+                    var formattedDate = date ? date.format(format) : null;
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
-                            if (!validators[i].validate(dateString)) {
+                            if (!validators[i].validate(formattedDate)) {
                                 scope.isValid = false;
                                 failedValidator = validators[i];
                                 break;
@@ -592,17 +568,17 @@ angular.element(document).ready(function() {
                     }
 
                     // Date is empty and remains unchanged.
-                    if (isEmpty && previousDate === null) {
+                    if (isEmpty && previousDate.isEmpty()) {
                         validate(null);
                         return;
                     }
 
                     // Date has been emptied.
                     if (isEmpty) {
-                        validate(maDate.date());
+                        validate(maDate);
 
                         if (scope.isValid) {
-                            setDisplayDate();
+                            setDisplayDate(null);
                             onChange();
                         }
 
@@ -616,21 +592,22 @@ angular.element(document).ready(function() {
                     }
 
                     if (!maDate.isEmpty() && (scope.hasTime || initialDisplayDate === date)) {
+                        setDateTime(maDate);
+
                         // Substruct time zone offset.
-                        maDate.date(addTimeToDate(maDate.date()));
-                        maDate.date(MaDate.offsetUtc(maDate.date(), -(timeZoneOffset - initialDateOffset)));
+                        maDate.add(-(timeZoneOffset - initialDateOffset), 'minute');
                     }
 
-                    validate(maDate.date());
+                    validate(maDate);
 
-                    if (!hasDateChanged(maDate.date())) {
+                    if (!hasDateChanged(maDate)) {
                         // Refresh diplay date in case the user changed its format, e.g.
                         // from 12 Oct 16 to 12Oct16. We need to set it back to 12 Oct 16.
                         setDisplayDate(maDate);
                         return;
                     }
 
-                    if (maDate.date()) {
+                    if (!maDate.isEmpty()) {
                         setDisplayDate(maDate);
                     }
 
@@ -638,7 +615,7 @@ angular.element(document).ready(function() {
                         return;
                     }
 
-                    onChange(maDate.date());
+                    onChange(maDate);
                 };
 
                 scope.onKeydown = function(event) {
@@ -684,26 +661,25 @@ angular.element(document).ready(function() {
                         return;
                     }
 
-                    previousDate = null;
+                    previousDate = MaDate.createEmpty();
                     scope.isTouched = true;
                     validate(null);
 
                     onChange();
-                    setDisplayDate();
+                    setDisplayDate(null);
                     dateElement.focus();
                 };
 
                 // Set initial date.
                 if (scope.value) {
                     var maDate = MaDate.parse(scope.value, scope.culture);
-                    maDate.date(MaDate.offsetUtc(maDate.date()));
 
                     if (maDate.isEmpty()) {
                         return;
                     }
 
                     setDisplayDate(maDate);
-                    previousDate = maDate.date();
+                    previousDate = maDate;
                     initialDateOffset = maDate.offset();
                 }
 
@@ -725,17 +701,17 @@ angular.element(document).ready(function() {
                     var maDate = parseDate(newDate);
 
                     if (maDate.isEmpty()) {
-                        previousDate = null;
+                        previousDate = MaDate.createEmpty();
                         setDisplayDate(null);
                     }
 
-                    if (!hasDateChanged(maDate.date())) {
+                    if (!hasDateChanged(maDate)) {
                         setDisplayDate(maDate);
                         return;
                     }
 
                     setDisplayDate(maDate);
-                    previousDate = maDate.date();
+                    previousDate = maDate;
                     initialDateOffset = maDate.offset();
                 });
 
@@ -777,7 +753,7 @@ angular.element(document).ready(function() {
                     }
 
                     if (minMaxValidators.length) {
-                        var dateString = maDate.date() ? MaDate.format(maDate.date(), format) : null;
+                        var formattedDate = maDate.format(format);
 
                         // Empty failedValidator if it is min/max validator.
                         if (failedValidator && (failedValidator.name === 'IsGreaterThanOrEqual' || failedValidator.name === 'IsLessThanOrEqual')) {
@@ -786,7 +762,7 @@ angular.element(document).ready(function() {
                         }
 
                         for (i = 0; i < minMaxValidators.length; i++) {
-                            if (!minMaxValidators[i].validate(dateString)) {
+                            if (!minMaxValidators[i].validate(formattedDate)) {
                                 scope.isValid = false;
                                 failedValidator = minMaxValidators[i];
                                 break;
@@ -798,8 +774,8 @@ angular.element(document).ready(function() {
                         }
                     }
 
-                    if (scope.isValid && hasDateChanged(maDate.date())) {
-                        onChange(maDate.date());
+                    if (scope.isValid && hasDateChanged(maDate)) {
+                        onChange(maDate);
                     }
                 };
 
@@ -823,7 +799,7 @@ angular.element(document).ready(function() {
                             return;
                         }
 
-                        validate(parseDate(scope.value).date());
+                        validate(parseDate(scope.value));
                     };
 
                     scope.instance.isValid = function() {
@@ -1983,7 +1959,7 @@ angular.element(document).ready(function() {
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
             language: 'en',
-            items: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
         }],
         daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -2030,8 +2006,8 @@ angular.element(document).ready(function() {
         // Convert month to number.
         if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
             for (var j = 0; j < months.length; j++) {
-                for (var i = 0; i < months[j].items.length; i++) {
-                    if (isMatch(month, months[j].items[i].slice(0, 3))) {
+                for (var i = 0; i < months[j].months.length; i++) {
+                    if (isMatch(month, months[j].months[i].slice(0, 3))) {
                         finalMonth = i + 1;
                         break;
                     }
@@ -2212,12 +2188,11 @@ angular.element(document).ready(function() {
     };
 
     var format = function(date, format, timeZone) {
-        var languageIndex = 0,
-            isMomentDate = date && date.isValid && date.isValid();
+        var languageIndex = 0;
         format = angular.isString(format) ? format : 'yyyy-MM-ddTHH:mm:ssZ';
         timeZone = timeZone || '';
 
-        if (!isDate(date) && !isMomentDate) {
+        if (!isDate(date)) {
             return null;
         }
 
@@ -2254,12 +2229,12 @@ angular.element(document).ready(function() {
             return (string + number).slice(-length);
         };
 
-        var day = isMomentDate ? date.date() : date.getDate(),
-            month = isMomentDate ? date.month() : date.getMonth(),
-            year = isMomentDate ? date.year() : date.getFullYear(),
-            hours = isMomentDate ? date.hours() : date.getHours(),
-            minutes = isMomentDate ? date.minutes() : date.getMinutes(),
-            seconds = isMomentDate ? date.seconds() : date.getSeconds();
+        var day = date.getDate(),
+            month = date.getMonth(),
+            year = date.getFullYear(),
+            hours = date.getHours(),
+            minutes = date.getMinutes(),
+            seconds = date.getSeconds();
 
         // Formats date parts.
         var formatDatePart = function(datePartFormat) {
@@ -2293,13 +2268,13 @@ angular.element(document).ready(function() {
                 case datePartFormats.M[2]:
                     // MMM
                     {
-                        datePart = months[languageIndex].items[month].substr(0, 3);
+                        datePart = months[languageIndex].months[month].substr(0, 3);
                         break;
                     }
                 case datePartFormats.M[3]:
                     // MMMM
                     {
-                        datePart = months[languageIndex].items[month];
+                        datePart = months[languageIndex].months[month];
                         break;
                     }
                 case datePartFormats.y[0]:
@@ -2370,24 +2345,6 @@ angular.element(document).ready(function() {
             .replace(/Z+/, dateParts.timeZone);
     };
 
-    var offsetUtc = function(date, timeZoneOffset) {
-        if (!date) {
-            return null;
-        }
-
-        timeZoneOffset = timeZoneOffset || 0;
-
-        if (isDate(date) || (date.isValid && date.isValid())) {
-            return moment(date).add(timeZoneOffset, 'm');
-        } else if (typeof date === 'string') {
-            var _date = moment(date).minute(
-                moment(date).minute() + (moment().utcOffset() * -1) + timeZoneOffset
-            );
-
-            return _date.isValid() ? _date : null;
-        }
-    };
-
     var difference = function(date1, date2) {
         return new MaDate(date1).valueOf() - new MaDate(date2).valueOf();
     };
@@ -2419,20 +2376,27 @@ angular.element(document).ready(function() {
         return offset;
     };
 
-    function MaDate(date, offset) {
-        this._date = date || null;
-        this._offset = offset || 0;
+    function MaDate(date) {
+        this._date = null;
+        this._offset = 0;
+
+        if (isDate(date)) {
+            this._date = new Date(date.valueOf());
+        }
 
         // MaDate is provided - just copy it.
         if (date instanceof MaDate) {
-            this._date = date.date();
+            if (!date.isEmpty()) {
+                this._date = new Date(date.toDate().valueOf());
+            }
+
             this._offset = date.offset();
         }
 
         // Parse date.
         if (angular.isString(date)) {
             var maDate = parse(date);
-            this._date = maDate.date();
+            this._date = maDate.toDate();
             this._offset = maDate.offset();
         }
 
@@ -2441,6 +2405,18 @@ angular.element(document).ready(function() {
             this._date = new Date();
         }
     }
+
+    MaDate.createEmpty = function() {
+        return new MaDate(null);
+    };
+
+    MaDate.prototype.copy = function() {
+        return new MaDate(this);
+    };
+
+    MaDate.prototype.toDate = function() {
+        return this._date;
+    };
 
     MaDate.prototype.date = function(date) {
         if (arguments.length === 0) {
@@ -2456,6 +2432,18 @@ angular.element(document).ready(function() {
         }
 
         this._offset = offset;
+        return this;
+    };
+
+    MaDate.prototype.toUtc = function() {
+        if (this.isEmpty() || this._offset === 0) {
+            return this;
+        }
+
+        this.add(-this._offset, 'minute');
+        this._offset = 0;
+
+        return this;
     };
 
     MaDate.prototype.isEmpty = function() {
@@ -2494,9 +2482,37 @@ angular.element(document).ready(function() {
             return this;
         }
 
-        if (period === 'day') {
-            this._date.setTime(this._date.valueOf() + number * 86400000);
+        // Don't change original date.
+        var date = new Date(this._date);
+
+        switch (period) {
+            case 'year':
+                date.setFullYear(date.getFullYear() + number);
+                break;
+            case 'quarter':
+                date.setMonth(date.getMonth() + 3 * number);
+                break;
+            case 'month':
+                date.setMonth(date.getMonth() + number);
+                break;
+            case 'week':
+                date.setDate(date.getDate() + 7 * number);
+                break;
+            case 'day':
+                date.setDate(date.getDate() + number);
+                break;
+            case 'hour':
+                date.setTime(date.getTime() + number * 3600000);
+                break;
+            case 'minute':
+                date.setTime(date.getTime() + number * 60000);
+                break;
+            case 'second':
+                date.setTime(date.getTime() + number * 1000);
+                break;
         }
+
+        this._date = date;
 
         return this;
     };
@@ -2510,6 +2526,7 @@ angular.element(document).ready(function() {
             return this._date.getSeconds();
         } else {
             this._date.setSeconds(second);
+            return this;
         }
     };
 
@@ -2522,6 +2539,7 @@ angular.element(document).ready(function() {
             return this._date.getMinutes();
         } else {
             this._date.setMinutes(minute);
+            return this;
         }
     };
 
@@ -2534,17 +2552,13 @@ angular.element(document).ready(function() {
             return this._date.getHours();
         } else {
             this._date.setHours(hour);
+            return this;
         }
-    };
-
-    MaDate.createEmpty = function() {
-        return new MaDate(null);
     };
 
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;
     MaDate.format = format;
-    MaDate.offsetUtc = offsetUtc;
     MaDate.isDate = isDate;
     MaDate.difference = difference;
 

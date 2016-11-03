@@ -3,7 +3,6 @@
     "undef": true,
     "globals": {
         "angular": false,
-        "moment": false,
         "console": false,
         "Pikaday": false,
         "document": false,
