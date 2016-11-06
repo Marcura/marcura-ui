@@ -184,7 +184,7 @@ angular.module('marcuraUI.components')
                     // Pikaday does no support clearing minDate by providing null value.
                     // So we just set minDate to 100 years before.
                     if (minDate.isEmpty()) {
-                        minDate = new MaDate().add(-100, 'year');
+                        minDate = new MaDate().subtract(100, 'year');
                     }
 
                     picker.setMinDate(minDate.toDate());
@@ -369,7 +369,7 @@ angular.module('marcuraUI.components')
                         setDateTime(maDate);
 
                         // Substruct time zone offset.
-                        maDate.add(-(timeZoneOffset - initialDateOffset), 'minute');
+                        maDate.subtract(timeZoneOffset - initialDateOffset, 'minute');
                     }
 
                     validate(maDate);

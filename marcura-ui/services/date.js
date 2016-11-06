@@ -544,7 +544,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return this;
         }
 
-        this.add(-this._offset, 'minute');
+        this.subtract(this._offset, 'minute');
         this._offset = 0;
 
         return this;
