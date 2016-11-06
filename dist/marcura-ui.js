@@ -2581,6 +2581,10 @@ angular.element(document).ready(function() {
         return this;
     };
 
+    MaDate.prototype.subtract = function(number, period) {
+        return this.add(number * -1, period);
+    };
+
     MaDate.prototype.second = function(second) {
         if (this.isEmpty()) {
             return 0;
@@ -2620,14 +2624,25 @@ angular.element(document).ready(function() {
         }
     };
 
-    MaDate.prototype.date = function(date) {
-        // TODO: should get/set day of month, e.g. 21
-        // if (arguments.length === 0) {
-        //     return this._date;
-        // }
-        //
-        // this._date = date;
-    };
+    // TODO
+    // MaDate.prototype.day = function(hour) {
+    //
+    // };
+
+    // TODO: should get/set day of month, e.g. 21
+    // MaDate.prototype.date = function(date) {
+    //
+    // };
+
+    // TODO
+    // MaDate.prototype.month = function(hour) {
+    //
+    // };
+
+    // TODO
+    // MaDate.prototype.year = function(hour) {
+    //
+    // };
 
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;

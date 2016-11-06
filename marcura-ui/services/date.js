@@ -621,6 +621,10 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return this;
     };
 
+    MaDate.prototype.subtract = function(number, period) {
+        return this.add(number * -1, period);
+    };
+
     MaDate.prototype.second = function(second) {
         if (this.isEmpty()) {
             return 0;
@@ -660,8 +664,23 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
+    // TODO
+    // MaDate.prototype.day = function(hour) {
+    //
+    // };
+
     // TODO: should get/set day of month, e.g. 21
     // MaDate.prototype.date = function(date) {
+    //
+    // };
+
+    // TODO
+    // MaDate.prototype.month = function(hour) {
+    //
+    // };
+
+    // TODO
+    // MaDate.prototype.year = function(hour) {
     //
     // };
 
