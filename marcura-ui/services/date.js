@@ -530,14 +530,6 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return this._date;
     };
 
-    MaDate.prototype.date = function(date) {
-        if (arguments.length === 0) {
-            return this._date;
-        }
-
-        this._date = date;
-    };
-
     MaDate.prototype.offset = function(offset) {
         if (arguments.length === 0) {
             return this._offset;
@@ -667,6 +659,11 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return this;
         }
     };
+
+    // TODO: should get/set day of month, e.g. 21
+    // MaDate.prototype.date = function(date) {
+    //
+    // };
 
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;
