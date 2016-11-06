@@ -5,6 +5,10 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }],
         daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
+    var isInteger = function(value) {
+        return value === parseInt(value, 10);
+    };
+
     var isDate = function(value) {
         if (!value) {
             return false;
@@ -26,12 +30,12 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             maDate = MaDate.createEmpty();
         day = day.toString();
         month = month.toString();
-        hours = hours || 0;
-        minutes = minutes || 0;
-        seconds = seconds || 0;
+        hours = Number(hours) || 0;
+        minutes = Number(minutes) || 0;
+        seconds = Number(seconds) || 0;
         offset = offset || 0;
 
-        // Convert YY to YYYY according to rules.
+        // Convert YY to YYYY.
         if (year <= 99) {
             if (year >= 0 && year < 30) {
                 year = '20' + year;
@@ -75,7 +79,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return maDate;
         }
 
-        maDate = new MaDate(new Date(year, month - 1, day, hours, minutes, seconds));
+        maDate = new MaDate(Number(year), Number(month - 1), Number(day), hours, minutes, seconds);
         maDate.offset(offset);
 
         return maDate;
@@ -113,15 +117,15 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
 
     var parse = function(value, culture) {
         var pattern, parts, dayAndMonth,
-            maDate = MaDate.createEmpty();
+            date = MaDate.createEmpty();
 
         // Check if a date requires parsing.
         if (isDate(value) || isMaDate(value)) {
             return value;
         }
 
-        if (!angular.isString(value)) {
-            return maDate;
+        if (typeof value !== 'string') {
+            return date;
         }
 
         // 21
@@ -141,7 +145,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
 
             if (!dayAndMonth.isValid) {
-                return maDate;
+                return date;
             }
 
             return getTotalDate(new Date().getFullYear(), dayAndMonth.month, dayAndMonth.day);
@@ -195,7 +199,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
 
             if (!dayAndMonth.isValid) {
-                return maDate;
+                return date;
             }
 
             return getTotalDate(parts[5], dayAndMonth.month, dayAndMonth.day);
@@ -230,7 +234,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], offset);
         }
 
-        return maDate;
+        return date;
     };
 
     var formatNumber = function(number, length) {
@@ -252,7 +256,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return 'Z';
         }
 
-        if (typeof offset !== 'number') {
+        if (!isInteger(offset)) {
             return null;
         }
 
@@ -487,34 +491,75 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return offset;
     };
 
-    function MaDate(date) {
+    /*
+        Overloads:
+        - new MaDate() +
+        - new MaDate(Date) +
+        - new MaDate(MaDate) +
+        - new MaDate(dateString) +
+        - new MaDate(dateString, culture) +
+        - new MaDate(year)
+        - new MaDate(year, month)
+        - new MaDate(year, month, date)
+        - new MaDate(year, month, date, hour)
+        - new MaDate(year, month, date, hour, minute)
+        - new MaDate(year, month, date, hour, minute, second)
+    */
+    function MaDate() {
+        var parameters = arguments,
+            date;
         this._date = null;
         this._offset = 0;
         this._isMaDate = true;
 
-        if (isDate(date)) {
-            this._date = new Date(date.valueOf());
-        }
-
-        // MaDate is provided - just copy it.
-        if (isMaDate(date)) {
-            if (!date.isEmpty()) {
-                this._date = new Date(date.toDate().valueOf());
-            }
-
-            this._offset = date.offset();
-        }
-
-        // Parse date.
-        if (angular.isString(date)) {
-            var maDate = parse(date);
-            this._date = maDate.toDate();
-            this._offset = maDate.offset();
-        }
-
-        // Create a current date.
-        if (arguments.length === 0) {
+        if (parameters.length === 0) {
+            // Create a current date.
             this._date = new Date();
+        } else if (parameters.length === 1) {
+            date = parameters[0];
+
+            if (isDate(date)) {
+                this._date = new Date(date.valueOf());
+            } else if (isMaDate(date)) {
+                // MaDate is provided - copy it.
+                if (!date.isEmpty()) {
+                    this._date = new Date(date.toDate().valueOf());
+                }
+
+                this._offset = date.offset();
+            } else if (typeof date === 'string') {
+                // Parse date.
+                date = parse(date);
+                this._date = date.toDate();
+                this._offset = date.offset();
+            } else if (isInteger(date)) {
+                // Year.
+                this._date = new Date(date, 0, 1, 0, 0, 0);
+            }
+        } else if (parameters.length === 2) {
+            // Date string and culture.
+            if (typeof parameters[0] === 'string' && typeof parameters[1] === 'string') {
+                date = parse(parameters[0], parameters[1]);
+                this._date = date.toDate();
+                this._offset = date.offset();
+            } else if (isInteger(parameters[0]) && isInteger(parameters[1])) {
+                // Year and month.
+                this._date = new Date(parameters[0], parameters[1], 1, 0, 0, 0);
+            }
+        } else if (parameters.length === 3 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], 0, 0, 0);
+        } else if (parameters.length === 4 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], 0, 0);
+        } else if (parameters.length === 5 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
+            isInteger(parameters[4])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], 0);
+        } else if (parameters.length === 6 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
+            isInteger(parameters[4]) && isInteger(parameters[5])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5]);
         }
     }
 

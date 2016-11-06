@@ -105,6 +105,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -200,27 +221,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -330,9 +330,9 @@ angular.element(document).ready(function() {
                     minDate = new MaDate(scope.minDate),
                     maxDate = new MaDate(scope.maxDate);
 
-                var onChange = function(maDate) {
-                    previousDate = maDate || MaDate.createEmpty();
-                    scope.value = maDate ? maDate.format(format) : null;
+                var onChange = function(date) {
+                    previousDate = date || MaDate.createEmpty();
+                    scope.value = date ? date.format(format) : null;
 
                     // Postpone change event for $apply (which is being invoked by $timeout)
                     // to have time to take effect and update scope.value,
@@ -344,10 +344,10 @@ angular.element(document).ready(function() {
                     });
                 };
 
-                var hasDateChanged = function(maDate) {
+                var hasDateChanged = function(date) {
                     if (
-                        (previousDate.isEmpty() && maDate.isEmpty()) ||
-                        (!previousDate.isEmpty() && !maDate.isEmpty() && previousDate.difference(maDate) === 0)
+                        (previousDate.isEmpty() && date.isEmpty()) ||
+                        (!previousDate.isEmpty() && !date.isEmpty() && previousDate.difference(date) === 0)
                     ) {
                         return false;
                     }
@@ -418,19 +418,19 @@ angular.element(document).ready(function() {
                 };
 
                 var parseDate = function(date) {
-                    var maDate = MaDate.createEmpty();
+                    var parsedDate = MaDate.createEmpty();
 
                     if (!date) {
-                        return maDate;
+                        return parsedDate;
                     }
 
                     if (scope.parser) {
-                        maDate = scope.parser(date);
+                        parsedDate = scope.parser(date);
                     } else {
-                        maDate = MaDate.parse(date, scope.culture);
+                        parsedDate = MaDate.parse(date, scope.culture);
                     }
 
-                    return maDate;
+                    return parsedDate;
                 };
 
                 var setDateTime = function(date) {
@@ -449,21 +449,21 @@ angular.element(document).ready(function() {
                         field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                         position: 'bottom right',
                         onSelect: function() {
-                            var maDate = new MaDate(picker.getDate());
-                            maDate.offset(timeZoneOffset);
+                            var date = new MaDate(picker.getDate());
+                            date.offset(timeZoneOffset);
 
                             if (scope.hasTime) {
-                                setDateTime(maDate);
+                                setDateTime(date);
                                 resetInitialDateOffset();
                             }
 
                             // Use $timeout to apply scope changes instead of $apply,
                             // which throws digest error at this point.
                             $timeout(function() {
-                                validate(maDate);
+                                validate(date);
                             });
 
-                            if (!hasDateChanged(maDate)) {
+                            if (!hasDateChanged(date)) {
                                 // Refresh display date in case the following scenario.
                                 // 1. maxDate is set to 30/10/2016.
                                 // 2. The user enteres greater date by hand 31/10/2016, which
@@ -471,11 +471,11 @@ angular.element(document).ready(function() {
                                 // 3. The user then selects the same 30/10/2016 date from the calendar,
                                 // but display date will not be changed as previous date is still 30/10/2016
                                 // (hasDateChanged will return false).
-                                setDisplayDate(maDate);
+                                setDisplayDate(date);
                                 return;
                             }
 
-                            onChange(maDate);
+                            onChange(date);
                         }
                     });
 
@@ -553,16 +553,16 @@ angular.element(document).ready(function() {
                     scope.isFocused = false;
                     scope.isTouched = true;
 
-                    var date = dateElement.val().trim(),
-                        isEmpty = date === '',
+                    var displayDate = dateElement.val().trim(),
+                        isEmpty = displayDate === '',
                         hours = Number(hoursElement.val()),
                         minutes = Number(minutesElement.val()),
-                        maDate = MaDate.createEmpty();
+                        date = MaDate.createEmpty();
 
                     // Check time.
                     if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
-                        maDate = parseDate(date);
-                        maDate.offset(initialDateOffset);
+                        date = parseDate(displayDate);
+                        date.offset(initialDateOffset);
                     } else {
                         scope.isValid = false;
                         return;
@@ -576,7 +576,7 @@ angular.element(document).ready(function() {
 
                     // Date has been emptied.
                     if (isEmpty) {
-                        validate(maDate);
+                        validate(date);
 
                         if (scope.isValid) {
                             setDisplayDate(null);
@@ -587,36 +587,36 @@ angular.element(document).ready(function() {
                     }
 
                     // Failed to parse the date.
-                    if (maDate.isEmpty()) {
+                    if (date.isEmpty()) {
                         scope.isValid = false;
                         return;
                     }
 
-                    if (!maDate.isEmpty() && (scope.hasTime || initialDisplayDate === date)) {
-                        setDateTime(maDate);
+                    if (!date.isEmpty() && (scope.hasTime || initialDisplayDate === displayDate)) {
+                        setDateTime(date);
 
                         // Substruct time zone offset.
-                        maDate.subtract(timeZoneOffset - initialDateOffset, 'minute');
+                        date.subtract(timeZoneOffset - initialDateOffset, 'minute');
                     }
 
-                    validate(maDate);
+                    validate(date);
 
-                    if (!hasDateChanged(maDate)) {
+                    if (!hasDateChanged(date)) {
                         // Refresh diplay date in case the user changed its format, e.g.
                         // from 12 Oct 16 to 12Oct16. We need to set it back to 12 Oct 16.
-                        setDisplayDate(maDate);
+                        setDisplayDate(date);
                         return;
                     }
 
-                    if (!maDate.isEmpty()) {
-                        setDisplayDate(maDate);
+                    if (!date.isEmpty()) {
+                        setDisplayDate(date);
                     }
 
                     if (!scope.isValid) {
                         return;
                     }
 
-                    onChange(maDate);
+                    onChange(date);
                 };
 
                 scope.onKeydown = function(event) {
@@ -673,15 +673,15 @@ angular.element(document).ready(function() {
 
                 // Set initial date.
                 if (scope.value) {
-                    var maDate = MaDate.parse(scope.value, scope.culture);
+                    var date = MaDate.parse(scope.value, scope.culture);
 
-                    if (maDate.isEmpty()) {
+                    if (date.isEmpty()) {
                         return;
                     }
 
-                    setDisplayDate(maDate);
-                    previousDate = maDate;
-                    initialDateOffset = maDate.offset();
+                    setDisplayDate(date);
+                    previousDate = date;
+                    initialDateOffset = date.offset();
                 }
 
                 $timeout(function() {
@@ -699,21 +699,21 @@ angular.element(document).ready(function() {
                         return;
                     }
 
-                    var maDate = parseDate(newDate);
+                    var date = parseDate(newDate);
 
-                    if (maDate.isEmpty()) {
+                    if (date.isEmpty()) {
                         previousDate = MaDate.createEmpty();
                         setDisplayDate(null);
                     }
 
-                    if (!hasDateChanged(maDate)) {
-                        setDisplayDate(maDate);
+                    if (!hasDateChanged(date)) {
+                        setDisplayDate(date);
                         return;
                     }
 
-                    setDisplayDate(maDate);
-                    previousDate = maDate;
-                    initialDateOffset = maDate.offset();
+                    setDisplayDate(date);
+                    previousDate = date;
+                    initialDateOffset = date.offset();
                 });
 
                 scope.$watch('isDisabled', function(newValue, oldValue) {
@@ -733,8 +733,8 @@ angular.element(document).ready(function() {
                         return;
                     }
 
-                    var maDate = parseDate(dateElement.val().trim());
-                    maDate.offset(timeZoneOffset);
+                    var date = parseDate(dateElement.val().trim());
+                    date.offset(timeZoneOffset);
 
                     if (dateName === 'maxDate') {
                         setMaxDate();
@@ -755,7 +755,7 @@ angular.element(document).ready(function() {
                     }
 
                     if (minMaxValidators.length) {
-                        var formattedDate = maDate.format(format);
+                        var formattedDate = date.format(format);
 
                         // Empty failedValidator if it is min/max validator.
                         if (failedValidator && (failedValidator.name === 'IsGreaterThanOrEqual' || failedValidator.name === 'IsLessThanOrEqual')) {
@@ -776,8 +776,8 @@ angular.element(document).ready(function() {
                         }
                     }
 
-                    if (scope.isValid && hasDateChanged(maDate)) {
-                        onChange(maDate);
+                    if (scope.isValid && hasDateChanged(date)) {
+                        onChange(date);
                     }
                 };
 
@@ -1193,6 +1193,35 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            isDisabled: '=',
+            click: '&'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
+                <i class="fa fa-times"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
         }
     };
 }]);
@@ -1929,41 +1958,16 @@ angular.element(document).ready(function() {
         };
     }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            isDisabled: '=',
-            click: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-reset-value" ng-class="{\
-                    \'ma-reset-value-is-disabled\': isDisabled\
-                }"\
-                ng-click="onClick()">\
-                <i class="fa fa-times"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
             language: 'en',
             months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
         }],
         daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    var isInteger = function(value) {
+        return value === parseInt(value, 10);
+    };
 
     var isDate = function(value) {
         if (!value) {
@@ -1986,12 +1990,12 @@ angular.element(document).ready(function() {
             maDate = MaDate.createEmpty();
         day = day.toString();
         month = month.toString();
-        hours = hours || 0;
-        minutes = minutes || 0;
-        seconds = seconds || 0;
+        hours = Number(hours) || 0;
+        minutes = Number(minutes) || 0;
+        seconds = Number(seconds) || 0;
         offset = offset || 0;
 
-        // Convert YY to YYYY according to rules.
+        // Convert YY to YYYY.
         if (year <= 99) {
             if (year >= 0 && year < 30) {
                 year = '20' + year;
@@ -2035,7 +2039,7 @@ angular.element(document).ready(function() {
             return maDate;
         }
 
-        maDate = new MaDate(new Date(year, month - 1, day, hours, minutes, seconds));
+        maDate = new MaDate(Number(year), Number(month - 1), Number(day), hours, minutes, seconds);
         maDate.offset(offset);
 
         return maDate;
@@ -2073,15 +2077,15 @@ angular.element(document).ready(function() {
 
     var parse = function(value, culture) {
         var pattern, parts, dayAndMonth,
-            maDate = MaDate.createEmpty();
+            date = MaDate.createEmpty();
 
         // Check if a date requires parsing.
         if (isDate(value) || isMaDate(value)) {
             return value;
         }
 
-        if (!angular.isString(value)) {
-            return maDate;
+        if (typeof value !== 'string') {
+            return date;
         }
 
         // 21
@@ -2101,7 +2105,7 @@ angular.element(document).ready(function() {
             dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
 
             if (!dayAndMonth.isValid) {
-                return maDate;
+                return date;
             }
 
             return getTotalDate(new Date().getFullYear(), dayAndMonth.month, dayAndMonth.day);
@@ -2155,7 +2159,7 @@ angular.element(document).ready(function() {
             dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
 
             if (!dayAndMonth.isValid) {
-                return maDate;
+                return date;
             }
 
             return getTotalDate(parts[5], dayAndMonth.month, dayAndMonth.day);
@@ -2190,7 +2194,7 @@ angular.element(document).ready(function() {
             return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], offset);
         }
 
-        return maDate;
+        return date;
     };
 
     var formatNumber = function(number, length) {
@@ -2212,7 +2216,7 @@ angular.element(document).ready(function() {
             return 'Z';
         }
 
-        if (typeof offset !== 'number') {
+        if (!isInteger(offset)) {
             return null;
         }
 
@@ -2447,34 +2451,75 @@ angular.element(document).ready(function() {
         return offset;
     };
 
-    function MaDate(date) {
+    /*
+        Overloads:
+        - new MaDate() +
+        - new MaDate(Date) +
+        - new MaDate(MaDate) +
+        - new MaDate(dateString) +
+        - new MaDate(dateString, culture) +
+        - new MaDate(year)
+        - new MaDate(year, month)
+        - new MaDate(year, month, date)
+        - new MaDate(year, month, date, hour)
+        - new MaDate(year, month, date, hour, minute)
+        - new MaDate(year, month, date, hour, minute, second)
+    */
+    function MaDate() {
+        var parameters = arguments,
+            date;
         this._date = null;
         this._offset = 0;
         this._isMaDate = true;
 
-        if (isDate(date)) {
-            this._date = new Date(date.valueOf());
-        }
-
-        // MaDate is provided - just copy it.
-        if (isMaDate(date)) {
-            if (!date.isEmpty()) {
-                this._date = new Date(date.toDate().valueOf());
-            }
-
-            this._offset = date.offset();
-        }
-
-        // Parse date.
-        if (angular.isString(date)) {
-            var maDate = parse(date);
-            this._date = maDate.toDate();
-            this._offset = maDate.offset();
-        }
-
-        // Create a current date.
-        if (arguments.length === 0) {
+        if (parameters.length === 0) {
+            // Create a current date.
             this._date = new Date();
+        } else if (parameters.length === 1) {
+            date = parameters[0];
+
+            if (isDate(date)) {
+                this._date = new Date(date.valueOf());
+            } else if (isMaDate(date)) {
+                // MaDate is provided - copy it.
+                if (!date.isEmpty()) {
+                    this._date = new Date(date.toDate().valueOf());
+                }
+
+                this._offset = date.offset();
+            } else if (typeof date === 'string') {
+                // Parse date.
+                date = parse(date);
+                this._date = date.toDate();
+                this._offset = date.offset();
+            } else if (isInteger(date)) {
+                // Year.
+                this._date = new Date(date, 0, 1, 0, 0, 0);
+            }
+        } else if (parameters.length === 2) {
+            // Date string and culture.
+            if (typeof parameters[0] === 'string' && typeof parameters[1] === 'string') {
+                date = parse(parameters[0], parameters[1]);
+                this._date = date.toDate();
+                this._offset = date.offset();
+            } else if (isInteger(parameters[0]) && isInteger(parameters[1])) {
+                // Year and month.
+                this._date = new Date(parameters[0], parameters[1], 1, 0, 0, 0);
+            }
+        } else if (parameters.length === 3 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], 0, 0, 0);
+        } else if (parameters.length === 4 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], 0, 0);
+        } else if (parameters.length === 5 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
+            isInteger(parameters[4])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], 0);
+        } else if (parameters.length === 6 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
+            isInteger(parameters[4]) && isInteger(parameters[5])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5]);
         }
     }
 

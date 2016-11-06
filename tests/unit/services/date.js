@@ -10,24 +10,57 @@ describe('MaDate', function() {
     }));
 
     describe('constructor', function() {
-        it('uses current date if date is not passed', function() {
-            var maDate = new MaDate();
-            expect(maDate.difference(new MaDate(new Date))).toEqual(0);
-        });
-
         it('creates empty instance if passed date is incorrect', function() {
             expect(new MaDate(undefined).isEmpty()).toEqual(true);
-            expect(new MaDate(1).isEmpty()).toEqual(true);
+            expect(new MaDate(null).isEmpty()).toEqual(true);
+            expect(new MaDate(true).isEmpty()).toEqual(true);
         });
 
-        it('creates instance', function() {
-            var maDate = new MaDate(new Date(1987, 6, 1, 0, 0, 0));
+        it('uses current date if date is not passed', function() {
+            var maDate = new MaDate();
+            expect(maDate.difference(new Date())).toEqual(0);
+        });
+
+        it('uses date string', function() {
+            expect(new MaDate('1 7 87').format()).toEqual('1987-07-01T00:00:00Z');
+        });
+
+        it('uses date string and culture', function() {
+            expect(new MaDate('1 7 87', 'en-US').format()).toEqual('1987-01-07T00:00:00Z');
+        });
+
+        it('uses date', function() {
+            var maDate = new MaDate(1987, 6, 1, 0, 0, 0);
+            expect(maDate.format()).toEqual('1987-07-01T00:00:00Z');
+            expect(maDate.offset()).toEqual(0);
+
+            maDate = new MaDate(maDate);
             expect(maDate.format()).toEqual('1987-07-01T00:00:00Z');
             expect(maDate.offset()).toEqual(0);
         });
 
-        it('parses date', function() {
-            expect(new MaDate('1 7 87').format()).toEqual('1987-07-01T00:00:00Z');
+        it('uses year', function() {
+            expect(new MaDate(2015).format()).toEqual('2015-01-01T00:00:00Z');
+        });
+
+        it('uses year and month', function() {
+            expect(new MaDate(2015, 1).format()).toEqual('2015-02-01T00:00:00Z');
+        });
+
+        it('uses year, month and date', function() {
+            expect(new MaDate(2015, 1, 10).format()).toEqual('2015-02-10T00:00:00Z');
+        });
+
+        it('uses year, month, date and hour', function() {
+            expect(new MaDate(2015, 1, 10, 15).format()).toEqual('2015-02-10T15:00:00Z');
+        });
+
+        it('uses year, month, date, hour and minute', function() {
+            expect(new MaDate(2015, 1, 10, 15, 30).format()).toEqual('2015-02-10T15:30:00Z');
+        });
+
+        it('uses year, month, date, hour, minute and second', function() {
+            expect(new MaDate(2015, 1, 10, 15, 30, 45).format()).toEqual('2015-02-10T15:30:45Z');
         });
     });
 
@@ -283,9 +316,8 @@ describe('MaDate', function() {
         });
 
         it('formats date', function() {
-            var date = new Date(2015, 1, 21);
-            expect(MaDate.format(date)).toEqual('2015-02-21T00:00:00Z');
-            expect(MaDate.format(new MaDate(date))).toEqual('2015-02-21T00:00:00Z');
+            expect(MaDate.format(new Date(2015, 1, 21))).toEqual('2015-02-21T00:00:00Z');
+            expect(MaDate.format(new MaDate(2015, 1, 21))).toEqual('2015-02-21T00:00:00Z');
         });
 
         it('formats date using format', function() {
@@ -340,7 +372,7 @@ describe('MaDate', function() {
         });
 
         it('formats date using format', function() {
-            expect(new MaDate(new Date(2015, 1, 21)).format('yyyy-MM-dd')).toEqual('2015-02-21');
+            expect(new MaDate(2015, 1, 21).format('yyyy-MM-dd')).toEqual('2015-02-21');
         });
     });
 
