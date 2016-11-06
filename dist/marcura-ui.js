@@ -105,6 +105,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -200,27 +221,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -332,7 +332,7 @@ angular.element(document).ready(function() {
 
                 var onChange = function(maDate) {
                     previousDate = maDate || MaDate.createEmpty();
-                    scope.value = maDate ? maDate.format(format, timeZone) : null;
+                    scope.value = maDate ? maDate.format(format) : null;
 
                     // Postpone change event for $apply (which is being invoked by $timeout)
                     // to have time to take effect and update scope.value,
@@ -450,6 +450,7 @@ angular.element(document).ready(function() {
                         position: 'bottom right',
                         onSelect: function() {
                             var maDate = new MaDate(picker.getDate());
+                            maDate.offset(timeZoneOffset);
 
                             if (scope.hasTime) {
                                 setDateTime(maDate);
@@ -733,6 +734,7 @@ angular.element(document).ready(function() {
                     }
 
                     var maDate = parseDate(dateElement.val().trim());
+                    maDate.offset(timeZoneOffset);
 
                     if (dateName === 'maxDate') {
                         setMaxDate();
@@ -1191,35 +1193,6 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            isDisabled: '=',
-            click: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-reset-value" ng-class="{\
-                    \'ma-reset-value-is-disabled\': isDisabled\
-                }"\
-                ng-click="onClick()">\
-                <i class="fa fa-times"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
         }
     };
 }]);
@@ -1956,6 +1929,35 @@ angular.element(document).ready(function() {
         };
     }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            isDisabled: '=',
+            click: '&'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
+                <i class="fa fa-times"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
             language: 'en',
@@ -1969,6 +1971,10 @@ angular.element(document).ready(function() {
         }
 
         return Object.prototype.toString.call(value) === '[object Date]' && value.getTime && !isNaN(value.getTime());
+    };
+
+    var isMaDate = function(value) {
+        return value instanceof MaDate || (!!value && value._isMaDate);
     };
 
     var isMatch = function(date, substring) {
@@ -2070,7 +2076,7 @@ angular.element(document).ready(function() {
             maDate = MaDate.createEmpty();
 
         // Check if a date requires parsing.
-        if (value instanceof Date || value instanceof MaDate) {
+        if (isDate(value) || isMaDate(value)) {
             return value;
         }
 
@@ -2187,25 +2193,107 @@ angular.element(document).ready(function() {
         return maDate;
     };
 
-    var format = function(date, format, timeZone) {
-        var languageIndex = 0;
-        format = angular.isString(format) ? format : 'yyyy-MM-ddTHH:mm:ssZ';
-        timeZone = timeZone || '';
+    var formatNumber = function(number, length) {
+        var string = '';
 
-        if (!isDate(date)) {
+        for (var i = 0; i < length; i++) {
+            string += '0';
+        }
+
+        return (string + number).slice(-length);
+    };
+
+    var isValidTimeZoneOffset = function(offset) {
+        return offset >= -720 && offset <= 840;
+    };
+
+    var offsetToTimeZone = function(offset) {
+        if (offset === 0) {
+            return 'Z';
+        }
+
+        if (typeof offset !== 'number') {
             return null;
         }
 
-        // Possible formats of date parts (day, month, year).
-        var datePartFormats = {
-            s: ['ss'],
-            m: ['mm'],
-            H: ['HH'],
-            d: ['d', 'dd'],
-            M: ['M', 'MM', 'MMM', 'MMMM'],
-            y: ['yy', 'yyyy'],
-            Z: ['Z']
-        };
+        // Time zones vary from -12:00 to 14:00.
+        if (offset < -720 || offset > 840) {
+            return null;
+        }
+
+        var sign = '+';
+
+        if (offset < 0) {
+            offset *= -1;
+            sign = '-';
+        }
+
+        var minutes = offset % 60,
+            hours = (offset - minutes) / 60;
+
+        return sign + formatNumber(hours, 2) + ':' + formatNumber(minutes, 2);
+    };
+
+    /*
+        Overloads:
+        - format(date)
+        - format(MaDate)
+        - format(date, format)
+        - format(MaDate, format)
+        - format(date, offset)
+        - format(MaDate, offset)
+        - format(date, format, offset)
+        - format(MaDate, format, offset)
+    */
+    var format = function(date) {
+        if (!isDate(date) && !isMaDate(date)) {
+            return null;
+        }
+
+        var parameters = arguments,
+            format,
+            offset = 0;
+
+        if (parameters.length === 2) {
+            if (typeof parameters[1] === 'string') {
+                format = parameters[1];
+            } else {
+                offset = parameters[1];
+
+                if (!isValidTimeZoneOffset(offset)) {
+                    return null;
+                }
+            }
+        } else if (parameters.length === 3) {
+            format = parameters[1];
+            offset = parameters[2];
+
+            if (!isValidTimeZoneOffset(offset)) {
+                return null;
+            }
+        }
+
+        format = format || 'yyyy-MM-ddTHH:mm:ssZ';
+
+        var languageIndex = 0,
+            timeZone = offsetToTimeZone(offset),
+            _date = isMaDate(date) ? date.toDate() : date,
+            // Possible formats of date parts (day, month, year).
+            datePartFormats = {
+                s: ['ss'],
+                m: ['mm'],
+                H: ['HH'],
+                d: ['d', 'dd'],
+                M: ['M', 'MM', 'MMM', 'MMMM'],
+                y: ['yy', 'yyyy'],
+                Z: ['Z']
+            },
+            day = _date.getDate(),
+            month = _date.getMonth(),
+            year = _date.getFullYear(),
+            hours = _date.getHours(),
+            minutes = _date.getMinutes(),
+            seconds = _date.getSeconds();
 
         // Checks format string parts on conformity with available date formats.
         var checkDatePart = function(dateChar) {
@@ -2218,23 +2306,6 @@ angular.element(document).ready(function() {
 
             return datePartFormats[dateChar].indexOf(datePart);
         };
-
-        var formatNumber = function(number, length) {
-            var string = '';
-
-            for (var i = 0; i < length; i++) {
-                string += '0';
-            }
-
-            return (string + number).slice(-length);
-        };
-
-        var day = date.getDate(),
-            month = date.getMonth(),
-            year = date.getFullYear(),
-            hours = date.getHours(),
-            minutes = date.getMinutes(),
-            seconds = date.getSeconds();
 
         // Formats date parts.
         var formatDatePart = function(datePartFormat) {
@@ -2379,13 +2450,14 @@ angular.element(document).ready(function() {
     function MaDate(date) {
         this._date = null;
         this._offset = 0;
+        this._isMaDate = true;
 
         if (isDate(date)) {
             this._date = new Date(date.valueOf());
         }
 
         // MaDate is provided - just copy it.
-        if (date instanceof MaDate) {
+        if (isMaDate(date)) {
             if (!date.isEmpty()) {
                 this._date = new Date(date.toDate().valueOf());
             }
@@ -2469,12 +2541,12 @@ angular.element(document).ready(function() {
         return time;
     };
 
-    MaDate.prototype.format = function(_format, timeZone) {
+    MaDate.prototype.format = function(_format) {
         if (this.isEmpty()) {
             return null;
         }
 
-        return format(this._date, _format, timeZone);
+        return format(this._date, _format, this._offset);
     };
 
     MaDate.prototype.add = function(number, period) {
@@ -2558,9 +2630,11 @@ angular.element(document).ready(function() {
 
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;
+    MaDate.offsetToTimeZone = offsetToTimeZone;
     MaDate.format = format;
     MaDate.isDate = isDate;
     MaDate.difference = difference;
+    MaDate.isMaDate = isMaDate;
 
     return MaDate;
 }]);
@@ -2796,7 +2870,7 @@ angular.element(document).ready(function() {
 
         var formattedValue = value.toString();
 
-        if (value instanceof MaDate) {
+        if (MaDate.isMaDate(value)) {
             formattedValue = value.format('dd MMM yyyy');
         }
 
@@ -2965,108 +3039,6 @@ angular.element(document).ready(function() {
                     });
                 }
             };
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-tabs">\
-                <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item" ng-repeat="item in items"\
-                        ng-focus="onFocus(item)"\
-                        ng-blur="onBlur(item)"\
-                        ng-keypress="onKeypress($event, item)"\
-                        ng-class="{\
-                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
-                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
-                            \'ma-tabs-item-is-focused\': item.isFocused\
-                        }"\
-                        ng-click="onSelect(item)">\
-                        <a class="ma-tabs-link" href="" tabindex="-1">\
-                            <span class="ma-tabs-text">{{item.text}}</span>\
-                        </a>\
-                    </li>\
-                </ul>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function(item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function(item) {
-                if (item.isDisabled || item.isSelected) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
-                }
-            };
-
-            scope.onKeypress = function(event, item) {
-                if (event.keyCode === maHelper.keyCode.enter) {
-                    scope.onSelect(item);
-                }
-            };
-
-            scope.onFocus = function(item) {
-                item.isFocused = true;
-            };
-
-            scope.onBlur = function(item) {
-                item.isFocused = false;
-            };
-
-            $timeout(function() {
-                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
-
-                itemElements.each(function(itemIndex, itemElement) {
-                    var item = scope.items[itemIndex];
-
-                    if (!item.isDisabled) {
-                        angular.element(itemElement).attr('tabindex', '0');
-                    }
-                });
-            });
         }
     };
 }]);
@@ -3333,6 +3305,108 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-tabs">\
+                <ul class="ma-tabs-list clearfix">\
+                    <li class="ma-tabs-item" ng-repeat="item in items"\
+                        ng-focus="onFocus(item)"\
+                        ng-blur="onBlur(item)"\
+                        ng-keypress="onKeypress($event, item)"\
+                        ng-class="{\
+                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
+                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
+                            \'ma-tabs-item-is-focused\': item.isFocused\
+                        }"\
+                        ng-click="onSelect(item)">\
+                        <a class="ma-tabs-link" href="" tabindex="-1">\
+                            <span class="ma-tabs-text">{{item.text}}</span>\
+                        </a>\
+                    </li>\
+                </ul>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function(item) {
+                if (item.isDisabled || item.isSelected) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function(item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
+
+            scope.onKeypress = function(event, item) {
+                if (event.keyCode === maHelper.keyCode.enter) {
+                    scope.onSelect(item);
+                }
+            };
+
+            scope.onFocus = function(item) {
+                item.isFocused = true;
+            };
+
+            scope.onBlur = function(item) {
+                item.isFocused = false;
+            };
+
+            $timeout(function() {
+                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
+
+                itemElements.each(function(itemIndex, itemElement) {
+                    var item = scope.items[itemIndex];
+
+                    if (!item.isDisabled) {
+                        angular.element(itemElement).attr('tabindex', '0');
+                    }
+                });
+            });
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', function($timeout) {
     return {
         restrict: 'E',
@@ -3360,25 +3434,6 @@ angular.element(document).ready(function() {
         },
         link: function(scope, element) {
             var valueElement = angular.element(element[0].querySelector('.ma-text-box-value'));
-            // valueType,
-
-            // getValueInType = function(value) {
-            //     if (!value) {
-            //         return null;
-            //     } else if (dateType === 'String') {
-            //         return value.toString();
-            //     } else if (angular.isNumber(value)) {
-            //         return date;
-            //     } else {
-            //         return MaDate.format(date, format);
-            //     }
-            // },
-            // onChange = function (value) {
-            //     scope.change({
-            //         value: value
-            //     });
-            // };
-
             scope._size = scope.size ? scope.size : 'sm';
 
             $timeout(function() {
@@ -3386,28 +3441,6 @@ angular.element(document).ready(function() {
                 element.removeAttr('id');
                 valueElement.attr('id', scope.id);
             });
-
-            // scope.$watch('value', function(newValue, oldValue) {
-            //     if (newValue === oldValue) {
-            //         return;
-            //     }
-            //
-            //     scope.change({
-            //         value: value
-            //     });
-            // });
-
-
-            // if (scope.value) {
-            //     // determine initial value type
-            //     if (maHelper.isString(scope.value)) {
-            //         valueType = 'String';
-            //     } else {
-            //         valueType = 'Number';
-            //     }
-            //
-            //     valueElement.val(scope.value);
-            // }
         }
     };
 }]);

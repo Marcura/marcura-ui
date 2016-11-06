@@ -6,7 +6,7 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
 
         var formattedValue = value.toString();
 
-        if (value instanceof MaDate) {
+        if (MaDate.isMaDate(value)) {
             formattedValue = value.format('dd MMM yyyy');
         }
 

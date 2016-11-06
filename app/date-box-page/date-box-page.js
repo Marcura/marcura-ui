@@ -15,7 +15,8 @@ function dateBoxPageController($scope, $timeout, MaDate, maValidators) {
     $scope.date9Min = new MaDate().add(-5, 'day').format('yyyy-MM-ddT00:00:00Z');
     $scope.date9Max = new MaDate().add(5, 'day').format('yyyy-MM-ddT00:00:00Z');
     $scope.date10 = '2016-07-25T00:00:00Z';
-    $scope.date21 = MaDate.format(new Date(), 'yyyy-MM-ddT00:00:00Z');
+    $scope.date21 = new MaDate().format('yyyy-MM-ddT00:00:00Z');
+
     $scope.date20DateBox = {};
     $scope.date20Validator = {
         validate: function(date) {

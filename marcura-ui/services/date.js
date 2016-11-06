@@ -13,6 +13,10 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return Object.prototype.toString.call(value) === '[object Date]' && value.getTime && !isNaN(value.getTime());
     };
 
+    var isMaDate = function(value) {
+        return value instanceof MaDate || (!!value && value._isMaDate);
+    };
+
     var isMatch = function(date, substring) {
         return date.match(new RegExp(substring, 'i'));
     };
@@ -112,7 +116,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             maDate = MaDate.createEmpty();
 
         // Check if a date requires parsing.
-        if (value instanceof Date || value instanceof MaDate) {
+        if (isDate(value) || isMaDate(value)) {
             return value;
         }
 
@@ -229,25 +233,107 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return maDate;
     };
 
-    var format = function(date, format, timeZone) {
-        var languageIndex = 0;
-        format = angular.isString(format) ? format : 'yyyy-MM-ddTHH:mm:ssZ';
-        timeZone = timeZone || '';
+    var formatNumber = function(number, length) {
+        var string = '';
 
-        if (!isDate(date)) {
+        for (var i = 0; i < length; i++) {
+            string += '0';
+        }
+
+        return (string + number).slice(-length);
+    };
+
+    var isValidTimeZoneOffset = function(offset) {
+        return offset >= -720 && offset <= 840;
+    };
+
+    var offsetToTimeZone = function(offset) {
+        if (offset === 0) {
+            return 'Z';
+        }
+
+        if (typeof offset !== 'number') {
             return null;
         }
 
-        // Possible formats of date parts (day, month, year).
-        var datePartFormats = {
-            s: ['ss'],
-            m: ['mm'],
-            H: ['HH'],
-            d: ['d', 'dd'],
-            M: ['M', 'MM', 'MMM', 'MMMM'],
-            y: ['yy', 'yyyy'],
-            Z: ['Z']
-        };
+        // Time zones vary from -12:00 to 14:00.
+        if (offset < -720 || offset > 840) {
+            return null;
+        }
+
+        var sign = '+';
+
+        if (offset < 0) {
+            offset *= -1;
+            sign = '-';
+        }
+
+        var minutes = offset % 60,
+            hours = (offset - minutes) / 60;
+
+        return sign + formatNumber(hours, 2) + ':' + formatNumber(minutes, 2);
+    };
+
+    /*
+        Overloads:
+        - format(date)
+        - format(MaDate)
+        - format(date, format)
+        - format(MaDate, format)
+        - format(date, offset)
+        - format(MaDate, offset)
+        - format(date, format, offset)
+        - format(MaDate, format, offset)
+    */
+    var format = function(date) {
+        if (!isDate(date) && !isMaDate(date)) {
+            return null;
+        }
+
+        var parameters = arguments,
+            format,
+            offset = 0;
+
+        if (parameters.length === 2) {
+            if (typeof parameters[1] === 'string') {
+                format = parameters[1];
+            } else {
+                offset = parameters[1];
+
+                if (!isValidTimeZoneOffset(offset)) {
+                    return null;
+                }
+            }
+        } else if (parameters.length === 3) {
+            format = parameters[1];
+            offset = parameters[2];
+
+            if (!isValidTimeZoneOffset(offset)) {
+                return null;
+            }
+        }
+
+        format = format || 'yyyy-MM-ddTHH:mm:ssZ';
+
+        var languageIndex = 0,
+            timeZone = offsetToTimeZone(offset),
+            _date = isMaDate(date) ? date.toDate() : date,
+            // Possible formats of date parts (day, month, year).
+            datePartFormats = {
+                s: ['ss'],
+                m: ['mm'],
+                H: ['HH'],
+                d: ['d', 'dd'],
+                M: ['M', 'MM', 'MMM', 'MMMM'],
+                y: ['yy', 'yyyy'],
+                Z: ['Z']
+            },
+            day = _date.getDate(),
+            month = _date.getMonth(),
+            year = _date.getFullYear(),
+            hours = _date.getHours(),
+            minutes = _date.getMinutes(),
+            seconds = _date.getSeconds();
 
         // Checks format string parts on conformity with available date formats.
         var checkDatePart = function(dateChar) {
@@ -260,23 +346,6 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
 
             return datePartFormats[dateChar].indexOf(datePart);
         };
-
-        var formatNumber = function(number, length) {
-            var string = '';
-
-            for (var i = 0; i < length; i++) {
-                string += '0';
-            }
-
-            return (string + number).slice(-length);
-        };
-
-        var day = date.getDate(),
-            month = date.getMonth(),
-            year = date.getFullYear(),
-            hours = date.getHours(),
-            minutes = date.getMinutes(),
-            seconds = date.getSeconds();
 
         // Formats date parts.
         var formatDatePart = function(datePartFormat) {
@@ -421,13 +490,14 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
     function MaDate(date) {
         this._date = null;
         this._offset = 0;
+        this._isMaDate = true;
 
         if (isDate(date)) {
             this._date = new Date(date.valueOf());
         }
 
         // MaDate is provided - just copy it.
-        if (date instanceof MaDate) {
+        if (isMaDate(date)) {
             if (!date.isEmpty()) {
                 this._date = new Date(date.toDate().valueOf());
             }
@@ -511,12 +581,12 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return time;
     };
 
-    MaDate.prototype.format = function(_format, timeZone) {
+    MaDate.prototype.format = function(_format) {
         if (this.isEmpty()) {
             return null;
         }
 
-        return format(this._date, _format, timeZone);
+        return format(this._date, _format, this._offset);
     };
 
     MaDate.prototype.add = function(number, period) {
@@ -600,9 +670,11 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
 
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;
+    MaDate.offsetToTimeZone = offsetToTimeZone;
     MaDate.format = format;
     MaDate.isDate = isDate;
     MaDate.difference = difference;
+    MaDate.isMaDate = isMaDate;
 
     return MaDate;
 }]);

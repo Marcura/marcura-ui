@@ -105,7 +105,7 @@ angular.module('marcuraUI.components')
 
                 var onChange = function(maDate) {
                     previousDate = maDate || MaDate.createEmpty();
-                    scope.value = maDate ? maDate.format(format, timeZone) : null;
+                    scope.value = maDate ? maDate.format(format) : null;
 
                     // Postpone change event for $apply (which is being invoked by $timeout)
                     // to have time to take effect and update scope.value,
@@ -223,6 +223,7 @@ angular.module('marcuraUI.components')
                         position: 'bottom right',
                         onSelect: function() {
                             var maDate = new MaDate(picker.getDate());
+                            maDate.offset(timeZoneOffset);
 
                             if (scope.hasTime) {
                                 setDateTime(maDate);
@@ -506,6 +507,7 @@ angular.module('marcuraUI.components')
                     }
 
                     var maDate = parseDate(dateElement.val().trim());
+                    maDate.offset(timeZoneOffset);
 
                     if (dateName === 'maxDate') {
                         setMaxDate();
