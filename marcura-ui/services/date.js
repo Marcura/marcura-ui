@@ -709,25 +709,44 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
-    // TODO
-    // MaDate.prototype.day = function(hour) {
-    //
-    // };
+    MaDate.prototype.date = function(date) {
+        if (this.isEmpty()) {
+            return 0;
+        }
 
-    // TODO: should get/set day of month, e.g. 21
-    // MaDate.prototype.date = function(date) {
-    //
-    // };
+        if (arguments.length === 0) {
+            return this._date.getDate();
+        } else {
+            this._date.setDate(date);
+            return this;
+        }
+    };
 
-    // TODO
-    // MaDate.prototype.month = function(hour) {
-    //
-    // };
+    MaDate.prototype.month = function(month) {
+        if (this.isEmpty()) {
+            return 0;
+        }
 
-    // TODO
-    // MaDate.prototype.year = function(hour) {
-    //
-    // };
+        if (arguments.length === 0) {
+            return this._date.getMonth();
+        } else {
+            this._date.setMonth(month);
+            return this;
+        }
+    };
+
+    MaDate.prototype.year = function(year) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getFullYear();
+        } else {
+            this._date.setFullYear(year);
+            return this;
+        }
+    };
 
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;

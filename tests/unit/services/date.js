@@ -17,8 +17,8 @@ describe('MaDate', function() {
         });
 
         it('uses current date if date is not passed', function() {
-            var maDate = new MaDate();
-            expect(maDate.difference(new Date())).toEqual(0);
+            var date = new MaDate();
+            expect(date.difference(new Date())).toEqual(0);
         });
 
         it('uses date string', function() {
@@ -30,13 +30,13 @@ describe('MaDate', function() {
         });
 
         it('uses date', function() {
-            var maDate = new MaDate(1987, 6, 1, 0, 0, 0);
-            expect(maDate.format()).toEqual('1987-07-01T00:00:00Z');
-            expect(maDate.offset()).toEqual(0);
+            var date = new MaDate(1987, 6, 1, 0, 0, 0);
+            expect(date.format()).toEqual('1987-07-01T00:00:00Z');
+            expect(date.offset()).toEqual(0);
 
-            maDate = new MaDate(maDate);
-            expect(maDate.format()).toEqual('1987-07-01T00:00:00Z');
-            expect(maDate.offset()).toEqual(0);
+            date = new MaDate(date);
+            expect(date.format()).toEqual('1987-07-01T00:00:00Z');
+            expect(date.offset()).toEqual(0);
         });
 
         it('uses year', function() {
@@ -445,195 +445,237 @@ describe('MaDate', function() {
 
     describe('createEmpty method', function() {
         it('creates empty instance', function() {
-            var maDate = MaDate.createEmpty();
-            expect(maDate.isEmpty()).toEqual(true);
+            expect(MaDate.createEmpty().isEmpty()).toEqual(true);
         });
     });
 
     describe('add method', function() {
         // Seconds.
         it('adds seconds', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.add(2, 'second');
-            expect(maDate.format()).toEqual('2015-02-21T10:45:32Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.add(2, 'second');
+            expect(date.format()).toEqual('2015-02-21T10:45:32Z');
 
-            maDate.add(28, 'second');
-            expect(maDate.format()).toEqual('2015-02-21T10:46:00Z');
+            date.add(28, 'second');
+            expect(date.format()).toEqual('2015-02-21T10:46:00Z');
         });
 
         // Minutes.
         it('adds minutes', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.add(2, 'minute');
-            expect(maDate.format()).toEqual('2015-02-21T10:47:30Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.add(2, 'minute');
+            expect(date.format()).toEqual('2015-02-21T10:47:30Z');
 
-            maDate.add(13, 'minute');
-            expect(maDate.format()).toEqual('2015-02-21T11:00:30Z');
+            date.add(13, 'minute');
+            expect(date.format()).toEqual('2015-02-21T11:00:30Z');
         });
 
         // Hours.
         it('adds hours', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.add(2, 'hour');
-            expect(maDate.format()).toEqual('2015-02-21T12:45:30Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.add(2, 'hour');
+            expect(date.format()).toEqual('2015-02-21T12:45:30Z');
 
-            maDate.add(12, 'hour');
-            expect(maDate.format()).toEqual('2015-02-22T00:45:30Z');
+            date.add(12, 'hour');
+            expect(date.format()).toEqual('2015-02-22T00:45:30Z');
         });
 
         // Days.
         it('adds days', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.add(2, 'day');
-            expect(maDate.format()).toEqual('2015-02-23T10:45:30Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.add(2, 'day');
+            expect(date.format()).toEqual('2015-02-23T10:45:30Z');
 
-            maDate.add(6, 'day');
-            expect(maDate.format()).toEqual('2015-03-01T10:45:30Z');
+            date.add(6, 'day');
+            expect(date.format()).toEqual('2015-03-01T10:45:30Z');
         });
 
         // Months.
         it('adds months', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.add(2, 'month');
-            expect(maDate.format()).toEqual('2015-04-21T10:45:30Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.add(2, 'month');
+            expect(date.format()).toEqual('2015-04-21T10:45:30Z');
 
-            maDate.add(9, 'month');
-            expect(maDate.format()).toEqual('2016-01-21T10:45:30Z');
+            date.add(9, 'month');
+            expect(date.format()).toEqual('2016-01-21T10:45:30Z');
         });
 
         // Years.
         it('adds years', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.add(2, 'year');
-            expect(maDate.format()).toEqual('2017-02-21T10:45:30Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.add(2, 'year');
+            expect(date.format()).toEqual('2017-02-21T10:45:30Z');
         });
     });
 
     describe('subtract method', function() {
         // Seconds.
         it('subtracts seconds', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.subtract(2, 'second');
-            expect(maDate.format()).toEqual('2015-02-21T10:45:28Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.subtract(2, 'second');
+            expect(date.format()).toEqual('2015-02-21T10:45:28Z');
 
-            maDate.subtract(29, 'second');
-            expect(maDate.format()).toEqual('2015-02-21T10:44:59Z');
+            date.subtract(29, 'second');
+            expect(date.format()).toEqual('2015-02-21T10:44:59Z');
         });
 
         // Minutes.
         it('subtracts minutes', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.subtract(2, 'minute');
-            expect(maDate.format()).toEqual('2015-02-21T10:43:30Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.subtract(2, 'minute');
+            expect(date.format()).toEqual('2015-02-21T10:43:30Z');
 
-            maDate.subtract(44, 'minute');
-            expect(maDate.format()).toEqual('2015-02-21T09:59:30Z');
+            date.subtract(44, 'minute');
+            expect(date.format()).toEqual('2015-02-21T09:59:30Z');
         });
 
         // Hours.
         it('subtracts hours', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.subtract(2, 'hour');
-            expect(maDate.format()).toEqual('2015-02-21T08:45:30Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.subtract(2, 'hour');
+            expect(date.format()).toEqual('2015-02-21T08:45:30Z');
 
-            maDate.subtract(9, 'hour');
-            expect(maDate.format()).toEqual('2015-02-20T23:45:30Z');
+            date.subtract(9, 'hour');
+            expect(date.format()).toEqual('2015-02-20T23:45:30Z');
         });
 
         // Days.
         it('subtracts days', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.subtract(2, 'day');
-            expect(maDate.format()).toEqual('2015-02-19T10:45:30Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.subtract(2, 'day');
+            expect(date.format()).toEqual('2015-02-19T10:45:30Z');
 
-            maDate.subtract(19, 'day');
-            expect(maDate.format()).toEqual('2015-01-31T10:45:30Z');
+            date.subtract(19, 'day');
+            expect(date.format()).toEqual('2015-01-31T10:45:30Z');
         });
 
         // Months.
         it('subtracts months', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.subtract(1, 'month');
-            expect(maDate.format()).toEqual('2015-01-21T10:45:30Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.subtract(1, 'month');
+            expect(date.format()).toEqual('2015-01-21T10:45:30Z');
 
-            maDate.subtract(1, 'month');
-            expect(maDate.format()).toEqual('2014-12-21T10:45:30Z');
+            date.subtract(1, 'month');
+            expect(date.format()).toEqual('2014-12-21T10:45:30Z');
         });
 
         // Years.
         it('subtracts years', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.subtract(2, 'year');
-            expect(maDate.format()).toEqual('2013-02-21T10:45:30Z');
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.subtract(2, 'year');
+            expect(date.format()).toEqual('2013-02-21T10:45:30Z');
         });
     });
 
     describe('second method', function() {
         it('returns seconds', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            expect(maDate.second()).toEqual(30);
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            expect(date.second()).toEqual(30);
         });
 
         it('sets seconds', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.second(10);
-            expect(maDate.second()).toEqual(10);
-            expect(maDate.minute()).toEqual(45);
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.second(10);
+            expect(date.second()).toEqual(10);
+            expect(date.minute()).toEqual(45);
 
-            maDate.second(80);
-            expect(maDate.second()).toEqual(20);
-            expect(maDate.minute()).toEqual(46);
+            date.second(80);
+            expect(date.second()).toEqual(20);
+            expect(date.minute()).toEqual(46);
         });
     });
 
     describe('minute method', function() {
         it('returns minutes', function() {
-            var maDate = new MaDate('2015-02-21T10:45:00Z');
-            expect(maDate.minute()).toEqual(45);
+            var date = new MaDate('2015-02-21T10:45:00Z');
+            expect(date.minute()).toEqual(45);
         });
 
         it('sets minutes', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.minute(10);
-            expect(maDate.minute()).toEqual(10);
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.minute(10);
+            expect(date.minute()).toEqual(10);
 
-            maDate.minute(80);
-            expect(maDate.minute()).toEqual(20);
-            expect(maDate.hour()).toEqual(11);
+            date.minute(80);
+            expect(date.minute()).toEqual(20);
+            expect(date.hour()).toEqual(11);
         });
     });
 
     describe('hour method', function() {
         it('returns hours', function() {
-            var maDate = new MaDate('2015-02-21T10:45:00Z');
-            expect(maDate.hour()).toEqual(10);
+            var date = new MaDate('2015-02-21T10:45:00Z');
+            expect(date.hour()).toEqual(10);
         });
 
         it('sets hours', function() {
-            var maDate = new MaDate('2015-02-21T10:45:30Z');
-            maDate.hour(20);
-            expect(maDate.hour()).toEqual(20);
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.hour(20);
+            expect(date.hour()).toEqual(20);
+        });
+    });
+
+    describe('date method', function() {
+        it('returns day of month', function() {
+            var date = new MaDate('2015-02-21T10:45:00Z');
+            expect(date.date()).toEqual(21);
+        });
+
+        it('sets day of month', function() {
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.date(25);
+            expect(date.date()).toEqual(25);
+
+            date.date(29);
+            expect(date.date()).toEqual(1);
+            expect(date.format()).toEqual('2015-03-01T10:45:30Z');
+        });
+    });
+
+    describe('month method', function() {
+        it('returns month', function() {
+            var date = new MaDate('2015-02-21T10:45:00Z');
+            expect(date.month()).toEqual(1);
+        });
+
+        it('sets month', function() {
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.month(3);
+            expect(date.month()).toEqual(3);
+        });
+    });
+
+    describe('year method', function() {
+        it('returns year', function() {
+            var date = new MaDate('2015-02-21T10:45:00Z');
+            expect(date.year()).toEqual(2015);
+        });
+
+        it('sets year', function() {
+            var date = new MaDate('2015-02-21T10:45:30Z');
+            date.year(2010);
+            expect(date.year()).toEqual(2010);
         });
     });
 
     describe('toUtc method', function() {
         it('does nothing if offset iz zero', function() {
-            var maDate = new MaDate('2015-02-21T20:45:00Z');
-            maDate.toUtc();
-            expect(maDate.offset()).toEqual(0);
-            expect(maDate.format()).toEqual('2015-02-21T20:45:00Z');
+            var date = new MaDate('2015-02-21T20:45:00Z');
+            date.toUtc();
+            expect(date.offset()).toEqual(0);
+            expect(date.format()).toEqual('2015-02-21T20:45:00Z');
         });
 
         it('transforms date to UTC', function() {
-            var maDate = new MaDate('2015-02-21T20:45:00+04:00');
-            maDate.toUtc();
-            expect(maDate.offset()).toEqual(0);
-            expect(maDate.format()).toEqual('2015-02-21T16:45:00Z');
+            var date = new MaDate('2015-02-21T20:45:00+04:00');
+            date.toUtc();
+            expect(date.offset()).toEqual(0);
+            expect(date.format()).toEqual('2015-02-21T16:45:00Z');
 
-            maDate = new MaDate('2015-02-21T20:45:00-04:00');
-            maDate.toUtc();
-            expect(maDate.offset()).toEqual(0);
-            expect(maDate.format()).toEqual('2015-02-22T00:45:00Z');
+            date = new MaDate('2015-02-21T20:45:00-04:00');
+            date.toUtc();
+            expect(date.offset()).toEqual(0);
+            expect(date.format()).toEqual('2015-02-22T00:45:00Z');
         });
     });
 });
