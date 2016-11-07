@@ -268,16 +268,21 @@ describe('MaDate', function() {
             expect(MaDate.parse('2015.February.21').format()).toEqual('2015-02-21T00:00:00Z');
         });
 
-        it('parses date with UTC time zone', function() {
+        it('parses date in yyyy-MM-ddTHH:mm:ss.fffZ format', function() {
             var date = MaDate.parse('2015-02-21T10:00:00Z');
             expect(date.format()).toEqual('2015-02-21T10:00:00Z');
             expect(date.offset()).toEqual(0);
-        });
+            expect(date.millisecond()).toEqual(0);
 
-        it('ignores time zones other than UTC', function() {
             var date = MaDate.parse('2015-02-21T10:00:00-03:00');
             expect(date.format()).toEqual('2015-02-21T10:00:00-03:00');
             expect(date.offset()).toEqual(-180);
+            expect(date.millisecond()).toEqual(0);
+
+            var date = MaDate.parse('2015-02-21T10:00:00.500Z');
+            expect(date.format('yyyy-MM-ddTHH:mm:ss.fffZ')).toEqual('2015-02-21T10:00:00.500Z');
+            expect(date.offset()).toEqual(0);
+            expect(date.millisecond()).toEqual(500);
         });
 
         it('supports specific en-GB formats', function() {
@@ -358,9 +363,10 @@ describe('MaDate', function() {
             expect(MaDate.format(date, 'yyyy-M-dd')).toEqual('2015-2-07');
         });
 
-        it('supports hours, minutes and seconds formats', function() {
-            expect(MaDate.format(new Date(2015, 1, 7, 12, 0, 42), 'HH:mm:ss')).toEqual('12:00:42');
-            expect(MaDate.format(new Date(2015, 1, 7, 12, 0, 7), 'yy-M-dd HH.mm.ss')).toEqual('15-2-07 12.00.07');
+        it('supports hours, minutes, seconds and milliseconds formats', function() {
+            var date = new Date(2015, 1, 7, 12, 0, 42);
+            date.setMilliseconds(500);
+            expect(MaDate.format(date, 'HH:mm:ss.fff')).toEqual('12:00:42.500');
         });
     });
 
@@ -566,6 +572,24 @@ describe('MaDate', function() {
             expect(date.format()).toEqual('2013-02-21T10:45:30Z');
         });
     });
+
+    // describe('millisecond method', function() {
+    //     it('returns milliseconds', function() {
+    //         var date = new MaDate('2015-02-21T10:45:30.500Z');
+    //         expect(date.millisecond()).toEqual(500);
+    //     });
+    //
+    //     it('sets milliseconds', function() {
+    //         // var date = new MaDate('2015-02-21T10:45:30Z');
+    //         // date.millisecond(10);
+    //         // expect(date.millisecond()).toEqual(10);
+    //         // expect(date.minute()).toEqual(45);
+    //
+    //         // date.second(80);
+    //         // expect(date.second()).toEqual(20);
+    //         // expect(date.minute()).toEqual(46);
+    //     });
+    // });
 
     describe('second method', function() {
         it('returns seconds', function() {

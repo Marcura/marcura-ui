@@ -25,7 +25,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return date.match(new RegExp(substring, 'i'));
     };
 
-    var getTotalDate = function(year, month, day, hours, minutes, seconds, offset) {
+    var getTotalDate = function(year, month, day, hours, minutes, seconds, milliseconds, offset) {
         var finalMonth,
             maDate = MaDate.createEmpty();
         day = day.toString();
@@ -33,6 +33,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         hours = Number(hours) || 0;
         minutes = Number(minutes) || 0;
         seconds = Number(seconds) || 0;
+        milliseconds = Number(milliseconds) || 0;
         offset = offset || 0;
 
         // Convert YY to YYYY.
@@ -79,7 +80,10 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return maDate;
         }
 
-        maDate = new MaDate(Number(year), Number(month - 1), Number(day), hours, minutes, seconds);
+        var date = new Date(Number(year), Number(month - 1), Number(day), hours, minutes, seconds);
+        date.setMilliseconds(milliseconds);
+
+        maDate = new MaDate(date);
         maDate.offset(offset);
 
         return maDate;
@@ -215,23 +219,23 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
 
         // 2015-02-21T10:00:00Z
-        // 2015-02-21T10:00:00+03:00
-        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)(?:Z|([+-])(2[0-3]|[01][0-9]):([0-5][0-9]))$/;
+        // 2015-02-21T10:00:00.652+03:00
+        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)(\.(\d{3}))?(?:Z|([+-])(2[0-3]|[01][0-9]):([0-5][0-9]))$/;
 
         if (value.match(pattern) !== null) {
             parts = pattern.exec(value);
             var offset = 0;
 
             // Get time zone offset.
-            if (parts.length === 12) {
-                offset = (Number(parts[10]) || 0) * 60 + (Number(parts[11]) || 0);
+            if (parts.length === 14) {
+                offset = (Number(parts[12]) || 0) * 60 + (Number(parts[13]) || 0);
 
-                if (parts[9] === '-' && offset !== 0) {
+                if (parts[11] === '-' && offset !== 0) {
                     offset = -offset;
                 }
             }
 
-            return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], offset);
+            return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], parts[10], offset);
         }
 
         return date;
@@ -324,6 +328,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             _date = isMaDate(date) ? date.toDate() : date,
             // Possible formats of date parts (day, month, year).
             datePartFormats = {
+                f: ['fff'],
                 s: ['ss'],
                 m: ['mm'],
                 H: ['HH'],
@@ -337,7 +342,8 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             year = _date.getFullYear(),
             hours = _date.getHours(),
             minutes = _date.getMinutes(),
-            seconds = _date.getSeconds();
+            seconds = _date.getSeconds(),
+            milliseconds = _date.getMilliseconds();
 
         // Checks format string parts on conformity with available date formats.
         var checkDatePart = function(dateChar) {
@@ -422,6 +428,12 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
                         datePart = formatNumber(seconds, 2);
                         break;
                     }
+                case datePartFormats.f[0]:
+                    // fff
+                    {
+                        datePart = formatNumber(milliseconds, 3);
+                        break;
+                    }
                 case datePartFormats.Z[0]:
                     // Z
                     {
@@ -445,6 +457,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             hours: formatDatePart(datePartFormats.H[checkDatePart('H')]),
             minutes: formatDatePart(datePartFormats.m[checkDatePart('m')]),
             seconds: formatDatePart(datePartFormats.s[checkDatePart('s')]),
+            milliseconds: formatDatePart(datePartFormats.f[checkDatePart('f')]),
             timeZone: formatDatePart(datePartFormats.Z[0]),
             separator: /^\w+([^\w])/.exec(format)
         };
@@ -457,6 +470,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             .replace(/H+/, dateParts.hours)
             .replace(/m+/, dateParts.minutes)
             .replace(/s+/, dateParts.seconds)
+            .replace(/f+/, dateParts.milliseconds)
             .replace(/Z+/, dateParts.timeZone);
     };
 
@@ -668,6 +682,19 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
 
     MaDate.prototype.subtract = function(number, period) {
         return this.add(number * -1, period);
+    };
+
+    MaDate.prototype.millisecond = function(millisecond) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getMilliseconds();
+        } else {
+            this._date.setMilliseconds(millisecond);
+            return this;
+        }
     };
 
     MaDate.prototype.second = function(second) {
