@@ -95,6 +95,14 @@ describe('MaDate', function() {
         });
     });
 
+    describe('isUtc method', function() {
+        it('determines whether date is in UTC', function() {
+            expect(MaDate.createEmpty().isUtc()).toEqual(false);
+            expect(new MaDate('2016-09-26T00:00:00Z').isUtc()).toEqual(true);
+            expect(new MaDate('2016-09-26T00:00:00+01:00').isUtc()).toEqual(false);
+        });
+    });
+
     describe('parse method', function() {
         it('returns passed date if it is already a valid MaDate object', function() {
             var date = MaDate.parse('2015-02-21T10:00:00Z');

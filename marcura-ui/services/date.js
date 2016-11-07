@@ -613,6 +613,10 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return !this._date;
     };
 
+    MaDate.prototype.isUtc = function() {
+        return !this.isEmpty() && this._offset === 0;
+    };
+
     MaDate.prototype.difference = function(date) {
         return difference(this, date);
     };
