@@ -617,6 +617,10 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return !this.isEmpty() && this._offset === 0;
     };
 
+    MaDate.prototype.isEqualTo = function(date) {
+        return this.difference(date) === 0;
+    };
+
     MaDate.prototype.difference = function(date) {
         return difference(this, date);
     };

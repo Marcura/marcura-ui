@@ -345,10 +345,7 @@ angular.element(document).ready(function() {
                 };
 
                 var hasDateChanged = function(date) {
-                    if (
-                        (previousDate.isEmpty() && date.isEmpty()) ||
-                        (!previousDate.isEmpty() && !date.isEmpty() && previousDate.difference(date) === 0)
-                    ) {
+                    if (previousDate.isEqualTo(date)) {
                         return false;
                     }
 
@@ -2563,6 +2560,14 @@ angular.element(document).ready(function() {
 
     MaDate.prototype.isEmpty = function() {
         return !this._date;
+    };
+
+    MaDate.prototype.isUtc = function() {
+        return !this.isEmpty() && this._offset === 0;
+    };
+
+    MaDate.prototype.isEqualTo = function(date) {
+        return this.difference(date) === 0;
     };
 
     MaDate.prototype.difference = function(date) {

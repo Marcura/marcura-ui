@@ -118,10 +118,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var hasDateChanged = function(date) {
-                    if (
-                        (previousDate.isEmpty() && date.isEmpty()) ||
-                        (!previousDate.isEmpty() && !date.isEmpty() && previousDate.difference(date) === 0)
-                    ) {
+                    if (previousDate.isEqualTo(date)) {
                         return false;
                     }
 

@@ -411,6 +411,15 @@ describe('MaDate', function() {
         });
     });
 
+    describe('isEqualTo method', function() {
+        it('determines whether this date is equal to passed date', function() {
+            expect(MaDate.createEmpty().isEqualTo(MaDate.createEmpty())).toEqual(true);
+            expect(new MaDate('2016-09-26T00:00:00Z').isEqualTo('2016-09-26T00:00:00Z')).toEqual(true);
+            expect(new MaDate('2016-09-26T00:00:01Z').isEqualTo('2016-09-26T00:00:00Z')).toEqual(false);
+            expect(new MaDate('2016-09-26T00:00:00Z').isEqualTo('2016-09-26T00:00:01Z')).toEqual(false);
+        });
+    });
+
     describe('parseTimeZone method', function() {
         it('parses time zone', function() {
             expect(MaDate.parseTimeZone('Z')).toEqual(0);
