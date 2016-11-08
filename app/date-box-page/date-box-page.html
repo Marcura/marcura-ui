@@ -127,6 +127,24 @@ maxDate: {{date9Max}}</pre>
     <div class="nodes-item">
         <pre>{{date10 || 'null'}}</pre>
     </div>
+
+    <div class="nodes-item">
+        <h2>Timeout for change event</h2>
+    </div>
+    <div class="nodes-item">
+        By default change event fires when the field loses focus.<br/>
+        However, it is also possible to set a timeout for the event. In this case timeout is 1 second.
+    </div>
+    <div class="nodes-item">
+        <ma-date-box
+            value="date11"
+            change-timeout="1000"
+            has-time="true">
+        </ma-date-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{date11 || 'null'}}</pre>
+    </div>
     <div class="nodes-item">
         <h2>An example of maxDate controlled by other DateBox</h2>
     </div>
@@ -177,4 +195,50 @@ value: {{date21 || 'null'}}</pre>
             </div>
         </form>
     </div>
+    <!-- <div class="nodes-item">
+        <form class="form">
+            <div class="form-group form-group-labels-on-top">
+                <div class="form-col col-xs-12 col-sm-3">
+                    <div class="form-label">
+                        <label for="start">Start</label>
+                    </div>
+                    <ma-date-box
+                        id="start"
+                        value="start"
+                        max-date="end"
+                        can-reset="true"
+                        change-timeout="1000"
+                        validate="validateStart(maValue)">
+                    </ma-date-box>
+                </div>
+                <div class="form-col col-xs-12 col-sm-3">
+                    <div class="form-label">
+                        <label for="end">End</label>
+                    </div>
+                    <ma-date-box
+                        id="end"
+                        value="end"
+                        min-date="start"
+                        max-date="now"
+                        can-reset="true"
+                        change-timeout="1000"
+                        validate="validateEnd(maValue)">
+                    </ma-date-box>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-col col-xs-12">
+                    <pre>// Start:
+maxDate: {{end || 'null'}}
+value: {{start || 'null'}}</pre>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-col col-xs-12">
+                    <pre>// End:
+value: {{end || 'null'}}</pre>
+                </div>
+            </div>
+        </form>
+    </div> -->
 </div>

@@ -28,7 +28,7 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
             };
         },
 
-        isGreaterThan: function(valueToCompare, allowEmpty) {
+        isGreater: function(valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
@@ -36,19 +36,19 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
             }
 
             return {
-                name: 'IsGreaterThan',
+                name: 'IsGreater',
                 message: message,
                 validate: function(value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isGreaterThan(value, valueToCompare);
+                    return maHelper.isGreater(value, valueToCompare);
                 }
             };
         },
 
-        isGreaterThanOrEqual: function(valueToCompare, allowEmpty) {
+        isGreaterOrEqual: function(valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
@@ -56,19 +56,19 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
             }
 
             return {
-                name: 'IsGreaterThanOrEqual',
+                name: 'IsGreaterOrEqual',
                 message: message,
                 validate: function(value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isGreaterThanOrEqual(value, valueToCompare);
+                    return maHelper.isGreaterOrEqual(value, valueToCompare);
                 }
             };
         },
 
-        isLessThan: function(valueToCompare, allowEmpty) {
+        isLess: function(valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
@@ -76,19 +76,19 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
             }
 
             return {
-                name: 'IsLessThan',
+                name: 'IsLess',
                 message: message,
                 validate: function(value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isLessThan(value, valueToCompare);
+                    return maHelper.isLess(value, valueToCompare);
                 }
             };
         },
 
-        isLessThanOrEqual: function(valueToCompare, allowEmpty) {
+        isLessOrEqual: function(valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
@@ -96,14 +96,14 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
             }
 
             return {
-                name: 'IsLessThanOrEqual',
+                name: 'IsLessOrEqual',
                 message: message,
                 validate: function(value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isLessThanOrEqual(value, valueToCompare);
+                    return maHelper.isLessOrEqual(value, valueToCompare);
                 }
             };
         }

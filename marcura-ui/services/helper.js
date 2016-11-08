@@ -166,45 +166,45 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', function(MaD
             return height;
         },
 
-        isGreaterThan: function(value, valueToCompare) {
+        isGreater: function(value, valueToCompare) {
             var date1 = new MaDate(value),
                 date2 = new MaDate(valueToCompare);
 
             if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.difference(date2) > 0;
+                return date1.isGreater(date2);
             }
 
             return value > valueToCompare;
         },
 
-        isGreaterThanOrEqual: function(value, valueToCompare) {
+        isGreaterOrEqual: function(value, valueToCompare) {
             var date1 = new MaDate(value),
                 date2 = new MaDate(valueToCompare);
 
             if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.difference(date2) >= 0;
+                return date1.isGreaterOrEqual(date2);
             }
 
             return value >= valueToCompare;
         },
 
-        isLessThan: function(value, valueToCompare) {
+        isLess: function(value, valueToCompare) {
             var date1 = new MaDate(value),
                 date2 = new MaDate(valueToCompare);
 
             if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.difference(date2) < 0;
+                return date1.isLess(date2);
             }
 
             return value < valueToCompare;
         },
 
-        isLessThanOrEqual: function(value, valueToCompare) {
+        isLessOrEqual: function(value, valueToCompare) {
             var date1 = new MaDate(value),
                 date2 = new MaDate(valueToCompare);
 
             if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.difference(date2) <= 0;
+                return date1.isLessOrEqual(date2);
             }
 
             return value <= valueToCompare;

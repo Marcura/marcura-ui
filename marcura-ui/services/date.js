@@ -474,10 +474,6 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             .replace(/Z+/, dateParts.timeZone);
     };
 
-    var difference = function(date1, date2) {
-        return new MaDate(date1).valueOf() - new MaDate(date2).valueOf();
-    };
-
     var parseTimeZone = function(timeZone) {
         if (!timeZone) {
             return 0;
@@ -617,12 +613,43 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return !this.isEmpty() && this._offset === 0;
     };
 
-    MaDate.prototype.isEqualTo = function(date) {
+    MaDate.prototype.isEqual = function(date) {
         return this.difference(date) === 0;
     };
 
+    MaDate.prototype.isLess = function(date) {
+        return this.difference(date) < 0;
+    };
+
+    MaDate.prototype.isLessOrEqual = function(date) {
+        return this.difference(date) <= 0;
+    };
+
+    MaDate.prototype.isGreater = function(date) {
+        return this.difference(date) > 0;
+    };
+
+    MaDate.prototype.isGreaterOrEqual = function(date) {
+        return this.difference(date) >= 0;
+    };
+
+    MaDate.prototype.isBetween = function(startDate, endDate, isInclusive) {
+        var _startDate = new MaDate(startDate),
+            _endDate = new MaDate(endDate);
+
+        if (this.isEmpty() || _startDate.isEmpty() || _endDate.isEmpty()) {
+            return false;
+        }
+
+        if (isInclusive) {
+            return this.isGreaterOrEqual(_startDate) && this.isLessOrEqual(_endDate);
+        }
+
+        return this.isGreater(_startDate) && this.isLess(_endDate);
+    };
+
     MaDate.prototype.difference = function(date) {
-        return difference(this, date);
+        return this.valueOf() - new MaDate(date).valueOf();
     };
 
     MaDate.prototype.valueOf = function() {
@@ -648,7 +675,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return format(this._date, _format, this._offset);
     };
 
-    MaDate.prototype.add = function(number, period) {
+    MaDate.prototype.add = function(number, unit) {
         if (this.isEmpty() || !number) {
             return this;
         }
@@ -656,7 +683,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         // Don't change original date.
         var date = new Date(this._date);
 
-        switch (period) {
+        switch (unit) {
             case 'year':
                 date.setFullYear(date.getFullYear() + number);
                 break;
@@ -681,6 +708,9 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             case 'second':
                 date.setTime(date.getTime() + number * 1000);
                 break;
+            case 'millisecond':
+                date.setTime(date.getTime() + number);
+                break;
         }
 
         this._date = date;
@@ -688,8 +718,8 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return this;
     };
 
-    MaDate.prototype.subtract = function(number, period) {
-        return this.add(number * -1, period);
+    MaDate.prototype.subtract = function(number, unit) {
+        return this.add(number * -1, unit);
     };
 
     MaDate.prototype.millisecond = function(millisecond) {
@@ -783,12 +813,42 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
+    MaDate.prototype.startOf = function(unit) {
+        switch (unit) {
+            case 'year':
+                this.month(0);
+                /* falls through */
+            case 'month':
+                this.date(1);
+                /* falls through */
+            case 'day':
+                this.hour(0);
+                /* falls through */
+            case 'hour':
+                this.minute(0);
+                /* falls through */
+            case 'minute':
+                this.second(0);
+                /* falls through */
+            case 'second':
+                this.millisecond(0);
+        }
+
+        return this;
+    };
+
+    MaDate.prototype.endOf = function(unit) {
+        if (!unit) {
+            return this;
+        }
+
+        return this.startOf(unit).add(1, unit).subtract(1, 'millisecond');
+    };
+
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;
     MaDate.offsetToTimeZone = offsetToTimeZone;
-    MaDate.format = format;
     MaDate.isDate = isDate;
-    MaDate.difference = difference;
     MaDate.isMaDate = isMaDate;
 
     return MaDate;

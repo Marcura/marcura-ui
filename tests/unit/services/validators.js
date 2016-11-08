@@ -17,21 +17,21 @@ describe('maHelper service', function() {
         });
     });
 
-    describe('isGreaterThan method', function () {
+    describe('isGreater method', function () {
         it('creates a validator which indicates whether a specified value is greater than other value', function () {
-            var validator = maValidators.isGreaterThan();
+            var validator = maValidators.isGreater();
 
-            expect(validator.name).toEqual('IsGreaterThan');
-            expect(maValidators.isGreaterThan(1).validate(2)).toEqual(true);
+            expect(validator.name).toEqual('IsGreater');
+            expect(maValidators.isGreater(1).validate(2)).toEqual(true);
         });
     });
 
-    describe('isLessThan method', function () {
+    describe('isLess method', function () {
         it('creates a validator which indicates whether a specified value is less than other value', function () {
-            var validator = maValidators.isLessThan();
+            var validator = maValidators.isLess();
 
-            expect(validator.name).toEqual('IsLessThan');
-            expect(maValidators.isLessThan(2).validate(1)).toEqual(true);
+            expect(validator.name).toEqual('IsLess');
+            expect(maValidators.isLess(2).validate(1)).toEqual(true);
         });
     });
 });

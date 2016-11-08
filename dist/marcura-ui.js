@@ -242,6 +242,7 @@ angular.element(document).ready(function() {
                 isDisabled: '=',
                 isRequired: '=',
                 change: '&',
+                validate: '&',
                 canReset: '=',
                 displayFormat: '=',
                 format: '=',
@@ -250,7 +251,8 @@ angular.element(document).ready(function() {
                 validators: '=',
                 instance: '=',
                 minDate: '=',
-                maxDate: '='
+                maxDate: '=',
+                changeTimeout: '='
             },
             replace: true,
             template: function(element, attributes) {
@@ -328,24 +330,16 @@ angular.element(document).ready(function() {
                     validators = [],
                     isRequired = scope.isRequired,
                     minDate = new MaDate(scope.minDate),
-                    maxDate = new MaDate(scope.maxDate);
-
-                var onChange = function(date) {
-                    previousDate = date || MaDate.createEmpty();
-                    scope.value = date ? date.format(format) : null;
-
-                    // Postpone change event for $apply (which is being invoked by $timeout)
-                    // to have time to take effect and update scope.value,
-                    // so both maValue and scope.value have the same values eventually.
-                    $timeout(function() {
-                        scope.change({
-                            maValue: scope.value
-                        });
-                    });
-                };
+                    maxDate = new MaDate(scope.maxDate),
+                    failedValidator = null,
+                    changePromise,
+                    changeTimeout = Number(scope.changeTimeout),
+                    dateCaretPosition = 0,
+                    hoursCaretPosition = 0,
+                    minutesCaretPosition = 0;
 
                 var hasDateChanged = function(date) {
-                    if (previousDate.isEqualTo(date)) {
+                    if (previousDate.isEqual(date)) {
                         return false;
                     }
 
@@ -372,6 +366,20 @@ angular.element(document).ready(function() {
                         hoursElement.val('00');
                         minutesElement.val('00');
                     }
+
+                    // Restore caret position.
+                    dateElement.prop({
+                        selectionStart: dateCaretPosition,
+                        selectionEnd: dateCaretPosition
+                    });
+                    hoursElement.prop({
+                        selectionStart: hoursCaretPosition,
+                        selectionEnd: hoursCaretPosition
+                    });
+                    minutesElement.prop({
+                        selectionStart: minutesCaretPosition,
+                        selectionEnd: minutesCaretPosition
+                    });
 
                     setCalendarDate(displayDate);
                 };
@@ -472,7 +480,7 @@ angular.element(document).ready(function() {
                                 return;
                             }
 
-                            onChange(date);
+                            triggerChange(date);
                         }
                     });
 
@@ -487,9 +495,7 @@ angular.element(document).ready(function() {
                     }
                 };
 
-                var failedValidator = null;
-
-                var validate = function(date) {
+                var validate = function(date, triggerEvent) {
                     scope.isValid = true;
                     failedValidator = null;
                     var formattedDate = date ? date.format(format) : null;
@@ -502,6 +508,10 @@ angular.element(document).ready(function() {
                                 break;
                             }
                         }
+                    }
+
+                    if (triggerEvent !== false) {
+                        triggerValidate(date);
                     }
                 };
 
@@ -525,29 +535,39 @@ angular.element(document).ready(function() {
                     }
 
                     if (!minDate.isEmpty()) {
-                        validators.push(maValidators.isGreaterThanOrEqual(minDate, true));
+                        validators.push(maValidators.isGreaterOrEqual(minDate, true));
                     }
 
                     if (!maxDate.isEmpty()) {
-                        validators.push(maValidators.isLessThanOrEqual(maxDate, true));
+                        validators.push(maValidators.isLessOrEqual(maxDate, true));
                     }
                 };
 
-                setValidators();
-                scope.isFocused = false;
-                scope.isValid = true;
-                scope.isTouched = false;
+                var triggerChange = function(date) {
+                    previousDate = date || MaDate.createEmpty();
+                    scope.value = date ? date.format(format) : null;
 
-                scope.isResetEnabled = function() {
-                    return !scope.isDisabled && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
+                    // Postpone change event for $apply (which is being invoked by $timeout)
+                    // to have time to take effect and update scope.value,
+                    // so both maValue and scope.value have the same values eventually.
+                    $timeout(function() {
+                        scope.change({
+                            maValue: scope.value
+                        });
+                    });
                 };
 
-                scope.onFocus = function() {
-                    scope.isFocused = true;
+                var triggerValidate = function(date) {
+                    // scope.value = date ? date.format(format) : null;
+
+                    $timeout(function() {
+                        scope.validate({
+                            maValue: date ? date.format(format) : null
+                        });
+                    });
                 };
 
-                scope.onBlur = function() {
-                    scope.isFocused = false;
+                var changeDate = function() {
                     scope.isTouched = true;
 
                     var displayDate = dateElement.val().trim(),
@@ -577,7 +597,7 @@ angular.element(document).ready(function() {
 
                         if (scope.isValid) {
                             setDisplayDate(null);
-                            onChange();
+                            triggerChange();
                         }
 
                         return;
@@ -613,7 +633,30 @@ angular.element(document).ready(function() {
                         return;
                     }
 
-                    onChange(date);
+                    triggerChange(date);
+                };
+
+                setValidators();
+                scope.isFocused = false;
+                scope.isValid = true;
+                scope.isTouched = false;
+
+                scope.isResetEnabled = function() {
+                    return !scope.isDisabled && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
+                };
+
+                scope.onFocus = function() {
+                    scope.isFocused = true;
+                };
+
+                scope.onBlur = function() {
+                    // Cancel change if it is already in process to prevent the event from firing twice.
+                    if (changePromise) {
+                        $timeout.cancel(changePromise);
+                    }
+
+                    scope.isFocused = false;
+                    changeDate();
                 };
 
                 scope.onKeydown = function(event) {
@@ -631,11 +674,28 @@ angular.element(document).ready(function() {
                         return;
                     }
 
+                    var hasValueChanged = false;
                     keyupValue = angular.element(event.target).val();
 
                     if (keydownValue !== keyupValue) {
+                        hasValueChanged = true;
                         scope.isTouched = true;
                         resetInitialDateOffset();
+                    }
+
+                    // Change value after a timeout while the user is typing.
+                    if (hasValueChanged && changeTimeout > 0) {
+                        dateCaretPosition = dateElement.prop('selectionStart');
+                        hoursCaretPosition = hoursElement.prop('selectionStart');
+                        minutesCaretPosition = minutesElement.prop('selectionStart');
+
+                        if (changePromise) {
+                            $timeout.cancel(changePromise);
+                        }
+
+                        changePromise = $timeout(function() {
+                            changeDate();
+                        }, changeTimeout);
                     }
                 };
 
@@ -663,7 +723,7 @@ angular.element(document).ready(function() {
                     scope.isTouched = true;
                     validate(null);
 
-                    onChange();
+                    triggerChange();
                     setDisplayDate(null);
                     dateElement.focus();
                 };
@@ -708,6 +768,8 @@ angular.element(document).ready(function() {
                         return;
                     }
 
+                    // Validate date to make it valid in case it was invalid before or vice versa.
+                    validate(date, false);
                     setDisplayDate(date);
                     previousDate = date;
                     initialDateOffset = date.offset();
@@ -746,7 +808,7 @@ angular.element(document).ready(function() {
                     var minMaxValidators = [];
 
                     for (var i = 0; i < validators.length; i++) {
-                        if (validators[i].name === 'IsGreaterThanOrEqual' || validators[i].name === 'IsLessThanOrEqual') {
+                        if (validators[i].name === 'IsGreaterOrEqual' || validators[i].name === 'IsLessOrEqual') {
                             minMaxValidators.push(validators[i]);
                         }
                     }
@@ -755,7 +817,7 @@ angular.element(document).ready(function() {
                         var formattedDate = date.format(format);
 
                         // Empty failedValidator if it is min/max validator.
-                        if (failedValidator && (failedValidator.name === 'IsGreaterThanOrEqual' || failedValidator.name === 'IsLessThanOrEqual')) {
+                        if (failedValidator && (failedValidator.name === 'IsGreaterOrEqual' || failedValidator.name === 'IsLessOrEqual')) {
                             failedValidator = null;
                             scope.isValid = true;
                         }
@@ -771,10 +833,12 @@ angular.element(document).ready(function() {
                         if (!scope.isValid) {
                             scope.isTouched = true;
                         }
+
+                        triggerValidate(date);
                     }
 
                     if (scope.isValid && hasDateChanged(date)) {
-                        onChange(date);
+                        triggerChange(date);
                     }
                 };
 
@@ -2423,10 +2487,6 @@ angular.element(document).ready(function() {
             .replace(/Z+/, dateParts.timeZone);
     };
 
-    var difference = function(date1, date2) {
-        return new MaDate(date1).valueOf() - new MaDate(date2).valueOf();
-    };
-
     var parseTimeZone = function(timeZone) {
         if (!timeZone) {
             return 0;
@@ -2566,12 +2626,43 @@ angular.element(document).ready(function() {
         return !this.isEmpty() && this._offset === 0;
     };
 
-    MaDate.prototype.isEqualTo = function(date) {
+    MaDate.prototype.isEqual = function(date) {
         return this.difference(date) === 0;
     };
 
+    MaDate.prototype.isLess = function(date) {
+        return this.difference(date) < 0;
+    };
+
+    MaDate.prototype.isLessOrEqual = function(date) {
+        return this.difference(date) <= 0;
+    };
+
+    MaDate.prototype.isGreater = function(date) {
+        return this.difference(date) > 0;
+    };
+
+    MaDate.prototype.isGreaterOrEqual = function(date) {
+        return this.difference(date) >= 0;
+    };
+
+    MaDate.prototype.isBetween = function(startDate, endDate, isInclusive) {
+        var _startDate = new MaDate(startDate),
+            _endDate = new MaDate(endDate);
+
+        if (this.isEmpty() || _startDate.isEmpty() || _endDate.isEmpty()) {
+            return false;
+        }
+
+        if (isInclusive) {
+            return this.isGreaterOrEqual(_startDate) && this.isLessOrEqual(_endDate);
+        }
+
+        return this.isGreater(_startDate) && this.isLess(_endDate);
+    };
+
     MaDate.prototype.difference = function(date) {
-        return difference(this, date);
+        return this.valueOf() - new MaDate(date).valueOf();
     };
 
     MaDate.prototype.valueOf = function() {
@@ -2597,7 +2688,7 @@ angular.element(document).ready(function() {
         return format(this._date, _format, this._offset);
     };
 
-    MaDate.prototype.add = function(number, period) {
+    MaDate.prototype.add = function(number, unit) {
         if (this.isEmpty() || !number) {
             return this;
         }
@@ -2605,7 +2696,7 @@ angular.element(document).ready(function() {
         // Don't change original date.
         var date = new Date(this._date);
 
-        switch (period) {
+        switch (unit) {
             case 'year':
                 date.setFullYear(date.getFullYear() + number);
                 break;
@@ -2630,6 +2721,9 @@ angular.element(document).ready(function() {
             case 'second':
                 date.setTime(date.getTime() + number * 1000);
                 break;
+            case 'millisecond':
+                date.setTime(date.getTime() + number);
+                break;
         }
 
         this._date = date;
@@ -2637,8 +2731,8 @@ angular.element(document).ready(function() {
         return this;
     };
 
-    MaDate.prototype.subtract = function(number, period) {
-        return this.add(number * -1, period);
+    MaDate.prototype.subtract = function(number, unit) {
+        return this.add(number * -1, unit);
     };
 
     MaDate.prototype.millisecond = function(millisecond) {
@@ -2732,12 +2826,42 @@ angular.element(document).ready(function() {
         }
     };
 
+    MaDate.prototype.startOf = function(unit) {
+        switch (unit) {
+            case 'year':
+                this.month(0);
+                /* falls through */
+            case 'month':
+                this.date(1);
+                /* falls through */
+            case 'day':
+                this.hour(0);
+                /* falls through */
+            case 'hour':
+                this.minute(0);
+                /* falls through */
+            case 'minute':
+                this.second(0);
+                /* falls through */
+            case 'second':
+                this.millisecond(0);
+        }
+
+        return this;
+    };
+
+    MaDate.prototype.endOf = function(unit) {
+        if (!unit) {
+            return this;
+        }
+
+        return this.startOf(unit).add(1, unit).subtract(1, 'millisecond');
+    };
+
     MaDate.parse = parse;
     MaDate.parseTimeZone = parseTimeZone;
     MaDate.offsetToTimeZone = offsetToTimeZone;
-    MaDate.format = format;
     MaDate.isDate = isDate;
-    MaDate.difference = difference;
     MaDate.isMaDate = isMaDate;
 
     return MaDate;
@@ -2911,45 +3035,45 @@ angular.element(document).ready(function() {
             return height;
         },
 
-        isGreaterThan: function(value, valueToCompare) {
+        isGreater: function(value, valueToCompare) {
             var date1 = new MaDate(value),
                 date2 = new MaDate(valueToCompare);
 
             if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.difference(date2) > 0;
+                return date1.isGreater(date2);
             }
 
             return value > valueToCompare;
         },
 
-        isGreaterThanOrEqual: function(value, valueToCompare) {
+        isGreaterOrEqual: function(value, valueToCompare) {
             var date1 = new MaDate(value),
                 date2 = new MaDate(valueToCompare);
 
             if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.difference(date2) >= 0;
+                return date1.isGreaterOrEqual(date2);
             }
 
             return value >= valueToCompare;
         },
 
-        isLessThan: function(value, valueToCompare) {
+        isLess: function(value, valueToCompare) {
             var date1 = new MaDate(value),
                 date2 = new MaDate(valueToCompare);
 
             if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.difference(date2) < 0;
+                return date1.isLess(date2);
             }
 
             return value < valueToCompare;
         },
 
-        isLessThanOrEqual: function(value, valueToCompare) {
+        isLessOrEqual: function(value, valueToCompare) {
             var date1 = new MaDate(value),
                 date2 = new MaDate(valueToCompare);
 
             if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.difference(date2) <= 0;
+                return date1.isLessOrEqual(date2);
             }
 
             return value <= valueToCompare;
@@ -2996,7 +3120,7 @@ angular.element(document).ready(function() {
             };
         },
 
-        isGreaterThan: function(valueToCompare, allowEmpty) {
+        isGreater: function(valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
@@ -3004,19 +3128,19 @@ angular.element(document).ready(function() {
             }
 
             return {
-                name: 'IsGreaterThan',
+                name: 'IsGreater',
                 message: message,
                 validate: function(value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isGreaterThan(value, valueToCompare);
+                    return maHelper.isGreater(value, valueToCompare);
                 }
             };
         },
 
-        isGreaterThanOrEqual: function(valueToCompare, allowEmpty) {
+        isGreaterOrEqual: function(valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
@@ -3024,19 +3148,19 @@ angular.element(document).ready(function() {
             }
 
             return {
-                name: 'IsGreaterThanOrEqual',
+                name: 'IsGreaterOrEqual',
                 message: message,
                 validate: function(value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isGreaterThanOrEqual(value, valueToCompare);
+                    return maHelper.isGreaterOrEqual(value, valueToCompare);
                 }
             };
         },
 
-        isLessThan: function(valueToCompare, allowEmpty) {
+        isLess: function(valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
@@ -3044,19 +3168,19 @@ angular.element(document).ready(function() {
             }
 
             return {
-                name: 'IsLessThan',
+                name: 'IsLess',
                 message: message,
                 validate: function(value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isLessThan(value, valueToCompare);
+                    return maHelper.isLess(value, valueToCompare);
                 }
             };
         },
 
-        isLessThanOrEqual: function(valueToCompare, allowEmpty) {
+        isLessOrEqual: function(valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
@@ -3064,14 +3188,14 @@ angular.element(document).ready(function() {
             }
 
             return {
-                name: 'IsLessThanOrEqual',
+                name: 'IsLessOrEqual',
                 message: message,
                 validate: function(value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isLessThanOrEqual(value, valueToCompare);
+                    return maHelper.isLessOrEqual(value, valueToCompare);
                 }
             };
         }

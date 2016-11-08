@@ -15,6 +15,7 @@ angular.module('marcuraUI.components')
                 isDisabled: '=',
                 isRequired: '=',
                 change: '&',
+                validate: '&',
                 canReset: '=',
                 displayFormat: '=',
                 format: '=',
@@ -23,7 +24,8 @@ angular.module('marcuraUI.components')
                 validators: '=',
                 instance: '=',
                 minDate: '=',
-                maxDate: '='
+                maxDate: '=',
+                changeTimeout: '='
             },
             replace: true,
             template: function(element, attributes) {
@@ -101,24 +103,16 @@ angular.module('marcuraUI.components')
                     validators = [],
                     isRequired = scope.isRequired,
                     minDate = new MaDate(scope.minDate),
-                    maxDate = new MaDate(scope.maxDate);
-
-                var onChange = function(date) {
-                    previousDate = date || MaDate.createEmpty();
-                    scope.value = date ? date.format(format) : null;
-
-                    // Postpone change event for $apply (which is being invoked by $timeout)
-                    // to have time to take effect and update scope.value,
-                    // so both maValue and scope.value have the same values eventually.
-                    $timeout(function() {
-                        scope.change({
-                            maValue: scope.value
-                        });
-                    });
-                };
+                    maxDate = new MaDate(scope.maxDate),
+                    failedValidator = null,
+                    changePromise,
+                    changeTimeout = Number(scope.changeTimeout),
+                    dateCaretPosition = 0,
+                    hoursCaretPosition = 0,
+                    minutesCaretPosition = 0;
 
                 var hasDateChanged = function(date) {
-                    if (previousDate.isEqualTo(date)) {
+                    if (previousDate.isEqual(date)) {
                         return false;
                     }
 
@@ -145,6 +139,20 @@ angular.module('marcuraUI.components')
                         hoursElement.val('00');
                         minutesElement.val('00');
                     }
+
+                    // Restore caret position.
+                    dateElement.prop({
+                        selectionStart: dateCaretPosition,
+                        selectionEnd: dateCaretPosition
+                    });
+                    hoursElement.prop({
+                        selectionStart: hoursCaretPosition,
+                        selectionEnd: hoursCaretPosition
+                    });
+                    minutesElement.prop({
+                        selectionStart: minutesCaretPosition,
+                        selectionEnd: minutesCaretPosition
+                    });
 
                     setCalendarDate(displayDate);
                 };
@@ -245,7 +253,7 @@ angular.module('marcuraUI.components')
                                 return;
                             }
 
-                            onChange(date);
+                            triggerChange(date);
                         }
                     });
 
@@ -260,9 +268,7 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                var failedValidator = null;
-
-                var validate = function(date) {
+                var validate = function(date, triggerEvent) {
                     scope.isValid = true;
                     failedValidator = null;
                     var formattedDate = date ? date.format(format) : null;
@@ -275,6 +281,10 @@ angular.module('marcuraUI.components')
                                 break;
                             }
                         }
+                    }
+
+                    if (triggerEvent !== false) {
+                        triggerValidate(date);
                     }
                 };
 
@@ -298,29 +308,39 @@ angular.module('marcuraUI.components')
                     }
 
                     if (!minDate.isEmpty()) {
-                        validators.push(maValidators.isGreaterThanOrEqual(minDate, true));
+                        validators.push(maValidators.isGreaterOrEqual(minDate, true));
                     }
 
                     if (!maxDate.isEmpty()) {
-                        validators.push(maValidators.isLessThanOrEqual(maxDate, true));
+                        validators.push(maValidators.isLessOrEqual(maxDate, true));
                     }
                 };
 
-                setValidators();
-                scope.isFocused = false;
-                scope.isValid = true;
-                scope.isTouched = false;
+                var triggerChange = function(date) {
+                    previousDate = date || MaDate.createEmpty();
+                    scope.value = date ? date.format(format) : null;
 
-                scope.isResetEnabled = function() {
-                    return !scope.isDisabled && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
+                    // Postpone change event for $apply (which is being invoked by $timeout)
+                    // to have time to take effect and update scope.value,
+                    // so both maValue and scope.value have the same values eventually.
+                    $timeout(function() {
+                        scope.change({
+                            maValue: scope.value
+                        });
+                    });
                 };
 
-                scope.onFocus = function() {
-                    scope.isFocused = true;
+                var triggerValidate = function(date) {
+                    // scope.value = date ? date.format(format) : null;
+
+                    $timeout(function() {
+                        scope.validate({
+                            maValue: date ? date.format(format) : null
+                        });
+                    });
                 };
 
-                scope.onBlur = function() {
-                    scope.isFocused = false;
+                var changeDate = function() {
                     scope.isTouched = true;
 
                     var displayDate = dateElement.val().trim(),
@@ -350,7 +370,7 @@ angular.module('marcuraUI.components')
 
                         if (scope.isValid) {
                             setDisplayDate(null);
-                            onChange();
+                            triggerChange();
                         }
 
                         return;
@@ -386,7 +406,30 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
-                    onChange(date);
+                    triggerChange(date);
+                };
+
+                setValidators();
+                scope.isFocused = false;
+                scope.isValid = true;
+                scope.isTouched = false;
+
+                scope.isResetEnabled = function() {
+                    return !scope.isDisabled && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
+                };
+
+                scope.onFocus = function() {
+                    scope.isFocused = true;
+                };
+
+                scope.onBlur = function() {
+                    // Cancel change if it is already in process to prevent the event from firing twice.
+                    if (changePromise) {
+                        $timeout.cancel(changePromise);
+                    }
+
+                    scope.isFocused = false;
+                    changeDate();
                 };
 
                 scope.onKeydown = function(event) {
@@ -404,11 +447,28 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
+                    var hasValueChanged = false;
                     keyupValue = angular.element(event.target).val();
 
                     if (keydownValue !== keyupValue) {
+                        hasValueChanged = true;
                         scope.isTouched = true;
                         resetInitialDateOffset();
+                    }
+
+                    // Change value after a timeout while the user is typing.
+                    if (hasValueChanged && changeTimeout > 0) {
+                        dateCaretPosition = dateElement.prop('selectionStart');
+                        hoursCaretPosition = hoursElement.prop('selectionStart');
+                        minutesCaretPosition = minutesElement.prop('selectionStart');
+
+                        if (changePromise) {
+                            $timeout.cancel(changePromise);
+                        }
+
+                        changePromise = $timeout(function() {
+                            changeDate();
+                        }, changeTimeout);
                     }
                 };
 
@@ -436,7 +496,7 @@ angular.module('marcuraUI.components')
                     scope.isTouched = true;
                     validate(null);
 
-                    onChange();
+                    triggerChange();
                     setDisplayDate(null);
                     dateElement.focus();
                 };
@@ -481,6 +541,8 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
+                    // Validate date to make it valid in case it was invalid before or vice versa.
+                    validate(date, false);
                     setDisplayDate(date);
                     previousDate = date;
                     initialDateOffset = date.offset();
@@ -519,7 +581,7 @@ angular.module('marcuraUI.components')
                     var minMaxValidators = [];
 
                     for (var i = 0; i < validators.length; i++) {
-                        if (validators[i].name === 'IsGreaterThanOrEqual' || validators[i].name === 'IsLessThanOrEqual') {
+                        if (validators[i].name === 'IsGreaterOrEqual' || validators[i].name === 'IsLessOrEqual') {
                             minMaxValidators.push(validators[i]);
                         }
                     }
@@ -528,7 +590,7 @@ angular.module('marcuraUI.components')
                         var formattedDate = date.format(format);
 
                         // Empty failedValidator if it is min/max validator.
-                        if (failedValidator && (failedValidator.name === 'IsGreaterThanOrEqual' || failedValidator.name === 'IsLessThanOrEqual')) {
+                        if (failedValidator && (failedValidator.name === 'IsGreaterOrEqual' || failedValidator.name === 'IsLessOrEqual')) {
                             failedValidator = null;
                             scope.isValid = true;
                         }
@@ -544,10 +606,12 @@ angular.module('marcuraUI.components')
                         if (!scope.isValid) {
                             scope.isTouched = true;
                         }
+
+                        triggerValidate(date);
                     }
 
                     if (scope.isValid && hasDateChanged(date)) {
-                        onChange(date);
+                        triggerChange(date);
                     }
                 };
 

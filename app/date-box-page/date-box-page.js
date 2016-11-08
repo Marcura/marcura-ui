@@ -11,17 +11,62 @@ function dateBoxPageController($scope, $timeout, MaDate, maValidators) {
     $scope.date6 = '2016-07-25T16:30:00Z';
     // $scope.date7 = '2016-07-25T00:00:00Z';
     $scope.date8 = '2016-07-25T16:30:00Z';
-    $scope.date9 = new MaDate().format('yyyy-MM-ddT00:00:00Z');
-    $scope.date9Min = new MaDate().subtract(5, 'day').format('yyyy-MM-ddT00:00:00Z');
-    $scope.date9Max = new MaDate().add(5, 'day').format('yyyy-MM-ddT00:00:00Z');
+    $scope.date9 = new MaDate().startOf('day').format();
+    $scope.date9Min = new MaDate().startOf('day').subtract(5, 'day').format();
+    $scope.date9Max = new MaDate().startOf('day').add(5, 'day').format();
     $scope.date10 = '2016-07-25T00:00:00Z';
-    $scope.date21 = new MaDate().format('yyyy-MM-ddT00:00:00Z');
-
+    $scope.date11 = '2016-07-25T12:40:00Z';
+    $scope.date21 = new MaDate().startOf('day').format();
     $scope.date20DateBox = {};
     $scope.date20Validator = {
         validate: function(date) {
             console.log('validate:', date);
             return true;
+        }
+    };
+
+    var getStart = function() {
+        var end = new MaDate($scope.end);
+
+        if (end.isEmpty()) {
+            end = new MaDate();
+        }
+
+        return end.subtract(1, 'month').startOf('day').format();
+    };
+
+    var getEnd = function() {
+        return new MaDate().startOf('day').format();
+    };
+
+    $scope.now = new MaDate().startOf('day').format();
+    $scope.end = getEnd();
+    $scope.start = getStart();
+
+    $scope.validateStart = function(start) {
+        start = new MaDate(start);
+
+        if (start.isEmpty()) {
+            $scope.start = getStart();
+        } else if (start.isGreater($scope.end)) {
+            $scope.start = null;
+
+            $timeout(function() {
+                $scope.start = getStart();
+            });
+        }
+    };
+    $scope.validateEnd = function(end) {
+        end = new MaDate(end);
+
+        if (end.isEmpty()) {
+            $scope.end = getEnd();
+        } else if (!end.isBetween($scope.start, $scope.now)) {
+            $scope.end = null;
+
+            $timeout(function() {
+                $scope.end = getEnd();
+            });
         }
     };
 

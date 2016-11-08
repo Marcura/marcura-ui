@@ -48,99 +48,99 @@ describe('maHelper service', function() {
         });
     });
 
-    describe('isGreaterThan method', function() {
+    describe('isGreater method', function() {
         it('determines whether a specified value is greater than other value', function() {
             // Number.
-            expect(maHelper.isGreaterThan(2, 1)).toEqual(true);
-            expect(maHelper.isGreaterThan(1, 2)).toEqual(false);
-            expect(maHelper.isGreaterThan(1, 1)).toEqual(false);
+            expect(maHelper.isGreater(2, 1)).toEqual(true);
+            expect(maHelper.isGreater(1, 2)).toEqual(false);
+            expect(maHelper.isGreater(1, 1)).toEqual(false);
 
             // Date.
-            expect(maHelper.isGreaterThan('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(true);
-            expect(maHelper.isGreaterThan('2016-09-16T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
-            expect(maHelper.isGreaterThan('2016-09-16T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(false);
+            expect(maHelper.isGreater('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(true);
+            expect(maHelper.isGreater('2016-09-16T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
+            expect(maHelper.isGreater('2016-09-16T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(false);
 
             // Date and time.
-            expect(maHelper.isGreaterThan('2016-09-26T01:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
-            expect(maHelper.isGreaterThan('2016-09-26T00:00:00Z', '2016-09-26T01:00:00Z')).toEqual(false);
-            expect(maHelper.isGreaterThan('2016-09-26T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
+            expect(maHelper.isGreater('2016-09-26T01:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
+            expect(maHelper.isGreater('2016-09-26T00:00:00Z', '2016-09-26T01:00:00Z')).toEqual(false);
+            expect(maHelper.isGreater('2016-09-26T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
 
             // Date with time zone.
-            expect(maHelper.isGreaterThan('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+02:00')).toEqual(true);
-            expect(maHelper.isGreaterThan('2016-09-26T10:00:00+02:00', '2016-09-26T10:00:00+01:00')).toEqual(false);
-            expect(maHelper.isGreaterThan('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+01:00')).toEqual(false);
+            expect(maHelper.isGreater('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+02:00')).toEqual(true);
+            expect(maHelper.isGreater('2016-09-26T10:00:00+02:00', '2016-09-26T10:00:00+01:00')).toEqual(false);
+            expect(maHelper.isGreater('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+01:00')).toEqual(false);
         });
     });
 
-    describe('isGreaterThanOrEqual method', function() {
+    describe('isGreaterOrEqual method', function() {
         it('determines whether a specified value is greater than or equal to other value', function() {
             // Number.
-            expect(maHelper.isGreaterThanOrEqual(2, 1)).toEqual(true);
-            expect(maHelper.isGreaterThanOrEqual(1, 2)).toEqual(false);
-            expect(maHelper.isGreaterThanOrEqual(1, 1)).toEqual(true);
+            expect(maHelper.isGreaterOrEqual(2, 1)).toEqual(true);
+            expect(maHelper.isGreaterOrEqual(1, 2)).toEqual(false);
+            expect(maHelper.isGreaterOrEqual(1, 1)).toEqual(true);
 
             // Date.
-            expect(maHelper.isGreaterThanOrEqual('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(true);
-            expect(maHelper.isGreaterThanOrEqual('2016-09-16T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
-            expect(maHelper.isGreaterThanOrEqual('2016-09-16T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(true);
+            expect(maHelper.isGreaterOrEqual('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(true);
+            expect(maHelper.isGreaterOrEqual('2016-09-16T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
+            expect(maHelper.isGreaterOrEqual('2016-09-16T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(true);
 
             // Date and time.
-            expect(maHelper.isGreaterThanOrEqual('2016-09-26T01:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
-            expect(maHelper.isGreaterThanOrEqual('2016-09-26T00:00:00Z', '2016-09-26T01:00:00Z')).toEqual(false);
-            expect(maHelper.isGreaterThanOrEqual('2016-09-26T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
+            expect(maHelper.isGreaterOrEqual('2016-09-26T01:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
+            expect(maHelper.isGreaterOrEqual('2016-09-26T00:00:00Z', '2016-09-26T01:00:00Z')).toEqual(false);
+            expect(maHelper.isGreaterOrEqual('2016-09-26T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
 
             // Date with time zone.
-            expect(maHelper.isGreaterThanOrEqual('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+02:00')).toEqual(true);
-            expect(maHelper.isGreaterThanOrEqual('2016-09-26T10:00:00+02:00', '2016-09-26T10:00:00+01:00')).toEqual(false);
-            expect(maHelper.isGreaterThanOrEqual('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+01:00')).toEqual(true);
+            expect(maHelper.isGreaterOrEqual('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+02:00')).toEqual(true);
+            expect(maHelper.isGreaterOrEqual('2016-09-26T10:00:00+02:00', '2016-09-26T10:00:00+01:00')).toEqual(false);
+            expect(maHelper.isGreaterOrEqual('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+01:00')).toEqual(true);
         });
     });
 
-    describe('isLessThan method', function() {
+    describe('isLess method', function() {
         it('determines whether a specified value is less than other value', function() {
             // Number.
-            expect(maHelper.isLessThan(2, 1)).toEqual(false);
-            expect(maHelper.isLessThan(1, 2)).toEqual(true);
-            expect(maHelper.isLessThan(1, 1)).toEqual(false);
+            expect(maHelper.isLess(2, 1)).toEqual(false);
+            expect(maHelper.isLess(1, 2)).toEqual(true);
+            expect(maHelper.isLess(1, 1)).toEqual(false);
 
             // Date.
-            expect(maHelper.isLessThan('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(false);
-            expect(maHelper.isLessThan('2016-09-16T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
-            expect(maHelper.isLessThan('2016-09-16T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(false);
+            expect(maHelper.isLess('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(false);
+            expect(maHelper.isLess('2016-09-16T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
+            expect(maHelper.isLess('2016-09-16T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(false);
 
             // Date and time.
-            expect(maHelper.isLessThan('2016-09-26T01:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
-            expect(maHelper.isLessThan('2016-09-26T00:00:00Z', '2016-09-26T01:00:00Z')).toEqual(true);
-            expect(maHelper.isLessThan('2016-09-26T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
+            expect(maHelper.isLess('2016-09-26T01:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
+            expect(maHelper.isLess('2016-09-26T00:00:00Z', '2016-09-26T01:00:00Z')).toEqual(true);
+            expect(maHelper.isLess('2016-09-26T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
 
             // Date with time zone.
-            expect(maHelper.isLessThan('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+02:00')).toEqual(false);
-            expect(maHelper.isLessThan('2016-09-26T10:00:00+02:00', '2016-09-26T10:00:00+01:00')).toEqual(true);
-            expect(maHelper.isLessThan('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+01:00')).toEqual(false);
+            expect(maHelper.isLess('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+02:00')).toEqual(false);
+            expect(maHelper.isLess('2016-09-26T10:00:00+02:00', '2016-09-26T10:00:00+01:00')).toEqual(true);
+            expect(maHelper.isLess('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+01:00')).toEqual(false);
         });
     });
 
-    describe('isLessThanOrEqual method', function() {
+    describe('isLessOrEqual method', function() {
         it('determines whether a specified value is less than or equal to other value', function() {
             // Number.
-            expect(maHelper.isLessThanOrEqual(2, 1)).toEqual(false);
-            expect(maHelper.isLessThanOrEqual(1, 2)).toEqual(true);
-            expect(maHelper.isLessThanOrEqual(1, 1)).toEqual(true);
+            expect(maHelper.isLessOrEqual(2, 1)).toEqual(false);
+            expect(maHelper.isLessOrEqual(1, 2)).toEqual(true);
+            expect(maHelper.isLessOrEqual(1, 1)).toEqual(true);
 
             // Date.
-            expect(maHelper.isLessThanOrEqual('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(false);
-            expect(maHelper.isLessThanOrEqual('2016-09-16T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
-            expect(maHelper.isLessThanOrEqual('2016-09-16T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(true);
+            expect(maHelper.isLessOrEqual('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(false);
+            expect(maHelper.isLessOrEqual('2016-09-16T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
+            expect(maHelper.isLessOrEqual('2016-09-16T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(true);
 
             // Date and time.
-            expect(maHelper.isLessThanOrEqual('2016-09-26T01:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
-            expect(maHelper.isLessThanOrEqual('2016-09-26T00:00:00Z', '2016-09-26T01:00:00Z')).toEqual(true);
-            expect(maHelper.isLessThanOrEqual('2016-09-26T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
+            expect(maHelper.isLessOrEqual('2016-09-26T01:00:00Z', '2016-09-26T00:00:00Z')).toEqual(false);
+            expect(maHelper.isLessOrEqual('2016-09-26T00:00:00Z', '2016-09-26T01:00:00Z')).toEqual(true);
+            expect(maHelper.isLessOrEqual('2016-09-26T00:00:00Z', '2016-09-26T00:00:00Z')).toEqual(true);
 
             // Date with time zone.
-            expect(maHelper.isLessThanOrEqual('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+02:00')).toEqual(false);
-            expect(maHelper.isLessThanOrEqual('2016-09-26T10:00:00+02:00', '2016-09-26T10:00:00+01:00')).toEqual(true);
-            expect(maHelper.isLessThanOrEqual('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+01:00')).toEqual(true);
+            expect(maHelper.isLessOrEqual('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+02:00')).toEqual(false);
+            expect(maHelper.isLessOrEqual('2016-09-26T10:00:00+02:00', '2016-09-26T10:00:00+01:00')).toEqual(true);
+            expect(maHelper.isLessOrEqual('2016-09-26T10:00:00+01:00', '2016-09-26T10:00:00+01:00')).toEqual(true);
         });
     });
 });
