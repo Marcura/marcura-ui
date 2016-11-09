@@ -28,7 +28,7 @@ angular.module('marcuraUI.components')
                 changeTimeout: '='
             },
             replace: true,
-            template: function(element, attributes) {
+            template: function(element) {
                 var html = '\
                 <div class="ma-date-box" ng-class="{\
                         \'ma-date-box-has-time\': hasTime,\
@@ -85,7 +85,7 @@ angular.module('marcuraUI.components')
                 scope.configuration.timeZone = (scope.timeZone || maDateBoxConfiguration.timeZone || 'Z')
                     .replace(/GMT/g, '');
             }],
-            link: function(scope, element, attributes) {
+            link: function(scope, element) {
                 var picker = null,
                     displayFormat = scope.configuration.displayFormat,
                     format = scope.configuration.format,
@@ -154,12 +154,9 @@ angular.module('marcuraUI.components')
                         selectionEnd: minutesCaretPosition
                     });
 
-                    setCalendarDate(displayDate);
-                };
-
-                var setCalendarDate = function(date) {
+                    // Set calendar date.
                     if (picker) {
-                        picker.setDate(date ? date.toDate() : null, true);
+                        picker.setDate(displayDate ? displayDate.toDate() : null, true);
                     }
                 };
 
@@ -257,7 +254,7 @@ angular.module('marcuraUI.components')
                         }
                     });
 
-                    setCalendarDate(previousDate);
+                    setDisplayDate(previousDate);
                     setMaxDate();
                     setMinDate();
                 };
@@ -331,8 +328,8 @@ angular.module('marcuraUI.components')
                 };
 
                 var triggerValidate = function(date) {
-                    // scope.value = date ? date.format(format) : null;
-
+                    // Postpone the event to allow scope.value to be updated, so
+                    // the event can operate relevant value.
                     $timeout(function() {
                         scope.validate({
                             maValue: date ? date.format(format) : null
@@ -503,7 +500,7 @@ angular.module('marcuraUI.components')
 
                 // Set initial date.
                 if (scope.value) {
-                    var date = MaDate.parse(scope.value, scope.culture);
+                    var date = parseDate(scope.value);
 
                     if (date.isEmpty()) {
                         return;
@@ -542,6 +539,7 @@ angular.module('marcuraUI.components')
                     }
 
                     // Validate date to make it valid in case it was invalid before or vice versa.
+                    // Pass false as second parameter to avoid loop from triggering validate event.
                     validate(date, false);
                     setDisplayDate(date);
                     previousDate = date;
@@ -644,6 +642,12 @@ angular.module('marcuraUI.components')
 
                     scope.instance.failedValidator = function() {
                         return failedValidator;
+                    };
+
+                    scope.instance.refresh = function() {
+                        var date = parseDate(scope.value);
+                        setDisplayDate(date);
+                        validate(date, false);
                     };
                 }
             }

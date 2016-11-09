@@ -25,50 +25,44 @@ function dateBoxPageController($scope, $timeout, MaDate, maValidators) {
         }
     };
 
-    var getStart = function() {
-        var end = new MaDate($scope.end);
-
-        if (end.isEmpty()) {
-            end = new MaDate();
-        }
-
-        return end.subtract(1, 'month').startOf('day').format();
-    };
-
-    var getEnd = function() {
-        return new MaDate().startOf('day').format();
-    };
-
-    $scope.now = new MaDate().startOf('day').format();
-    $scope.end = getEnd();
-    $scope.start = getStart();
-
-    $scope.validateStart = function(start) {
-        start = new MaDate(start);
-
-        if (start.isEmpty()) {
-            $scope.start = getStart();
-        } else if (start.isGreater($scope.end)) {
-            $scope.start = null;
-
-            $timeout(function() {
-                $scope.start = getStart();
-            });
-        }
-    };
-    $scope.validateEnd = function(end) {
-        end = new MaDate(end);
-
-        if (end.isEmpty()) {
-            $scope.end = getEnd();
-        } else if (!end.isBetween($scope.start, $scope.now)) {
-            $scope.end = null;
-
-            $timeout(function() {
-                $scope.end = getEnd();
-            });
-        }
-    };
+    // var getStart = function() {
+    //     var end = new MaDate($scope.end);
+    //
+    //     if (end.isEmpty()) {
+    //         end = new MaDate();
+    //     }
+    //
+    //     return end.subtract(1, 'month').startOf('day').format();
+    // };
+    //
+    // var getEnd = function() {
+    //     return new MaDate().startOf('day').format();
+    // };
+    //
+    // $scope.now = new MaDate().startOf('day').format();
+    // $scope.end = getEnd();
+    // $scope.start = getStart();
+    // $scope.startComponent = {};
+    // $scope.endComponent = {};
+    //
+    // $scope.validateStart = function(start) {
+    //     start = new MaDate(start);
+    //
+    //     if (start.isEmpty()) {
+    //         $scope.start = getStart();
+    //     } else if (start.isGreater($scope.end)) {
+    //         $scope.startComponent.refresh();
+    //     }
+    // };
+    // $scope.validateEnd = function(end) {
+    //     end = new MaDate(end);
+    //
+    //     if (end.isEmpty()) {
+    //         $scope.end = getEnd();
+    //     } else if (!end.isBetween($scope.start, $scope.now)) {
+    //         $scope.endComponent.refresh();
+    //     }
+    // };
 
     $scope.change1 = function(date) {
         console.log('change');

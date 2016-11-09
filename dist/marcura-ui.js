@@ -105,6 +105,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -204,27 +225,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function() {
         this.$get = function() {
@@ -255,7 +255,7 @@ angular.element(document).ready(function() {
                 changeTimeout: '='
             },
             replace: true,
-            template: function(element, attributes) {
+            template: function(element) {
                 var html = '\
                 <div class="ma-date-box" ng-class="{\
                         \'ma-date-box-has-time\': hasTime,\
@@ -312,7 +312,7 @@ angular.element(document).ready(function() {
                 scope.configuration.timeZone = (scope.timeZone || maDateBoxConfiguration.timeZone || 'Z')
                     .replace(/GMT/g, '');
             }],
-            link: function(scope, element, attributes) {
+            link: function(scope, element) {
                 var picker = null,
                     displayFormat = scope.configuration.displayFormat,
                     format = scope.configuration.format,
@@ -381,12 +381,9 @@ angular.element(document).ready(function() {
                         selectionEnd: minutesCaretPosition
                     });
 
-                    setCalendarDate(displayDate);
-                };
-
-                var setCalendarDate = function(date) {
+                    // Set calendar date.
                     if (picker) {
-                        picker.setDate(date ? date.toDate() : null, true);
+                        picker.setDate(displayDate ? displayDate.toDate() : null, true);
                     }
                 };
 
@@ -484,7 +481,7 @@ angular.element(document).ready(function() {
                         }
                     });
 
-                    setCalendarDate(previousDate);
+                    setDisplayDate(previousDate);
                     setMaxDate();
                     setMinDate();
                 };
@@ -558,8 +555,8 @@ angular.element(document).ready(function() {
                 };
 
                 var triggerValidate = function(date) {
-                    // scope.value = date ? date.format(format) : null;
-
+                    // Postpone the event to allow scope.value to be updated, so
+                    // the event can operate relevant value.
                     $timeout(function() {
                         scope.validate({
                             maValue: date ? date.format(format) : null
@@ -730,7 +727,7 @@ angular.element(document).ready(function() {
 
                 // Set initial date.
                 if (scope.value) {
-                    var date = MaDate.parse(scope.value, scope.culture);
+                    var date = parseDate(scope.value);
 
                     if (date.isEmpty()) {
                         return;
@@ -769,6 +766,7 @@ angular.element(document).ready(function() {
                     }
 
                     // Validate date to make it valid in case it was invalid before or vice versa.
+                    // Pass false as second parameter to avoid loop from triggering validate event.
                     validate(date, false);
                     setDisplayDate(date);
                     previousDate = date;
@@ -871,6 +869,12 @@ angular.element(document).ready(function() {
 
                     scope.instance.failedValidator = function() {
                         return failedValidator;
+                    };
+
+                    scope.instance.refresh = function() {
+                        var date = parseDate(scope.value);
+                        setDisplayDate(date);
+                        validate(date, false);
                     };
                 }
             }

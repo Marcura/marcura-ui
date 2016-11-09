@@ -208,7 +208,8 @@ value: {{date21 || 'null'}}</pre>
                         max-date="end"
                         can-reset="true"
                         change-timeout="1000"
-                        validate="validateStart(maValue)">
+                        validate="validateStart(maValue)"
+                        instance="startComponent">
                     </ma-date-box>
                 </div>
                 <div class="form-col col-xs-12 col-sm-3">
@@ -222,7 +223,8 @@ value: {{date21 || 'null'}}</pre>
                         max-date="now"
                         can-reset="true"
                         change-timeout="1000"
-                        validate="validateEnd(maValue)">
+                        validate="validateEnd(maValue)"
+                        instance="endComponent">
                     </ma-date-box>
                 </div>
             </div>
