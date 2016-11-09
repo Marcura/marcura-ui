@@ -25,7 +25,8 @@ angular.module('marcuraUI.components')
                 instance: '=',
                 minDate: '=',
                 maxDate: '=',
-                changeTimeout: '='
+                changeTimeout: '=',
+                placeholder: '@'
             },
             replace: true,
             template: function(element) {
@@ -41,6 +42,7 @@ angular.module('marcuraUI.components')
                     }">\
                     <div class="ma-date-box-inner">\
                         <input class="ma-date-box-date" type="text" id="{{id}}"\
+                            placeholder="{{placeholder}}"\
                             ng-disabled="isDisabled"\
                             ng-focus="onFocus()"\
                             ng-keydown="onKeydown($event)"\
