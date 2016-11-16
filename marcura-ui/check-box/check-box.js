@@ -40,9 +40,12 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
                 }
             };
 
+            var setText = function() {
+                scope.hasText = scope.text ? true : false;
+            };
+
             scope._size = scope.size ? scope.size : 'xs';
             scope.cssClass = ' ma-check-box-' + scope._size;
-            scope.hasText = scope.text ? true : false;
             scope.isFocused = false;
 
             scope.onChange = function() {
@@ -92,7 +95,16 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
                 setTabindex();
             });
 
+            scope.$watch('text', function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setText();
+            });
+
             setTabindex();
+            setText();
         }
     };
 }]);
