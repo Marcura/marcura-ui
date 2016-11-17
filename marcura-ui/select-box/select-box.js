@@ -60,12 +60,11 @@ angular.module('marcuraUI.components')
                         </div>';
 
                 if (isAjax) {
-                    html += '<input ui-select2="options"\
+                    html += '<input class="ma-select-box-input" ui-select2="options"\
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-change="onChange()"\
-                        ng-model="selectedItem"\
-                        placeholder="{{placeholder}}"/>';
+                        ng-model="selectedItem"/>';
                 } else {
                     // Add an empty option (<option></option>) as first item for the placeholder to work.
                     // It's strange, but that's how Select2 works.
@@ -132,6 +131,7 @@ angular.module('marcuraUI.components')
 
                 // Setting Select2 options does not work from link function, so they are set here.
                 scope.options = {};
+                scope.runInitSelection = true;
 
                 // AJAX options.
                 if (scope.ajax) {
@@ -141,10 +141,8 @@ angular.module('marcuraUI.components')
                         return markup;
                     };
                     scope.options.initSelection = function initSelection(element, callback) {
-                        // Run init function only once to set initial port.
-                        initSelection.runs = initSelection.runs ? initSelection.runs : 1;
-
-                        if (initSelection.runs === 1 && scope.getItemValue(scope.value)) {
+                        // Run init function only when it is required to update Select2 value.
+                        if (scope.runInitSelection && scope.getItemValue(scope.value)) {
                             var item = angular.copy(scope.value);
                             item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
                             item.id = scope.getItemValue(item);
@@ -154,7 +152,7 @@ angular.module('marcuraUI.components')
                             callback();
                         }
 
-                        initSelection.runs++;
+                        scope.runInitSelection = false;
                     };
                 }
             }],
@@ -578,11 +576,27 @@ angular.module('marcuraUI.components')
                     });
                 };
 
+                // Runs initSelection to force Select2 to refresh its displayed value.
+                // This is only required in AJAX mode.
+                var initializeSelect2Value = function functionName() {
+                    if (!scope.isAjax || !selectData) {
+                        return;
+                    }
+
+                    // If placeholder is set Select2 initSelection will not work and thus value will not be set.
+                    // We need to add/remove placeholder accordingly.
+                    selectData.opts.placeholder = scope.value ? '' : scope.placeholder;
+                    selectData.setPlaceholder();
+                    scope.runInitSelection = true;
+                    selectData.initSelection();
+                };
+
                 scope.$watch('value', function(newValue, oldValue) {
                     if (newValue === oldValue) {
                         return;
                     }
 
+                    initializeSelect2Value();
                     setInternalValue(newValue);
                 });
 
@@ -671,6 +685,8 @@ angular.module('marcuraUI.components')
                     labelElement = $('label[for="' + scope.id + '"]');
                     switchButtonElement = angular.element(element[0].querySelector('.ma-button-switch'));
                     resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset'));
+
+                    initializeSelect2Value();
 
                     // Focus the component when label is clicked.
                     if (labelElement.length > 0) {

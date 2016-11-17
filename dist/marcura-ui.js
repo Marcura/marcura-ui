@@ -105,27 +105,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -233,6 +212,27 @@ angular.element(document).ready(function() {
 
             setTabindex();
             setText();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1338,12 +1338,11 @@ angular.element(document).ready(function() {
                         </div>';
 
                 if (isAjax) {
-                    html += '<input ui-select2="options"\
+                    html += '<input class="ma-select-box-input" ui-select2="options"\
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-change="onChange()"\
-                        ng-model="selectedItem"\
-                        placeholder="{{placeholder}}"/>';
+                        ng-model="selectedItem"/>';
                 } else {
                     // Add an empty option (<option></option>) as first item for the placeholder to work.
                     // It's strange, but that's how Select2 works.
@@ -1410,6 +1409,7 @@ angular.element(document).ready(function() {
 
                 // Setting Select2 options does not work from link function, so they are set here.
                 scope.options = {};
+                scope.runInitSelection = true;
 
                 // AJAX options.
                 if (scope.ajax) {
@@ -1419,10 +1419,8 @@ angular.element(document).ready(function() {
                         return markup;
                     };
                     scope.options.initSelection = function initSelection(element, callback) {
-                        // Run init function only once to set initial port.
-                        initSelection.runs = initSelection.runs ? initSelection.runs : 1;
-
-                        if (initSelection.runs === 1 && scope.getItemValue(scope.value)) {
+                        // Run init function only when it is required to update Select2 value.
+                        if (scope.runInitSelection && scope.getItemValue(scope.value)) {
                             var item = angular.copy(scope.value);
                             item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
                             item.id = scope.getItemValue(item);
@@ -1432,7 +1430,7 @@ angular.element(document).ready(function() {
                             callback();
                         }
 
-                        initSelection.runs++;
+                        scope.runInitSelection = false;
                     };
                 }
             }],
@@ -1856,11 +1854,27 @@ angular.element(document).ready(function() {
                     });
                 };
 
+                // Runs initSelection to force Select2 to refresh its displayed value.
+                // This is only required in AJAX mode.
+                var initializeSelect2Value = function functionName() {
+                    if (!scope.isAjax || !selectData) {
+                        return;
+                    }
+
+                    // If placeholder is set Select2 initSelection will not work and thus value will not be set.
+                    // We need to add/remove placeholder accordingly.
+                    selectData.opts.placeholder = scope.value ? '' : scope.placeholder;
+                    selectData.setPlaceholder();
+                    scope.runInitSelection = true;
+                    selectData.initSelection();
+                };
+
                 scope.$watch('value', function(newValue, oldValue) {
                     if (newValue === oldValue) {
                         return;
                     }
 
+                    initializeSelect2Value();
                     setInternalValue(newValue);
                 });
 
@@ -1949,6 +1963,8 @@ angular.element(document).ready(function() {
                     labelElement = $('label[for="' + scope.id + '"]');
                     switchButtonElement = angular.element(element[0].querySelector('.ma-button-switch'));
                     resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset'));
+
+                    initializeSelect2Value();
 
                     // Focus the component when label is clicked.
                     if (labelElement.length > 0) {
@@ -3289,108 +3305,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-tabs">\
-                <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item" ng-repeat="item in items"\
-                        ng-focus="onFocus(item)"\
-                        ng-blur="onBlur(item)"\
-                        ng-keypress="onKeypress($event, item)"\
-                        ng-class="{\
-                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
-                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
-                            \'ma-tabs-item-is-focused\': item.isFocused\
-                        }"\
-                        ng-click="onSelect(item)">\
-                        <a class="ma-tabs-link" href="" tabindex="-1">\
-                            <span class="ma-tabs-text">{{item.text}}</span>\
-                        </a>\
-                    </li>\
-                </ul>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function(item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function(item) {
-                if (item.isDisabled || item.isSelected) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
-                }
-            };
-
-            scope.onKeypress = function(event, item) {
-                if (event.keyCode === maHelper.keyCode.enter) {
-                    scope.onSelect(item);
-                }
-            };
-
-            scope.onFocus = function(item) {
-                item.isFocused = true;
-            };
-
-            scope.onBlur = function(item) {
-                item.isFocused = false;
-            };
-
-            $timeout(function() {
-                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
-
-                itemElements.each(function(itemIndex, itemElement) {
-                    var item = scope.items[itemIndex];
-
-                    if (!item.isDisabled) {
-                        angular.element(itemElement).attr('tabindex', '0');
-                    }
-                });
-            });
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', 'maValidators', function($timeout, $window, maHelper, maValidators) {
     return {
         restrict: 'E',
@@ -3649,6 +3563,108 @@ angular.element(document).ready(function() {
                     return scope.isValid;
                 };
             }
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-tabs">\
+                <ul class="ma-tabs-list clearfix">\
+                    <li class="ma-tabs-item" ng-repeat="item in items"\
+                        ng-focus="onFocus(item)"\
+                        ng-blur="onBlur(item)"\
+                        ng-keypress="onKeypress($event, item)"\
+                        ng-class="{\
+                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
+                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
+                            \'ma-tabs-item-is-focused\': item.isFocused\
+                        }"\
+                        ng-click="onSelect(item)">\
+                        <a class="ma-tabs-link" href="" tabindex="-1">\
+                            <span class="ma-tabs-text">{{item.text}}</span>\
+                        </a>\
+                    </li>\
+                </ul>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function(item) {
+                if (item.isDisabled || item.isSelected) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function(item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
+
+            scope.onKeypress = function(event, item) {
+                if (event.keyCode === maHelper.keyCode.enter) {
+                    scope.onSelect(item);
+                }
+            };
+
+            scope.onFocus = function(item) {
+                item.isFocused = true;
+            };
+
+            scope.onBlur = function(item) {
+                item.isFocused = false;
+            };
+
+            $timeout(function() {
+                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
+
+                itemElements.each(function(itemIndex, itemElement) {
+                    var item = scope.items[itemIndex];
+
+                    if (!item.isDisabled) {
+                        angular.element(itemElement).attr('tabindex', '0');
+                    }
+                });
+            });
         }
     };
 }]);

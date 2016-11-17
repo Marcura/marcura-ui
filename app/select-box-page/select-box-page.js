@@ -20,7 +20,7 @@ function selectBoxPageController($scope, $timeout, helper) {
     };
     $scope.port8SelectBox = {};
     // $scope.port8 = 'Moscow';
-    // $scope.port8 = $scope.ports2[1];
+    $scope.port8 = $scope.ports2[1];
     $scope.port9 = {
         name: 'Moscow'
     };
@@ -172,6 +172,23 @@ function selectBoxPageController($scope, $timeout, helper) {
         console.log('scope:', $scope.port11);
         console.log('event:', port ? port : port);
     };
+
+    // Test placeholder in AJAX mode.
+    // $timeout(function () {
+    //     $scope.port10 = null;
+    // }, 3000);
+    //
+    // $timeout(function () {
+    //     $scope.port10 = $scope.ports2[1];
+    // }, 6000);
+    //
+    // $timeout(function () {
+    //     $scope.port10 = null;
+    // }, 9000);
+    //
+    // $timeout(function () {
+    //     $scope.port10 = $scope.ports2[0];
+    // }, 12000);
 
     // API: Mode.
     // $timeout(function() {
