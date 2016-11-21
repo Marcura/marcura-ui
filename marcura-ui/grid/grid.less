@@ -9,6 +9,24 @@
         font-size: 20px;
     }
 
+    &-has-spinner {
+        position: relative;
+    }
+
+    /*Loading spinner makes horizontal bar appear on the table - hide it.*/
+    &-is-loading {
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+
+    &-spinner.loading-spinner .pace-activity {
+        width: 50px;
+        height: 50px;
+        border-radius: 30px;
+        border-width: 6px;
+        margin: 50px auto 0;
+    }
+
     &-header {
         border-top: 1px solid #979797;
         border-bottom: 1px solid #c3c3cd;
@@ -219,23 +237,13 @@
     }
 
     &-empty {
-        position: relative;
-        min-height: 122px;
-
-        &-icon {
-            padding: 20px 0 10px;
-            text-align: center;
-
-            .fa {
-                font-size: 52px;
-                color: #9b9b9b;
-                text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8);
-            }
-        }
-
         &-text {
             text-align: center;
             color: #7d7d87;
+            background-color: #fafafa;
+            font-size: 20px;
+            padding: 40px 10px;
+            margin-top: 10px;
         }
     }
 
