@@ -148,5 +148,11 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         controller: 'modalPageController'
     });
 
+    $stateProvider.state('pager', {
+        url: '/pager',
+        templateUrl: 'pager-page/pager-page.html',
+        controller: 'pagerPageController'
+    });
+
     $urlRouterProvider.otherwise('/home');
 });
