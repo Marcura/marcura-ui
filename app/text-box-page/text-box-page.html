@@ -4,13 +4,61 @@
     </div>
     <div class="nodes-item">
         <h1>TextBox</h1>
+        <div class="api-documentation">
+            <a href="https://github.com/Marcura/marcura-ui/wiki/textbox">API documentation</a>
+        </div>
     </div>
     <div class="nodes-item">
-        <label for="name">Name:</label>
+        <h2>Basic</h2>
+    </div>
+    <div class="nodes-item">
         <ma-text-box
-            id="name"
-            value="name"
-            change="change(value)">
+            value="text1"
+            change="change1(maValue)"
+            blur="blur1(maValue)"
+            focus="focus1(maValue)">
         </ma-text-box>
+    </div>
+    <div class="nodes-item">
+        <pre>'{{text1 || ''}}'</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>Disabled</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-text-box
+            is-disabled="true"
+            value="text2">
+        </ma-text-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Required</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-text-box
+            is-required="true"
+            value="text3"
+            change="change3(maValue)">
+        </ma-text-box>
+    </div>
+    <div class="nodes-item">
+        <pre>'{{text3 || ''}}'</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>Timeout for change event</h2>
+    </div>
+    <div class="nodes-item">
+        By default change event fires when value is changed.<br/>
+        However, it is also possible to set a timeout for the event. In this case timeout is 1 second.
+    </div>
+    <div class="nodes-item">
+        <ma-text-box
+            value="text4"
+            change="change1(maValue)"
+            change-timeout="100">
+        </ma-text-box>
+    </div>
+    <div class="nodes-item">
+        <pre>'{{text4 || ''}}'</pre>
     </div>
 </div>

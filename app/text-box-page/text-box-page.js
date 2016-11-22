@@ -1,18 +1,31 @@
 angular.module('app.controllers').controller('textBoxPageController', textBoxPageController);
 
 function textBoxPageController($scope) {
-    // $scope.name = '';
+    $scope.text1 = '';
+    $scope.text3 = '';
+    $scope.text4 = '';
 
-    // $scope.change = function(value) {
-    //     console.log('value:', value);
-    // };
+    $scope.change1 = function(text) {
+        console.log('change');
+        console.log('event:', text);
+        console.log('scope:', $scope.text1);
+    };
 
-    $scope.$watch('name', function(newValue, oldValue) {
-        console.log('newValue:', newValue);
-    });
+    $scope.blur1 = function(text) {
+        console.log('blur');
+        console.log('event:', text);
+        console.log('scope:', $scope.text1);
+    };
 
-    // $scope.$watch('name', function(newValue, oldValue) {
-    //     console.log('new:', newValue);
-    //     console.log('old:', oldValue);
-    // });
+    $scope.focus1 = function(text) {
+        console.log('focus');
+        console.log('event:', text);
+        console.log('scope:', $scope.text1);
+    };
+
+    $scope.change3 = function(text) {
+        console.log('change');
+        console.log('event:', text);
+        console.log('scope:', $scope.text3);
+    };
 }

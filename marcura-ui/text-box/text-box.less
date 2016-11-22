@@ -1,15 +1,44 @@
+@import 'marcura-ui/less.less';
+
 .ma-text-box {
-    display: inline-block;
-
-    &-value {
-        border-radius: 0;
-    }
-}
-
-.ma-text-box-wrapper {
     position: relative;
 
-    input.form-control {
-        padding-right: 32px;
+    &-is-focused &-value {
+        .box-shadow(@input-shadow-focused);
+        border-color: @input-border-color-focused;
+    }
+
+    &-is-disabled &-value {
+        .box-shadow(none);
+        background-color: @input-background-color-disabled;
+        cursor: default;
+    }
+
+    &-is-invalid&-is-touched {
+        &.ma-text-box-is-focused .ma-text-box-value {
+            .box-shadow(@input-shadow-invalid);
+        }
+
+        .ma-text-box-value {
+            border-color: @input-border-color-invalid;
+        }
+    }
+
+    &-value {
+        .input;
+        .box-shadow(@input-shadow);
+        .input-transition;
+        .box-sizing(border-box);
+        display: inline-block;
+        font-size: 14px;
+        height: 30px;
+        color: #555;
+        vertical-align: top;
+        font-family: @font-family;
+        line-height: normal;
+        width: 100%;
+        padding: 5px 10px;
+        border: 1px solid @input-border-color;
+        background-color: @input-background-color;
     }
 }
