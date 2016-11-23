@@ -95,30 +95,33 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                 if (!isObjectArray) {
                     hasChanged = oldValue !== item;
                 } else if (scope.itemValueField) {
-                    if (maHelper.isNullOrUndefined(oldValue) && item[scope.itemValueField]) {
+                    if (maHelper.isNullOrUndefined(oldValue) && !maHelper.isNullOrUndefined(item[scope.itemValueField])) {
                         hasChanged = true;
                     } else {
                         hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
                     }
                 } else {
                     // Compare objects if itemValueField is not provided.
-                    if (maHelper.isNullOrUndefined(oldValue) && item) {
+                    if (maHelper.isNullOrUndefined(oldValue) && !maHelper.isNullOrUndefined(item)) {
                         hasChanged = true;
                     } else {
                         hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
                     }
                 }
 
-                if (hasChanged) {
-                    $timeout(function() {
-                        validate(scope.value);
-
-                        scope.change({
-                            maValue: item,
-                            maOldValue: oldValue
-                        });
-                    });
+                // Remove selection if the same item is selected.
+                if (!hasChanged) {
+                    scope.value = null;
                 }
+
+                $timeout(function() {
+                    validate(scope.value);
+
+                    scope.change({
+                        maValue: scope.value,
+                        maOldValue: oldValue
+                    });
+                });
             };
 
             // Set up validators.
