@@ -105,27 +105,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -233,6 +212,27 @@ angular.element(document).ready(function() {
 
             setTabindex();
             setText();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -3762,6 +3762,7 @@ angular.element(document).ready(function() {
         restrict: 'E',
         scope: {
             id: '@',
+            type: '@',
             value: '=',
             isDisabled: '=',
             isRequired: '=',
@@ -3773,7 +3774,9 @@ angular.element(document).ready(function() {
             changeTimeout: '='
         },
         replace: true,
-        template: function() {
+        template: function(element, attributes) {
+            var type = attributes.type === 'password' ? 'password' : 'text';
+
             var html = '\
             <div class="ma-text-box"\
                 ng-class="{\
@@ -3782,12 +3785,11 @@ angular.element(document).ready(function() {
                     \'ma-text-box-is-invalid\': !isValid,\
                     \'ma-text-box-is-touched\': isTouched\
                 }">\
-                <input class="ma-text-box-value" type="text" id="{{id}}"\
+                <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
                     type="text"\
                     ng-focus="onFocus()"\
                     ng-blur="onBlur()"\
                     ng-keydown="onKeydown($event)"\
-                    ng-keyup="onKeyup($event)"\
                     ng-disabled="isDisabled"/>\
             </div>';
 
@@ -3892,7 +3894,9 @@ angular.element(document).ready(function() {
                 keydownValue = angular.element(event.target).val();
             };
 
-            scope.onKeyup = function(event) {
+            // Use input event to support value change from contextual menu,
+            // e.g. mouse right click + Cut/Copy/Paste etc.
+            valueElement.on('input', function(event) {
                 // Ignore tab key.
                 if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
                     return;
@@ -3906,20 +3910,22 @@ angular.element(document).ready(function() {
                 }
 
                 // Change value after a timeout while the user is typing.
-                if (hasValueChanged) {
-                    if (changeTimeout > 0) {
-                        if (changePromise) {
-                            $timeout.cancel(changePromise);
-                        }
-
-                        changePromise = $timeout(function() {
-                            changeValue();
-                        }, changeTimeout);
-                    } else {
-                        changeValue();
-                    }
+                if (!hasValueChanged) {
+                    return;
                 }
-            };
+
+                if (changeTimeout > 0) {
+                    if (changePromise) {
+                        $timeout.cancel(changePromise);
+                    }
+
+                    changePromise = $timeout(function() {
+                        changeValue();
+                    }, changeTimeout);
+                } else {
+                    changeValue();
+                }
+            });
 
             $timeout(function() {
                 // Move id to input.
@@ -3932,9 +3938,17 @@ angular.element(document).ready(function() {
                     return;
                 }
 
+                var caretPosition = valueElement.prop('selectionStart');
+
                 scope.isValid = true;
                 scope.isTouched = false;
                 valueElement.val(newValue);
+
+                // Restore caret position.
+                valueElement.prop({
+                    selectionStart: caretPosition,
+                    selectionEnd: caretPosition
+                });
             });
 
             // Set initial value.

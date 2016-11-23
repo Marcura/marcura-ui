@@ -4,6 +4,7 @@ function textBoxPageController($scope) {
     $scope.text1 = '';
     $scope.text3 = '';
     $scope.text4 = '';
+    $scope.text5 = '';
 
     $scope.change1 = function(text) {
         console.log('change');
@@ -27,5 +28,11 @@ function textBoxPageController($scope) {
         console.log('change');
         console.log('event:', text);
         console.log('scope:', $scope.text3);
+    };
+
+    $scope.change4 = function(text) {
+        console.log('change');
+        console.log('event:', text);
+        console.log('scope:', $scope.text4);
     };
 }
