@@ -9,6 +9,16 @@
         }
     }
 
+    &:not(&-can-unselect) &-item-is-selected {
+        .ma-button:hover {
+            cursor: default;
+        }
+
+        .ma-button:active {
+            .box-shadow(@input-shadow-focused);
+        }
+    }
+
     &-item {
         display: inline-block;
 

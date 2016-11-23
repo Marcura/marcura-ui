@@ -11,7 +11,8 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
             isDisabled: '=',
             isRequired: '=',
             validators: '=',
-            instance: '='
+            instance: '=',
+            canUnselect: '='
         },
         replace: true,
         template: function() {
@@ -19,7 +20,8 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                 <div class="ma-radio-button" ng-class="{\
                         \'ma-radio-button-is-disabled\': isDisabled,\
                         \'ma-radio-button-is-invalid\': !isValid,\
-                        \'ma-radio-button-is-touched\': isTouched\
+                        \'ma-radio-button-is-touched\': isTouched,\
+                        \'ma-radio-button-can-unselect\': canUnselect\
                     }">\
                     <div class="ma-radio-button-item" ng-class="{\
                             \'ma-radio-button-item-is-selected\': isItemSelected(item)\
@@ -110,18 +112,20 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                 }
 
                 // Remove selection if the same item is selected.
-                if (!hasChanged) {
+                if (scope.canUnselect && !hasChanged) {
                     scope.value = null;
                 }
 
-                $timeout(function() {
-                    validate(scope.value);
+                if (hasChanged || (scope.canUnselect && !hasChanged)) {
+                    $timeout(function() {
+                        validate(scope.value);
 
-                    scope.change({
-                        maValue: scope.value,
-                        maOldValue: oldValue
+                        scope.change({
+                            maValue: scope.value,
+                            maOldValue: oldValue
+                        });
                     });
-                });
+                }
             };
 
             // Set up validators.
