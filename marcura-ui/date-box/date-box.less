@@ -6,6 +6,11 @@
     width: 100%;
     display: inline-block;
     position: relative;
+    .input-reset-button;
+
+    &-is-reset-disabled {
+        .input-reset-button-disabled;
+    }
 
     &-is-disabled {
         .ma-date-box-inner {
@@ -66,39 +71,6 @@
         .box-shadow(@input-shadow);
         .input-transition;
         .box-sizing(border-box);
-    }
-
-    .ma-button.ma-button-reset {
-        position: absolute;
-        top: 0;
-        right: 0;
-        border-left: 0;
-        .box-shadow(none);
-    }
-
-    .ma-button-reset .ma-button-icon {
-        font-size: 20px;
-        text-shadow: none;
-        color: #bebebe;
-    }
-
-    .ma-button-reset.ma-button-is-disabled {
-        background-color: @input-background-color-disabled;
-    }
-
-    .ma-button-reset.ma-button-is-disabled .ma-button-icon {
-        color: inherit;
-        opacity: 0.45;
-    }
-
-    &-is-reset-disabled {
-        .ma-button-reset.ma-button-is-disabled {
-            background-color: #ffffff;
-
-            .ma-button-icon {
-                opacity: 0.15;
-            }
-        }
     }
 
     &-date,

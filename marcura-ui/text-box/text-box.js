@@ -12,7 +12,8 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
             change: '&',
             blur: '&',
             focus: '&',
-            changeTimeout: '='
+            changeTimeout: '=',
+            canReset: '='
         },
         replace: true,
         template: function(element, attributes) {
@@ -24,7 +25,9 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                     \'ma-text-box-is-disabled\': isDisabled,\
                     \'ma-text-box-is-focused\': isFocused,\
                     \'ma-text-box-is-invalid\': !isValid,\
-                    \'ma-text-box-is-touched\': isTouched\
+                    \'ma-text-box-is-touched\': isTouched,\
+                    \'ma-text-box-can-reset\': canReset,\
+                    \'ma-text-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled()\
                 }">\
                 <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
                     type="text"\
@@ -32,6 +35,12 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                     ng-blur="onBlur()"\
                     ng-keydown="onKeydown($event)"\
                     ng-disabled="isDisabled"/>\
+                <ma-button class="ma-button-reset"\
+                    ng-show="canReset" size="xs" modifier="simple"\
+                    right-icon="times-circle"\
+                    click="onReset()"\
+                    is-disabled="!isResetEnabled()">\
+                </ma-button>\
             </div>';
 
             return html;
@@ -50,10 +59,11 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
 
             var validate = function() {
                 scope.isValid = true;
+                var value = valueElement.val();
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(valueElement.val())) {
+                        if (!validators[i].validate(value)) {
                             scope.isValid = false;
                             break;
                         }
@@ -105,6 +115,22 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 isRequired = true;
             }
 
+            scope.isResetEnabled = function() {
+                return !scope.isDisabled && valueElement.val() !== '';
+            };
+
+            scope.onReset = function() {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                previousValue = valueElement.val();
+                scope.isTouched = true;
+                triggerChange(null);
+                validate();
+                valueElement.focus();
+            };
+
             scope.onFocus = function() {
                 scope.isFocused = true;
 
@@ -155,17 +181,14 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                     return;
                 }
 
-                if (changeTimeout > 0) {
-                    if (changePromise) {
-                        $timeout.cancel(changePromise);
-                    }
-
-                    changePromise = $timeout(function() {
-                        changeValue();
-                    }, changeTimeout);
-                } else {
-                    changeValue();
+                if (changePromise) {
+                    $timeout.cancel(changePromise);
                 }
+
+                // $timeout is required here to apply scope changes, even if changeTimeout is 0.
+                changePromise = $timeout(function() {
+                    changeValue();
+                }, changeTimeout);
             });
 
             $timeout(function() {
@@ -180,10 +203,8 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 }
 
                 var caretPosition = valueElement.prop('selectionStart');
-
-                scope.isValid = true;
-                scope.isTouched = false;
                 valueElement.val(newValue);
+                validate();
 
                 // Restore caret position.
                 valueElement.prop({

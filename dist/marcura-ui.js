@@ -3324,75 +3324,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-side-menu">\
-                <div class="ma-side-menu-item" ng-repeat="item in items" ng-class="{\
-                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
-                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
-                    }"\
-                    ng-click="onSelect(item)">\
-                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
-                    <div class="ma-side-menu-text">{{item.text}}</div>\
-                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function(item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function(item) {
-                if (item.isDisabled) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -3491,6 +3422,75 @@ angular.element(document).ready(function() {
                     }
                 });
             });
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-side-menu">\
+                <div class="ma-side-menu-item" ng-repeat="item in items" ng-class="{\
+                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
+                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
+                    }"\
+                    ng-click="onSelect(item)">\
+                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
+                    <div class="ma-side-menu-text">{{item.text}}</div>\
+                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function(item) {
+                if (item.isDisabled) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function(item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
         }
     };
 }]);
@@ -3771,7 +3771,8 @@ angular.element(document).ready(function() {
             change: '&',
             blur: '&',
             focus: '&',
-            changeTimeout: '='
+            changeTimeout: '=',
+            canReset: '='
         },
         replace: true,
         template: function(element, attributes) {
@@ -3783,7 +3784,9 @@ angular.element(document).ready(function() {
                     \'ma-text-box-is-disabled\': isDisabled,\
                     \'ma-text-box-is-focused\': isFocused,\
                     \'ma-text-box-is-invalid\': !isValid,\
-                    \'ma-text-box-is-touched\': isTouched\
+                    \'ma-text-box-is-touched\': isTouched,\
+                    \'ma-text-box-can-reset\': canReset,\
+                    \'ma-text-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled()\
                 }">\
                 <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
                     type="text"\
@@ -3791,6 +3794,12 @@ angular.element(document).ready(function() {
                     ng-blur="onBlur()"\
                     ng-keydown="onKeydown($event)"\
                     ng-disabled="isDisabled"/>\
+                <ma-button class="ma-button-reset"\
+                    ng-show="canReset" size="xs" modifier="simple"\
+                    right-icon="times-circle"\
+                    click="onReset()"\
+                    is-disabled="!isResetEnabled()">\
+                </ma-button>\
             </div>';
 
             return html;
@@ -3809,10 +3818,11 @@ angular.element(document).ready(function() {
 
             var validate = function() {
                 scope.isValid = true;
+                var value = valueElement.val();
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(valueElement.val())) {
+                        if (!validators[i].validate(value)) {
                             scope.isValid = false;
                             break;
                         }
@@ -3864,6 +3874,22 @@ angular.element(document).ready(function() {
                 isRequired = true;
             }
 
+            scope.isResetEnabled = function() {
+                return !scope.isDisabled && valueElement.val() !== '';
+            };
+
+            scope.onReset = function() {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                previousValue = valueElement.val();
+                scope.isTouched = true;
+                triggerChange(null);
+                validate();
+                valueElement.focus();
+            };
+
             scope.onFocus = function() {
                 scope.isFocused = true;
 
@@ -3914,17 +3940,14 @@ angular.element(document).ready(function() {
                     return;
                 }
 
-                if (changeTimeout > 0) {
-                    if (changePromise) {
-                        $timeout.cancel(changePromise);
-                    }
-
-                    changePromise = $timeout(function() {
-                        changeValue();
-                    }, changeTimeout);
-                } else {
-                    changeValue();
+                if (changePromise) {
+                    $timeout.cancel(changePromise);
                 }
+
+                // $timeout is required here to apply scope changes, even if changeTimeout is 0.
+                changePromise = $timeout(function() {
+                    changeValue();
+                }, changeTimeout);
             });
 
             $timeout(function() {
@@ -3939,10 +3962,8 @@ angular.element(document).ready(function() {
                 }
 
                 var caretPosition = valueElement.prop('selectionStart');
-
-                scope.isValid = true;
-                scope.isTouched = false;
                 valueElement.val(newValue);
+                validate();
 
                 // Restore caret position.
                 valueElement.prop({

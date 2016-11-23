@@ -61,3 +61,38 @@
 .input-transition {
     .transition(border-color ease-in-out .15s, box-shadow ease-in-out .15s;);
 }
+
+.input-reset-button {
+    .ma-button.ma-button-reset {
+        position: absolute;
+        top: 0;
+        right: 0;
+        border-left: 0;
+        .box-shadow(none);
+    }
+
+    .ma-button-reset .ma-button-icon {
+        font-size: 20px;
+        text-shadow: none;
+        color: #bebebe;
+    }
+
+    .ma-button-reset.ma-button-is-disabled {
+        background-color: @input-background-color-disabled;
+    }
+
+    .ma-button-reset.ma-button-is-disabled .ma-button-icon {
+        color: inherit;
+        opacity: 0.45;
+    }
+}
+
+.input-reset-button-disabled {
+    .ma-button-reset.ma-button-is-disabled {
+        background-color: #ffffff;
+
+        .ma-button-icon {
+            opacity: 0.15;
+        }
+    }
+}

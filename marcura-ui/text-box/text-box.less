@@ -2,6 +2,11 @@
 
 .ma-text-box {
     position: relative;
+    .input-reset-button;
+
+    &-is-reset-disabled {
+        .input-reset-button-disabled;
+    }
 
     &-is-focused &-value {
         .box-shadow(@input-shadow-focused);
@@ -22,6 +27,10 @@
         .ma-text-box-value {
             border-color: @input-border-color-invalid;
         }
+    }
+
+    &-can-reset {
+        padding-right: 29px;
     }
 
     &-value {
