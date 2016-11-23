@@ -26,6 +26,7 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                         }"\
                         ng-repeat="item in items">\
                         <ma-button\
+                            class="ma-button-radio"\
                             text="{{getItemText(item)}}"\
                             modifier="simple"\
                             size="xs"\
