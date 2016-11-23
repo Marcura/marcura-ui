@@ -35,4 +35,10 @@ function textBoxPageController($scope) {
         console.log('event:', text);
         console.log('scope:', $scope.text4);
     };
+
+    $scope.change6 = function(text) {
+        console.log('change');
+        console.log('event:', text);
+        console.log('scope:', $scope.text6);
+    };
 }

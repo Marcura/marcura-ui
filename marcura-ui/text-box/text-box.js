@@ -86,8 +86,22 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 });
             };
 
+            var hasValueChanged = function() {
+                var value = valueElement.val();
+
+                if (maHelper.isNullOrUndefined(previousValue) && value === '') {
+                    return false;
+                }
+
+                return previousValue !== value;
+            };
+
             var changeValue = function() {
                 scope.isTouched = true;
+
+                if (!hasValueChanged()) {
+                    return;
+                }
 
                 validate();
 
@@ -169,15 +183,15 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                     return;
                 }
 
-                var hasValueChanged = false;
+                var hasChanged = false;
                 keyupValue = angular.element(event.target).val();
 
                 if (keydownValue !== keyupValue) {
-                    hasValueChanged = true;
+                    hasChanged = true;
                 }
 
                 // Change value after a timeout while the user is typing.
-                if (!hasValueChanged) {
+                if (!hasChanged) {
                     return;
                 }
 
