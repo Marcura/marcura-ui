@@ -1,0 +1,52 @@
+<div class="nodes nodes-padding-bottom-m">
+    <div class="nodes-item">
+        <a href="#/home">Home</a>
+    </div>
+    <div class="nodes-item">
+        <h1>RadioButton</h1>
+        <div class="api-documentation">
+            <a href="https://github.com/Marcura/marcura-ui/wiki/radiobutton">API documentation</a>
+        </div>
+    </div>
+    <div class="nodes-item">
+        <h2>Items as strings</h1>
+    </div>
+    <div class="nodes-item">
+        <ma-radio-button
+            items="ports1"
+            value="port1"
+            change="change1(maValue)">
+        </ma-radio-button>
+    </div>
+    <div class="nodes-item">
+        <pre>{{port1 || 'null'}}</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>Items as objects</h1>
+    </div>
+    <div class="nodes-item">
+        <ma-radio-button
+            items="ports2"
+            item-text-field="name"
+            item-value-field="id"
+            value="port2"
+            change="change2(maValue)">
+        </ma-radio-button>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(port2 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>Disabled</h1>
+    </div>
+    <div class="nodes-item">
+        <ma-radio-button
+            items="ports1"
+            is-disabled="true"
+            value="port3">
+        </ma-radio-button>
+    </div>
+    <div class="nodes-item">
+        <pre>{{port3 || 'null'}}</pre>
+    </div>
+</div>

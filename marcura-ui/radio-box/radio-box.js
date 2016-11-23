@@ -162,58 +162,60 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             };
 
             scope.onChange = function() {
-                if (!scope.isDisabled) {
-                    var valueProperty,
-                        oldValue = scope.value;
-                    scope.value = scope.item;
+                if (scope.isDisabled) {
+                    return;
+                }
 
-                    if (controllerScope && valuePropertyParts) {
-                        // When the component is inside ng-repeat normal binding like
-                        // value="port" won't work.
-                        // This is to workaround the problem.
-                        valueProperty = controllerScope;
+                var valueProperty,
+                    oldValue = scope.value;
+                scope.value = scope.item;
 
-                        // Handle nested property binding.
-                        for (var i = 0; i < valuePropertyParts.length; i++) {
-                            valueProperty = valueProperty[valuePropertyParts[i]];
-                        }
+                if (controllerScope && valuePropertyParts) {
+                    // When the component is inside ng-repeat normal binding like
+                    // value="port" won't work.
+                    // This is to workaround the problem.
+                    valueProperty = controllerScope;
 
-                        valueProperty = scope.item;
-                    } else {
-                        valueProperty = controllerScope[attributes.value];
-                        controllerScope[attributes.value] = scope.item;
+                    // Handle nested property binding.
+                    for (var i = 0; i < valuePropertyParts.length; i++) {
+                        valueProperty = valueProperty[valuePropertyParts[i]];
                     }
 
-                    // Check that value has changed.
-                    var hasChanged = true;
+                    valueProperty = scope.item;
+                } else {
+                    valueProperty = controllerScope[attributes.value];
+                    controllerScope[attributes.value] = scope.item;
+                }
 
-                    if (isStringArray) {
-                        hasChanged = oldValue !== scope.item;
-                    } else if (scope.itemValueField) {
-                        if (!oldValue && scope.item[scope.itemValueField]) {
-                            hasChanged = true;
-                        } else {
-                            hasChanged = oldValue[scope.itemValueField] !== scope.item[scope.itemValueField];
-                        }
+                // Check that value has changed.
+                var hasChanged = true;
+
+                if (isStringArray) {
+                    hasChanged = oldValue !== scope.item;
+                } else if (scope.itemValueField) {
+                    if (!oldValue && scope.item[scope.itemValueField]) {
+                        hasChanged = true;
                     } else {
-                        // Compare objects if itemValueField is not provided.
-                        if (!oldValue && scope.item) {
-                            hasChanged = true;
-                        } else {
-                            hasChanged = JSON.stringify(oldValue) === JSON.stringify(scope.item);
-                        }
+                        hasChanged = oldValue[scope.itemValueField] !== scope.item[scope.itemValueField];
                     }
+                } else {
+                    // Compare objects if itemValueField is not provided.
+                    if (!oldValue && scope.item) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(scope.item);
+                    }
+                }
 
-                    if (hasChanged) {
-                        $timeout(function() {
-                            validate(scope.value);
+                if (hasChanged) {
+                    $timeout(function() {
+                        validate(scope.value);
 
-                            scope.change({
-                                maValue: scope.item,
-                                maOldValue: oldValue
-                            });
+                        scope.change({
+                            maValue: scope.item,
+                            maOldValue: oldValue
                         });
-                    }
+                    });
                 }
             };
 
