@@ -9,13 +9,15 @@
         }
     }
 
-    &:not(&-can-unselect) &-item-is-selected {
-        .ma-button:hover {
-            cursor: default;
-        }
+    &:not(&-can-unselect):not(&-is-disabled) &-item-is-selected {
+        .ma-button {
+            &:hover {
+                cursor: default;
+            }
 
-        .ma-button:active {
-            .box-shadow(@input-shadow-focused);
+            &:active {
+                .box-shadow(@input-shadow-focused);
+            }
         }
     }
 
@@ -29,8 +31,14 @@
         }
 
         &:not(&-is-selected) {
-            .ma-button:not(.ma-button-is-disabled):hover {
-                background-color: #fafafa;
+            .ma-button:not(.ma-button-is-disabled) {
+                &:hover {
+                    background-color: #fafafa;
+                }
+
+                &:active {
+                    .box-shadow(none);
+                }
             }
         }
 
