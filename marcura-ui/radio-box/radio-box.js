@@ -276,6 +276,8 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
 
             // Prepare API instance.
             if (scope.instance) {
+                scope.instance.isInitialized = true;
+
                 scope.instance.isValid = function() {
                     return scope.isValid;
                 };
