@@ -8,7 +8,8 @@ function sideMenuPageController($scope) {
         isSelected: true
     }, {
         text: 'payments',
-        icon: 'calendar'
+        icon: 'calendar',
+        hidden: true
     }, {
         text: 'port information',
         icon: 'anchor'
