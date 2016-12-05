@@ -46,6 +46,11 @@
         color: #ffffff;
     }
 
+    &-default&-link:not(&-is-disabled):hover &-icon,
+    &-default:not(&-link):not(&-is-disabled):hover {
+        background-color: #e6e6e6;
+    }
+
     &-danger&-is-disabled:not(&-link),
     &-is-disabled {
         background-color: #c3c3cd;
@@ -74,6 +79,7 @@
     &-xs {
         padding-top: 4px;
         padding-bottom: 5px;
+        height: 30px;
 
         .ma-button-text {
             font-size: 12px;
@@ -267,5 +273,40 @@
     &-simple:not(&-link) {
         background-color: #ffffff;
         border: 1px solid #ccc;
+    }
+
+    &-flat {
+        .box-shadow(none);
+        border-radius: 4px;
+
+        &.ma-button-is-disabled.ma-button-default {
+            opacity: 0.75;
+        }
+
+        &:active:not(.ma-button-is-disabled):not(.ma-button-link) {
+            .box-shadow(none);
+        }
+
+        .ma-button-rim {
+            border-radius: 3px;
+        }
+
+        .ma-button-text {
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .ma-button-icon {
+            text-shadow: none;
+        }
+
+        &.ma-button-link {
+            text-decoration: underline;
+
+            .ma-button-icon {
+                .box-shadow(none);
+                border-radius: 4px;
+            }
+        }
     }
 }

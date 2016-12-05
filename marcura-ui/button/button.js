@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maButton', [function() {
+angular.module('marcuraUI.components').directive('maButton', ['maHelper', function(maHelper) {
     return {
         restrict: 'E',
         scope: {
@@ -44,12 +44,21 @@ angular.module('marcuraUI.components').directive('maButton', [function() {
             scope.hasLeftIcon = scope.leftIcon ? true : false;
             scope.hasRightIcon = scope.rightIcon ? true : false;
             scope.hasText = scope.text ? true : false;
+            var modifiers = '';
+
+            if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
+                modifiers = scope.modifier.split(' ');
+            }
+
+            for (var i = 0; i < modifiers.length; i++) {
+                element.addClass('ma-button-' + modifiers[i]);
+            }
 
             element.addClass('ma-button-' + scope.size);
 
-            if (scope.modifier) {
-                element.addClass('ma-button-' + scope.modifier);
-            }
+            // if (scope.modifier) {
+            //     element.addClass('ma-button-' + scope.modifier);
+            // }
 
             scope.onClick = function() {
                 if (!scope.isDisabled) {
