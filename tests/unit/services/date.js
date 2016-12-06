@@ -321,6 +321,11 @@ describe('MaDate', function() {
             expect(MaDate.parse('29 Feb 2015').isEmpty()).toEqual(true);
             expect(MaDate.parse('29 Feb 2012').format()).toEqual('2012-02-29T00:00:00Z');
         });
+
+        it('ignores whitespaces', function() {
+            expect(MaDate.parse('28  Feb 2015').format()).toEqual('2015-02-28T00:00:00Z');
+            expect(MaDate.parse('08   Nov  16').format()).toEqual('2016-11-08T00:00:00Z');
+        });
     });
 
     describe('format method', function() {
@@ -373,13 +378,13 @@ describe('MaDate', function() {
     describe('valueOf method', function() {
         it('returns the primitive value of a date', function() {
             // Date.
-            expect(new MaDate('2016-09-26T00:00:00Z').valueOf()).toEqual(1474833600000);
+            expect(new MaDate('2016-09-26T00:00:00Z').valueOf()).toEqual(new Date(2016, 8, 26, 0, 0, 0, 0).valueOf());
 
             // Date and time.
-            expect(new MaDate('2016-09-26T01:00:00Z').valueOf()).toEqual(1474837200000);
+            expect(new MaDate('2016-09-26T01:00:00Z').valueOf()).toEqual(new Date(2016, 8, 26, 1, 0, 0, 0).valueOf());
 
             // Date with time zone.
-            expect(new MaDate('2016-09-26T10:00:00+01:00').valueOf()).toEqual(1474866000000);
+            expect(new MaDate('2016-09-26T10:00:00+01:00').valueOf()).toEqual(new Date(2016, 8, 26, 9, 0, 0, 0).valueOf());
         });
     });
 

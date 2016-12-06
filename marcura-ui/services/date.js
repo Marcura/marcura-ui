@@ -132,6 +132,9 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             return date;
         }
 
+        // Replace multiple whitespaces with a single one.
+        value = value.replace(/\s+/g,' ');
+
         // 21
         pattern = /^\d{1,2}$/;
 
