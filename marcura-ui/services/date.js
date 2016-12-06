@@ -1,7 +1,13 @@
 angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
             language: 'en',
-            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+            full: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        }],
+        weekDays = [{
+            language: 'en',
+            full: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            short: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
         }],
         daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -57,8 +63,8 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         // Convert month to number.
         if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
             for (var j = 0; j < months.length; j++) {
-                for (var i = 0; i < months[j].months.length; i++) {
-                    if (isMatch(month, months[j].months[i].slice(0, 3))) {
+                for (var i = 0; i < months[j].full.length; i++) {
+                    if (isMatch(month, months[j].full[i].slice(0, 3))) {
                         finalMonth = i + 1;
                         break;
                     }
@@ -133,7 +139,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
 
         // Replace multiple whitespaces with a single one.
-        value = value.replace(/\s+/g,' ');
+        value = value.replace(/\s+/g, ' ');
 
         // 21
         pattern = /^\d{1,2}$/;
@@ -335,12 +341,13 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
                 s: ['ss'],
                 m: ['mm'],
                 H: ['HH'],
-                d: ['d', 'dd'],
+                d: ['d', 'dd', 'ddd', 'dddd'],
                 M: ['M', 'MM', 'MMM', 'MMMM'],
                 y: ['yy', 'yyyy'],
                 Z: ['Z']
             },
             day = _date.getDate(),
+            dayOfWeek = _date.getDay(),
             month = _date.getMonth(),
             year = _date.getFullYear(),
             hours = _date.getHours(),
@@ -377,6 +384,18 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
                         datePart = formatNumber(day, 2);
                         break;
                     }
+                case datePartFormats.d[2]:
+                    // ddd
+                    {
+                        datePart = weekDays[languageIndex].short[dayOfWeek];
+                        break;
+                    }
+                case datePartFormats.d[3]:
+                    // dddd
+                    {
+                        datePart = weekDays[languageIndex].full[dayOfWeek];
+                        break;
+                    }
                 case datePartFormats.M[0]:
                     // M
                     {
@@ -392,13 +411,13 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
                 case datePartFormats.M[2]:
                     // MMM
                     {
-                        datePart = months[languageIndex].months[month].substr(0, 3);
+                        datePart = months[languageIndex].short[month];
                         break;
                     }
                 case datePartFormats.M[3]:
                     // MMMM
                     {
-                        datePart = months[languageIndex].months[month];
+                        datePart = months[languageIndex].full[month];
                         break;
                     }
                 case datePartFormats.y[0]:

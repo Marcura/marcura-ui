@@ -352,6 +352,8 @@ describe('MaDate', function() {
             var date = new Date(2015, 1, 7);
             expect(new MaDate(date).format('yyyy-MM-d')).toEqual('2015-02-7');
             expect(new MaDate(date).format('yyyy-MM-dd')).toEqual('2015-02-07');
+            expect(new MaDate(date).format('yyyy-MM-ddd')).toEqual('2015-02-Sat');
+            expect(new MaDate(date).format('yyyy-MM-dddd')).toEqual('2015-02-Saturday');
         });
 
         it('supports month format', function() {
