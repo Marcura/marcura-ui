@@ -1,0 +1,51 @@
+@import 'marcura-ui/less.less';
+
+.ma-multi-check-box {
+    &-item {
+        display: inline-block;
+        border: 1px solid @input-border-color;
+        height: 30px;
+        margin-right: 5px;
+        border-radius: 4px;
+        position: relative;
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+
+    &-text {
+        display: inline-block;
+        padding: 4px 10px 0;
+        width: ~'calc(100% - 30px)';
+        height: 28px;
+        border-right: 1px solid @input-border-color;
+        line-height: 20px;
+    }
+
+    &-background {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1;
+    }
+
+    .ma-check-box {
+        padding-left: 30px;
+
+        &-sm .ma-check-box-icon {
+            left: 8px;
+        }
+
+        &-inner {
+            border-color: transparent;
+            .box-shadow(none);
+        }
+    }
+}

@@ -1,0 +1,39 @@
+<div class="nodes nodes-padding-bottom-m">
+    <div class="nodes-item">
+        <a href="#/home">Home</a>
+    </div>
+    <div class="nodes-item">
+        <h1>MultiCheckBox</h1>
+        <div class="api-documentation">
+            <a href="https://github.com/Marcura/marcura-ui/wiki/multicheckbox">API documentation</a>
+        </div>
+    </div>
+    <div class="nodes-item">
+        <h2>Items as strings</h1>
+    </div>
+    <div class="nodes-item">
+        <ma-multi-check-box
+            items="ports1"
+            value="port1"
+            change="change1(maValue)">
+        </ma-multi-check-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{port1 || 'null'}}</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>Items as objects</h1>
+    </div>
+    <div class="nodes-item">
+        <ma-multi-check-box
+            item-text-field="name"
+            item-value-field="id"
+            items="ports2"
+            value="port2"
+            change="change2(maValue)">
+        </ma-multi-check-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(port2 || null) | json}}</pre>
+    </div>
+</div>

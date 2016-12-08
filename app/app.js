@@ -33,6 +33,12 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         controller: 'dateBoxPageController'
     });
 
+    $stateProvider.state('multi-check-box', {
+        url: '/multi-check-box',
+        templateUrl: 'multi-check-box-page/multi-check-box-page.html',
+        controller: 'multiCheckBoxPageController'
+    });
+
     $stateProvider.state('grid', {
         url: '/grid',
         templateUrl: 'grid-page/grid-page.html',
