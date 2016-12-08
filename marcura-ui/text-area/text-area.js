@@ -252,8 +252,16 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
             // Prepare API instance.
             if (scope.instance) {
+                scope.instance.isInitialized = true;
+
                 scope.instance.isValid = function() {
                     return scope.isValid;
+                };
+
+                scope.instance.focus = function() {
+                    if (!scope.isFocused) {
+                        valueElement.focus();
+                    }
                 };
             }
         }
