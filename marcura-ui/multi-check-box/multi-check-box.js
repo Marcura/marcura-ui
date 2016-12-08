@@ -115,9 +115,13 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
                     for (var j = 0; j < scope.value.length; j++) {
                         for (var k = 0; k < scope.items.length; k++) {
                             if (!isObjectArray) {
-                                scope.getItemMetadata(scope.items[k]).isSelected = scope.items[k] === scope.value[j];
+                                if (scope.items[k] === scope.value[j]) {
+                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
+                                }
                             } else if (scope.itemValueField) {
-                                scope.getItemMetadata(scope.items[k]).isSelected = scope.items[k][scope.itemValueField] === scope.value[j][scope.itemValueField];
+                                if (scope.items[k][scope.itemValueField] === scope.value[j][scope.itemValueField]) {
+                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
+                                }
                             }
                         }
                     }
