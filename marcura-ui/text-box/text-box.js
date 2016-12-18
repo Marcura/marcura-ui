@@ -13,7 +13,8 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
             blur: '&',
             focus: '&',
             changeTimeout: '=',
-            canReset: '='
+            canReset: '=',
+            placeholder: '@'
         },
         replace: true,
         template: function(element, attributes) {
@@ -31,6 +32,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 }">\
                 <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
                     type="text"\
+                    placeholder="{{placeholder}}"\
                     ng-focus="onFocus()"\
                     ng-blur="onBlur()"\
                     ng-keydown="onKeydown($event)"\
