@@ -522,6 +522,12 @@ angular.module('marcuraUI.components')
                     // Validation is required if the item is a simple text, not a JSON object.
                     var item = maHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
 
+                    // In case if JSON.parse has parsed string to a number.
+                    // This can happen when items is an array of numbers.
+                    if (typeof item === 'number') {
+                        item = scope.selectedItem;
+                    }
+
                     // The change event works differently in AJAX mode.
                     if (scope.isAjax) {
                         // The change event fires first time even if scope.value has not changed.
