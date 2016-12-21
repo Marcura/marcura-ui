@@ -44,27 +44,19 @@ angular.module('marcuraUI.components')
                         <input class="ma-date-box-date" type="text" id="{{id}}"\
                             placeholder="{{placeholder}}"\
                             ng-disabled="isDisabled"\
-                            ng-focus="onFocus()"\
                             ng-keydown="onKeydown($event)"\
-                            ng-keyup="onKeyup($event)"\
-                            ng-blur="onBlur()"/><input class="ma-date-box-hours"\
+                            ng-keyup="onKeyup($event)"/><input class="ma-date-box-hour"\
                                 maxlength="2"\
                                 ng-disabled="isDisabled"\
                                 ng-show="hasTime"\
-                                ng-focus="onFocus()"\
-                                ng-keydown="onKeydown($event)"\
                                 ng-keyup="onKeyup($event)"\
-                                ng-blur="onBlur()"\
                                 ng-keydown="onTimeKeydown($event)"\
                                 /><div class="ma-date-box-colon" ng-if="hasTime">:</div><input \
-                                class="ma-date-box-minutes" type="text"\
+                                class="ma-date-box-minute" type="text"\
                                 maxlength="2"\
                                 ng-disabled="isDisabled"\
                                 ng-show="hasTime"\
-                                ng-focus="onFocus()"\
-                                ng-keydown="onKeydown($event)"\
                                 ng-keyup="onKeyup($event)"\
-                                ng-blur="onBlur()"\
                                 ng-keydown="onTimeKeydown($event)"/>\
                         <i class="ma-date-box-icon fa fa-calendar"></i>\
                     </div>\
@@ -93,8 +85,8 @@ angular.module('marcuraUI.components')
                     format = scope.configuration.format,
                     timeZone = scope.configuration.timeZone,
                     dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
-                    hoursElement = angular.element(element[0].querySelector('.ma-date-box-hours')),
-                    minutesElement = angular.element(element[0].querySelector('.ma-date-box-minutes')),
+                    hourElement = angular.element(element[0].querySelector('.ma-date-box-hour')),
+                    minuteElement = angular.element(element[0].querySelector('.ma-date-box-minute')),
                     previousDate = MaDate.createEmpty(),
                     timeZoneOffset = MaDate.parseTimeZone(timeZone),
                     initialDisplayDate,
@@ -110,8 +102,11 @@ angular.module('marcuraUI.components')
                     changePromise,
                     changeTimeout = Number(scope.changeTimeout),
                     dateCaretPosition = 0,
-                    hoursCaretPosition = 0,
-                    minutesCaretPosition = 0;
+                    hourCaretPosition = 0,
+                    minuteCaretPosition = 0,
+                    isDateFocused,
+                    isHourFocused,
+                    isMinuteFocused;
 
                 var hasDateChanged = function(date) {
                     if (previousDate.isEqual(date)) {
@@ -130,31 +125,52 @@ angular.module('marcuraUI.components')
                         // Adjust display date offset.
                         displayDate = date.copy().toUtc().add(timeZoneOffset, 'minute');
                         dateElement.val(displayDate.format(displayFormat));
-                        hoursElement.val(displayDate.format('HH'));
-                        minutesElement.val(displayDate.format('mm'));
+                        hourElement.val(displayDate.format('HH'));
+                        minuteElement.val(displayDate.format('mm'));
 
                         if (!initialDisplayDate) {
                             initialDisplayDate = dateElement.val();
                         }
                     } else {
                         dateElement.val('');
-                        hoursElement.val('00');
-                        minutesElement.val('00');
+                        hourElement.val('00');
+                        minuteElement.val('00');
                     }
 
-                    // Restore caret position.
-                    dateElement.prop({
-                        selectionStart: dateCaretPosition,
-                        selectionEnd: dateCaretPosition
-                    });
-                    hoursElement.prop({
-                        selectionStart: hoursCaretPosition,
-                        selectionEnd: hoursCaretPosition
-                    });
-                    minutesElement.prop({
-                        selectionStart: minutesCaretPosition,
-                        selectionEnd: minutesCaretPosition
-                    });
+                    // Restore caret position if the component has focus.
+                    if (scope.isFocused) {
+                        // In IE setting selectionStart/selectionEnd properties triggers focus/blur event.
+                        // Remove the events while properties are being set and then restore them.
+                        removeFocusEvent();
+                        removeBlurEvent();
+
+                        // Set caret for an appropriate field.
+                        if (isDateFocused) {
+                            dateElement.prop({
+                                selectionStart: dateCaretPosition,
+                                selectionEnd: dateCaretPosition
+                            });
+                        }
+
+                        if (isHourFocused) {
+                            hourElement.prop({
+                                selectionStart: hourCaretPosition,
+                                selectionEnd: hourCaretPosition
+                            });
+                        }
+
+                        if (isMinuteFocused) {
+                            minuteElement.prop({
+                                selectionStart: minuteCaretPosition,
+                                selectionEnd: minuteCaretPosition
+                            });
+                        }
+
+                        $timeout(function() {
+                            addFocusEvent();
+                            addBlurEvent();
+                        });
+                    }
 
                     // Set calendar date.
                     if (picker) {
@@ -211,8 +227,8 @@ angular.module('marcuraUI.components')
                 };
 
                 var setDateTime = function(date) {
-                    date.hour(Number(hoursElement.val()))
-                        .minute(Number(minutesElement.val()))
+                    date.hour(Number(hourElement.val()))
+                        .minute(Number(minuteElement.val()))
                         .second(0);
                 };
 
@@ -344,12 +360,12 @@ angular.module('marcuraUI.components')
 
                     var displayDate = dateElement.val().trim(),
                         isEmpty = displayDate === '',
-                        hours = Number(hoursElement.val()),
-                        minutes = Number(minutesElement.val()),
+                        hour = Number(hourElement.val()),
+                        minute = Number(minuteElement.val()),
                         date = MaDate.createEmpty();
 
                     // Check time.
-                    if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+                    if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
                         date = parseDate(displayDate);
                         date.offset(initialDateOffset);
                     } else {
@@ -408,17 +424,83 @@ angular.module('marcuraUI.components')
                     triggerChange(date);
                 };
 
+                var focusDate = function() {
+                    isDateFocused = true;
+                    isHourFocused = false;
+                    isMinuteFocused = false;
+                    scope.onFocus();
+                };
+
+                var focusHour = function() {
+                    isHourFocused = true;
+                    isDateFocused = false;
+                    isMinuteFocused = false;
+                    scope.onFocus();
+                };
+
+                var focusMinute = function() {
+                    isMinuteFocused = true;
+                    isDateFocused = false;
+                    isHourFocused = false;
+                    scope.onFocus();
+                };
+
+                var blurDate = function() {
+                    isDateFocused = false;
+                    scope.onBlur();
+                };
+
+                var blurHour = function() {
+                    isHourFocused = false;
+                    scope.onBlur();
+                };
+
+                var blurMinute = function() {
+                    isMinuteFocused = false;
+                    scope.onBlur();
+                };
+
+                var addFocusEvent = function() {
+                    // Remove the event in case it exists.
+                    removeFocusEvent();
+                    $('.ma-date-box-date', element).on('focus', focusDate);
+                    $('.ma-date-box-hour', element).on('focus', focusHour);
+                    $('.ma-date-box-minute', element).on('focus', focusMinute);
+                };
+
+                var removeFocusEvent = function() {
+                    $('.ma-date-box-date', element).off('focus', focusDate);
+                    $('.ma-date-box-hour', element).off('focus', focusHour);
+                    $('.ma-date-box-minute', element).off('focus', focusMinute);
+                };
+
+                var addBlurEvent = function() {
+                    // Remove the event in case it exists.
+                    removeBlurEvent();
+                    $('.ma-date-box-date', element).on('blur', blurDate);
+                    $('.ma-date-box-hour', element).on('blur', blurHour);
+                    $('.ma-date-box-minute', element).on('blur', blurMinute);
+                };
+
+                var removeBlurEvent = function() {
+                    $('.ma-date-box-date', element).off('blur', blurDate);
+                    $('.ma-date-box-hour', element).off('blur', blurHour);
+                    $('.ma-date-box-minute', element).off('blur', blurMinute);
+                };
+
                 setValidators();
                 scope.isFocused = false;
                 scope.isValid = true;
                 scope.isTouched = false;
 
                 scope.isResetEnabled = function() {
-                    return !scope.isDisabled && (dateElement.val() || hoursElement.val() !== '00' || minutesElement.val() !== '00');
+                    return !scope.isDisabled && (dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00');
                 };
 
                 scope.onFocus = function() {
-                    scope.isFocused = true;
+                    scope.$apply(function() {
+                        scope.isFocused = true;
+                    });
                 };
 
                 scope.onBlur = function() {
@@ -427,8 +509,10 @@ angular.module('marcuraUI.components')
                         $timeout.cancel(changePromise);
                     }
 
-                    scope.isFocused = false;
-                    changeDate();
+                    scope.$apply(function() {
+                        scope.isFocused = false;
+                        changeDate();
+                    });
                 };
 
                 scope.onKeydown = function(event) {
@@ -458,8 +542,8 @@ angular.module('marcuraUI.components')
                     // Change value after a timeout while the user is typing.
                     if (hasValueChanged && changeTimeout > 0) {
                         dateCaretPosition = dateElement.prop('selectionStart');
-                        hoursCaretPosition = hoursElement.prop('selectionStart');
-                        minutesCaretPosition = minutesElement.prop('selectionStart');
+                        hourCaretPosition = hourElement.prop('selectionStart');
+                        minuteCaretPosition = minuteElement.prop('selectionStart');
 
                         if (changePromise) {
                             $timeout.cancel(changePromise);
@@ -512,6 +596,9 @@ angular.module('marcuraUI.components')
                     previousDate = date;
                     initialDateOffset = date.offset();
                 }
+
+                addFocusEvent();
+                addBlurEvent();
 
                 $timeout(function() {
                     if (!scope.isDisabled) {
