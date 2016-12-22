@@ -1896,7 +1896,7 @@ angular.element(document).ready(function() {
                             ng-change="onChange()"\
                             placeholder="{{placeholder}}">\
                             <option></option>\
-                            <option ng-repeat="item in items | maSelectBoxOrderBy:orderBy" value="{{getOptionValue(item)}}">\
+                            <option ng-repeat="item in _items | maSelectBoxOrderBy:orderBy" value="{{getOptionValue(item)}}">\
                                 {{formatItem(item)}}\
                             </option>\
                         </select>';
@@ -1992,6 +1992,8 @@ angular.element(document).ready(function() {
                     hasIsNotEmptyValidator = false,
                     previousValue;
 
+                // We need a copy of items. See 'scope.$watch('items', ...)' for an answer why.
+                scope._items = angular.isArray(scope.items) ? angular.copy(scope.items) : [];
                 scope.previousSelectedItem = scope.previousSelectedItem || null;
                 scope.isAddMode = false;
                 scope.formatItem = scope.itemTemplate ||
@@ -2008,21 +2010,21 @@ angular.element(document).ready(function() {
                 scope.isAjax = angular.isObject(scope.ajax);
 
                 var isExistingItem = function(item) {
-                    if (!angular.isArray(scope.items)) {
+                    if (!angular.isArray(scope._items)) {
                         return false;
                     }
 
                     var isItemObject = scope.getItemValue(item) !== null;
 
-                    for (var i = 0; i < scope.items.length; i++) {
+                    for (var i = 0; i < scope._items.length; i++) {
                         if (isItemObject) {
                             // Search by value field.
-                            if (scope.getItemValue(scope.items[i]) === scope.getItemValue(item)) {
+                            if (scope.getItemValue(scope._items[i]) === scope.getItemValue(item)) {
                                 return true;
                             }
                         } else {
                             // Search by item itself as text.
-                            if (scope.items[i] === item) {
+                            if (scope._items[i] === item) {
                                 return true;
                             }
                         }
@@ -2041,10 +2043,10 @@ angular.element(document).ready(function() {
                         return itemValue;
                     }
 
-                    if (angular.isArray(scope.items)) {
-                        for (var i = 0; i < scope.items.length; i++) {
-                            if (scope.getItemValue(scope.items[i]) === itemValue.toString()) {
-                                return scope.items[i];
+                    if (angular.isArray(scope._items)) {
+                        for (var i = 0; i < scope._items.length; i++) {
+                            if (scope.getItemValue(scope._items[i]) === itemValue.toString()) {
+                                return scope._items[i];
                             }
                         }
                     }
@@ -2327,7 +2329,7 @@ angular.element(document).ready(function() {
 
                     if (!isInternalCall) {
                         $timeout(function() {
-                            // Trigger change event as user manually swithces between custom and selected items.
+                            // Trigger change event as user manually swithces between custom and selected item.
                             scope.change({
                                 maValue: scope.value,
                                 maOldValue: previousValue
@@ -2363,13 +2365,13 @@ angular.element(document).ready(function() {
                     }
 
                     // Get selected item from items by value field.
-                    // There is no 'items' array in AJAX mode.
+                    // There is no items array in AJAX mode.
                     if (!scope.isAjax) {
                         if (scope.itemValueField && !maHelper.isNullOrWhiteSpace(item)) {
-                            for (var i = 0; i < scope.items.length; i++) {
+                            for (var i = 0; i < scope._items.length; i++) {
 
-                                if (scope.getItemValue(scope.items[i]) === item.toString()) {
-                                    item = scope.items[i];
+                                if (scope.getItemValue(scope._items[i]) === item.toString()) {
+                                    item = scope._items[i];
                                     break;
                                 }
                             }
@@ -2416,6 +2418,44 @@ angular.element(document).ready(function() {
                     scope.runInitSelection = true;
                     selectData.initSelection();
                 };
+
+                scope.$watch('items', function(newItems, oldItems) {
+                    // When an array of items is completely replaced with a new array, angular-ui-select2
+                    // triggers a watcher which sets the value to undefined, which we do not want.
+                    // So instead of replacing an array, we clear it and repopulate with new items.
+                    if (angular.equals(newItems, oldItems)) {
+                        return;
+                    }
+
+                    scope._items.splice(0, scope._items.length);
+
+                    // Push new items to the array.
+                    Array.prototype.push.apply(scope._items, newItems);
+
+                    // Set value to refresh the mode.
+                    // E.g., let's say initial value is 'Vladivostok' and items is an empty array, so mode is 'add'.
+                    // Then items is set to an array containing 'Vladivostok', so
+                    // mode should be switched to 'select', because 'Vladivostok' is now exists in the list.
+                    if (scope.canAddItem) {
+                        setInternalValue(scope.value);
+
+                        // For some reason angular-ui-select2 does not trigger change for selectedItem
+                        // in this case, so we need to set it manually.
+                        // See node_modules\angular-ui-select2\src\select2.js line 121.
+                        $timeout(function() {
+                            if (angular.isObject(scope.value)) {
+                                var item = angular.copy(scope.value);
+                                item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
+                                item.id = scope.getItemValue(item);
+                                selectData.data(item);
+                            } else if (!scope.value) {
+                                selectData.data(null);
+                            } else {
+                                selectData.val(scope.value);
+                            }
+                        });
+                    }
+                }, true);
 
                 scope.$watch('value', function(newValue, oldValue) {
                     if (newValue === oldValue) {
