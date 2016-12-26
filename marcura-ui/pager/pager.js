@@ -35,16 +35,29 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
         },
         link: function(scope) {
             var pageCorrected = false;
-            // scope.internalPage = scope.page;
+
+            var triggerChange = function(page) {
+                scope.page = page;
+
+                // Postpone change event for $apply (which is being invoked by $timeout)
+                // to have time to take effect and update scope.value,
+                $timeout(function() {
+                    scope.change({
+                        maPage: page
+                    });
+                });
+            };
 
             scope.previousClick = function() {
                 var page = scope.getPage(scope.internalPage);
                 scope.internalPage = page <= 1 ? 1 : page - 1;
+                triggerChange(scope.internalPage);
             };
 
             scope.nextClick = function() {
                 var page = scope.getPage(scope.internalPage);
                 scope.internalPage = page >= scope.totalPages ? 1 : page + 1;
+                triggerChange(scope.internalPage);
             };
 
             scope.onChange = function(newValue, oldValue) {
@@ -62,15 +75,7 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 }
 
                 if (!pageCorrected) {
-                    scope.page = page;
-
-                    // Postpone change event for $apply (which is being invoked by $timeout)
-                    // to have time to take effect and update scope.value,
-                    $timeout(function() {
-                        scope.change({
-                            maPage: page
-                        });
-                    });
+                    triggerChange(page);
                 }
 
                 pageCorrected = false;
