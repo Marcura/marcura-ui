@@ -78,12 +78,14 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                     return;
                 }
 
+                var oldValue = previousValue;
                 scope.value = value;
                 previousValue = value;
 
                 $timeout(function() {
                     scope.change({
-                        maValue: value
+                        maValue: value,
+                        maOldValue: oldValue
                     });
                 });
             };
@@ -219,14 +221,17 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 }
 
                 var caretPosition = valueElement.prop('selectionStart');
+                previousValue = newValue;
                 valueElement.val(newValue);
                 validate();
 
                 // Restore caret position.
-                valueElement.prop({
-                    selectionStart: caretPosition,
-                    selectionEnd: caretPosition
-                });
+                if (scope.isFocused) {
+                    valueElement.prop({
+                        selectionStart: caretPosition,
+                        selectionEnd: caretPosition
+                    });
+                }
             });
 
             // Set initial value.

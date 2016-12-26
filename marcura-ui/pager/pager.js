@@ -17,8 +17,11 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                     click="previousClick()"\
                     is-disabled="getPage(internalPage) <= 1"\
                 ></ma-button\
-                ><input class="form-control input-sm" type="text" ng-model="internalPage"\
-                /><div class="ma-pager-text">of {{getPage(totalPages)}} pages</div\
+                ><ma-text-box\
+                    class="ma-pager-value"\
+                    change="onChange(maValue, maOldValue)"\
+                    value="internalPage">\
+                </ma-text-box><div class="ma-pager-text">of {{getPage(totalPages)}} pages</div\
                 ><ma-button\
                     class="ma-button-next"\
                     right-icon="chevron-right"\
@@ -32,7 +35,7 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
         },
         link: function(scope) {
             var pageCorrected = false;
-            scope.internalPage = scope.page;
+            // scope.internalPage = scope.page;
 
             scope.previousClick = function() {
                 var page = scope.getPage(scope.internalPage);
@@ -44,7 +47,7 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 scope.internalPage = page >= scope.totalPages ? 1 : page + 1;
             };
 
-            scope.$watch('internalPage', function(newValue, oldValue) {
+            scope.onChange = function(newValue, oldValue) {
                 var page = scope.getPage(newValue),
                     oldPage = scope.getPage(oldValue);
 
@@ -71,9 +74,10 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 }
 
                 pageCorrected = false;
-            });
+            };
 
-            scope.$watch('page', function(newValue, oldValue) {
+            $timeout(function() {
+                // Set initial value.
                 scope.internalPage = scope.page;
             });
 

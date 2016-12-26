@@ -1,4 +1,4 @@
-<div class="nodes nodes-padding-bottom-m">
+<div class="nodes nodes-padding-bottom-m nodes-text-box">
     <div class="nodes-item">
         <a href="#/home">Home</a>
     </div>
@@ -14,7 +14,7 @@
     <div class="nodes-item">
         <ma-text-box
             value="text1"
-            change="change1(maValue)"
+            change="change1(maValue, maOldValue)"
             blur="blur1(maValue)"
             focus="focus1(maValue)">
         </ma-text-box>
@@ -55,7 +55,7 @@
     <div class="nodes-item">
         <ma-text-box
             value="text4"
-            change="change4(maValue)"
+            change="change4(maValue, maOldValue)"
             change-timeout="1000">
         </ma-text-box>
     </div>

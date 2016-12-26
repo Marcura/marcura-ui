@@ -6,10 +6,11 @@ function textBoxPageController($scope) {
     $scope.text4 = '';
     $scope.text5 = '';
 
-    $scope.change1 = function(text) {
+    $scope.change1 = function(text, oldText) {
         console.log('change');
         console.log('event:', text);
         console.log('scope:', $scope.text1);
+        console.log('event old:', oldText);
     };
 
     $scope.blur1 = function(text) {
@@ -30,10 +31,11 @@ function textBoxPageController($scope) {
         console.log('scope:', $scope.text3);
     };
 
-    $scope.change4 = function(text) {
+    $scope.change4 = function(text, oldText) {
         console.log('change');
         console.log('event:', text);
         console.log('scope:', $scope.text4);
+        console.log('event old:', oldText);
     };
 
     $scope.change6 = function(text) {
