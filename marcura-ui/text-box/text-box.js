@@ -57,7 +57,9 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 keyupValue,
                 previousValue,
                 changePromise,
-                changeTimeout = Number(scope.changeTimeout);
+                changeTimeout = Number(scope.changeTimeout),
+                // Value at the moment of focus.
+                focusValue;
 
             var validate = function() {
                 scope.isValid = true;
@@ -151,6 +153,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
 
             scope.onFocus = function() {
                 scope.isFocused = true;
+                focusValue = scope.value;
 
                 scope.focus({
                     maValue: scope.value
@@ -166,7 +169,9 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 scope.isFocused = false;
                 changeValue();
                 scope.blur({
-                    maValue: scope.value
+                    maValue: scope.value,
+                    maOldValue: focusValue,
+                    maHasValueChanged: focusValue !== scope.value
                 });
             };
 

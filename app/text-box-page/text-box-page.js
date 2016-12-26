@@ -13,10 +13,12 @@ function textBoxPageController($scope) {
         console.log('event old:', oldText);
     };
 
-    $scope.blur1 = function(text) {
+    $scope.blur1 = function(text, oldText, hasChanged) {
         console.log('blur');
         console.log('event:', text);
         console.log('scope:', $scope.text1);
+        console.log('event old:', oldText);
+        console.log('hasChanged:', hasChanged);
     };
 
     $scope.focus1 = function(text) {
