@@ -226,6 +226,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function() {
         this.$get = function() {
@@ -971,27 +992,6 @@ angular.element(document).ready(function() {
         };
     }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
         restrict: 'E',
@@ -1037,11 +1037,11 @@ angular.element(document).ready(function() {
                     }">\
                     <div class="ma-multi-check-box-item" ng-repeat="item in items">\
                         <div class="ma-multi-check-box-background" ng-click="onChange(item)"></div>\
-                        <div class="ma-multi-check-box-text">{{getItemText(item)}}</div><ma-check-box\
+                        <ma-check-box\
                             size="sm"\
                             value="getItemMetadata(item).isSelected"\
                             is-disabled="isDisabled">\
-                        </ma-check-box>\
+                        </ma-check-box><div class="ma-multi-check-box-text">{{getItemText(item)}}</div>\
                     </div>\
                 </div>';
 
