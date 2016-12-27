@@ -115,117 +115,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            value: '=',
-            isDisabled: '=',
-            change: '&',
-            size: '@',
-            rtl: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-check-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-check-box-is-checked\': value === true,\
-                    \'ma-check-box-is-disabled\': isDisabled,\
-                    \'ma-check-box-has-text\': hasText,\
-                    \'ma-check-box-rtl\': rtl,\
-                    \'ma-check-box-is-focused\': isFocused\
-                }">\
-                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
-                <div class="ma-check-box-inner"></div>\
-                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element) {
-            var setTabindex = function() {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
-
-            var setText = function() {
-                scope.hasText = scope.text ? true : false;
-            };
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-check-box-' + scope._size;
-            scope.isFocused = false;
-
-            scope.onChange = function() {
-                if (!scope.isDisabled) {
-                    scope.value = !scope.value;
-
-                    $timeout(function() {
-                        scope.change({
-                            value: scope.value
-                        });
-                    });
-                }
-            };
-
-            scope.onFocus = function() {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function() {
-                if (!scope.isDisabled) {
-                    scope.isFocused = false;
-                }
-            };
-
-            scope.onKeypress = function(event) {
-                if (event.keyCode === maHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (!scope.isDisabled) {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            scope.$watch('isDisabled', function(newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            scope.$watch('text', function(newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setText();
-            });
-
-            setTabindex();
-            setText();
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
     return {
         restrict: 'E',
@@ -991,6 +880,117 @@ angular.element(document).ready(function() {
             }
         };
     }]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            value: '=',
+            isDisabled: '=',
+            change: '&',
+            size: '@',
+            rtl: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-check-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
+                ng-click="onChange()"\
+                ng-class="{\
+                    \'ma-check-box-is-checked\': value === true,\
+                    \'ma-check-box-is-disabled\': isDisabled,\
+                    \'ma-check-box-has-text\': hasText,\
+                    \'ma-check-box-rtl\': rtl,\
+                    \'ma-check-box-is-focused\': isFocused\
+                }">\
+                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
+                <div class="ma-check-box-inner"></div>\
+                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element) {
+            var setTabindex = function() {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
+            var setText = function() {
+                scope.hasText = scope.text ? true : false;
+            };
+
+            scope._size = scope.size ? scope.size : 'xs';
+            scope.cssClass = ' ma-check-box-' + scope._size;
+            scope.isFocused = false;
+
+            scope.onChange = function() {
+                if (!scope.isDisabled) {
+                    scope.value = !scope.value;
+
+                    $timeout(function() {
+                        scope.change({
+                            value: scope.value
+                        });
+                    });
+                }
+            };
+
+            scope.onFocus = function() {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function() {
+                if (!scope.isDisabled) {
+                    scope.isFocused = false;
+                }
+            };
+
+            scope.onKeypress = function(event) {
+                if (event.keyCode === maHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (!scope.isDisabled) {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            scope.$watch('isDisabled', function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            scope.$watch('text', function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setText();
+            });
+
+            setTabindex();
+            setText();
+        }
+    };
+}]);
 })();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
@@ -2441,29 +2441,31 @@ angular.element(document).ready(function() {
                     // Push new items to the array.
                     Array.prototype.push.apply(scope._items, newItems);
 
-                    // Set value to refresh the mode.
-                    // E.g., let's say initial value is 'Vladivostok' and items is an empty array, so mode is 'add'.
+                    // Set value to refresh displayed value and mode.
+                    // 1 scenario:
+                    // Initial value is 'Vladivostok' and items is an empty array, so mode is 'add'.
                     // Then items is set to an array containing 'Vladivostok', so
                     // mode should be switched to 'select', because 'Vladivostok' is now exists in the list.
-                    if (scope.canAddItem) {
-                        setInternalValue(scope.value);
+                    // 2 scenario:
+                    // Initial value is 'Vladivostok' and items is an empty array. Select2 displays empty value.
+                    // Then items are loaded asynchronously and Select2 value needs to be refreshed.
+                    setInternalValue(scope.value);
 
-                        // For some reason angular-ui-select2 does not trigger change for selectedItem
-                        // in this case, so we need to set it manually.
-                        // See node_modules\angular-ui-select2\src\select2.js line 121.
-                        $timeout(function() {
-                            if (angular.isObject(scope.value)) {
-                                var item = angular.copy(scope.value);
-                                item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
-                                item.id = scope.getItemValue(item);
-                                selectData.data(item);
-                            } else if (!scope.value) {
-                                selectData.data(null);
-                            } else {
-                                selectData.val(scope.value);
-                            }
-                        });
-                    }
+                    // For some reason angular-ui-select2 does not trigger change for selectedItem
+                    // in this case, so we need to set it manually.
+                    // See node_modules\angular-ui-select2\src\select2.js line 121.
+                    $timeout(function() {
+                        if (angular.isObject(scope.value)) {
+                            var item = angular.copy(scope.value);
+                            item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
+                            item.id = scope.getItemValue(item);
+                            selectData.data(item);
+                        } else if (!scope.value) {
+                            selectData.data(null);
+                        } else {
+                            selectData.val(scope.value);
+                        }
+                    });
                 }, true);
 
                 scope.$watch('value', function(newValue, oldValue) {

@@ -612,29 +612,31 @@ angular.module('marcuraUI.components')
                     // Push new items to the array.
                     Array.prototype.push.apply(scope._items, newItems);
 
-                    // Set value to refresh the mode.
-                    // E.g., let's say initial value is 'Vladivostok' and items is an empty array, so mode is 'add'.
+                    // Set value to refresh displayed value and mode.
+                    // 1 scenario:
+                    // Initial value is 'Vladivostok' and items is an empty array, so mode is 'add'.
                     // Then items is set to an array containing 'Vladivostok', so
                     // mode should be switched to 'select', because 'Vladivostok' is now exists in the list.
-                    if (scope.canAddItem) {
-                        setInternalValue(scope.value);
+                    // 2 scenario:
+                    // Initial value is 'Vladivostok' and items is an empty array. Select2 displays empty value.
+                    // Then items are loaded asynchronously and Select2 value needs to be refreshed.
+                    setInternalValue(scope.value);
 
-                        // For some reason angular-ui-select2 does not trigger change for selectedItem
-                        // in this case, so we need to set it manually.
-                        // See node_modules\angular-ui-select2\src\select2.js line 121.
-                        $timeout(function() {
-                            if (angular.isObject(scope.value)) {
-                                var item = angular.copy(scope.value);
-                                item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
-                                item.id = scope.getItemValue(item);
-                                selectData.data(item);
-                            } else if (!scope.value) {
-                                selectData.data(null);
-                            } else {
-                                selectData.val(scope.value);
-                            }
-                        });
-                    }
+                    // For some reason angular-ui-select2 does not trigger change for selectedItem
+                    // in this case, so we need to set it manually.
+                    // See node_modules\angular-ui-select2\src\select2.js line 121.
+                    $timeout(function() {
+                        if (angular.isObject(scope.value)) {
+                            var item = angular.copy(scope.value);
+                            item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
+                            item.id = scope.getItemValue(item);
+                            selectData.data(item);
+                        } else if (!scope.value) {
+                            selectData.data(null);
+                        } else {
+                            selectData.val(scope.value);
+                        }
+                    });
                 }, true);
 
                 scope.$watch('value', function(newValue, oldValue) {
