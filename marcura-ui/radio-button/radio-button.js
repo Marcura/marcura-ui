@@ -25,7 +25,7 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                     }">\
                     <div class="ma-radio-button-item" ng-class="{\
                             \'ma-radio-button-item-is-selected\': isItemSelected(item)\
-                        }" ng-style="{ width: 100 / scope.items.length + \'%\' }"\
+                        }" ng-style="{ width: (100 / items.length) + \'%\' }"\
                         ng-repeat="item in items">\
                         <ma-button\
                             class="ma-button-radio"\
