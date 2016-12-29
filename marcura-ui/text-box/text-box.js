@@ -106,6 +106,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 scope.isTouched = true;
 
                 if (!hasValueChanged()) {
+                    validate();
                     return;
                 }
 
