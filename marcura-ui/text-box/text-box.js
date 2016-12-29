@@ -24,7 +24,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
             <div class="ma-text-box"\
                 ng-class="{\
                     \'ma-text-box-is-disabled\': isDisabled,\
-                    \'ma-text-box-is-focused\': isFocused,\
+                    \'ma-text-box-is-focused\': isValueFocused,\
                     \'ma-text-box-is-invalid\': !isValid,\
                     \'ma-text-box-is-touched\': isTouched,\
                     \'ma-text-box-can-reset\': canReset,\
@@ -33,14 +33,14 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
                     type="text"\
                     placeholder="{{placeholder}}"\
-                    ng-focus="onFocus()"\
-                    ng-blur="onBlur()"\
+                    ng-focus="onFocus(\'value\')"\
                     ng-keydown="onKeydown($event)"\
                     ng-disabled="isDisabled"/>\
                 <ma-button class="ma-button-reset"\
                     ng-show="canReset" size="xs" modifier="simple"\
                     right-icon="times-circle"\
                     click="onReset()"\
+                    ng-focus="onFocus()"\
                     is-disabled="!isResetEnabled()">\
                 </ma-button>\
             </div>';
@@ -49,6 +49,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
         },
         link: function(scope, element) {
             var valueElement = angular.element(element[0].querySelector('.ma-text-box-value')),
+                resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset')),
                 validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
                 hasIsNotEmptyValidator = false,
@@ -59,7 +60,8 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 changePromise,
                 changeTimeout = Number(scope.changeTimeout),
                 // Value at the moment of focus.
-                focusValue;
+                focusValue,
+                isFocusLost = true;
 
             var validate = function() {
                 scope.isValid = true;
@@ -117,7 +119,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 }
             };
 
-            scope.isFocused = false;
+            scope.isValueFocused = false;
             scope.isTouched = false;
 
             // Set up validators.
@@ -152,28 +154,53 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 valueElement.focus();
             };
 
-            scope.onFocus = function() {
-                scope.isFocused = true;
-                focusValue = scope.value;
+            scope.onFocus = function(elementName) {
+                if (elementName === 'value') {
+                    scope.isValueFocused = true;
+                }
 
-                scope.focus({
-                    maValue: scope.value
-                });
+                if (isFocusLost) {
+                    focusValue = scope.value;
+
+                    scope.focus({
+                        maValue: scope.value
+                    });
+                }
+
+                isFocusLost = false;
             };
 
-            scope.onBlur = function() {
+            valueElement.focusout(function(event) {
+                onFocusout(event);
+            });
+
+            resetButtonElement.focusout(function(event) {
+                onFocusout(event);
+            });
+
+            var onFocusout = function(event) {
+                var elementTo = angular.element(event.relatedTarget);
+                isFocusLost = elementTo[0] !== valueElement[0] && elementTo[0] !== resetButtonElement[0];
+
                 // Cancel change if it is already in process to prevent the event from firing twice.
                 if (changePromise) {
                     $timeout.cancel(changePromise);
                 }
 
-                scope.isFocused = false;
-                changeValue();
-                scope.blur({
-                    maValue: scope.value,
-                    maOldValue: focusValue,
-                    maHasValueChanged: focusValue !== scope.value
+                // Use safeApply to avoid apply error when Reset icon is clicked.
+                maHelper.safeApply(function() {
+                    scope.isValueFocused = false;
                 });
+
+                if (isFocusLost) {
+                    changeValue();
+
+                    scope.blur({
+                        maValue: scope.value,
+                        maOldValue: focusValue,
+                        maHasValueChanged: focusValue !== scope.value
+                    });
+                }
             };
 
             scope.onKeydown = function(event) {
@@ -232,7 +259,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 validate();
 
                 // Restore caret position.
-                if (scope.isFocused) {
+                if (scope.isValueFocused) {
                     valueElement.prop({
                         selectionStart: caretPosition,
                         selectionEnd: caretPosition

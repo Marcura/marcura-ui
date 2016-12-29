@@ -1,4 +1,4 @@
-angular.module('marcuraUI.services').factory('maHelper', ['MaDate', function(MaDate) {
+angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope', function(MaDate, $rootScope) {
     return {
         keyCode: {
             backspace: 8,
@@ -216,6 +216,19 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', function(MaD
                 return true;
             } catch (error) {
                 return false;
+            }
+        },
+
+        safeApply: function(method) {
+            var phase = $rootScope.$$phase;
+
+            if (phase !== '$apply' && phase !== '$digest') {
+                $rootScope.$apply(method);
+                return;
+            }
+
+            if (method && typeof method === 'function') {
+                method();
             }
         }
     };
