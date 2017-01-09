@@ -35,6 +35,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 }">\
                 <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
                     type="text"\
+                    autocomplete="off"\
                     placeholder="{{placeholder}}"\
                     ng-focus="onFocus(\'value\')"\
                     ng-keydown="onKeydown($event)"\

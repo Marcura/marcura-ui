@@ -40,6 +40,27 @@ angular.element(document).ready(function() {
     }
 });
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maButton', ['maHelper', function(maHelper) {
     return {
         restrict: 'E',
@@ -111,27 +132,6 @@ angular.element(document).ready(function() {
             scope.isLink = function functionName() {
                 return scope.kind === 'link';
             };
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -4319,6 +4319,7 @@ angular.element(document).ready(function() {
                 }">\
                 <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
                     type="text"\
+                    autocomplete="off"\
                     placeholder="{{placeholder}}"\
                     ng-focus="onFocus(\'value\')"\
                     ng-keydown="onKeydown($event)"\
