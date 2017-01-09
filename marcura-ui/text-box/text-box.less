@@ -31,8 +31,17 @@
         }
     }
 
-    &-can-reset {
+    &-can-reset,
+    &-can-toggle-password {
         padding-right: 29px;
+    }
+
+    &-can-reset&-can-toggle-password {
+        padding-right: 58px;
+
+        .ma-button.ma-button-toggle-password {
+            right: 29px;
+        }
     }
 
     &-value {
@@ -51,5 +60,38 @@
         padding: 5px 10px;
         border: 1px solid @input-border-color;
         background-color: @input-background-color;
+    }
+
+    .ma-button.ma-button-toggle-password {
+        position: absolute;
+        top: 0;
+        right: 0;
+        border-left: 0;
+        .box-shadow(none);
+    }
+
+    .ma-button-toggle-password .ma-button-icon {
+        font-size: 20px;
+        text-shadow: none;
+        color: #bebebe;
+    }
+
+    .ma-button-toggle-password.ma-button-is-disabled {
+        background-color: @input-background-color-disabled;
+    }
+
+    .ma-button-toggle-password.ma-button-is-disabled .ma-button-icon {
+        color: inherit;
+        opacity: 0.45;
+    }
+
+    &-is-toggle-password-disabled {
+        .ma-button-toggle-password.ma-button-is-disabled {
+            background-color: #ffffff;
+
+            .ma-button-icon {
+                opacity: 0.15;
+            }
+        }
     }
 }

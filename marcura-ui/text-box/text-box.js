@@ -14,7 +14,8 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
             focus: '&',
             changeTimeout: '=',
             canReset: '=',
-            placeholder: '@'
+            placeholder: '@',
+            hasShowPasswordButton: '='
         },
         replace: true,
         template: function(element, attributes) {
@@ -28,7 +29,9 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                     \'ma-text-box-is-invalid\': !isValid,\
                     \'ma-text-box-is-touched\': isTouched,\
                     \'ma-text-box-can-reset\': canReset,\
-                    \'ma-text-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled()\
+                    \'ma-text-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
+                    \'ma-text-box-can-toggle-password\': canTogglePassword,\
+                    \'ma-text-box-is-toggle-password-disabled\': canTogglePassword && !isDisabled && !isTogglePasswordEnabled()\
                 }">\
                 <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
                     type="text"\
@@ -36,6 +39,13 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                     ng-focus="onFocus(\'value\')"\
                     ng-keydown="onKeydown($event)"\
                     ng-disabled="isDisabled"/>\
+                <ma-button class="ma-button-toggle-password"\
+                    ng-show="canTogglePassword" size="xs" modifier="simple"\
+                    right-icon="{{isPasswordVisible ? \'eye-slash\' : \'eye\'}}"\
+                    click="togglePassword()"\
+                    ng-focus="onFocus()"\
+                    is-disabled="!isTogglePasswordEnabled()">\
+                </ma-button>\
                 <ma-button class="ma-button-reset"\
                     ng-show="canReset" size="xs" modifier="simple"\
                     right-icon="times-circle"\
@@ -50,6 +60,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
         link: function(scope, element) {
             var valueElement = angular.element(element[0].querySelector('.ma-text-box-value')),
                 resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset')),
+                togglePasswordButtonElement = angular.element(element[0].querySelector('.ma-button-toggle-password')),
                 validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
                 hasIsNotEmptyValidator = false,
@@ -121,6 +132,12 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
 
             scope.isValueFocused = false;
             scope.isTouched = false;
+            scope.canTogglePassword = false;
+            scope.isPasswordVisible = false;
+
+            if (scope.type === 'password') {
+                scope.canTogglePassword = scope.hasShowPasswordButton !== false;
+            }
 
             // Set up validators.
             for (var i = 0; i < validators.length; i++) {
@@ -178,9 +195,31 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 onFocusout(event);
             });
 
+            togglePasswordButtonElement.focusout(function(event) {
+                onFocusout(event);
+            });
+
+            scope.togglePassword = function() {
+                scope.isPasswordVisible = !scope.isPasswordVisible;
+                valueElement[0].type = scope.isPasswordVisible ? 'text' : 'password';
+            };
+
+            scope.isTogglePasswordEnabled = function() {
+                return !scope.isDisabled && valueElement.val() !== '';
+            };
+
             var onFocusout = function(event) {
                 var elementTo = angular.element(event.relatedTarget);
-                isFocusLost = elementTo[0] !== valueElement[0] && elementTo[0] !== resetButtonElement[0];
+
+                // Trigger blur event when focus goes to an element outside the component.
+                if (scope.canTogglePassword) {
+                    isFocusLost = elementTo[0] !== valueElement[0] &&
+                        elementTo[0] !== togglePasswordButtonElement[0] &&
+                        elementTo[0] !== resetButtonElement[0];
+                } else {
+                    isFocusLost = elementTo[0] !== valueElement[0] &&
+                        elementTo[0] !== resetButtonElement[0];
+                }
 
                 // Cancel change if it is already in process to prevent the event from firing twice.
                 if (changePromise) {
