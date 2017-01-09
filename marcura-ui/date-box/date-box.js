@@ -498,7 +498,8 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.onFocus = function() {
-                    scope.$apply(function() {
+                    // Use safeApply to avoid apply error when Reset icon is clicked.
+                    maHelper.safeApply(function() {
                         scope.isFocused = true;
                     });
                 };
