@@ -29,6 +29,16 @@
         }
     }
 
+    &-is-invalid&-is-touched {
+        &.ma-check-box-is-focused .ma-check-box-inner {
+            .box-shadow(@input-shadow-invalid);
+        }
+
+        .ma-check-box-inner {
+            border-color: @input-border-color-invalid;
+        }
+    }
+
     &-text {
         line-height: 22px;
     }

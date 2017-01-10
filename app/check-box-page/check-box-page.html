@@ -1,4 +1,4 @@
-<div class="nodes nodes-padding-bottom-m">
+<div class="nodes nodes-padding-bottom-m nodes-check-box">
     <div class="nodes-item">
         <a href="#/home">Home</a>
     </div>
@@ -9,46 +9,46 @@
         </div>
     </div>
     <div class="nodes-item">
-        <h2>Extra small</h1>
+        <h2>Basic</h1>
     </div>
     <div class="nodes-item">
         <ma-check-box
             text="Tokai"
             value="false"
-            change="change(value)">
-        </ma-check-box>
-        <ma-check-box
+            change="change(maValue)">
+        </ma-check-box><!--
+        --><ma-check-box
             text="Vladivostok"
             value="true"
-            change="change(value)">
-        </ma-check-box>
-        <ma-check-box
+            change="change(maValue)">
+        </ma-check-box><!--
+        --><ma-check-box
             text="Navlakhi"
             value="false"
-            change="change(value)">
+            change="change(maValue)">
         </ma-check-box>
     </div>
     <div class="nodes-item">
-        <h2>Small</h1>
+        <h2>Large size</h1>
     </div>
     <div class="nodes-item">
         <ma-check-box
             size="sm"
             text="Tokai"
             value="false"
-            change="change(value)">
-        </ma-check-box>
-        <ma-check-box
+            change="change(maValue)">
+        </ma-check-box><!--
+        --><ma-check-box
             size="sm"
             text="Vladivostok"
             value="true"
-            change="change(value)">
-        </ma-check-box>
-        <ma-check-box
+            change="change(maValue)">
+        </ma-check-box><!--
+        --><ma-check-box
             size="sm"
             text="Navlakhi"
             value="false"
-            change="change(value)">
+            change="change(maValue)">
         </ma-check-box>
     </div>
     <div class="nodes-item">
@@ -59,19 +59,42 @@
             is-disabled="true"
             text="Tokai"
             value="false"
-            change="change(value)">
-        </ma-check-box>
-        <ma-check-box
+            change="change(maValue)">
+        </ma-check-box><!--
+        --><ma-check-box
             is-disabled="true"
             text="Vladivostok"
             value="true"
-            change="change(value)">
-        </ma-check-box>
-        <ma-check-box
+            change="change(maValue)">
+        </ma-check-box><!--
+        --><ma-check-box
             is-disabled="isDisabled"
             text="Navlakhi"
             value="false"
-            change="change(value)">
+            change="change(maValue)">
+        </ma-check-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Required</h1>
+    </div>
+    <div class="nodes-item">
+        <ma-check-box
+            is-required="true"
+            text="Tokai"
+            value="false"
+            change="change(maValue)">
+        </ma-check-box><!--
+        --><ma-check-box
+            is-required="true"
+            text="Vladivostok"
+            value="true"
+            change="change(maValue)">
+        </ma-check-box><!--
+        --><ma-check-box
+            is-required="true"
+            text="Navlakhi"
+            value="false"
+            change="change(maValue)">
         </ma-check-box>
     </div>
 </div>

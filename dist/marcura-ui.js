@@ -115,7 +115,7 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', function(maHelper, $timeout) {
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function(maHelper, $timeout, maValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -124,7 +124,10 @@ angular.element(document).ready(function() {
             isDisabled: '=',
             change: '&',
             size: '@',
-            rtl: '='
+            rtl: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
         },
         replace: true,
         template: function() {
@@ -139,7 +142,9 @@ angular.element(document).ready(function() {
                     \'ma-check-box-is-disabled\': isDisabled,\
                     \'ma-check-box-has-text\': hasText,\
                     \'ma-check-box-rtl\': rtl,\
-                    \'ma-check-box-is-focused\': isFocused\
+                    \'ma-check-box-is-focused\': isFocused,\
+                    \'ma-check-box-is-invalid\': !isValid,\
+                    \'ma-check-box-is-touched\': isTouched\
                 }">\
                 <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
                 <div class="ma-check-box-inner"></div>\
@@ -149,6 +154,10 @@ angular.element(document).ready(function() {
             return html;
         },
         link: function(scope, element) {
+            var validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
             var setTabindex = function() {
                 if (scope.isDisabled) {
                     element.removeAttr('tabindex');
@@ -164,14 +173,36 @@ angular.element(document).ready(function() {
             scope._size = scope.size ? scope.size : 'xs';
             scope.cssClass = ' ma-check-box-' + scope._size;
             scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var validate = function() {
+                scope.isValid = true;
+                scope.isTouched = true;
+
+                // Remove 'false' value for 'IsNotEmpty' to work correctly.
+                var value = scope.value === false ? null : scope.value;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        var validator = validators[i];
+
+                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
 
             scope.onChange = function() {
                 if (!scope.isDisabled) {
                     scope.value = !scope.value;
+                    validate();
 
                     $timeout(function() {
                         scope.change({
-                            value: scope.value
+                            maValue: scope.value
                         });
                     });
                 }
@@ -184,9 +215,13 @@ angular.element(document).ready(function() {
             };
 
             scope.onBlur = function() {
-                if (!scope.isDisabled) {
-                    scope.isFocused = false;
+                if (scope.isDisabled) {
+                    return;
                 }
+
+                scope.isFocused = false;
+
+                validate();
             };
 
             scope.onKeypress = function(event) {
@@ -219,6 +254,35 @@ angular.element(document).ready(function() {
 
                 setText();
             });
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(maValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isValid = function() {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function() {
+                    validate();
+                };
+            }
 
             setTabindex();
             setText();

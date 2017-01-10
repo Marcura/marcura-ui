@@ -1,0 +1,7 @@
+.nodes-check-box .nodes-item .ma-check-box {
+    margin-right: 10px;
+}
+
+.nodes-check-box .nodes-item .ma-check-box:last-child {
+    margin-right: 0;
+}

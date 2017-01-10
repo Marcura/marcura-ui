@@ -1,7 +1,7 @@
-.nodes-item .ma-radio-box {
+.nodes-radio-box .nodes-item .ma-radio-box {
     margin-right: 10px;
 }
 
-.nodes-item .ma-radio-box:last-child {
+.nodes-radio-box .nodes-item .ma-radio-box:last-child {
     margin-right: 0;
 }
