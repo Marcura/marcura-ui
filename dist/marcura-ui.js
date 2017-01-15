@@ -1336,70 +1336,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            scope.calculateLeft = function(stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function() {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function(stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', '$sce', 'maValidators', function(maHelper, $timeout, $sce, maValidators) {
     var radioBoxes = {};
 
@@ -1697,6 +1633,70 @@ angular.element(document).ready(function() {
             });
 
             setTabindex();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            scope.calculateLeft = function(stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function() {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function(stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
         }
     };
 }]);
@@ -3906,75 +3906,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-side-menu">\
-                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.hidden" ng-class="{\
-                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
-                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
-                    }"\
-                    ng-click="onSelect(item)">\
-                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
-                    <div class="ma-side-menu-text">{{item.text}}</div>\
-                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function(item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function(item) {
-                if (item.isDisabled) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -4073,6 +4004,75 @@ angular.element(document).ready(function() {
                     }
                 });
             });
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-side-menu">\
+                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.hidden" ng-class="{\
+                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
+                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
+                    }"\
+                    ng-click="onSelect(item)">\
+                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
+                    <div class="ma-side-menu-text">{{item.text}}</div>\
+                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function(item) {
+                if (item.isDisabled) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function(item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
         }
     };
 }]);
@@ -4364,7 +4364,8 @@ angular.element(document).ready(function() {
             changeTimeout: '=',
             canReset: '=',
             placeholder: '@',
-            hasShowPasswordButton: '='
+            hasShowPasswordButton: '=',
+            trim: '='
         },
         replace: true,
         template: function(element, attributes) {
@@ -4422,7 +4423,21 @@ angular.element(document).ready(function() {
                 changeTimeout = Number(scope.changeTimeout),
                 // Value at the moment of focus.
                 focusValue,
-                isFocusLost = true;
+                isFocusLost = true,
+                trim = scope.trim === false ? false : true,
+                isInternalChange = false;
+
+            var setPreviousValue = function(value) {
+                // Convert the value to string if it's a number, for example,
+                // because a number cannot be trimmed.
+                value = (maHelper.isNullOrUndefined(value) ? '' : value).toString();
+
+                if (trim) {
+                    value = value.trim();
+                }
+
+                previousValue = value;
+            };
 
             var validate = function() {
                 scope.isValid = true;
@@ -4439,13 +4454,15 @@ angular.element(document).ready(function() {
             };
 
             var triggerChange = function(value) {
-                if (previousValue === value) {
+                if (!hasValueChanged(value)) {
                     return;
                 }
 
-                var oldValue = previousValue;
+                isInternalChange = true;
+                var oldValue = trim ? previousValue.trim() : previousValue;
+                value = trim ? value.trim() : value;
                 scope.value = value;
-                previousValue = value;
+                setPreviousValue(value);
 
                 $timeout(function() {
                     scope.change({
@@ -4455,20 +4472,21 @@ angular.element(document).ready(function() {
                 });
             };
 
-            var hasValueChanged = function() {
-                var value = valueElement.val();
+            var hasValueChanged = function(value) {
+                value = maHelper.isNullOrUndefined(value) ? '' : value;
+                var oldValue = maHelper.isNullOrUndefined(previousValue) ? '' : previousValue;
 
-                if (maHelper.isNullOrUndefined(previousValue) && value === '') {
-                    return false;
+                if (trim) {
+                    return oldValue.trim() !== value.trim();
                 }
 
-                return previousValue !== value;
+                return oldValue !== value;
             };
 
             var changeValue = function() {
                 scope.isTouched = true;
 
-                if (!hasValueChanged()) {
+                if (!hasValueChanged(valueElement.val())) {
                     validate();
                     return;
                 }
@@ -4514,9 +4532,10 @@ angular.element(document).ready(function() {
                     return;
                 }
 
-                previousValue = valueElement.val();
+                setPreviousValue(valueElement.val());
                 scope.isTouched = true;
-                triggerChange(null);
+                valueElement.val('');
+                triggerChange('');
                 validate();
                 valueElement.focus();
             };
@@ -4638,12 +4657,17 @@ angular.element(document).ready(function() {
             });
 
             scope.$watch('value', function(newValue, oldValue) {
+                if (isInternalChange) {
+                    isInternalChange = false;
+                    return;
+                }
+
                 if (newValue === oldValue) {
                     return;
                 }
 
                 var caretPosition = valueElement.prop('selectionStart');
-                previousValue = newValue;
+                setPreviousValue(newValue);
                 valueElement.val(newValue);
                 validate();
 
@@ -4659,7 +4683,7 @@ angular.element(document).ready(function() {
             // Set initial value.
             valueElement.val(scope.value);
             validate();
-            previousValue = scope.value;
+            setPreviousValue(scope.value);
 
             // Prepare API instance.
             if (scope.instance) {

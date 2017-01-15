@@ -4,7 +4,7 @@ var gulp = require('gulp'),
     del = require('del'),
     uglify = require('gulp-uglify'),
     concat = require('gulp-concat'),
-    minifyCss = require('gulp-minify-css'),
+    cleanCss = require('gulp-clean-css'),
     less = require('gulp-less'),
     wrap = require('gulp-wrap'),
     karma = require('karma'),
@@ -63,7 +63,7 @@ gulp.task('copy-css', function() {
             this.emit('end');
         }))
         .pipe(concat('marcura-ui.min.css'))
-        .pipe(minifyCss())
+        .pipe(cleanCss())
         .pipe(gulp.dest(paths.dist.root))
         .pipe(browserSync.stream());
 });

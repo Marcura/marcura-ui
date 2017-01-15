@@ -1,7 +1,7 @@
 angular.module('app.controllers').controller('textBoxPageController', textBoxPageController);
 
 function textBoxPageController($scope) {
-    $scope.text1 = '';
+    // $scope.text1 = '';
     $scope.text3 = '';
     $scope.text4 = '';
     $scope.text5 = '';
@@ -12,6 +12,7 @@ function textBoxPageController($scope) {
         console.log('event:', text);
         console.log('scope:', $scope.text1);
         console.log('event old:', oldText);
+        console.log('---');
     };
 
     $scope.blur1 = function(text, oldText, hasChanged) {
@@ -20,18 +21,21 @@ function textBoxPageController($scope) {
         console.log('scope:', $scope.text1);
         console.log('event old:', oldText);
         console.log('hasChanged:', hasChanged);
+        console.log('---');
     };
 
     $scope.focus1 = function(text) {
         console.log('focus');
         console.log('event:', text);
         console.log('scope:', $scope.text1);
+        console.log('---');
     };
 
     $scope.change3 = function(text) {
         console.log('change');
         console.log('event:', text);
         console.log('scope:', $scope.text3);
+        console.log('---');
     };
 
     $scope.change4 = function(text, oldText) {
@@ -39,12 +43,14 @@ function textBoxPageController($scope) {
         console.log('event:', text);
         console.log('scope:', $scope.text4);
         console.log('event old:', oldText);
+        console.log('---');
     };
 
     $scope.change6 = function(text) {
         console.log('change');
         console.log('event:', text);
         console.log('scope:', $scope.text6);
+        console.log('---');
     };
 
     $scope.change7 = function(text, oldText) {
