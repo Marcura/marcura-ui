@@ -348,6 +348,12 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 scope.instance.isValid = function() {
                     return scope.isValid;
                 };
+
+                scope.instance.focus = function() {
+                    if (!scope.isValueFocused) {
+                        valueElement.focus();
+                    }
+                };
             }
         }
     };
