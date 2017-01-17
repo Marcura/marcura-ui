@@ -1,5 +1,5 @@
 {
-    "version": "0.25.23",
+    "version": "0.25.24",
     "name": "marcura-ui",
     "description": "Marcura UI",
     "author": "Marcura",
@@ -26,7 +26,7 @@
         "gulp": "3.9.1",
         "gulp-uglify": "1.5.4",
         "gulp-concat": "2.6.0",
-        "gulp-minify-css": "1.2.4",
+        "gulp-clean-css": "2.3.2",
         "gulp-less": "3.0.1",
         "gulp-wrap": "0.13.0",
         "karma": "1.1.1",
@@ -36,7 +36,7 @@
         "gulp-jshint": "2.0.1",
         "express": "4.13.3",
         "ui-select": "0.19.1",
-        "pace": "git+https://github.com/HubSpot/pace.git"
+        "pace": "HubSpot/pace"
     },
     "main": "server.js",
     "scripts": {

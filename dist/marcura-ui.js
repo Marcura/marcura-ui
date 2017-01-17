@@ -115,27 +115,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function(maHelper, $timeout, maValidators) {
     return {
         restrict: 'E',
@@ -307,6 +286,27 @@ angular.element(document).ready(function() {
 
             setTabindex();
             setText();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1701,35 +1701,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            isDisabled: '=',
-            click: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-reset-value" ng-class="{\
-                    \'ma-reset-value-is-disabled\': isDisabled\
-                }"\
-                ng-click="onClick()">\
-                <i class="fa fa-times"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'maValidators', 'maHelper', function($timeout, maValidators, maHelper) {
     return {
         restrict: 'E',
@@ -1888,6 +1859,35 @@ angular.element(document).ready(function() {
                     validate(scope.value);
                 };
             }
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            isDisabled: '=',
+            click: '&'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
+                <i class="fa fa-times"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
         }
     };
 }]);
@@ -4364,7 +4364,8 @@ angular.element(document).ready(function() {
             changeTimeout: '=',
             canReset: '=',
             placeholder: '@',
-            hasShowPasswordButton: '='
+            hasShowPasswordButton: '=',
+            trim: '='
         },
         replace: true,
         template: function(element, attributes) {
@@ -4422,7 +4423,21 @@ angular.element(document).ready(function() {
                 changeTimeout = Number(scope.changeTimeout),
                 // Value at the moment of focus.
                 focusValue,
-                isFocusLost = true;
+                isFocusLost = true,
+                trim = scope.trim === false ? false : true,
+                isInternalChange = false;
+
+            var setPreviousValue = function(value) {
+                // Convert the value to string if it's a number, for example,
+                // because a number cannot be trimmed.
+                value = (maHelper.isNullOrUndefined(value) ? '' : value).toString();
+
+                if (trim) {
+                    value = value.trim();
+                }
+
+                previousValue = value;
+            };
 
             var validate = function() {
                 scope.isValid = true;
@@ -4439,13 +4454,15 @@ angular.element(document).ready(function() {
             };
 
             var triggerChange = function(value) {
-                if (previousValue === value) {
+                if (!hasValueChanged(value)) {
                     return;
                 }
 
-                var oldValue = previousValue;
+                isInternalChange = true;
+                var oldValue = trim ? previousValue.trim() : previousValue;
+                value = trim ? value.trim() : value;
                 scope.value = value;
-                previousValue = value;
+                setPreviousValue(value);
 
                 $timeout(function() {
                     scope.change({
@@ -4455,20 +4472,21 @@ angular.element(document).ready(function() {
                 });
             };
 
-            var hasValueChanged = function() {
-                var value = valueElement.val();
+            var hasValueChanged = function(value) {
+                value = maHelper.isNullOrUndefined(value) ? '' : value;
+                var oldValue = maHelper.isNullOrUndefined(previousValue) ? '' : previousValue;
 
-                if (maHelper.isNullOrUndefined(previousValue) && value === '') {
-                    return false;
+                if (trim) {
+                    return oldValue.trim() !== value.trim();
                 }
 
-                return previousValue !== value;
+                return oldValue !== value;
             };
 
             var changeValue = function() {
                 scope.isTouched = true;
 
-                if (!hasValueChanged()) {
+                if (!hasValueChanged(valueElement.val())) {
                     validate();
                     return;
                 }
@@ -4514,9 +4532,10 @@ angular.element(document).ready(function() {
                     return;
                 }
 
-                previousValue = valueElement.val();
+                setPreviousValue(valueElement.val());
                 scope.isTouched = true;
-                triggerChange(null);
+                valueElement.val('');
+                triggerChange('');
                 validate();
                 valueElement.focus();
             };
@@ -4638,12 +4657,17 @@ angular.element(document).ready(function() {
             });
 
             scope.$watch('value', function(newValue, oldValue) {
+                if (isInternalChange) {
+                    isInternalChange = false;
+                    return;
+                }
+
                 if (newValue === oldValue) {
                     return;
                 }
 
                 var caretPosition = valueElement.prop('selectionStart');
-                previousValue = newValue;
+                setPreviousValue(newValue);
                 valueElement.val(newValue);
                 validate();
 
@@ -4659,7 +4683,7 @@ angular.element(document).ready(function() {
             // Set initial value.
             valueElement.val(scope.value);
             validate();
-            previousValue = scope.value;
+            setPreviousValue(scope.value);
 
             // Prepare API instance.
             if (scope.instance) {
