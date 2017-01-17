@@ -254,10 +254,12 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'maHe
                 if (isFocusLost) {
                     changeValue();
 
-                    scope.blur({
-                        maValue: scope.value,
-                        maOldValue: focusValue,
-                        maHasValueChanged: focusValue !== scope.value
+                    maHelper.safeApply(function() {
+                        scope.blur({
+                            maValue: scope.value,
+                            maOldValue: focusValue,
+                            maHasValueChanged: focusValue !== scope.value
+                        });
                     });
                 }
             };
