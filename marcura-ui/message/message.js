@@ -1,8 +1,8 @@
 angular.module('marcuraUI.components').directive('maMessage', [function() {
     return {
         restrict: 'E',
+        transclude: true,
         scope: {
-            text: '@',
             type: '@',
             state: '@'
         },
@@ -17,7 +17,7 @@ angular.module('marcuraUI.components').directive('maMessage', [function() {
                             \'fa-exclamation-triangle\': _state === \'danger\' || _state === \'warning\'\
                         }"></i>\
                     </div>\
-                    <div class="ma-message-text">{{text}}</div>\
+                    <div class="ma-message-text"><ng-transclude></ng-transclude></div>\
                 </div>';
 
             return html;
