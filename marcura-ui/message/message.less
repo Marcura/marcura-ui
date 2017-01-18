@@ -1,0 +1,54 @@
+@import 'marcura-ui/less.less';
+
+.ma-message {
+    position: relative;
+    padding-left: 22px;
+
+    &-alert {
+        padding: 15px 15px 15px 50px;
+
+        .ma-message-icon {
+            font-size: 20px;
+            top: 12px;
+            left: 15px;
+        }
+
+        &.ma-message-info {
+            background-color: #d9edf7;
+        }
+
+        &.ma-message-success {
+            background-color: #dff0d8;
+        }
+
+        &.ma-message-danger {
+            background-color: #fadfe2;
+        }
+
+        &.ma-message-warning {
+            background-color: #fcf8e3;
+        }
+    }
+
+    &-icon {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    &-info {
+        color: #1b809e;
+    }
+
+    &-success {
+        color: #3c763d;
+    }
+
+    &-danger {
+        color: #d0011b;
+    }
+
+    &-warning {
+        color: #aa6708;
+    }
+}

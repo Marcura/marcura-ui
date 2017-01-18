@@ -27,6 +27,12 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         controller: 'buttonPageController'
     });
 
+    $stateProvider.state('message', {
+        url: '/message',
+        templateUrl: 'message-page/message-page.html',
+        controller: 'messagePageController'
+    });
+
     $stateProvider.state('date-box', {
         url: '/date-box',
         templateUrl: 'date-box-page/date-box-page.html',
