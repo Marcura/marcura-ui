@@ -185,6 +185,11 @@
         }
 
         &-multi {
+            &.select2-container-active .select2-choices {
+                border-color: @input-border-color-focused;
+                .box-shadow(@input-shadow-focused);
+            }
+
             .select2-choices {
                 border-radius: 0;
                 border-color: @input-border-color;

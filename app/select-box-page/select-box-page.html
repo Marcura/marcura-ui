@@ -9,6 +9,43 @@
         </div>
     </div>
     <div class="nodes-item">
+        <h2>Multiple</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports2"
+            value="ports14"
+            item-text-field="name"
+            item-value-field="id"
+            placeholder="Select port"
+            multiple="true"
+            focus="focus14(maValue)"
+            blur="blur14(maValue)"
+            change="change14(maValue)">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(ports14 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>Multiple: Reset button</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports2"
+            value="ports15"
+            item-text-field="name"
+            item-value-field="id"
+            placeholder="Select port"
+            multiple="true"
+            can-reset="true"
+            change="change15(maValue)">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(ports15 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
         <h2>Items as strings</h2>
     </div>
     <div class="nodes-item">

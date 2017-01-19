@@ -33,11 +33,13 @@ angular.module('marcuraUI.components')
                 ajax: '=',
                 canReset: '=',
                 placeholder: '@',
-                textPlaceholder: '@'
+                textPlaceholder: '@',
+                multiple: '='
             },
             replace: true,
             template: function(element, attributes) {
-                var isAjax = !maHelper.isNullOrWhiteSpace(attributes.ajax);
+                var isAjax = !maHelper.isNullOrWhiteSpace(attributes.ajax),
+                    multiple = attributes.multiple === 'true';
 
                 var html = '\
                     <div class="ma-select-box"\
@@ -69,13 +71,12 @@ angular.module('marcuraUI.components')
                     // Add an empty option (<option></option>) as first item for the placeholder to work.
                     // It's strange, but that's how Select2 works.
                     html += '\
-                        <select ui-select2="options"\
+                        <select ui-select2="options"' + (multiple ? ' multiple' : '') + '\
                             ng-show="!isAddMode"\
                             ng-disabled="isDisabled"\
                             ng-model="selectedItem"\
                             ng-change="onChange()"\
-                            placeholder="{{placeholder}}">\
-                            <option></option>\
+                            placeholder="{{placeholder}}">' + (!multiple ? '<option></option>' : '') + '\
                             <option ng-repeat="item in _items | maSelectBoxOrderBy:orderBy" value="{{getOptionValue(item)}}">\
                                 {{formatItem(item)}}\
                             </option>\
@@ -251,47 +252,57 @@ angular.module('marcuraUI.components')
                 };
 
                 var setInternalValue = function(item) {
-                    if (scope.canAddItem && item) {
-                        // Switch mode depending on whether provided item exists in the list.
-                        // This allows the component to be displayed in correct mode, let's say, in add mode,
-                        // when scope.value is initially a custom value not presented in the list.
-                        scope.isAddMode = !isExistingItem(item);
-                    }
+                    if (scope.multiple) {
+                        var itemsValues = [];
 
-                    validate(item);
-
-                    if (scope.isAddMode) {
-                        if (!item) {
-                            scope.text = null;
-                        } else {
-                            if (scope.itemTextField && item[scope.itemTextField]) {
-                                // Item is an object.
-                                scope.text = item[scope.itemTextField].toString();
-                            } else {
-                                // Item is a string.
-                                scope.text = item;
-                            }
+                        for (var i = 0; i < item.length; i++) {
+                            itemsValues.push(scope.getItemValue(item[i]));
                         }
 
-                        previousAddedItem = item;
-                        scope.toggleMode('add');
+                        scope.selectedItem = itemsValues;
                     } else {
-                        if (!item) {
-                            scope.selectedItem = null;
-                        } else if (!scope.isAjax) {
-                            // Set select value.
-                            // When in AJAX mode Select2 sets values by itself.
-                            if (scope.getItemValue(item) !== null) {
-                                // Item is an object.
-                                scope.selectedItem = scope.getItemValue(item);
-                            } else if (typeof item === 'string') {
-                                // Item is a string.
-                                scope.selectedItem = item;
-                            }
+                        if (scope.canAddItem && item) {
+                            // Switch mode depending on whether provided item exists in the list.
+                            // This allows the component to be displayed in correct mode, let's say, in add mode,
+                            // when scope.value is initially a custom value not presented in the list.
+                            scope.isAddMode = !isExistingItem(item);
                         }
 
-                        scope.previousSelectedItem = item;
-                        scope.toggleMode('select');
+                        validate(item);
+
+                        if (scope.isAddMode) {
+                            if (!item) {
+                                scope.text = null;
+                            } else {
+                                if (scope.itemTextField && item[scope.itemTextField]) {
+                                    // Item is an object.
+                                    scope.text = item[scope.itemTextField].toString();
+                                } else {
+                                    // Item is a string.
+                                    scope.text = item;
+                                }
+                            }
+
+                            previousAddedItem = item;
+                            scope.toggleMode('add');
+                        } else {
+                            if (!item) {
+                                scope.selectedItem = null;
+                            } else if (!scope.isAjax) {
+                                // Set select value.
+                                // When in AJAX mode Select2 sets values by itself.
+                                if (scope.getItemValue(item) !== null) {
+                                    // Item is an object.
+                                    scope.selectedItem = scope.getItemValue(item);
+                                } else if (typeof item === 'string') {
+                                    // Item is a string.
+                                    scope.selectedItem = item;
+                                }
+                            }
+
+                            scope.previousSelectedItem = item;
+                            scope.toggleMode('select');
+                        }
                     }
                 };
 
@@ -361,14 +372,16 @@ angular.module('marcuraUI.components')
                             elementTo[0] !== switchButtonElement[0] &&
                             elementTo[0] !== resetButtonElement[0] &&
                             elementTo[0] !== textElement[0] &&
-                            elementTo[0] !== selectData.focusser[0] &&
                             elementTo[0] !== selectInputElement[0];
                     } else {
                         isFocusLost = !isFocusInside &&
                             elementTo[0] !== resetButtonElement[0] &&
                             elementTo[0] !== textElement[0] &&
-                            elementTo[0] !== selectData.focusser[0] &&
                             elementTo[0] !== selectInputElement[0];
+                    }
+
+                    if (!isFocusInside && selectData.focusser && elementTo[0] === selectData.focusser[0]) {
+                        isFocusLost = false;
                     }
 
                     if (isFocusLost) {
@@ -408,6 +421,10 @@ angular.module('marcuraUI.components')
                         return false;
                     }
 
+                    if (scope.multiple) {
+                        return !maHelper.isNullOrUndefined(scope.value) && scope.value.length;
+                    }
+
                     // When in add mode check scope.text as user changes it.
                     if (scope.isAddMode) {
                         return !maHelper.isNullOrWhiteSpace(scope.text);
@@ -418,7 +435,7 @@ angular.module('marcuraUI.components')
 
                 scope.onReset = function() {
                     previousValue = scope.value;
-                    scope.value = null;
+                    scope.value = scope.multiple ? [] : null;
                     setFocus();
 
                     $timeout(function() {
@@ -521,67 +538,90 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.onChange = function() {
-                    // Validation is required if the item is a simple text, not a JSON object.
-                    var item = maHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
+                    var item;
 
-                    // In case if JSON.parse has parsed string to a number.
-                    // This can happen when items is an array of numbers.
-                    if (typeof item === 'number') {
-                        item = scope.selectedItem;
-                    }
+                    if (scope.multiple) {
+                        var itemsValues = scope.selectedItem,
+                            items = [];
 
-                    // The change event works differently in AJAX mode.
-                    if (scope.isAjax) {
-                        // The change event fires first time even if scope.value has not changed.
-                        if (item === scope.previousSelectedItem) {
-                            return;
+                        for (var j = 0; j < itemsValues.length; j++) {
+                            item = getItemByValue(itemsValues[j]);
+
+                            if (item) {
+                                items.push(item);
+                            }
                         }
 
-                        // When item is selected, change event fires multiple times.
-                        // The last time, when item is an object, is the correct one - all others must be ignored.
-                        if (!angular.isObject(item)) {
-                            return;
+                        scope.value = items;
+
+                        $timeout(function() {
+                            scope.change({
+                                maValue: items
+                            });
+                        });
+                    } else {
+                        // Validation is required if the item is a simple text, not a JSON object.
+                        item = maHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
+
+                        // In case if JSON.parse has parsed string to a number.
+                        // This can happen when items is an array of numbers.
+                        if (typeof item === 'number') {
+                            item = scope.selectedItem;
                         }
-                    }
 
-                    // Get selected item from items by value field.
-                    // There is no items array in AJAX mode.
-                    if (!scope.isAjax) {
-                        if (scope.itemValueField && !maHelper.isNullOrWhiteSpace(item)) {
-                            for (var i = 0; i < scope._items.length; i++) {
+                        // The change event works differently in AJAX mode.
+                        if (scope.isAjax) {
+                            // The change event fires first time even if scope.value has not changed.
+                            if (item === scope.previousSelectedItem) {
+                                return;
+                            }
 
-                                if (scope.getItemValue(scope._items[i]) === item.toString()) {
-                                    item = scope._items[i];
-                                    break;
+                            // When item is selected, change event fires multiple times.
+                            // The last time, when item is an object, is the correct one - all others must be ignored.
+                            if (!angular.isObject(item)) {
+                                return;
+                            }
+                        }
+
+                        // Get selected item from items by value field.
+                        // There is no items array in AJAX mode.
+                        if (!scope.isAjax) {
+                            if (scope.itemValueField && !maHelper.isNullOrWhiteSpace(item)) {
+                                for (var i = 0; i < scope._items.length; i++) {
+
+                                    if (scope.getItemValue(scope._items[i]) === item.toString()) {
+                                        item = scope._items[i];
+                                        break;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if (!item && !scope.value) {
-                        return;
-                    }
-
-                    if (scope.itemValueField) {
-                        var value = scope.getItemValue(scope.value);
-
-                        if (value && value === scope.getItemValue(item)) {
+                        if (!item && !scope.value) {
                             return;
                         }
-                    } else if (item === scope.value) {
-                        return;
-                    }
 
-                    previousValue = scope.value;
-                    scope.value = item;
-                    scope.previousSelectedItem = item;
+                        if (scope.itemValueField) {
+                            var value = scope.getItemValue(scope.value);
 
-                    $timeout(function() {
-                        scope.change({
-                            maValue: item,
-                            maOldValue: previousValue
+                            if (value && value === scope.getItemValue(item)) {
+                                return;
+                            }
+                        } else if (item === scope.value) {
+                            return;
+                        }
+
+                        previousValue = scope.value;
+                        scope.value = item;
+                        scope.previousSelectedItem = item;
+
+                        $timeout(function() {
+                            scope.change({
+                                maValue: item,
+                                maOldValue: previousValue
+                            });
                         });
-                    });
+                    }
                 };
 
                 // Runs initSelection to force Select2 to refresh its displayed value.
@@ -743,13 +783,16 @@ angular.module('marcuraUI.components')
                         });
                     }
 
-                    selectData.focusser.on('focus', function() {
-                        scope.onFocus('select');
-                    });
+                    // There is no focussser in multiple mode.
+                    if (selectData.focusser) {
+                        selectData.focusser.on('focus', function() {
+                            scope.onFocus('select');
+                        });
 
-                    selectData.focusser.on('focusout', function(event) {
-                        onFocusout(event, 'select');
-                    });
+                        selectData.focusser.on('focusout', function(event) {
+                            onFocusout(event, 'select');
+                        });
+                    }
 
                     selectData.dropdown.on('focus', '.select2-input', function() {
                         // This is required for IE to keep focus when an item is selected
