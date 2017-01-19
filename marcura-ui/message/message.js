@@ -14,7 +14,8 @@ angular.module('marcuraUI.components').directive('maMessage', [function() {
                         <i class="fa" ng-class="{\
                             \'fa-info-circle\': _state === \'info\',\
                             \'fa-check-circle\': _state === \'success\',\
-                            \'fa-exclamation-triangle\': _state === \'danger\' || _state === \'warning\'\
+                            \'fa-exclamation-triangle\': _state === \'warning\',\
+                            \'fa-times-circle\': _state === \'danger\'\
                         }"></i>\
                     </div>\
                     <div class="ma-message-text"><ng-transclude></ng-transclude></div>\
