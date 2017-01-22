@@ -290,27 +290,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function() {
         this.$get = function() {
@@ -1056,6 +1035,27 @@ angular.element(document).ready(function() {
             }
         };
     }]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
 })();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
@@ -1896,35 +1896,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            isDisabled: '=',
-            click: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-reset-value" ng-class="{\
-                    \'ma-reset-value-is-disabled\': isDisabled\
-                }"\
-                ng-click="onClick()">\
-                <i class="fa fa-times"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components')
     .filter('maSelectBoxOrderBy', ['orderByFilter', function(orderByFilter) {
         return function(items, orderByExpression) {
@@ -2712,6 +2683,35 @@ angular.element(document).ready(function() {
             }
         };
     }]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            isDisabled: '=',
+            click: '&'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
+                <i class="fa fa-times"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
+        }
+    };
+}]);
 })();
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
@@ -3939,75 +3939,6 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-side-menu">\
-                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.hidden" ng-class="{\
-                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
-                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
-                    }"\
-                    ng-click="onSelect(item)">\
-                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
-                    <div class="ma-side-menu-text">{{item.text}}</div>\
-                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function(item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function(item) {
-                if (item.isDisabled) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -4106,6 +4037,75 @@ angular.element(document).ready(function() {
                     }
                 });
             });
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-side-menu">\
+                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.hidden" ng-class="{\
+                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
+                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
+                    }"\
+                    ng-click="onSelect(item)">\
+                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
+                    <div class="ma-side-menu-text">{{item.text}}</div>\
+                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function(item) {
+                if (item.isDisabled) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function(item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
         }
     };
 }]);
