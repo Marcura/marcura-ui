@@ -19,6 +19,11 @@
         border-color: @input-border-color-focused;
     }
 
+    &-is-select-focused .select2-choices {
+        border-color: @input-border-color-focused !important;
+        .box-shadow(@input-shadow-focused) !important;
+    }
+
     &-is-disabled &-text {
         .box-shadow(none);
         background-color: @input-background-color-disabled;

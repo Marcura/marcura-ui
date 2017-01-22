@@ -307,9 +307,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var onFocusout = function(event, elementName) {
-                    var elementTo = angular.element(event.relatedTarget),
-                        selectInputElement = angular.element(selectData.dropdown[0].querySelector('.select2-input'));
-
+                    var elementTo = angular.element(event.relatedTarget);
                     scope.isTextFocused = false;
 
                     // Trigger change event for text element.
@@ -372,19 +370,28 @@ angular.module('marcuraUI.components')
                             elementTo[0] !== switchButtonElement[0] &&
                             elementTo[0] !== resetButtonElement[0] &&
                             elementTo[0] !== textElement[0] &&
-                            elementTo[0] !== selectInputElement[0];
+                            elementTo[0] !== selectData.search[0];
                     } else {
                         isFocusLost = !isFocusInside &&
                             elementTo[0] !== resetButtonElement[0] &&
                             elementTo[0] !== textElement[0] &&
-                            elementTo[0] !== selectInputElement[0];
+                            elementTo[0] !== selectData.search[0];
                     }
 
+                    // TODO:
+                    // 1) Handle tags. When a tag is clicked focus stau inside the component.
+                    // 2) When multiple and resetButtonElement is focused focus should be removed from select.
+                    // console.log('elementTo:', elementTo[0]);
+                    // console.log('isFocusLost:', isFocusLost);
+
+                    // There is no focussser in multiple mode.
                     if (!isFocusInside && selectData.focusser && elementTo[0] === selectData.focusser[0]) {
                         isFocusLost = false;
                     }
 
                     if (isFocusLost) {
+                        element.removeClass('ma-select-box-is-select-focused');
+
                         scope.blur({
                             maValue: scope.value
                         });
@@ -783,8 +790,23 @@ angular.module('marcuraUI.components')
                         });
                     }
 
-                    // There is no focussser in multiple mode.
-                    if (selectData.focusser) {
+                    // console.log(scope.multiple);
+                    // console.log(selectData.search);
+                    // console.log('---');
+
+                    if (scope.multiple) {
+                        selectData.search.on('focus', function() {
+                            element.addClass('ma-select-box-is-select-focused');
+                            scope.onFocus();
+                        });
+
+                        selectData.search.on('focusout', function(event) {
+                            // TODO: Should I pass 'select'?
+                            // onFocusout(event, 'select');
+                            onFocusout(event);
+                        });
+                    } else {
+                        // There is no focussser in multiple mode.
                         selectData.focusser.on('focus', function() {
                             scope.onFocus('select');
                         });

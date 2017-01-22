@@ -4,7 +4,7 @@ function selectBoxPageController($scope, $timeout, helper) {
     $scope.ports2 = helper.getPorts();
     $scope.ports1 = [];
 
-    angular.forEach($scope.ports2, function (port) {
+    angular.forEach($scope.ports2, function(port) {
         $scope.ports1.push(port.name);
     });
 
@@ -191,6 +191,19 @@ function selectBoxPageController($scope, $timeout, helper) {
     $scope.change14 = function(ports) {
         console.log('change');
         console.log('scope:', $scope.ports14);
+        console.log('event:', ports);
+    };
+
+    // ports14.
+    $scope.focus15 = function(ports) {
+        console.log('focus');
+        console.log('scope:', $scope.ports15);
+        console.log('event:', ports);
+    };
+
+    $scope.blur15 = function(ports) {
+        console.log('blur');
+        console.log('scope:', $scope.ports15);
         console.log('event:', ports);
     };
 
