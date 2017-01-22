@@ -167,6 +167,7 @@ angular.module('marcuraUI.components')
                     labelElement,
                     isFocusLost = true,
                     isFocusInside = false,
+                    isSelectHovered = false,
                     showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
                     validators = scope.validators ? angular.copy(scope.validators) : [],
                     isRequired = scope.isRequired,
@@ -379,14 +380,19 @@ angular.module('marcuraUI.components')
                     }
 
                     // TODO:
-                    // 1) Handle tags. When a tag is clicked focus stau inside the component.
                     // 2) When multiple and resetButtonElement is focused focus should be removed from select.
                     // console.log('elementTo:', elementTo[0]);
                     // console.log('isFocusLost:', isFocusLost);
 
-                    // There is no focussser in multiple mode.
-                    if (!isFocusInside && selectData.focusser && elementTo[0] === selectData.focusser[0]) {
-                        isFocusLost = false;
+                    if (scope.multiple) {
+                        if (isSelectHovered) {
+                            isFocusLost = false;
+                        }
+                    } else {
+                        // There is no focussser in multiple mode.
+                        if (!isFocusInside && elementTo[0] === selectData.focusser[0]) {
+                            isFocusLost = false;
+                        }
                     }
 
                     if (isFocusLost) {
@@ -805,6 +811,16 @@ angular.module('marcuraUI.components')
                             // onFocusout(event, 'select');
                             onFocusout(event);
                         });
+
+                        // Track that the select is hovered to prevent focus lost when a selected item
+                        // or selection is clicked.
+                        selectData.selection.on('mouseenter', function() {
+                            isSelectHovered = true;
+                        });
+
+                        selectData.selection.on('mouseleave', function() {
+                            isSelectHovered = false;
+                        });
                     } else {
                         // There is no focussser in multiple mode.
                         selectData.focusser.on('focus', function() {
@@ -841,11 +857,21 @@ angular.module('marcuraUI.components')
                         isFocusInside = true;
                     });
 
+                    selectData.dropdown.on('mouseleave', '.select2-result', function() {
+                        isFocusInside = false;
+                    });
+
                     // Detect if select2 mask is hovered.
                     // This is later used for triggering blur event correctly in IE.
                     $($document).on('mouseenter', '.select2-drop-mask', function() {
                         isFocusInside = true;
                     });
+
+                    // TODO: This does not work for multiple in IE.
+                    // $($document).on('mouseleave', '.select2-drop-mask', function() {
+                    //     console.log('mouseleave');
+                    //     isFocusInside = false;
+                    // });
                 });
             }
         };
