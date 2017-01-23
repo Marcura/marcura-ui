@@ -229,4 +229,43 @@
             text-placeholder="Enter port">
         </ma-select-box>
     </div>
+    <div class="nodes-item">
+        <h2>Multiple</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports14"
+            value="port14"
+            item-text-field="name"
+            item-value-field="id"
+            placeholder="Select port"
+            multiple="true"
+            focus="focus14(maValue)"
+            blur="blur14(maValue)"
+            change="change14(maValue)">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(port14 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>Multiple: Reset button</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports15"
+            value="port15"
+            item-text-field="name"
+            item-value-field="id"
+            placeholder="Select port"
+            multiple="true"
+            can-reset="true"
+            focus="focus15(maValue)"
+            blur="blur15(maValue)"
+            change="change15(maValue)">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(port15 || null) | json}}</pre>
+    </div>
 </div>

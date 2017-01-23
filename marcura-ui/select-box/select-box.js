@@ -33,11 +33,13 @@ angular.module('marcuraUI.components')
                 ajax: '=',
                 canReset: '=',
                 placeholder: '@',
-                textPlaceholder: '@'
+                textPlaceholder: '@',
+                multiple: '='
             },
             replace: true,
             template: function(element, attributes) {
-                var isAjax = !maHelper.isNullOrWhiteSpace(attributes.ajax);
+                var isAjax = !maHelper.isNullOrWhiteSpace(attributes.ajax),
+                    multiple = attributes.multiple === 'true';
 
                 var html = '\
                     <div class="ma-select-box"\
@@ -69,13 +71,12 @@ angular.module('marcuraUI.components')
                     // Add an empty option (<option></option>) as first item for the placeholder to work.
                     // It's strange, but that's how Select2 works.
                     html += '\
-                        <select ui-select2="options"\
+                        <select ui-select2="options"' + (multiple ? ' multiple' : '') + '\
                             ng-show="!isAddMode"\
                             ng-disabled="isDisabled"\
                             ng-model="selectedItem"\
                             ng-change="onChange()"\
-                            placeholder="{{placeholder}}">\
-                            <option></option>\
+                            placeholder="{{placeholder}}">' + (!multiple ? '<option></option>' : '') + '\
                             <option ng-repeat="item in _items | maSelectBoxOrderBy:orderBy" value="{{getOptionValue(item)}}">\
                                 {{formatItem(item)}}\
                             </option>\
@@ -89,7 +90,7 @@ angular.module('marcuraUI.components')
                         ng-focus="onFocus(\'text\')"\
                         placeholder="{{textPlaceholder}}"/>\
                     <ma-button class="ma-button-switch"\
-                        ng-if="canAddItem" size="xs" modifier="simple"\
+                        ng-show="canAddItem" size="xs" modifier="simple"\
                         tooltip="{{getAddItemTooltip()}}"\
                         right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
                         click="toggleMode()"\
@@ -100,7 +101,7 @@ angular.module('marcuraUI.components')
                         ng-show="canReset" size="xs" modifier="simple"\
                         right-icon="times-circle"\
                         click="onReset()"\
-                        ng-focus="onFocus()"\
+                        ng-focus="onFocus(\'reset\')"\
                         is-disabled="!isResetEnabled()">\
                     </ma-button>\
                 </div>';
@@ -166,6 +167,7 @@ angular.module('marcuraUI.components')
                     labelElement,
                     isFocusLost = true,
                     isFocusInside = false,
+                    isSelectHovered = false,
                     showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
                     validators = scope.validators ? angular.copy(scope.validators) : [],
                     isRequired = scope.isRequired,
@@ -251,54 +253,63 @@ angular.module('marcuraUI.components')
                 };
 
                 var setInternalValue = function(item) {
-                    if (scope.canAddItem && item) {
-                        // Switch mode depending on whether provided item exists in the list.
-                        // This allows the component to be displayed in correct mode, let's say, in add mode,
-                        // when scope.value is initially a custom value not presented in the list.
-                        scope.isAddMode = !isExistingItem(item);
-                    }
+                    if (scope.multiple) {
+                        var itemsValues = [];
 
-                    validate(item);
-
-                    if (scope.isAddMode) {
-                        if (!item) {
-                            scope.text = null;
-                        } else {
-                            if (scope.itemTextField && item[scope.itemTextField]) {
-                                // Item is an object.
-                                scope.text = item[scope.itemTextField].toString();
-                            } else {
-                                // Item is a string.
-                                scope.text = item;
-                            }
+                        for (var i = 0; i < item.length; i++) {
+                            itemsValues.push(scope.getItemValue(item[i]));
                         }
 
-                        previousAddedItem = item;
-                        scope.toggleMode('add');
+                        scope.selectedItem = itemsValues;
+                        validate(item);
                     } else {
-                        if (!item) {
-                            scope.selectedItem = null;
-                        } else if (!scope.isAjax) {
-                            // Set select value.
-                            // When in AJAX mode Select2 sets values by itself.
-                            if (scope.getItemValue(item) !== null) {
-                                // Item is an object.
-                                scope.selectedItem = scope.getItemValue(item);
-                            } else if (typeof item === 'string') {
-                                // Item is a string.
-                                scope.selectedItem = item;
-                            }
+                        if (scope.canAddItem && item) {
+                            // Switch mode depending on whether provided item exists in the list.
+                            // This allows the component to be displayed in correct mode, let's say, in add mode,
+                            // when scope.value is initially a custom value not presented in the list.
+                            scope.isAddMode = !isExistingItem(item);
                         }
 
-                        scope.previousSelectedItem = item;
-                        scope.toggleMode('select');
+                        validate(item);
+
+                        if (scope.isAddMode) {
+                            if (!item) {
+                                scope.text = null;
+                            } else {
+                                if (scope.itemTextField && item[scope.itemTextField]) {
+                                    // Item is an object.
+                                    scope.text = item[scope.itemTextField].toString();
+                                } else {
+                                    // Item is a string.
+                                    scope.text = item;
+                                }
+                            }
+
+                            previousAddedItem = item;
+                            scope.toggleMode('add');
+                        } else {
+                            if (!item) {
+                                scope.selectedItem = null;
+                            } else if (!scope.isAjax) {
+                                // Set select value.
+                                // When in AJAX mode Select2 sets values by itself.
+                                if (scope.getItemValue(item) !== null) {
+                                    // Item is an object.
+                                    scope.selectedItem = scope.getItemValue(item);
+                                } else if (typeof item === 'string') {
+                                    // Item is a string.
+                                    scope.selectedItem = item;
+                                }
+                            }
+
+                            scope.previousSelectedItem = item;
+                            scope.toggleMode('select');
+                        }
                     }
                 };
 
                 var onFocusout = function(event, elementName) {
-                    var elementTo = angular.element(event.relatedTarget),
-                        selectInputElement = angular.element(selectData.dropdown[0].querySelector('.select2-input'));
-
+                    var elementTo = angular.element(event.relatedTarget);
                     scope.isTextFocused = false;
 
                     // Trigger change event for text element.
@@ -335,15 +346,10 @@ angular.module('marcuraUI.components')
                             scope.value = value;
                             previousAddedItem = scope.value;
 
-                            // Postpone change event for $apply (which is being invoked by $timeout)
-                            // to have time to take effect and update scope.value,
-                            // so both maValue and scope.value have the same values eventually.
                             if (scope.isValid) {
-                                $timeout(function() {
-                                    scope.change({
-                                        maValue: scope.value,
-                                        maOldValue: previousValue
-                                    });
+                                scope.change({
+                                    maValue: scope.value,
+                                    maOldValue: previousValue
                                 });
                             }
                         });
@@ -354,24 +360,26 @@ angular.module('marcuraUI.components')
                     }
 
                     // Trigger blur event when focus goes to an element outside the component.
-                    if (scope.canAddItem) {
-                        // Compare switchButtonElement only if it exists, to avoid comparing
-                        // two undefineds: elementTo[0] and switchButtonElement[0].
-                        isFocusLost = !isFocusInside &&
-                            elementTo[0] !== switchButtonElement[0] &&
-                            elementTo[0] !== resetButtonElement[0] &&
-                            elementTo[0] !== textElement[0] &&
-                            elementTo[0] !== selectData.focusser[0] &&
-                            elementTo[0] !== selectInputElement[0];
+                    isFocusLost = !isFocusInside &&
+                        elementTo[0] !== switchButtonElement[0] &&
+                        elementTo[0] !== resetButtonElement[0] &&
+                        elementTo[0] !== textElement[0] &&
+                        elementTo[0] !== selectData.search[0];
+
+                    if (scope.multiple) {
+                        if (isSelectHovered) {
+                            isFocusLost = false;
+                        }
                     } else {
-                        isFocusLost = !isFocusInside &&
-                            elementTo[0] !== resetButtonElement[0] &&
-                            elementTo[0] !== textElement[0] &&
-                            elementTo[0] !== selectData.focusser[0] &&
-                            elementTo[0] !== selectInputElement[0];
+                        // There is no focussser in multiple mode.
+                        if (!isFocusInside && elementTo[0] === selectData.focusser[0]) {
+                            isFocusLost = false;
+                        }
                     }
 
                     if (isFocusLost) {
+                        element.removeClass('ma-select-box-is-select-focused');
+
                         scope.blur({
                             maValue: scope.value
                         });
@@ -408,6 +416,10 @@ angular.module('marcuraUI.components')
                         return false;
                     }
 
+                    if (scope.multiple) {
+                        return !maHelper.isNullOrUndefined(scope.value) && scope.value.length;
+                    }
+
                     // When in add mode check scope.text as user changes it.
                     if (scope.isAddMode) {
                         return !maHelper.isNullOrWhiteSpace(scope.text);
@@ -417,8 +429,9 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.onReset = function() {
+                    scope.isTouched = true;
                     previousValue = scope.value;
-                    scope.value = null;
+                    scope.value = scope.multiple ? [] : null;
                     setFocus();
 
                     $timeout(function() {
@@ -432,6 +445,10 @@ angular.module('marcuraUI.components')
                 scope.onFocus = function(elementName) {
                     if (elementName === 'text') {
                         scope.isTextFocused = true;
+                    }
+
+                    if (elementName === 'reset') {
+                        element.removeClass('ma-select-box-is-select-focused');
                     }
 
                     if (isFocusLost) {
@@ -521,67 +538,94 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.onChange = function() {
-                    // Validation is required if the item is a simple text, not a JSON object.
-                    var item = maHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
+                    var item;
 
-                    // In case if JSON.parse has parsed string to a number.
-                    // This can happen when items is an array of numbers.
-                    if (typeof item === 'number') {
-                        item = scope.selectedItem;
-                    }
+                    if (scope.multiple) {
+                        var itemsValues = scope.selectedItem,
+                            items = [];
 
-                    // The change event works differently in AJAX mode.
-                    if (scope.isAjax) {
-                        // The change event fires first time even if scope.value has not changed.
-                        if (item === scope.previousSelectedItem) {
-                            return;
+                        for (var j = 0; j < itemsValues.length; j++) {
+                            item = getItemByValue(itemsValues[j]);
+
+                            if (item) {
+                                items.push(item);
+                            }
                         }
 
-                        // When item is selected, change event fires multiple times.
-                        // The last time, when item is an object, is the correct one - all others must be ignored.
-                        if (!angular.isObject(item)) {
-                            return;
+                        scope.isTouched = true;
+                        scope.value = items;
+
+                        $timeout(function() {
+                            scope.change({
+                                maValue: items
+                            });
+                        });
+
+                        // Invoke mouseleave on the list when it is closed for the next blur event to work properly.
+                        selectData.dropdown.mouseleave();
+                    } else {
+                        // Validation is required if the item is a simple text, not a JSON object.
+                        item = maHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
+
+                        // In case if JSON.parse has parsed string to a number.
+                        // This can happen when items is an array of numbers.
+                        if (typeof item === 'number') {
+                            item = scope.selectedItem;
                         }
-                    }
 
-                    // Get selected item from items by value field.
-                    // There is no items array in AJAX mode.
-                    if (!scope.isAjax) {
-                        if (scope.itemValueField && !maHelper.isNullOrWhiteSpace(item)) {
-                            for (var i = 0; i < scope._items.length; i++) {
+                        // The change event works differently in AJAX mode.
+                        if (scope.isAjax) {
+                            // The change event fires first time even if scope.value has not changed.
+                            if (item === scope.previousSelectedItem) {
+                                return;
+                            }
 
-                                if (scope.getItemValue(scope._items[i]) === item.toString()) {
-                                    item = scope._items[i];
-                                    break;
+                            // When item is selected, change event fires multiple times.
+                            // The last time, when item is an object, is the correct one - all others must be ignored.
+                            if (!angular.isObject(item)) {
+                                return;
+                            }
+                        }
+
+                        // Get selected item from items by value field.
+                        // There is no items array in AJAX mode.
+                        if (!scope.isAjax) {
+                            if (scope.itemValueField && !maHelper.isNullOrWhiteSpace(item)) {
+                                for (var i = 0; i < scope._items.length; i++) {
+
+                                    if (scope.getItemValue(scope._items[i]) === item.toString()) {
+                                        item = scope._items[i];
+                                        break;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if (!item && !scope.value) {
-                        return;
-                    }
-
-                    if (scope.itemValueField) {
-                        var value = scope.getItemValue(scope.value);
-
-                        if (value && value === scope.getItemValue(item)) {
+                        if (!item && !scope.value) {
                             return;
                         }
-                    } else if (item === scope.value) {
-                        return;
-                    }
 
-                    previousValue = scope.value;
-                    scope.value = item;
-                    scope.previousSelectedItem = item;
+                        if (scope.itemValueField) {
+                            var value = scope.getItemValue(scope.value);
 
-                    $timeout(function() {
-                        scope.change({
-                            maValue: item,
-                            maOldValue: previousValue
+                            if (value && value === scope.getItemValue(item)) {
+                                return;
+                            }
+                        } else if (item === scope.value) {
+                            return;
+                        }
+
+                        previousValue = scope.value;
+                        scope.value = item;
+                        scope.previousSelectedItem = item;
+
+                        $timeout(function() {
+                            scope.change({
+                                maValue: item,
+                                maOldValue: previousValue
+                            });
                         });
-                    });
+                    }
                 };
 
                 // Runs initSelection to force Select2 to refresh its displayed value.
@@ -690,6 +734,10 @@ angular.module('marcuraUI.components')
                 var isNotEmptyAndInListValidator = {
                     name: 'IsNotEmpty',
                     validate: function(value) {
+                        if (scope.multiple && angular.isArray(value)) {
+                            return value.length > 0;
+                        }
+
                         if (maHelper.isNullOrWhiteSpace(value)) {
                             return false;
                         }
@@ -743,13 +791,48 @@ angular.module('marcuraUI.components')
                         });
                     }
 
-                    selectData.focusser.on('focus', function() {
-                        scope.onFocus('select');
-                    });
+                    if (scope.multiple) {
+                        selectData.search.on('focus', function() {
+                            element.addClass('ma-select-box-is-select-focused');
+                            scope.onFocus();
+                        });
 
-                    selectData.focusser.on('focusout', function(event) {
-                        onFocusout(event, 'select');
-                    });
+                        selectData.search.on('focusout', function(event) {
+                            onFocusout(event, 'select');
+                        });
+
+                        // Track that the select is hovered to prevent focus lost when a selected item
+                        // or selection is clicked.
+                        selectData.selection.on('mouseenter', function() {
+                            isSelectHovered = true;
+                        });
+
+                        selectData.selection.on('mouseleave', function() {
+                            isSelectHovered = false;
+                        });
+
+                        selectData.dropdown.on('mouseenter', function() {
+                            isSelectHovered = true;
+                        });
+
+                        selectData.dropdown.on('mouseleave', function() {
+                            isSelectHovered = false;
+                        });
+
+                        selectData.dropdown.on('click', function() {
+                            // Return focus to the input field for the next blur event to work properly.
+                            selectData.search.focus();
+                        });
+                    } else {
+                        // There is no focussser in multiple mode.
+                        selectData.focusser.on('focus', function() {
+                            scope.onFocus('select');
+                        });
+
+                        selectData.focusser.on('focusout', function(event) {
+                            onFocusout(event, 'select');
+                        });
+                    }
 
                     selectData.dropdown.on('focus', '.select2-input', function() {
                         // This is required for IE to keep focus when an item is selected
@@ -776,10 +859,16 @@ angular.module('marcuraUI.components')
                         isFocusInside = true;
                     });
 
+                    selectData.dropdown.on('mouseleave', '.select2-result', function() {
+                        isFocusInside = false;
+                    });
+
                     // Detect if select2 mask is hovered.
                     // This is later used for triggering blur event correctly in IE.
                     $($document).on('mouseenter', '.select2-drop-mask', function() {
-                        isFocusInside = true;
+                        if (!scope.multiple) {
+                            isFocusInside = true;
+                        }
                     });
                 });
             }
