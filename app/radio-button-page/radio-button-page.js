@@ -1,7 +1,7 @@
 angular.module('app.controllers').controller('radioButtonPageController', radioButtonPageController);
 
 function radioButtonPageController($scope, helper) {
-    $scope.ports2 = helper.getPorts();
+    $scope.ports2 = helper.getPorts().slice(0, 3);
     $scope.ports1 = [];
 
     angular.forEach($scope.ports2, function(port) {

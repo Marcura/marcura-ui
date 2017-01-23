@@ -90,7 +90,7 @@ angular.module('marcuraUI.components')
                         ng-focus="onFocus(\'text\')"\
                         placeholder="{{textPlaceholder}}"/>\
                     <ma-button class="ma-button-switch"\
-                        ng-if="canAddItem" size="xs" modifier="simple"\
+                        ng-show="canAddItem" size="xs" modifier="simple"\
                         tooltip="{{getAddItemTooltip()}}"\
                         right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
                         click="toggleMode()"\
@@ -101,7 +101,7 @@ angular.module('marcuraUI.components')
                         ng-show="canReset" size="xs" modifier="simple"\
                         right-icon="times-circle"\
                         click="onReset()"\
-                        ng-focus="onFocus()"\
+                        ng-focus="onFocus(\'reset\')"\
                         is-disabled="!isResetEnabled()">\
                     </ma-button>\
                 </div>';
@@ -261,6 +261,7 @@ angular.module('marcuraUI.components')
                         }
 
                         scope.selectedItem = itemsValues;
+                        validate(item);
                     } else {
                         if (scope.canAddItem && item) {
                             // Switch mode depending on whether provided item exists in the list.
@@ -345,15 +346,10 @@ angular.module('marcuraUI.components')
                             scope.value = value;
                             previousAddedItem = scope.value;
 
-                            // Postpone change event for $apply (which is being invoked by $timeout)
-                            // to have time to take effect and update scope.value,
-                            // so both maValue and scope.value have the same values eventually.
                             if (scope.isValid) {
-                                $timeout(function() {
-                                    scope.change({
-                                        maValue: scope.value,
-                                        maOldValue: previousValue
-                                    });
+                                scope.change({
+                                    maValue: scope.value,
+                                    maOldValue: previousValue
                                 });
                             }
                         });
@@ -364,25 +360,11 @@ angular.module('marcuraUI.components')
                     }
 
                     // Trigger blur event when focus goes to an element outside the component.
-                    if (scope.canAddItem) {
-                        // Compare switchButtonElement only if it exists, to avoid comparing
-                        // two undefineds: elementTo[0] and switchButtonElement[0].
-                        isFocusLost = !isFocusInside &&
-                            elementTo[0] !== switchButtonElement[0] &&
-                            elementTo[0] !== resetButtonElement[0] &&
-                            elementTo[0] !== textElement[0] &&
-                            elementTo[0] !== selectData.search[0];
-                    } else {
-                        isFocusLost = !isFocusInside &&
-                            elementTo[0] !== resetButtonElement[0] &&
-                            elementTo[0] !== textElement[0] &&
-                            elementTo[0] !== selectData.search[0];
-                    }
-
-                    // TODO:
-                    // 2) When multiple and resetButtonElement is focused focus should be removed from select.
-                    // console.log('elementTo:', elementTo[0]);
-                    // console.log('isFocusLost:', isFocusLost);
+                    isFocusLost = !isFocusInside &&
+                        elementTo[0] !== switchButtonElement[0] &&
+                        elementTo[0] !== resetButtonElement[0] &&
+                        elementTo[0] !== textElement[0] &&
+                        elementTo[0] !== selectData.search[0];
 
                     if (scope.multiple) {
                         if (isSelectHovered) {
@@ -447,6 +429,7 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.onReset = function() {
+                    scope.isTouched = true;
                     previousValue = scope.value;
                     scope.value = scope.multiple ? [] : null;
                     setFocus();
@@ -462,6 +445,10 @@ angular.module('marcuraUI.components')
                 scope.onFocus = function(elementName) {
                     if (elementName === 'text') {
                         scope.isTextFocused = true;
+                    }
+
+                    if (elementName === 'reset') {
+                        element.removeClass('ma-select-box-is-select-focused');
                     }
 
                     if (isFocusLost) {
@@ -565,6 +552,7 @@ angular.module('marcuraUI.components')
                             }
                         }
 
+                        scope.isTouched = true;
                         scope.value = items;
 
                         $timeout(function() {
@@ -572,6 +560,9 @@ angular.module('marcuraUI.components')
                                 maValue: items
                             });
                         });
+
+                        // Invoke mouseleave on the list when it is closed for the next blur event to work properly.
+                        selectData.dropdown.mouseleave();
                     } else {
                         // Validation is required if the item is a simple text, not a JSON object.
                         item = maHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
@@ -743,6 +734,10 @@ angular.module('marcuraUI.components')
                 var isNotEmptyAndInListValidator = {
                     name: 'IsNotEmpty',
                     validate: function(value) {
+                        if (scope.multiple && angular.isArray(value)) {
+                            return value.length > 0;
+                        }
+
                         if (maHelper.isNullOrWhiteSpace(value)) {
                             return false;
                         }
@@ -796,10 +791,6 @@ angular.module('marcuraUI.components')
                         });
                     }
 
-                    // console.log(scope.multiple);
-                    // console.log(selectData.search);
-                    // console.log('---');
-
                     if (scope.multiple) {
                         selectData.search.on('focus', function() {
                             element.addClass('ma-select-box-is-select-focused');
@@ -807,9 +798,7 @@ angular.module('marcuraUI.components')
                         });
 
                         selectData.search.on('focusout', function(event) {
-                            // TODO: Should I pass 'select'?
-                            // onFocusout(event, 'select');
-                            onFocusout(event);
+                            onFocusout(event, 'select');
                         });
 
                         // Track that the select is hovered to prevent focus lost when a selected item
@@ -820,6 +809,19 @@ angular.module('marcuraUI.components')
 
                         selectData.selection.on('mouseleave', function() {
                             isSelectHovered = false;
+                        });
+
+                        selectData.dropdown.on('mouseenter', function() {
+                            isSelectHovered = true;
+                        });
+
+                        selectData.dropdown.on('mouseleave', function() {
+                            isSelectHovered = false;
+                        });
+
+                        selectData.dropdown.on('click', function() {
+                            // Return focus to the input field for the next blur event to work properly.
+                            selectData.search.focus();
                         });
                     } else {
                         // There is no focussser in multiple mode.
@@ -864,14 +866,10 @@ angular.module('marcuraUI.components')
                     // Detect if select2 mask is hovered.
                     // This is later used for triggering blur event correctly in IE.
                     $($document).on('mouseenter', '.select2-drop-mask', function() {
-                        isFocusInside = true;
+                        if (!scope.multiple) {
+                            isFocusInside = true;
+                        }
                     });
-
-                    // TODO: This does not work for multiple in IE.
-                    // $($document).on('mouseleave', '.select2-drop-mask', function() {
-                    //     console.log('mouseleave');
-                    //     isFocusInside = false;
-                    // });
                 });
             }
         };
