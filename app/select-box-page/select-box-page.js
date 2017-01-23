@@ -49,7 +49,6 @@ function selectBoxPageController($scope, $timeout, helper) {
     // which in turn changes the appearence of displayed value for those SelectBoxes.
     $scope.ports14 = angular.copy($scope.ports2);
     $scope.ports15 = angular.copy($scope.ports2);
-    $scope.port14 = [$scope.ports2[1]];
     $scope.port15 = [$scope.ports2[1]];
 
     // port1.

@@ -256,8 +256,10 @@ angular.module('marcuraUI.components')
                     if (scope.multiple) {
                         var itemsValues = [];
 
-                        for (var i = 0; i < item.length; i++) {
-                            itemsValues.push(scope.getItemValue(item[i]));
+                        if (item && item.length) {
+                            for (var i = 0; i < item.length; i++) {
+                                itemsValues.push(scope.getItemValue(item[i]));
+                            }
                         }
 
                         scope.selectedItem = itemsValues;
