@@ -673,9 +673,13 @@ angular.module('marcuraUI.components')
                     // See node_modules\angular-ui-select2\src\select2.js line 121.
                     $timeout(function() {
                         if (angular.isObject(scope.value)) {
-                            var item = angular.copy(scope.value);
+                            // Item might only contain id field, which might not be enough for itemTemplate.
+                            // So we need to get a full item from items.
+                            var itemValue = scope.getItemValue(scope.value),
+                                item = angular.copy(getItemByValue(itemValue) || scope.value);
+
                             item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
-                            item.id = scope.getItemValue(item);
+                            item.id = itemValue;
                             selectData.data(item);
                         } else if (!scope.value) {
                             selectData.data(null);
