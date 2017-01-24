@@ -49,7 +49,6 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                 isRequired = scope.isRequired,
                 hasIsNotEmptyValidator = false;
 
-
             var setTabindex = function() {
                 if (scope.isDisabled) {
                     element.removeAttr('tabindex');
