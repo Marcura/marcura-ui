@@ -130,6 +130,15 @@ angular.module('marcuraUI.components')
                     return value.toString();
                 };
 
+                scope.formatItem = scope.itemTemplate ||
+                    function(item) {
+                        if (!item) {
+                            return '';
+                        }
+
+                        return scope.itemTextField ? item[scope.itemTextField] : item.toString();
+                    };
+
                 // Setting Select2 options does not work from link function, so they are set here.
                 scope.options = {};
                 scope.runInitSelection = true;
@@ -145,7 +154,7 @@ angular.module('marcuraUI.components')
                         // Run init function only when it is required to update Select2 value.
                         if (scope.runInitSelection && scope.getItemValue(scope.value)) {
                             var item = angular.copy(scope.value);
-                            item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
+                            item.text = scope.formatItem(item);
                             item.id = scope.getItemValue(item);
                             scope.previousSelectedItem = item;
                             callback(item);
@@ -178,18 +187,14 @@ angular.module('marcuraUI.components')
                 scope._items = angular.isArray(scope.items) ? angular.copy(scope.items) : [];
                 scope.previousSelectedItem = scope.previousSelectedItem || null;
                 scope.isAddMode = false;
-                scope.formatItem = scope.itemTemplate ||
-                    function(item) {
-                        if (!item) {
-                            return '';
-                        }
-
-                        return scope.itemTextField ? item[scope.itemTextField] : item.toString();
-                    };
                 scope.isTextFocused = false;
                 scope.isValid = true;
                 scope.isTouched = false;
                 scope.isAjax = angular.isObject(scope.ajax);
+
+                var isStringArray = function() {
+                    return !scope.itemValueField && !scope.itemTextField;
+                };
 
                 var isExistingItem = function(item) {
                     if (!angular.isArray(scope._items)) {
@@ -221,7 +226,7 @@ angular.module('marcuraUI.components')
                     }
 
                     // The list is an array of strings, so value is item itself.
-                    if (!scope.itemTextField) {
+                    if (isStringArray()) {
                         return itemValue;
                     }
 
@@ -238,7 +243,7 @@ angular.module('marcuraUI.components')
 
                 var getNewItem = function(itemText) {
                     // The list is an array of strings, so item should be a simple string.
-                    if (!scope.itemTextField) {
+                    if (isStringArray()) {
                         return itemText;
                     }
 
@@ -673,12 +678,12 @@ angular.module('marcuraUI.components')
                     // See node_modules\angular-ui-select2\src\select2.js line 121.
                     $timeout(function() {
                         if (angular.isObject(scope.value)) {
-                            // Item might only contain id field, which might not be enough for itemTemplate.
+                            // An item might only contain id field, which might not be enough to format the item.
                             // So we need to get a full item from items.
                             var itemValue = scope.getItemValue(scope.value),
                                 item = angular.copy(getItemByValue(itemValue) || scope.value);
 
-                            item.text = scope.itemTemplate ? scope.itemTemplate(item) : item[scope.itemTextField];
+                            item.text = scope.formatItem(item);
                             item.id = itemValue;
                             selectData.data(item);
                         } else if (!scope.value) {
