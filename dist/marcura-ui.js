@@ -115,6 +115,27 @@ angular.element(document).ready(function() {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function(maHelper, $timeout, maValidators) {
     return {
         restrict: 'E',
@@ -286,27 +307,6 @@ angular.element(document).ready(function() {
 
             setTabindex();
             setText();
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1057,6 +1057,26 @@ angular.element(document).ready(function() {
         };
     }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            orderBy: '@',
+            sorting: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid-order ma-grid-order-{{sorting.direction}}"\
+                ng-show="sorting.orderedBy === orderBy || (sorting.orderedBy === \'-\' + orderBy)">\
+                <i class="fa fa-sort-{{sorting.direction}}"></i>\
+            </div>';
+
+            return html;
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maMessage', [function() {
     return {
         restrict: 'E',
@@ -1149,6 +1169,24 @@ angular.element(document).ready(function() {
                 }
             };
 
+            var setSelectedItems = function() {
+                if (scope.value && scope.value.length && scope.items && scope.items.length) {
+                    for (var j = 0; j < scope.value.length; j++) {
+                        for (var k = 0; k < scope.items.length; k++) {
+                            if (!isObjectArray) {
+                                if (scope.items[k] === scope.value[j]) {
+                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
+                                }
+                            } else if (scope.itemValueField) {
+                                if (scope.items[k][scope.itemValueField] === scope.value[j][scope.itemValueField]) {
+                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
             scope.getItemMetadata = function(item) {
                 var itemValue = isObjectArray ? item[scope.itemValueField] : item;
 
@@ -1201,23 +1239,17 @@ angular.element(document).ready(function() {
                 });
             };
 
+            scope.$watch('value', function(newValue, oldValue) {
+                if (angular.equals(newValue, oldValue)) {
+                    return;
+                }
+
+                setSelectedItems();
+            });
+
             // Set initial value.
             $timeout(function() {
-                if (scope.value && scope.value.length && scope.items && scope.items.length) {
-                    for (var j = 0; j < scope.value.length; j++) {
-                        for (var k = 0; k < scope.items.length; k++) {
-                            if (!isObjectArray) {
-                                if (scope.items[k] === scope.value[j]) {
-                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
-                                }
-                            } else if (scope.itemValueField) {
-                                if (scope.items[k][scope.itemValueField] === scope.value[j][scope.itemValueField]) {
-                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
-                                }
-                            }
-                        }
-                    }
-                }
+                setSelectedItems();
             });
 
             // Set up validators.
@@ -1248,26 +1280,6 @@ angular.element(document).ready(function() {
                     validate(scope.value);
                 };
             }
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            orderBy: '@',
-            sorting: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid-order ma-grid-order-{{sorting.direction}}"\
-                ng-show="sorting.orderedBy === orderBy || (sorting.orderedBy === \'-\' + orderBy)">\
-                <i class="fa fa-sort-{{sorting.direction}}"></i>\
-            </div>';
-
-            return html;
         }
     };
 }]);
@@ -2107,7 +2119,8 @@ angular.element(document).ready(function() {
                     validators = scope.validators ? angular.copy(scope.validators) : [],
                     isRequired = scope.isRequired,
                     hasIsNotEmptyValidator = false,
-                    previousValue;
+                    previousValue,
+                    isObjectArray = scope.itemTextField || scope.itemValueField;
 
                 // We need a copy of items. See 'scope.$watch('items', ...)' for an answer why.
                 scope._items = angular.isArray(scope.items) ? angular.copy(scope.items) : [];
@@ -2117,10 +2130,6 @@ angular.element(document).ready(function() {
                 scope.isValid = true;
                 scope.isTouched = false;
                 scope.isAjax = angular.isObject(scope.ajax);
-
-                var isStringArray = function() {
-                    return !scope.itemValueField && !scope.itemTextField;
-                };
 
                 var isExistingItem = function(item) {
                     if (!angular.isArray(scope._items)) {
@@ -2152,7 +2161,7 @@ angular.element(document).ready(function() {
                     }
 
                     // The list is an array of strings, so value is item itself.
-                    if (isStringArray()) {
+                    if (!isObjectArray) {
                         return itemValue;
                     }
 
@@ -2169,7 +2178,7 @@ angular.element(document).ready(function() {
 
                 var getNewItem = function(itemText) {
                     // The list is an array of strings, so item should be a simple string.
-                    if (isStringArray()) {
+                    if (!isObjectArray) {
                         return itemText;
                     }
 

@@ -181,7 +181,8 @@ angular.module('marcuraUI.components')
                     validators = scope.validators ? angular.copy(scope.validators) : [],
                     isRequired = scope.isRequired,
                     hasIsNotEmptyValidator = false,
-                    previousValue;
+                    previousValue,
+                    isObjectArray = scope.itemTextField || scope.itemValueField;
 
                 // We need a copy of items. See 'scope.$watch('items', ...)' for an answer why.
                 scope._items = angular.isArray(scope.items) ? angular.copy(scope.items) : [];
@@ -191,10 +192,6 @@ angular.module('marcuraUI.components')
                 scope.isValid = true;
                 scope.isTouched = false;
                 scope.isAjax = angular.isObject(scope.ajax);
-
-                var isStringArray = function() {
-                    return !scope.itemValueField && !scope.itemTextField;
-                };
 
                 var isExistingItem = function(item) {
                     if (!angular.isArray(scope._items)) {
@@ -226,7 +223,7 @@ angular.module('marcuraUI.components')
                     }
 
                     // The list is an array of strings, so value is item itself.
-                    if (isStringArray()) {
+                    if (!isObjectArray) {
                         return itemValue;
                     }
 
@@ -243,7 +240,7 @@ angular.module('marcuraUI.components')
 
                 var getNewItem = function(itemText) {
                     // The list is an array of strings, so item should be a simple string.
-                    if (isStringArray()) {
+                    if (!isObjectArray) {
                         return itemText;
                     }
 
