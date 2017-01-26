@@ -674,15 +674,34 @@ angular.module('marcuraUI.components')
                     // in this case, so we need to set it manually.
                     // See node_modules\angular-ui-select2\src\select2.js line 121.
                     $timeout(function() {
-                        if (angular.isObject(scope.value)) {
-                            // An item might only contain id field, which might not be enough to format the item.
-                            // So we need to get a full item from items.
-                            var itemValue = scope.getItemValue(scope.value),
-                                item = angular.copy(getItemByValue(itemValue) || scope.value);
+                        var itemValue,
+                            item;
 
-                            item.text = scope.formatItem(item);
-                            item.id = itemValue;
-                            selectData.data(item);
+                        if (angular.isObject(scope.value)) {
+                            if (scope.multiple && angular.isArray(scope.value)) {
+                                var items = [];
+
+                                for (var i = 0; i < scope.value.length; i++) {
+                                    // An item might only contain value field, which might not be enough to format the item.
+                                    // So we need to get a full item from items.
+                                    itemValue = scope.getItemValue(scope.value[i]);
+                                    item = angular.copy(getItemByValue(itemValue) || scope.value[i]);
+                                    item.text = scope.formatItem(item);
+                                    item.id = itemValue;
+
+                                    if (item) {
+                                        items.push(item);
+                                    }
+                                }
+
+                                selectData.data(items);
+                            } else {
+                                itemValue = scope.getItemValue(scope.value);
+                                item = angular.copy(getItemByValue(itemValue) || scope.value);
+                                item.text = scope.formatItem(item);
+                                item.id = itemValue;
+                                selectData.data(item);
+                            }
                         } else if (!scope.value) {
                             selectData.data(null);
                         } else {
