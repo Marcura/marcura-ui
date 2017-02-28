@@ -302,6 +302,27 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function() {
         this.$get = function() {
@@ -1048,23 +1069,22 @@ if (!String.prototype.endsWith) {
         };
     }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+(function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
         restrict: 'E',
         scope: {
-            costItems: '='
+            orderBy: '@',
+            sorting: '='
         },
         replace: true,
         template: function() {
             var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
+            <div class="ma-grid-order ma-grid-order-{{sorting.direction}}"\
+                ng-show="sorting.orderedBy === orderBy || (sorting.orderedBy === \'-\' + orderBy)">\
+                <i class="fa fa-sort-{{sorting.direction}}"></i>\
             </div>';
 
             return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1098,26 +1118,6 @@ if (!String.prototype.endsWith) {
             scope._type = scope.type || 'message';
             scope._state = scope.state || 'info';
             scope.cssClass = ' ma-message-' + scope._type + ' ma-message-' + scope._state;
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            orderBy: '@',
-            sorting: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid-order ma-grid-order-{{sorting.direction}}"\
-                ng-show="sorting.orderedBy === orderBy || (sorting.orderedBy === \'-\' + orderBy)">\
-                <i class="fa fa-sort-{{sorting.direction}}"></i>\
-            </div>';
-
-            return html;
         }
     };
 }]);
@@ -2382,10 +2382,14 @@ if (!String.prototype.endsWith) {
                     return !maHelper.isNullOrUndefined(scope.value);
                 };
 
-                scope.onReset = function() {
-                    scope.isTouched = true;
+                scope.reset = function() {
                     previousValue = scope.value;
                     scope.value = scope.multiple ? [] : null;
+                };
+
+                scope.onReset = function() {
+                    scope.isTouched = true;
+                    scope.reset();
                     setFocus();
 
                     $timeout(function() {
@@ -2704,6 +2708,14 @@ if (!String.prototype.endsWith) {
 
                         validate(scope.value);
                     };
+
+                    scope.instance.clear = function() {
+                        scope.reset();
+
+                        $timeout(function() {
+                            scope.isTouched = false;
+                        });
+                    };  
                 }
 
                 // Create a custom 'IsNotEmpty' validator, which also checks that

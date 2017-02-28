@@ -432,10 +432,14 @@ angular.module('marcuraUI.components')
                     return !maHelper.isNullOrUndefined(scope.value);
                 };
 
-                scope.onReset = function() {
-                    scope.isTouched = true;
+                scope.reset = function() {
                     previousValue = scope.value;
                     scope.value = scope.multiple ? [] : null;
+                };
+
+                scope.onReset = function() {
+                    scope.isTouched = true;
+                    scope.reset();
                     setFocus();
 
                     $timeout(function() {
@@ -754,6 +758,14 @@ angular.module('marcuraUI.components')
 
                         validate(scope.value);
                     };
+
+                    scope.instance.clear = function() {
+                        scope.reset();
+
+                        $timeout(function() {
+                            scope.isTouched = false;
+                        });
+                    };  
                 }
 
                 // Create a custom 'IsNotEmpty' validator, which also checks that
