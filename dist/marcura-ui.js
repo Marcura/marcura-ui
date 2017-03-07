@@ -2301,9 +2301,12 @@ if (!String.prototype.endsWith) {
                             previousAddedItem = scope.value;
 
                             if (scope.isValid) {
-                                scope.change({
-                                    maValue: scope.value,
-                                    maOldValue: previousValue
+                                // Postpone change event for scope value to be updated before.
+                                $timeout(function() {
+                                    scope.change({
+                                        maValue: scope.value,
+                                        maOldValue: previousValue
+                                    });
                                 });
                             }
                         });
