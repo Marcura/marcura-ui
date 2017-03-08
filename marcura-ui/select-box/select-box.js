@@ -760,7 +760,7 @@ angular.module('marcuraUI.components')
                     scope.instance.validate = function () {
                         scope.isTouched = true;
 
-                        validate(scope.value);
+                        validate(scope.isAddMode ? scope.text : scope.value);
                     };
 
                     scope.instance.clear = function () {
