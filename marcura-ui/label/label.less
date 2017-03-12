@@ -1,7 +1,11 @@
 @import 'marcura-ui/less.less';
 
 .ma-label {
-    .display-flex;
+    display:  inline-block;
+    
+    &-inner {
+        .display-flex;
+    }
 
     &-text {
         display: block;
@@ -19,5 +23,6 @@
         font-weight: bold;
         font-size: 12px;
         font-family: monospace;
+        line-height: inherit;
     }
 }
