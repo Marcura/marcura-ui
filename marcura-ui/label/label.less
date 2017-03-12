@@ -1,22 +1,19 @@
 @import 'marcura-ui/less.less';
 
 .ma-label {
-    display:  inline-block;
+    display: inline-block;
     
-    &-inner {
-        .display-flex;
-    }
-
     &-text {
-        display: block;
+        display: inline-block;
         .box-sizing(border-box);
         margin: 0;
         padding: 0;
-        max-width: calc(100% - 10px);
+        max-width: ~'calc(100% - 10px)';
         font-weight: normal;
     }
 
     &-star {
+        display: inline-block;
         width: 10px;
         color: @text-color-danger;
         text-align: right;
@@ -24,5 +21,6 @@
         font-size: 12px;
         font-family: monospace;
         line-height: inherit;
+        vertical-align: top;
     }
 }

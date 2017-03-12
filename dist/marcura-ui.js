@@ -52,6 +52,81 @@ if (!String.prototype.endsWith) {
         return lastIndex !== -1 && lastIndex === position;
     };
 }})();
+(function(){angular.module('marcuraUI.components').directive('maButton', ['maHelper', function(maHelper) {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            kind: '@',
+            leftIcon: '@',
+            rightIcon: '@',
+            isDisabled: '=',
+            click: '&',
+            size: '@',
+            modifier: '@'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+                <button class="ma-button"\
+                    ng-click="onClick()"\
+                    ng-disabled="isDisabled"\
+                    ng-class="{\
+                        \'ma-button-link\': isLink(),\
+                        \'ma-button-has-left-icon\': hasLeftIcon,\
+                        \'ma-button-has-right-icon\': hasRightIcon,\
+                        \'ma-button-is-disabled\': isDisabled,\
+                        \'ma-button-has-text\': hasText\
+                    }">\
+                    <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
+                        <i class="fa fa-{{leftIcon}}"></i>\
+                        <span class="ma-button-rim" ng-if="isLink()"></span>\
+                    </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
+                        <i class="fa fa-{{rightIcon}}"></i>\
+                        <span class="ma-button-rim" ng-if="isLink()"></span>\
+                    </span>\
+                    <span class="ma-button-rim" ng-if="!isLink()"></span>\
+                </button>';
+
+            return html;
+        },
+        link: function(scope, element) {
+            scope.hasText = false;
+            scope.hasLeftIcon = false;
+            scope.hasRightIcon = false;
+            scope.size = scope.size ? scope.size : 'md';
+            scope.hasLeftIcon = scope.leftIcon ? true : false;
+            scope.hasRightIcon = scope.rightIcon ? true : false;
+            scope.hasText = scope.text ? true : false;
+            var modifiers = '';
+
+            if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
+                modifiers = scope.modifier.split(' ');
+            }
+
+            for (var i = 0; i < modifiers.length; i++) {
+                element.addClass('ma-button-' + modifiers[i]);
+            }
+
+            element.addClass('ma-button-' + scope.size);
+
+            // if (scope.modifier) {
+            //     element.addClass('ma-button-' + scope.modifier);
+            // }
+
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
+
+            scope.isLink = function functionName() {
+                return scope.kind === 'link';
+            };
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function(maHelper, $timeout, maValidators) {
     return {
         restrict: 'E',
@@ -227,77 +302,23 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maButton', ['maHelper', function(maHelper) {
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
     return {
         restrict: 'E',
         scope: {
-            text: '@',
-            kind: '@',
-            leftIcon: '@',
-            rightIcon: '@',
-            isDisabled: '=',
-            click: '&',
-            size: '@',
-            modifier: '@'
+            costItems: '='
         },
         replace: true,
         template: function() {
             var html = '\
-                <button class="ma-button"\
-                    ng-click="onClick()"\
-                    ng-disabled="isDisabled"\
-                    ng-class="{\
-                        \'ma-button-link\': isLink(),\
-                        \'ma-button-has-left-icon\': hasLeftIcon,\
-                        \'ma-button-has-right-icon\': hasRightIcon,\
-                        \'ma-button-is-disabled\': isDisabled,\
-                        \'ma-button-has-text\': hasText\
-                    }">\
-                    <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
-                        <i class="fa fa-{{leftIcon}}"></i>\
-                        <span class="ma-button-rim" ng-if="isLink()"></span>\
-                    </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
-                        <i class="fa fa-{{rightIcon}}"></i>\
-                        <span class="ma-button-rim" ng-if="isLink()"></span>\
-                    </span>\
-                    <span class="ma-button-rim" ng-if="!isLink()"></span>\
-                </button>';
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
 
             return html;
         },
-        link: function(scope, element) {
-            scope.hasText = false;
-            scope.hasLeftIcon = false;
-            scope.hasRightIcon = false;
-            scope.size = scope.size ? scope.size : 'md';
-            scope.hasLeftIcon = scope.leftIcon ? true : false;
-            scope.hasRightIcon = scope.rightIcon ? true : false;
-            scope.hasText = scope.text ? true : false;
-            var modifiers = '';
-
-            if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
-                modifiers = scope.modifier.split(' ');
-            }
-
-            for (var i = 0; i < modifiers.length; i++) {
-                element.addClass('ma-button-' + modifiers[i]);
-            }
-
-            element.addClass('ma-button-' + scope.size);
-
-            // if (scope.modifier) {
-            //     element.addClass('ma-button-' + scope.modifier);
-            // }
-
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-
-            scope.isLink = function functionName() {
-                return scope.kind === 'link';
-            };
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1048,27 +1069,6 @@ if (!String.prototype.endsWith) {
         };
     }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', [function() {
     return {
         restrict: 'E',
@@ -1101,10 +1101,7 @@ if (!String.prototype.endsWith) {
         template: function () {
             var html = '\
                 <div class="ma-label">\
-                    <div class="ma-label-inner">\
-                        <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label>\
-                        <div class="ma-label-star" ng-if="isRequired">*</div>\
-                    </div>\
+                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><div class="ma-label-star" ng-if="isRequired">*</div>\
                 </div>';
 
             return html;
@@ -1140,103 +1137,6 @@ if (!String.prototype.endsWith) {
             scope._type = scope.type || 'message';
             scope._state = scope.state || 'info';
             scope.cssClass = ' ma-message-' + scope._type + ' ma-message-' + scope._state;
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function($timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            page: '=',
-            totalPages: '=',
-            change: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '<div class="ma-pager"\
-                ><ma-button\
-                    class="ma-button-previous"\
-                    right-icon="chevron-left"\
-                    size="xs"\
-                    modifier="default"\
-                    click="previousClick()"\
-                    is-disabled="getPage(internalPage) <= 1"\
-                ></ma-button\
-                ><ma-text-box\
-                    class="ma-pager-value"\
-                    change="onChange(maValue, maOldValue)"\
-                    value="internalPage">\
-                </ma-text-box><div class="ma-pager-text">of {{getPage(totalPages)}} pages</div\
-                ><ma-button\
-                    class="ma-button-next"\
-                    right-icon="chevron-right"\
-                    size="xs"\
-                    modifier="default"\
-                    click="nextClick()"\
-                    is-disabled="getPage(internalPage) >= getPage(totalPages)">\
-                </ma-button></div>';
-
-            return html;
-        },
-        link: function(scope) {
-            var pageCorrected = false;
-
-            var triggerChange = function(page) {
-                scope.page = page;
-
-                // Postpone change event for $apply (which is being invoked by $timeout)
-                // to have time to take effect and update scope.value,
-                $timeout(function() {
-                    scope.change({
-                        maPage: page
-                    });
-                });
-            };
-
-            scope.previousClick = function() {
-                var page = scope.getPage(scope.internalPage);
-                scope.internalPage = page <= 1 ? 1 : page - 1;
-                triggerChange(scope.internalPage);
-            };
-
-            scope.nextClick = function() {
-                var page = scope.getPage(scope.internalPage);
-                scope.internalPage = page >= scope.totalPages ? 1 : page + 1;
-                triggerChange(scope.internalPage);
-            };
-
-            scope.onChange = function(newValue, oldValue) {
-                var page = scope.getPage(newValue),
-                    oldPage = scope.getPage(oldValue);
-
-                if (page === oldPage) {
-                    return;
-                }
-
-                if (page < 1 || page > scope.getPage(scope.totalPages)) {
-                    scope.internalPage = oldPage;
-                    pageCorrected = true;
-                    return;
-                }
-
-                if (!pageCorrected) {
-                    triggerChange(page);
-                }
-
-                pageCorrected = false;
-            };
-
-            $timeout(function() {
-                // Set initial value.
-                scope.internalPage = scope.page;
-            });
-
-            scope.getPage = function(page) {
-                page = Number(page);
-
-                return typeof page !== 'number' || isNaN(page) ? 0 : page;
-            };
         }
     };
 }]);
@@ -1411,6 +1311,103 @@ if (!String.prototype.endsWith) {
                     validate(scope.value);
                 };
             }
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function($timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            page: '=',
+            totalPages: '=',
+            change: '&'
+        },
+        replace: true,
+        template: function() {
+            var html = '<div class="ma-pager"\
+                ><ma-button\
+                    class="ma-button-previous"\
+                    right-icon="chevron-left"\
+                    size="xs"\
+                    modifier="default"\
+                    click="previousClick()"\
+                    is-disabled="getPage(internalPage) <= 1"\
+                ></ma-button\
+                ><ma-text-box\
+                    class="ma-pager-value"\
+                    change="onChange(maValue, maOldValue)"\
+                    value="internalPage">\
+                </ma-text-box><div class="ma-pager-text">of {{getPage(totalPages)}} pages</div\
+                ><ma-button\
+                    class="ma-button-next"\
+                    right-icon="chevron-right"\
+                    size="xs"\
+                    modifier="default"\
+                    click="nextClick()"\
+                    is-disabled="getPage(internalPage) >= getPage(totalPages)">\
+                </ma-button></div>';
+
+            return html;
+        },
+        link: function(scope) {
+            var pageCorrected = false;
+
+            var triggerChange = function(page) {
+                scope.page = page;
+
+                // Postpone change event for $apply (which is being invoked by $timeout)
+                // to have time to take effect and update scope.value,
+                $timeout(function() {
+                    scope.change({
+                        maPage: page
+                    });
+                });
+            };
+
+            scope.previousClick = function() {
+                var page = scope.getPage(scope.internalPage);
+                scope.internalPage = page <= 1 ? 1 : page - 1;
+                triggerChange(scope.internalPage);
+            };
+
+            scope.nextClick = function() {
+                var page = scope.getPage(scope.internalPage);
+                scope.internalPage = page >= scope.totalPages ? 1 : page + 1;
+                triggerChange(scope.internalPage);
+            };
+
+            scope.onChange = function(newValue, oldValue) {
+                var page = scope.getPage(newValue),
+                    oldPage = scope.getPage(oldValue);
+
+                if (page === oldPage) {
+                    return;
+                }
+
+                if (page < 1 || page > scope.getPage(scope.totalPages)) {
+                    scope.internalPage = oldPage;
+                    pageCorrected = true;
+                    return;
+                }
+
+                if (!pageCorrected) {
+                    triggerChange(page);
+                }
+
+                pageCorrected = false;
+            };
+
+            $timeout(function() {
+                // Set initial value.
+                scope.internalPage = scope.page;
+            });
+
+            scope.getPage = function(page) {
+                page = Number(page);
+
+                return typeof page !== 'number' || isNaN(page) ? 0 : page;
+            };
         }
     };
 }]);
@@ -1937,6 +1934,35 @@ if (!String.prototype.endsWith) {
                     validate(scope.value);
                 };
             }
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            isDisabled: '=',
+            click: '&'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
+                <i class="fa fa-times"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
         }
     };
 }]);
@@ -2864,35 +2890,6 @@ if (!String.prototype.endsWith) {
             }
         };
     }]);})();
-(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            isDisabled: '=',
-            click: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-reset-value" ng-class="{\
-                    \'ma-reset-value-is-disabled\': isDisabled\
-                }"\
-                ng-click="onClick()">\
-                <i class="fa fa-times"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
             language: 'en',

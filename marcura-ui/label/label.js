@@ -10,10 +10,7 @@ angular.module('marcuraUI.components').directive('maLabel', [function () {
         template: function () {
             var html = '\
                 <div class="ma-label">\
-                    <div class="ma-label-inner">\
-                        <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label>\
-                        <div class="ma-label-star" ng-if="isRequired">*</div>\
-                    </div>\
+                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><div class="ma-label-star" ng-if="isRequired">*</div>\
                 </div>';
 
             return html;
