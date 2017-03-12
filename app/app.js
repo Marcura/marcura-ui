@@ -172,5 +172,11 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         controller: 'pagerPageController'
     });
 
+    $stateProvider.state('label', {
+        url: '/label',
+        templateUrl: 'label-page/label-page.html',
+        controller: 'labelPageController'
+    });
+
     $urlRouterProvider.otherwise('/home');
 });
