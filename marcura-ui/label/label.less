@@ -2,13 +2,18 @@
 
 .ma-label {
     display: inline-block;
+
+    &-is-required {
+        .ma-label-text {
+            max-width: ~'calc(100% - 10px)';
+        }
+    }
     
     &-text {
         display: inline-block;
         .box-sizing(border-box);
         margin: 0;
         padding: 0;
-        max-width: ~'calc(100% - 10px)';
         font-weight: normal;
     }
 
