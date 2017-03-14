@@ -2,10 +2,17 @@
 
 .ma-label {
     display: inline-block;
+    position: relative;
 
     &-is-required {
         .ma-label-text {
             max-width: ~'calc(100% - 10px)';
+        }
+    }
+
+    &-has-content {
+        .ma-label-star {
+            width: 10px;
         }
     }
     
@@ -19,13 +26,18 @@
 
     &-star {
         display: inline-block;
-        width: 10px;
-        color: @text-color-danger;
-        text-align: right;
-        font-weight: bold;
-        font-size: 12px;
-        font-family: monospace;
+        width: 6px;
         line-height: inherit;
-        vertical-align: top;
+    }
+
+    .fa-star {
+        color: @text-color-danger;
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        top: 2px;
+        line-height: 8px;
+        right: 0;
+        font-size: 7px;
     }
 }

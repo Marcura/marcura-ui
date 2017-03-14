@@ -180,8 +180,6 @@ angular.module('marcuraUI.components')
                     isSelectHovered = false,
                     showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
                     validators = scope.validators ? angular.copy(scope.validators) : [],
-                    isRequired = scope.isRequired,
-                    hasIsNotEmptyValidator = false,
                     previousValue,
                     isObjectArray = scope.itemTextField || scope.itemValueField;
 
@@ -193,6 +191,47 @@ angular.module('marcuraUI.components')
                 scope.isValid = true;
                 scope.isTouched = false;
                 scope.isAjax = angular.isObject(scope.ajax);
+
+                // A custom 'IsNotEmpty' validator, which also checks that
+                // a selected item is in the list.
+                var isNotEmptyAndInListValidator = {
+                    name: 'IsNotEmpty',
+                    validate: function (value) {
+                        if (scope.multiple && angular.isArray(value)) {
+                            return value.length > 0;
+                        }
+
+                        if (maHelper.isNullOrWhiteSpace(value)) {
+                            return false;
+                        }
+
+                        // In select mode check that a selected item is in the list.
+                        // In AJAX mode there is no items array and we can not check it.
+                        if (!scope.isAjax && !scope.isAddMode && !isExistingItem(value)) {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                };
+
+                var setValidators = function () {
+                    var emptyValidatorIndex = null;
+
+                    for (var i = 0; i < validators.length; i++) {
+                        if (validators[i].name === 'IsNotEmpty') {
+                            emptyValidatorIndex = i;
+                            validators[i] = isNotEmptyAndInListValidator;
+                            break;
+                        }
+                    }
+
+                    if (emptyValidatorIndex === null && scope.isRequired) {
+                        validators.unshift(isNotEmptyAndInListValidator);
+                    } else if (emptyValidatorIndex !== null && !scope.isRequired) {
+                        validators.splice(emptyValidatorIndex, 1);
+                    }
+                };
 
                 var isExistingItem = function (item) {
                     if (!angular.isArray(scope._items)) {
@@ -737,6 +776,15 @@ angular.module('marcuraUI.components')
                     validate(newValue);
                 });
 
+                scope.$watch('isRequired', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    setValidators();
+                    validate(scope.isAddMode ? scope.text : scope.value);
+                });
+
                 // Prepare API instance.
                 if (scope.instance) {
                     scope.instance.isInitialized = true;
@@ -772,45 +820,7 @@ angular.module('marcuraUI.components')
                     };
                 }
 
-                // Create a custom 'IsNotEmpty' validator, which also checks that
-                // a selected item is in the list.
-                var isNotEmptyAndInListValidator = {
-                    name: 'IsNotEmpty',
-                    validate: function (value) {
-                        if (scope.multiple && angular.isArray(value)) {
-                            return value.length > 0;
-                        }
-
-                        if (maHelper.isNullOrWhiteSpace(value)) {
-                            return false;
-                        }
-
-                        // In select mode check that a selected item is in the list.
-                        // In AJAX mode there is no items array and we can not check it.
-                        if (!scope.isAjax && !scope.isAddMode && !isExistingItem(value)) {
-                            return false;
-                        }
-
-                        return true;
-                    }
-                };
-
-                // Set up validators.
-                for (var i = 0; i < validators.length; i++) {
-                    if (validators[i].name === 'IsNotEmpty') {
-                        hasIsNotEmptyValidator = true;
-                        validators[i] = isNotEmptyAndInListValidator;
-                        break;
-                    }
-                }
-
-                if (!hasIsNotEmptyValidator && isRequired) {
-                    validators.unshift(isNotEmptyAndInListValidator);
-                }
-
-                if (hasIsNotEmptyValidator) {
-                    isRequired = true;
-                }
+                setValidators();
 
                 $timeout(function () {
                     // Set initial value.

@@ -52,81 +52,6 @@ if (!String.prototype.endsWith) {
         return lastIndex !== -1 && lastIndex === position;
     };
 }})();
-(function(){angular.module('marcuraUI.components').directive('maButton', ['maHelper', function(maHelper) {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            kind: '@',
-            leftIcon: '@',
-            rightIcon: '@',
-            isDisabled: '=',
-            click: '&',
-            size: '@',
-            modifier: '@'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-                <button class="ma-button"\
-                    ng-click="onClick()"\
-                    ng-disabled="isDisabled"\
-                    ng-class="{\
-                        \'ma-button-link\': isLink(),\
-                        \'ma-button-has-left-icon\': hasLeftIcon,\
-                        \'ma-button-has-right-icon\': hasRightIcon,\
-                        \'ma-button-is-disabled\': isDisabled,\
-                        \'ma-button-has-text\': hasText\
-                    }">\
-                    <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
-                        <i class="fa fa-{{leftIcon}}"></i>\
-                        <span class="ma-button-rim" ng-if="isLink()"></span>\
-                    </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
-                        <i class="fa fa-{{rightIcon}}"></i>\
-                        <span class="ma-button-rim" ng-if="isLink()"></span>\
-                    </span>\
-                    <span class="ma-button-rim" ng-if="!isLink()"></span>\
-                </button>';
-
-            return html;
-        },
-        link: function(scope, element) {
-            scope.hasText = false;
-            scope.hasLeftIcon = false;
-            scope.hasRightIcon = false;
-            scope.size = scope.size ? scope.size : 'md';
-            scope.hasLeftIcon = scope.leftIcon ? true : false;
-            scope.hasRightIcon = scope.rightIcon ? true : false;
-            scope.hasText = scope.text ? true : false;
-            var modifiers = '';
-
-            if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
-                modifiers = scope.modifier.split(' ');
-            }
-
-            for (var i = 0; i < modifiers.length; i++) {
-                element.addClass('ma-button-' + modifiers[i]);
-            }
-
-            element.addClass('ma-button-' + scope.size);
-
-            // if (scope.modifier) {
-            //     element.addClass('ma-button-' + scope.modifier);
-            // }
-
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-
-            scope.isLink = function functionName() {
-                return scope.kind === 'link';
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function(maHelper, $timeout, maValidators) {
     return {
         restrict: 'E',
@@ -319,6 +244,81 @@ if (!String.prototype.endsWith) {
         },
         link: function(scope) {
             console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maButton', ['maHelper', function(maHelper) {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            kind: '@',
+            leftIcon: '@',
+            rightIcon: '@',
+            isDisabled: '=',
+            click: '&',
+            size: '@',
+            modifier: '@'
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+                <button class="ma-button"\
+                    ng-click="onClick()"\
+                    ng-disabled="isDisabled"\
+                    ng-class="{\
+                        \'ma-button-link\': isLink(),\
+                        \'ma-button-has-left-icon\': hasLeftIcon,\
+                        \'ma-button-has-right-icon\': hasRightIcon,\
+                        \'ma-button-is-disabled\': isDisabled,\
+                        \'ma-button-has-text\': hasText\
+                    }">\
+                    <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
+                        <i class="fa fa-{{leftIcon}}"></i>\
+                        <span class="ma-button-rim" ng-if="isLink()"></span>\
+                    </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
+                        <i class="fa fa-{{rightIcon}}"></i>\
+                        <span class="ma-button-rim" ng-if="isLink()"></span>\
+                    </span>\
+                    <span class="ma-button-rim" ng-if="!isLink()"></span>\
+                </button>';
+
+            return html;
+        },
+        link: function(scope, element) {
+            scope.hasText = false;
+            scope.hasLeftIcon = false;
+            scope.hasRightIcon = false;
+            scope.size = scope.size ? scope.size : 'md';
+            scope.hasLeftIcon = scope.leftIcon ? true : false;
+            scope.hasRightIcon = scope.rightIcon ? true : false;
+            scope.hasText = scope.text ? true : false;
+            var modifiers = '';
+
+            if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
+                modifiers = scope.modifier.split(' ');
+            }
+
+            for (var i = 0; i < modifiers.length; i++) {
+                element.addClass('ma-button-' + modifiers[i]);
+            }
+
+            element.addClass('ma-button-' + scope.size);
+
+            // if (scope.modifier) {
+            //     element.addClass('ma-button-' + scope.modifier);
+            // }
+
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
+                }
+            };
+
+            scope.isLink = function functionName() {
+                return scope.kind === 'link';
+            };
         }
     };
 }]);
@@ -1101,12 +1101,18 @@ if (!String.prototype.endsWith) {
         template: function () {
             var html = '\
                 <div class="ma-label" ng-class="{\
-                    \'ma-label-is-required\': isRequired\
+                    \'ma-label-is-required\': isRequired,\
+                    \'ma-label-has-content\': hasContent\
                 }">\
-                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><div class="ma-label-star" ng-if="isRequired">*</div>\
+                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;</div>\
+                    <i class="fa fa-star" ng-if="isRequired"></i>\
                 </div>';
 
             return html;
+        },
+        link: function (scope, element) {
+            scope.hasContent = element.find('span').contents().length > 0;
         }
     };
 }]);})();
@@ -2151,8 +2157,6 @@ if (!String.prototype.endsWith) {
                     isSelectHovered = false,
                     showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
                     validators = scope.validators ? angular.copy(scope.validators) : [],
-                    isRequired = scope.isRequired,
-                    hasIsNotEmptyValidator = false,
                     previousValue,
                     isObjectArray = scope.itemTextField || scope.itemValueField;
 
@@ -2164,6 +2168,47 @@ if (!String.prototype.endsWith) {
                 scope.isValid = true;
                 scope.isTouched = false;
                 scope.isAjax = angular.isObject(scope.ajax);
+
+                // A custom 'IsNotEmpty' validator, which also checks that
+                // a selected item is in the list.
+                var isNotEmptyAndInListValidator = {
+                    name: 'IsNotEmpty',
+                    validate: function (value) {
+                        if (scope.multiple && angular.isArray(value)) {
+                            return value.length > 0;
+                        }
+
+                        if (maHelper.isNullOrWhiteSpace(value)) {
+                            return false;
+                        }
+
+                        // In select mode check that a selected item is in the list.
+                        // In AJAX mode there is no items array and we can not check it.
+                        if (!scope.isAjax && !scope.isAddMode && !isExistingItem(value)) {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                };
+
+                var setValidators = function () {
+                    var emptyValidatorIndex = null;
+
+                    for (var i = 0; i < validators.length; i++) {
+                        if (validators[i].name === 'IsNotEmpty') {
+                            emptyValidatorIndex = i;
+                            validators[i] = isNotEmptyAndInListValidator;
+                            break;
+                        }
+                    }
+
+                    if (emptyValidatorIndex === null && scope.isRequired) {
+                        validators.unshift(isNotEmptyAndInListValidator);
+                    } else if (emptyValidatorIndex !== null && !scope.isRequired) {
+                        validators.splice(emptyValidatorIndex, 1);
+                    }
+                };
 
                 var isExistingItem = function (item) {
                     if (!angular.isArray(scope._items)) {
@@ -2708,6 +2753,15 @@ if (!String.prototype.endsWith) {
                     validate(newValue);
                 });
 
+                scope.$watch('isRequired', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    setValidators();
+                    validate(scope.isAddMode ? scope.text : scope.value);
+                });
+
                 // Prepare API instance.
                 if (scope.instance) {
                     scope.instance.isInitialized = true;
@@ -2743,45 +2797,7 @@ if (!String.prototype.endsWith) {
                     };
                 }
 
-                // Create a custom 'IsNotEmpty' validator, which also checks that
-                // a selected item is in the list.
-                var isNotEmptyAndInListValidator = {
-                    name: 'IsNotEmpty',
-                    validate: function (value) {
-                        if (scope.multiple && angular.isArray(value)) {
-                            return value.length > 0;
-                        }
-
-                        if (maHelper.isNullOrWhiteSpace(value)) {
-                            return false;
-                        }
-
-                        // In select mode check that a selected item is in the list.
-                        // In AJAX mode there is no items array and we can not check it.
-                        if (!scope.isAjax && !scope.isAddMode && !isExistingItem(value)) {
-                            return false;
-                        }
-
-                        return true;
-                    }
-                };
-
-                // Set up validators.
-                for (var i = 0; i < validators.length; i++) {
-                    if (validators[i].name === 'IsNotEmpty') {
-                        hasIsNotEmptyValidator = true;
-                        validators[i] = isNotEmptyAndInListValidator;
-                        break;
-                    }
-                }
-
-                if (!hasIsNotEmptyValidator && isRequired) {
-                    validators.unshift(isNotEmptyAndInListValidator);
-                }
-
-                if (hasIsNotEmptyValidator) {
-                    isRequired = true;
-                }
+                setValidators();
 
                 $timeout(function () {
                     // Set initial value.
@@ -4187,6 +4203,108 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-tabs">\
+                <ul class="ma-tabs-list clearfix">\
+                    <li class="ma-tabs-item" ng-repeat="item in items"\
+                        ng-focus="onFocus(item)"\
+                        ng-blur="onBlur(item)"\
+                        ng-keypress="onKeypress($event, item)"\
+                        ng-class="{\
+                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
+                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
+                            \'ma-tabs-item-is-focused\': item.isFocused\
+                        }"\
+                        ng-click="onSelect(item)">\
+                        <a class="ma-tabs-link" href="" tabindex="-1">\
+                            <span class="ma-tabs-text">{{item.text}}</span>\
+                        </a>\
+                    </li>\
+                </ul>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function(item) {
+                if (item.isDisabled || item.isSelected) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function(item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
+
+            scope.onKeypress = function(event, item) {
+                if (event.keyCode === maHelper.keyCode.enter) {
+                    scope.onSelect(item);
+                }
+            };
+
+            scope.onFocus = function(item) {
+                item.isFocused = true;
+            };
+
+            scope.onBlur = function(item) {
+                item.isFocused = false;
+            };
+
+            $timeout(function() {
+                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
+
+                itemElements.each(function(itemIndex, itemElement) {
+                    var item = scope.items[itemIndex];
+
+                    if (!item.isDisabled) {
+                        angular.element(itemElement).attr('tabindex', '0');
+                    }
+                });
+            });
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', 'maValidators', function($timeout, $window, maHelper, maValidators) {
     return {
         restrict: 'E',
@@ -4453,108 +4571,6 @@ if (!String.prototype.endsWith) {
                     }
                 };
             }
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-tabs">\
-                <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item" ng-repeat="item in items"\
-                        ng-focus="onFocus(item)"\
-                        ng-blur="onBlur(item)"\
-                        ng-keypress="onKeypress($event, item)"\
-                        ng-class="{\
-                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
-                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
-                            \'ma-tabs-item-is-focused\': item.isFocused\
-                        }"\
-                        ng-click="onSelect(item)">\
-                        <a class="ma-tabs-link" href="" tabindex="-1">\
-                            <span class="ma-tabs-text">{{item.text}}</span>\
-                        </a>\
-                    </li>\
-                </ul>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function(item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function(item) {
-                if (item.isDisabled || item.isSelected) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
-                }
-            };
-
-            scope.onKeypress = function(event, item) {
-                if (event.keyCode === maHelper.keyCode.enter) {
-                    scope.onSelect(item);
-                }
-            };
-
-            scope.onFocus = function(item) {
-                item.isFocused = true;
-            };
-
-            scope.onBlur = function(item) {
-                item.isFocused = false;
-            };
-
-            $timeout(function() {
-                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
-
-                itemElements.each(function(itemIndex, itemElement) {
-                    var item = scope.items[itemIndex];
-
-                    if (!item.isDisabled) {
-                        angular.element(itemElement).attr('tabindex', '0');
-                    }
-                });
-            });
         }
     };
 }]);
