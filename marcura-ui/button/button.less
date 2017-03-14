@@ -1,5 +1,9 @@
 @import 'marcura-ui/less.less';
 
+@button-icon-padding: 35px;
+@button-color: #36a4ff;
+@button-fillingless-border-width: 1px;
+
 .ma-button {
     position: relative;
     padding: 8px 20px;
@@ -15,12 +19,50 @@
     vertical-align: middle;
     text-align: center;
     color: #ffffff;
-    background-color: #36a4ff;
-    .box-shadow(0 1px 2px 0 rgba(0, 0, 0, 0.3));
+    background-color: @button-color;
     .user-select(none);
 
-    &:focus:not(&-link):not(&-default):not(&-simple),
-    &:hover:not(&-link):not(&-default):not(&-simple) {
+    &-fillingless:not(&-link) {
+        background-color: #ffffff;
+        padding: 7px 19px;
+        border: @button-fillingless-border-width solid @button-color;
+        color: @button-color;
+
+        &.ma-button-xs {
+            padding-top: 3px;
+
+            &.ma-button-has-right-icon:not(.ma-button-has-text) {
+                padding-right: 10px - @button-fillingless-border-width;
+            }
+        }
+
+        &.ma-button-has-right-icon {
+            padding-right: @button-icon-padding - @button-fillingless-border-width;
+        }
+
+        &.ma-button-has-left-icon {
+            padding-left: @button-icon-padding - @button-fillingless-border-width;
+        }
+
+        .ma-button-rim {
+            border-color: @button-color;
+        }
+    }
+
+    &-fillingless&-link {
+        .ma-button-icon {
+            background-color: #ffffff;
+            border: @button-fillingless-border-width solid @button-color;
+            color: @button-color;
+
+            .ma-button-rim {
+                border-color: @button-color;
+            }
+        }
+    }
+
+    &:focus:not(&-link):not(&-default):not(&-simple):not(&-fillingless),
+    &:hover:not(&-link):not(&-default):not(&-simple):not(&-fillingless) {
         text-decoration: none;
         color: #ffffff;
     }
@@ -38,11 +80,10 @@
     }
 
     &:not(&-link):not(&-is-disabled):active {
-        .box-shadow(0 0 6px rgba(0, 0, 0, 0.225) inset);
         text-decoration: none;
     }
 
-    &:not(&-link):not(&-is-disabled):not(&-default):not(&-simple):active {
+    &:not(&-link):not(&-is-disabled):not(&-default):not(&-simple):not(&-fillingless):active {
         color: #ffffff;
     }
 
@@ -55,7 +96,6 @@
     &-is-disabled {
         background-color: #c3c3cd;
         cursor: default;
-        .box-shadow(none);
     }
 
     &-default .ma-button-rim {
@@ -102,7 +142,7 @@
 
     &-icon,
     &:not(&-link):not(&-default):not(&-simple) &-text {
-        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+        // text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
     }
 
     &-icon {
@@ -124,7 +164,7 @@
     }
 
     &-has-left-icon {
-        padding-left: 35px;
+        padding-left: @button-icon-padding;
 
         &:not(.ma-button-has-text) {
             padding-left: 16px;
@@ -147,7 +187,7 @@
     }
 
     &-has-right-icon {
-        padding-right: 35px;
+        padding-right: @button-icon-padding;
 
         &:not(.ma-button-has-text) .ma-button-icon-right {
             right: 50%;
@@ -159,7 +199,6 @@
         color: @text-color;
         background: none;
         text-decoration: underline;
-        .box-shadow(none);
 
         &:focus,
         &:hover {
@@ -171,17 +210,15 @@
         }
 
         .ma-button-icon {
-            .box-shadow(0 1px 2px 0 rgba(0, 0, 0, 0.3));
             color: #ffffff;
             width: 30px;
             height: 30px;
             margin-top: -15px;
-            background-color: #36a4ff;
+            background-color: @button-color;
         }
 
         &.ma-button-is-disabled .ma-button-icon {
             background-color: #c3c3cd;
-            .box-shadow(none);
         }
 
         .ma-button-icon-left {
@@ -227,10 +264,6 @@
         &.ma-button-simple .ma-button-icon {
             background-color: #ffffff;
             border: 1px solid #ccc;
-        }
-
-        &:not(.ma-button-is-disabled):active .ma-button-icon {
-            .box-shadow(0 0 6px rgba(0, 0, 0, 0.225) inset);
         }
     }
 
@@ -280,15 +313,10 @@
     }
 
     &-flat {
-        .box-shadow(none);
         border-radius: 4px;
 
         &.ma-button-is-disabled.ma-button-default {
             opacity: 0.75;
-        }
-
-        &:active:not(.ma-button-is-disabled):not(.ma-button-link) {
-            .box-shadow(none);
         }
 
         .ma-button-rim {
@@ -301,12 +329,11 @@
         }
 
         .ma-button-icon {
-            text-shadow: none;
+            // text-shadow: none;
         }
 
         &.ma-button-link {
             .ma-button-icon {
-                .box-shadow(none);
                 border-radius: 4px;
             }
         }
