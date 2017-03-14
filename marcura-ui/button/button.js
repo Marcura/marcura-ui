@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maButton', ['maHelper', function(maHelper) {
+angular.module('marcuraUI.components').directive('maButton', ['maHelper', function (maHelper) {
     return {
         restrict: 'E',
         scope: {
@@ -12,7 +12,7 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
             modifier: '@'
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '\
                 <button class="ma-button"\
                     ng-click="onClick()"\
@@ -36,7 +36,7 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
 
             return html;
         },
-        link: function(scope, element) {
+        link: function (scope, element) {
             scope.hasText = false;
             scope.hasLeftIcon = false;
             scope.hasRightIcon = false;
@@ -56,11 +56,7 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
 
             element.addClass('ma-button-' + scope.size);
 
-            // if (scope.modifier) {
-            //     element.addClass('ma-button-' + scope.modifier);
-            // }
-
-            scope.onClick = function() {
+            scope.onClick = function () {
                 if (!scope.isDisabled) {
                     scope.click();
                 }
