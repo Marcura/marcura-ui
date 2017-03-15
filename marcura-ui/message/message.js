@@ -6,13 +6,14 @@ angular.module('marcuraUI.components').directive('maMessage', [function () {
             type: '@',
             state: '@',
             size: '@',
-            textAlign: '@'
+            textAlign: '@',
+            hasIcon: '='
         },
         replace: true,
         template: function () {
             var html = '\
                 <div class="ma-message{{cssClass}}">\
-                    <div class="ma-message-icon">\
+                    <div class="ma-message-icon" ng-if="_hasIcon">\
                         <i class="fa" ng-class="{\
                             \'fa-info-circle\': _state === \'info\',\
                             \'fa-check-circle\': _state === \'success\',\
@@ -28,13 +29,35 @@ angular.module('marcuraUI.components').directive('maMessage', [function () {
         link: function (scope) {
             var type = scope.type || 'message',
                 size = scope.size ? scope.size : 'md';
+            scope._hasIcon = scope.hasIcon === false ? false : true;
 
-            scope._state = scope.state || 'default';
-            scope.cssClass = ' ma-message-' + type + ' ma-message-' + scope._state + ' ma-message-' + size;
+            var setState = function () {
+                scope._state = scope.state || 'default';
+            };
 
-            if (scope.textAlign) {
-                scope.cssClass += ' ma-message-text-align-' + scope.textAlign;
-            }
+            var setCssClass = function () {
+                scope.cssClass = ' ma-message-' + type + ' ma-message-' + scope._state + ' ma-message-' + size;
+
+                if (scope.textAlign) {
+                    scope.cssClass += ' ma-message-text-align-' + scope.textAlign;
+                }
+
+                if (scope._hasIcon) {
+                    scope.cssClass += ' ma-message-has-icon';
+                }
+            };
+
+            scope.$watch('state', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setState();
+                setCssClass();
+            });
+
+            setState();
+            setCssClass();
         }
     };
 }]);

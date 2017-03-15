@@ -2,10 +2,17 @@
 
 .ma-message {
     position: relative;
-    padding-left: 22px;
+
+    &-has-icon {
+        padding-left: 22px;
+    }
 
     &-alert {
-        padding: 15px 15px 15px 50px;
+        padding: 15px;
+
+        &.ma-message-has-icon {
+            padding-left: 50px;
+        }
 
         .ma-message-icon {
             font-size: 22px;
@@ -42,7 +49,10 @@
     &-lg {
         padding-top: 40px;
         padding-bottom: 40px;
-        padding-left: 60px;
+
+        &.ma-message-has-icon {
+            padding-left: 60px;
+        }
 
         .ma-message-icon {
             font-size: 30px;
@@ -55,8 +65,8 @@
             font-size: 18px;
         }
 
-        &-default {
-            padding-left: 0;
+        &.ma-message-default {
+            padding-left: 15px;
         }
         
         &.ma-message-warning {
