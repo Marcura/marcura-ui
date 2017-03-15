@@ -13,21 +13,13 @@
         position: relative;
     }
 
-    // Loading spinner makes horizontal bar appear on the table - hide it.
+    // The spinner makes horizontal bar appear on the table - hide it.
     &-is-loading {
         overflow: hidden;
     }
 
     &-responsive:not(&-is-loading) {
         overflow-x: initial;
-    }
-
-    &-spinner.loading-spinner .pace .pace-activity {
-        width: 50px;
-        height: 50px;
-        border-radius: 30px;
-        border-width: 6px;
-        margin: 50px auto 0;
     }
 
     &-header {

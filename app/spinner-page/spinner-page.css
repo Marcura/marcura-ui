@@ -1,0 +1,10 @@
+.nodes-spinner .nodes-item-has-spinner {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.nodes-spinner .nodes-item-has-spinner.nodes-item-position {
+    width: 200px;
+    height: 200px;
+}

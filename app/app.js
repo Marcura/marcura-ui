@@ -178,5 +178,11 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         controller: 'labelPageController'
     });
 
+    $stateProvider.state('spinner', {
+        url: '/spinner',
+        templateUrl: 'spinner-page/spinner-page.html',
+        controller: 'spinnerPageController'
+    });
+
     $urlRouterProvider.otherwise('/home');
 });
