@@ -1,13 +1,15 @@
-angular.module('marcuraUI.components').directive('maMessage', [function() {
+angular.module('marcuraUI.components').directive('maMessage', [function () {
     return {
         restrict: 'E',
         transclude: true,
         scope: {
             type: '@',
-            state: '@'
+            state: '@',
+            size: '@',
+            textAlign: '@'
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '\
                 <div class="ma-message{{cssClass}}">\
                     <div class="ma-message-icon">\
@@ -23,10 +25,16 @@ angular.module('marcuraUI.components').directive('maMessage', [function() {
 
             return html;
         },
-        link: function(scope) {
-            scope._type = scope.type || 'message';
-            scope._state = scope.state || 'info';
-            scope.cssClass = ' ma-message-' + scope._type + ' ma-message-' + scope._state;
+        link: function (scope) {
+            var type = scope.type || 'message',
+                size = scope.size ? scope.size : 'md';
+
+            scope._state = scope.state || 'default';
+            scope.cssClass = ' ma-message-' + type + ' ma-message-' + scope._state + ' ma-message-' + size;
+
+            if (scope.textAlign) {
+                scope.cssClass += ' ma-message-text-align-' + scope.textAlign;
+            }
         }
     };
 }]);
