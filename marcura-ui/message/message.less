@@ -46,6 +46,36 @@
         }
     }
 
+    &-md {
+        padding-top: 20px;
+        padding-bottom: 20px;
+
+        &.ma-message-has-icon {
+            padding-left: 56px;
+        }
+
+        .ma-message-icon {
+            font-size: 28px;
+            width: 28px;
+            height: 28px;
+            top: 15px;
+        }
+
+        .ma-message-text {
+            font-size: 18px;
+        }
+
+        &.ma-message-default {
+            padding-left: 15px;
+        }
+        
+        &.ma-message-warning {
+            .ma-message-icon {
+                font-size: 24px;
+            }
+        }
+    }
+
     &-lg {
         padding-top: 40px;
         padding-bottom: 40px;
@@ -58,11 +88,11 @@
             font-size: 30px;
             width: 30px;
             height: 30px;
-            top: 32px;
+            top: 36px;
         }
 
         .ma-message-text {
-            font-size: 18px;
+            font-size: 20px;
         }
 
         &.ma-message-default {

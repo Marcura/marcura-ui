@@ -28,7 +28,7 @@ angular.module('marcuraUI.components').directive('maMessage', [function () {
         },
         link: function (scope) {
             var type = scope.type || 'message',
-                size = scope.size ? scope.size : 'md';
+                size = scope.size ? scope.size : 'sm';
             scope._hasIcon = scope.hasIcon === false ? false : true;
 
             var setState = function () {
