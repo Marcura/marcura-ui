@@ -54,6 +54,9 @@ describe('maHelper service', function() {
             expect(maHelper.isGreater(2, 1)).toEqual(true);
             expect(maHelper.isGreater(1, 2)).toEqual(false);
             expect(maHelper.isGreater(1, 1)).toEqual(false);
+            expect(maHelper.isGreater(1, 1)).toEqual(false);
+            expect(maHelper.isGreater('0', 0)).toEqual(false);
+            expect(maHelper.isGreater('1', 0)).toEqual(true);
 
             // Date.
             expect(maHelper.isGreater('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(true);
@@ -78,6 +81,8 @@ describe('maHelper service', function() {
             expect(maHelper.isGreaterOrEqual(2, 1)).toEqual(true);
             expect(maHelper.isGreaterOrEqual(1, 2)).toEqual(false);
             expect(maHelper.isGreaterOrEqual(1, 1)).toEqual(true);
+            expect(maHelper.isGreaterOrEqual('0', 0)).toEqual(true);
+            expect(maHelper.isGreaterOrEqual('1', 0)).toEqual(true);
 
             // Date.
             expect(maHelper.isGreaterOrEqual('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(true);
@@ -102,6 +107,8 @@ describe('maHelper service', function() {
             expect(maHelper.isLess(2, 1)).toEqual(false);
             expect(maHelper.isLess(1, 2)).toEqual(true);
             expect(maHelper.isLess(1, 1)).toEqual(false);
+            expect(maHelper.isLess('0', 0)).toEqual(false);
+            expect(maHelper.isLess('0', 1)).toEqual(true);
 
             // Date.
             expect(maHelper.isLess('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(false);
@@ -126,6 +133,8 @@ describe('maHelper service', function() {
             expect(maHelper.isLessOrEqual(2, 1)).toEqual(false);
             expect(maHelper.isLessOrEqual(1, 2)).toEqual(true);
             expect(maHelper.isLessOrEqual(1, 1)).toEqual(true);
+            expect(maHelper.isLessOrEqual('0', 0)).toEqual(true);
+            expect(maHelper.isLessOrEqual('0', 1)).toEqual(true);
 
             // Date.
             expect(maHelper.isLessOrEqual('2016-09-26T00:00:00Z', '2016-09-16T00:00:00Z')).toEqual(false);

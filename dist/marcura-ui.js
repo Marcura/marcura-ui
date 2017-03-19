@@ -1971,35 +1971,6 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            isDisabled: '=',
-            click: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-reset-value" ng-class="{\
-                    \'ma-reset-value-is-disabled\': isDisabled\
-                }"\
-                ng-click="onClick()">\
-                <i class="fa fa-times"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.onClick = function() {
-                if (!scope.isDisabled) {
-                    scope.click();
-                }
-            };
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components')
     .filter('maSelectBoxOrderBy', ['orderByFilter', function (orderByFilter) {
         return function (items, orderByExpression) {
@@ -2933,69 +2904,29 @@ if (!String.prototype.endsWith) {
             }
         };
     }]);})();
-(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
+(function(){angular.module('marcuraUI.components').directive('maResetValue', [function() {
     return {
         restrict: 'E',
         scope: {
-            items: '=',
-            select: '&',
-            useState: '='
+            isDisabled: '=',
+            click: '&'
         },
         replace: true,
         template: function() {
             var html = '\
-            <div class="ma-side-menu">\
-                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.hidden" ng-class="{\
-                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
-                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
-                    }"\
-                    ng-click="onSelect(item)">\
-                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
-                    <div class="ma-side-menu-text">{{item.text}}</div>\
-                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
-                </div>\
+            <div class="ma-reset-value" ng-class="{\
+                    \'ma-reset-value-is-disabled\': isDisabled\
+                }"\
+                ng-click="onClick()">\
+                <i class="fa fa-times"></i>\
             </div>';
 
             return html;
         },
         link: function(scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function(item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function(item) {
-                if (item.isDisabled) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
+            scope.onClick = function() {
+                if (!scope.isDisabled) {
+                    scope.click();
                 }
             };
         }
@@ -3880,7 +3811,7 @@ if (!String.prototype.endsWith) {
     return MaDate;
 }]);
 })();
-(function(){angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope', function(MaDate, $rootScope) {
+(function(){angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope', function (MaDate, $rootScope) {
     return {
         keyCode: {
             backspace: 8,
@@ -3902,12 +3833,12 @@ if (!String.prototype.endsWith) {
             up: 38
         },
 
-        isEmail: function(value) {
+        isEmail: function (value) {
             var pattern = /^([\+\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
             return pattern.test(value);
         },
 
-        isNullOrWhiteSpace: function(value) {
+        isNullOrWhiteSpace: function (value) {
             if (value === null || value === undefined) {
                 return true;
             }
@@ -3920,15 +3851,15 @@ if (!String.prototype.endsWith) {
             return value.toString().replace(/\s/g, '').length < 1;
         },
 
-        isNullOrUndefined: function(value) {
+        isNullOrUndefined: function (value) {
             return value === null || angular.isUndefined(value);
         },
 
-        formatString: function(value) {
+        formatString: function (value) {
             // Source: http://ajaxcontroltoolkit.codeplex.com/SourceControl/latest#Client/MicrosoftAjax/Extensions/String.js
             var formattedString = '';
 
-            for (var i = 0;;) {
+            for (var i = 0; ;) {
                 // Search for curly bracers.
                 var open = value.indexOf('{', i);
                 var close = value.indexOf('}', i);
@@ -3984,7 +3915,7 @@ if (!String.prototype.endsWith) {
 
                 var arg = arguments[argNumber];
 
-                if (typeof(arg) === 'undefined' || arg === null) {
+                if (typeof (arg) === 'undefined' || arg === null) {
                     arg = '';
                 }
 
@@ -3995,7 +3926,7 @@ if (!String.prototype.endsWith) {
             return formattedString;
         },
 
-        changeSortingOrder: function(sorting, orderBy) {
+        changeSortingOrder: function (sorting, orderBy) {
             if (orderBy.charAt(0) === '-') {
                 if (sorting.orderedBy !== orderBy) {
                     sorting.direction = 'desc';
@@ -4015,7 +3946,7 @@ if (!String.prototype.endsWith) {
             }
         },
 
-        getTextHeight: function(text, font, width, lineHeight) {
+        getTextHeight: function (text, font, width, lineHeight) {
             if (!font) {
                 return 0;
             }
@@ -4048,51 +3979,63 @@ if (!String.prototype.endsWith) {
             return height;
         },
 
-        isGreater: function(value, valueToCompare) {
+        isGreater: function (value, valueToCompare) {
             var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare);
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
 
-            if (!date1.isEmpty() && !date2.isEmpty()) {
+            if (isNumber) {
+                return parseFloat(value) > parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
                 return date1.isGreater(date2);
             }
 
             return value > valueToCompare;
         },
 
-        isGreaterOrEqual: function(value, valueToCompare) {
+        isGreaterOrEqual: function (value, valueToCompare) {
             var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare);
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
 
-            if (!date1.isEmpty() && !date2.isEmpty()) {
+            if (isNumber) {
+                return parseFloat(value) >= parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
                 return date1.isGreaterOrEqual(date2);
             }
 
             return value >= valueToCompare;
         },
 
-        isLess: function(value, valueToCompare) {
+        isLess: function (value, valueToCompare) {
             var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare);
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
 
-            if (!date1.isEmpty() && !date2.isEmpty()) {
+            if (isNumber) {
+                return parseFloat(value) < parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
                 return date1.isLess(date2);
             }
 
             return value < valueToCompare;
         },
 
-        isLessOrEqual: function(value, valueToCompare) {
+        isLessOrEqual: function (value, valueToCompare) {
             var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare);
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
 
-            if (!date1.isEmpty() && !date2.isEmpty()) {
+            if (isNumber) {
+                return parseFloat(value) <= parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
                 return date1.isLessOrEqual(date2);
             }
 
             return value <= valueToCompare;
         },
 
-        isJson: function(value) {
+        isJson: function (value) {
             try {
                 JSON.parse(value);
                 return true;
@@ -4101,7 +4044,7 @@ if (!String.prototype.endsWith) {
             }
         },
 
-        safeApply: function(method) {
+        safeApply: function (method) {
             var phase = $rootScope.$$phase;
 
             if (phase !== '$apply' && phase !== '$digest') {
@@ -4114,8 +4057,7 @@ if (!String.prototype.endsWith) {
             }
         }
     };
-}]);
-})();
+}]);})();
 (function(){angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDate', function(maHelper, MaDate) {
     var formatValueToCompare = function(value) {
         if (!value) {
@@ -4222,6 +4164,75 @@ if (!String.prototype.endsWith) {
                     }
 
                     return maHelper.isLessOrEqual(value, valueToCompare);
+                }
+            };
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-side-menu">\
+                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.hidden" ng-class="{\
+                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
+                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
+                    }"\
+                    ng-click="onSelect(item)">\
+                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
+                    <div class="ma-side-menu-text">{{item.text}}</div>\
+                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function(item) {
+                if (item.isDisabled) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function(item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
                 }
             };
         }
@@ -4725,6 +4736,9 @@ if (!String.prototype.endsWith) {
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
+                        console.log(validators[i].name);
+                        console.log(validators[i].validate(value));
+                        console.log('---');
                         if (!validators[i].validate(value)) {
                             scope.isValid = false;
                             break;

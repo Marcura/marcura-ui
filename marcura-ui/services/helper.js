@@ -1,4 +1,4 @@
-angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope', function(MaDate, $rootScope) {
+angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope', function (MaDate, $rootScope) {
     return {
         keyCode: {
             backspace: 8,
@@ -20,12 +20,12 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope'
             up: 38
         },
 
-        isEmail: function(value) {
+        isEmail: function (value) {
             var pattern = /^([\+\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
             return pattern.test(value);
         },
 
-        isNullOrWhiteSpace: function(value) {
+        isNullOrWhiteSpace: function (value) {
             if (value === null || value === undefined) {
                 return true;
             }
@@ -38,15 +38,15 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope'
             return value.toString().replace(/\s/g, '').length < 1;
         },
 
-        isNullOrUndefined: function(value) {
+        isNullOrUndefined: function (value) {
             return value === null || angular.isUndefined(value);
         },
 
-        formatString: function(value) {
+        formatString: function (value) {
             // Source: http://ajaxcontroltoolkit.codeplex.com/SourceControl/latest#Client/MicrosoftAjax/Extensions/String.js
             var formattedString = '';
 
-            for (var i = 0;;) {
+            for (var i = 0; ;) {
                 // Search for curly bracers.
                 var open = value.indexOf('{', i);
                 var close = value.indexOf('}', i);
@@ -102,7 +102,7 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope'
 
                 var arg = arguments[argNumber];
 
-                if (typeof(arg) === 'undefined' || arg === null) {
+                if (typeof (arg) === 'undefined' || arg === null) {
                     arg = '';
                 }
 
@@ -113,7 +113,7 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope'
             return formattedString;
         },
 
-        changeSortingOrder: function(sorting, orderBy) {
+        changeSortingOrder: function (sorting, orderBy) {
             if (orderBy.charAt(0) === '-') {
                 if (sorting.orderedBy !== orderBy) {
                     sorting.direction = 'desc';
@@ -133,7 +133,7 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope'
             }
         },
 
-        getTextHeight: function(text, font, width, lineHeight) {
+        getTextHeight: function (text, font, width, lineHeight) {
             if (!font) {
                 return 0;
             }
@@ -166,51 +166,63 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope'
             return height;
         },
 
-        isGreater: function(value, valueToCompare) {
+        isGreater: function (value, valueToCompare) {
             var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare);
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
 
-            if (!date1.isEmpty() && !date2.isEmpty()) {
+            if (isNumber) {
+                return parseFloat(value) > parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
                 return date1.isGreater(date2);
             }
 
             return value > valueToCompare;
         },
 
-        isGreaterOrEqual: function(value, valueToCompare) {
+        isGreaterOrEqual: function (value, valueToCompare) {
             var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare);
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
 
-            if (!date1.isEmpty() && !date2.isEmpty()) {
+            if (isNumber) {
+                return parseFloat(value) >= parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
                 return date1.isGreaterOrEqual(date2);
             }
 
             return value >= valueToCompare;
         },
 
-        isLess: function(value, valueToCompare) {
+        isLess: function (value, valueToCompare) {
             var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare);
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
 
-            if (!date1.isEmpty() && !date2.isEmpty()) {
+            if (isNumber) {
+                return parseFloat(value) < parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
                 return date1.isLess(date2);
             }
 
             return value < valueToCompare;
         },
 
-        isLessOrEqual: function(value, valueToCompare) {
+        isLessOrEqual: function (value, valueToCompare) {
             var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare);
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
 
-            if (!date1.isEmpty() && !date2.isEmpty()) {
+            if (isNumber) {
+                return parseFloat(value) <= parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
                 return date1.isLessOrEqual(date2);
             }
 
             return value <= valueToCompare;
         },
 
-        isJson: function(value) {
+        isJson: function (value) {
             try {
                 JSON.parse(value);
                 return true;
@@ -219,7 +231,7 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope'
             }
         },
 
-        safeApply: function(method) {
+        safeApply: function (method) {
             var phase = $rootScope.$$phase;
 
             if (phase !== '$apply' && phase !== '$digest') {
