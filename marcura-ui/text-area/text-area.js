@@ -236,11 +236,15 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 var caretPosition = valueElement.prop('selectionStart');
                 valueElement.val(newValue);
 
-                // Restore caret position.
-                valueElement.prop({
-                    selectionStart: caretPosition,
-                    selectionEnd: caretPosition
-                });
+                // Restore caret position if text area is visible.
+                var isVisible = $(element).is(':visible');
+
+                if (isVisible) {
+                    valueElement.prop({
+                        selectionStart: caretPosition,
+                        selectionEnd: caretPosition
+                    });
+                }
 
                 resize();
             });
