@@ -268,4 +268,22 @@
     <div class="nodes-item">
         <pre>{{(port15 || null) | json}}</pre>
     </div>
+    <div class="nodes-item">
+        <h2>Store only item value</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            items="ports2"
+            value="port16"
+            item-text-field="name"
+            item-value-field="id"
+            store-item-value-only="true"
+            focus="focus16(maValue)"
+            blur="blur16(maValue)"
+            change="change16(maValue, maOldValue)">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{!maHelper.isNullOrWhiteSpace(port16) ? port16 : 'null'}}</pre>
+    </div>
 </div>

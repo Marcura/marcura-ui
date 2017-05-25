@@ -1,6 +1,7 @@
 angular.module('app.controllers').controller('selectBoxPageController', selectBoxPageController);
 
-function selectBoxPageController($scope, $timeout, helper) {
+function selectBoxPageController($scope, $timeout, helper, maHelper) {
+    $scope.maHelper = maHelper;
     $scope.ports2 = helper.getPorts();
     $scope.ports1 = [];
 
@@ -50,6 +51,7 @@ function selectBoxPageController($scope, $timeout, helper) {
     $scope.ports14 = angular.copy($scope.ports2);
     $scope.ports15 = angular.copy($scope.ports2);
     $scope.port15 = [$scope.ports2[1]];
+    $scope.port16 = $scope.ports2[1].id;
 
     // port1.
     $scope.change1 = function(port, oldPort) {
@@ -216,6 +218,30 @@ function selectBoxPageController($scope, $timeout, helper) {
         console.log('scope:', $scope.port15);
         console.log('event:', ports);
     };
+
+    // port16.
+    $scope.focus16 = function(port) {
+        console.log('focus');
+        console.log('scope:', $scope.port16);
+        console.log('event:', port);
+    };
+
+    $scope.blur16 = function(port) {
+        console.log('blur');
+        console.log('scope:', $scope.port16);
+        console.log('event:', port);
+    };
+
+    $scope.change16 = function(port, oldPort) {
+        console.log('change');
+        console.log('scope:', $scope.port16);
+        console.log('event:', port);
+        console.log('old value:', oldPort);
+    };
+
+    $timeout(function() {
+        $scope.port16 = 0;
+    }, 3000);
 
     // Test placeholder in AJAX mode.
     // $timeout(function () {

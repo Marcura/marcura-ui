@@ -35,7 +35,8 @@ angular.module('marcuraUI.components')
                 canReset: '=',
                 placeholder: '@',
                 textPlaceholder: '@',
-                multiple: '='
+                multiple: '=',
+                storeItemValueOnly: '='
             },
             replace: true,
             template: function (element, attributes) {
@@ -112,8 +113,13 @@ angular.module('marcuraUI.components')
             controller: ['$scope', function (scope) {
                 // Gets a value from itemValueField if an item is object.
                 scope.getItemValue = function (item) {
-                    if (!item || !scope.itemValueField) {
+                    if (maHelper.isNullOrWhiteSpace(item) || !scope.itemValueField) {
                         return null;
+                    }
+
+                    // Item is already a value (an object might be passed as well).
+                    if (scope.storeItemValueOnly) {
+                        return (angular.isObject(item) ? item[scope.itemValueField] : item).toString();
                     }
 
                     // In case of a nested property binding like 'company.port.id'.
@@ -261,7 +267,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var getItemByValue = function (itemValue) {
-                    if (!itemValue) {
+                    if (maHelper.isNullOrWhiteSpace(itemValue)) {
                         return null;
                     }
 
@@ -335,7 +341,7 @@ angular.module('marcuraUI.components')
                             previousAddedItem = item;
                             scope.toggleMode('add');
                         } else {
-                            if (!item) {
+                            if (maHelper.isNullOrWhiteSpace(item)) {
                                 scope.selectedItem = null;
                             } else if (!scope.isAjax) {
                                 // Set select value.
@@ -431,7 +437,7 @@ angular.module('marcuraUI.components')
                         element.removeClass('ma-select-box-is-select-focused');
 
                         scope.blur({
-                            maValue: scope.value
+                            maValue: scope.storeItemValueOnly ? getItemByValue(scope.value) : scope.value
                         });
                     }
 
@@ -507,7 +513,7 @@ angular.module('marcuraUI.components')
 
                     if (isFocusLost) {
                         scope.focus({
-                            maValue: scope.value
+                            maValue: scope.storeItemValueOnly ? getItemByValue(scope.value) : scope.value
                         });
                     }
 
@@ -670,8 +676,15 @@ angular.module('marcuraUI.components')
                         }
 
                         previousValue = scope.value;
-                        scope.value = item;
-                        scope.previousSelectedItem = item;
+
+                        if (scope.storeItemValueOnly) {
+                            scope.value = scope.getItemValue(item);
+                            scope.previousSelectedItem = scope.value;
+                            previousValue = getItemByValue(previousValue);
+                        } else {
+                            scope.value = item;
+                            scope.previousSelectedItem = item;
+                        }
 
                         $timeout(function () {
                             scope.change({

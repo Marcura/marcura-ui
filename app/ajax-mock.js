@@ -58,7 +58,7 @@ window.marcuraApp = {
     }]
 };
 
-$.ajax = function(parameters) {
+$.ajax = function (parameters) {
     if (parameters.url === '/api/ports') {
         parameters.success(window.marcuraApp.ports);
     }
