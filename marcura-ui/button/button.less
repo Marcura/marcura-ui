@@ -100,6 +100,9 @@
     &-is-disabled {
         background-color: #c3c3cd;
         cursor: default;
+        // Don't let disabled button block mouse events from reaching wrapper.
+        // Bootstrap tooltip set on a wrapper element won't work witouht it.
+        pointer-events: none;
     }
 
     &-default .ma-button-rim {
