@@ -63,7 +63,8 @@ if (!String.prototype.endsWith) {
             isDisabled: '=',
             click: '&',
             size: '@',
-            modifier: '@'
+            modifier: '@',
+            isLoading: '='
         },
         replace: true,
         template: function () {
@@ -76,8 +77,14 @@ if (!String.prototype.endsWith) {
                         \'ma-button-has-left-icon\': hasLeftIcon,\
                         \'ma-button-has-right-icon\': hasRightIcon,\
                         \'ma-button-is-disabled\': isDisabled,\
-                        \'ma-button-has-text\': hasText\
+                        \'ma-button-has-text\': hasText,\
+                        \'ma-button-is-loading\': isLoading\
                     }">\
+                    <span class="ma-button-spinner" ng-if="isLoading && !isDisabled">\
+                        <div class="pace">\
+                            <div class="pace-activity"></div>\
+                        </div>\
+                    </span>\
                     <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
                         <i class="fa fa-{{leftIcon}}"></i>\
                         <span class="ma-button-rim" ng-if="isLink()"></span>\
@@ -111,9 +118,11 @@ if (!String.prototype.endsWith) {
             element.addClass('ma-button-' + scope.size);
 
             scope.onClick = function () {
-                if (!scope.isDisabled) {
-                    scope.click();
+                if (scope.isDisabled || scope.isLoading) {
+                    return;
                 }
+
+                scope.click();
             };
 
             scope.isLink = function functionName() {
@@ -122,27 +131,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function(maHelper, $timeout, maValidators) {
     return {
         restrict: 'E',
@@ -314,6 +302,27 @@ if (!String.prototype.endsWith) {
 
             setTabindex();
             setText();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);

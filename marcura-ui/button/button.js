@@ -9,7 +9,8 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
             isDisabled: '=',
             click: '&',
             size: '@',
-            modifier: '@'
+            modifier: '@',
+            isLoading: '='
         },
         replace: true,
         template: function () {
@@ -22,8 +23,14 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
                         \'ma-button-has-left-icon\': hasLeftIcon,\
                         \'ma-button-has-right-icon\': hasRightIcon,\
                         \'ma-button-is-disabled\': isDisabled,\
-                        \'ma-button-has-text\': hasText\
+                        \'ma-button-has-text\': hasText,\
+                        \'ma-button-is-loading\': isLoading\
                     }">\
+                    <span class="ma-button-spinner" ng-if="isLoading && !isDisabled">\
+                        <div class="pace">\
+                            <div class="pace-activity"></div>\
+                        </div>\
+                    </span>\
                     <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
                         <i class="fa fa-{{leftIcon}}"></i>\
                         <span class="ma-button-rim" ng-if="isLink()"></span>\
@@ -57,9 +64,11 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
             element.addClass('ma-button-' + scope.size);
 
             scope.onClick = function () {
-                if (!scope.isDisabled) {
-                    scope.click();
+                if (scope.isDisabled || scope.isLoading) {
+                    return;
                 }
+
+                scope.click();
             };
 
             scope.isLink = function functionName() {

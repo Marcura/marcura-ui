@@ -12,15 +12,19 @@
     line-height: 20px;
     text-decoration: none;
     display: inline-block;
-    cursor: pointer;
     border: 0;
     margin: 0;
     outline: 0;
     vertical-align: middle;
     text-align: center;
     color: #ffffff;
+    cursor: default;
     background-color: @button-color;
     .user-select(none);
+
+    &:not(&-is-loading) {
+        cursor: pointer;
+    }
 
     &-fillingless:not(&-link) {
         background-color: #ffffff;
@@ -67,7 +71,7 @@
         color: #ffffff;
     }
 
-    &:focus:not(&-is-disabled) {
+    &:focus:not(&-is-disabled):not(&-is-loading) {
         .ma-button-rim {
             display: block;
         }
@@ -87,8 +91,8 @@
         color: #ffffff;
     }
 
-    &-default&-link:not(&-is-disabled):hover &-icon,
-    &-default:not(&-link):not(&-is-disabled):hover {
+    &-default&-link:not(&-is-disabled):not(&-is-loading):hover &-icon,
+    &-default:not(&-link):not(&-is-disabled):not(&-is-loading):hover {
         background-color: #e6e6e6;
     }
 
@@ -104,6 +108,27 @@
 
     &-simple .ma-button-rim {
         border-color: #66afe9;
+    }
+
+    &-spinner {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: #d9edf7;
+        opacity: 0.5;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        display: block;
+    }
+
+    .pace .pace-activity {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        margin: auto;
     }
 
     &-rim {
@@ -140,10 +165,10 @@
         min-width: 60px;
     }
 
-    &-icon,
-    &:not(&-link):not(&-default):not(&-simple) &-text {
-        // text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
-    }
+    // &-icon,
+    // &:not(&-link):not(&-default):not(&-simple) &-text {
+    //     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+    // }
 
     &-icon {
         font-size: 16px;
@@ -193,6 +218,14 @@
             right: 50%;
             margin-right: -10px;
         }
+    }
+
+    // Remove 3D push effect in IE.
+    &:active &-text,
+    &:focus &-text {
+        position:relative;
+        top: 0;
+        left: 0;
     }
 
     &-link {
@@ -326,10 +359,6 @@
         .ma-button-text {
             font-size: 14px;
             font-weight: normal;
-        }
-
-        .ma-button-icon {
-            // text-shadow: none;
         }
 
         &.ma-button-link {
