@@ -26,7 +26,7 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
                         \'ma-button-has-text\': hasText,\
                         \'ma-button-is-loading\': isLoading\
                     }">\
-                    <span class="ma-button-spinner" ng-if="isLoading && !isDisabled">\
+                    <span class="ma-button-spinner" ng-if="isLoading">\
                         <div class="pace">\
                             <div class="pace-activity"></div>\
                         </div>\
