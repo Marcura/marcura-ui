@@ -2142,14 +2142,17 @@ if (!String.prototype.endsWith) {
                     return value.toString();
                 };
 
-                scope.formatItem = scope.itemTemplate ||
-                    function (item) {
-                        if (!item) {
-                            return '';
-                        }
+                scope.formatItem = function (item) {
+                    if (scope.itemTemplate) {
+                        return scope.itemTemplate(item);
+                    }
 
-                        return scope.itemTextField ? item[scope.itemTextField] : item.toString();
-                    };
+                    if (!item) {
+                        return '';
+                    }
+
+                    return scope.itemTextField ? item[scope.itemTextField] : item.toString();
+                };
 
                 // Setting Select2 options does not work from link function, so they are set here.
                 scope.options = {};
