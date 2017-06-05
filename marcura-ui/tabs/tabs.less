@@ -28,12 +28,12 @@
 
         &-is-focused:not(&-is-disabled) .ma-tabs-link {
             .box-shadow(@input-shadow-focused);
-            border-color: @input-border-color-focused;
+            border-color: @color-primary;
         }
 
         &-is-focused:not(&-is-selected) .ma-tabs-link {
             &:hover {
-                color: #7d7d87;
+                color: @text-color-light;
                 cursor: pointer;
                 background-color: #fafafa;
             }
@@ -64,14 +64,14 @@
         &:not(&-is-selected):not(&-is-disabled):not(&-is-focused) .ma-tabs-link:hover {
             background-color: #fafafa;
             cursor: pointer;
-            color: #7d7d87;
+            color: @text-color-light;
             margin-bottom: -10px;
             padding-bottom: 7px;
             border-color: #fafafa;
         }
 
         &:not(&-is-selected):not(&-is-disabled) a.ma-tabs-link {
-            color: #7d7d87;
+            color: @text-color-light;
         }
     }
 
@@ -80,7 +80,7 @@
         padding: 8px 15px;
         border-radius: 4px 4px 0 0;
         border: 1px solid transparent;
-        color: #7d7d87;
+        color: @text-color-light;
         display: block;
     }
 

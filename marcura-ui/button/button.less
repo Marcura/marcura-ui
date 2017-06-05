@@ -1,7 +1,6 @@
 @import 'marcura-ui/less.less';
 
 @button-icon-padding: 35px;
-@button-color: #36a4ff;
 @button-fillingless-border-width: 1px;
 
 .ma-button {
@@ -19,7 +18,7 @@
     text-align: center;
     color: #ffffff;
     cursor: default;
-    background-color: @button-color;
+    background-color: @color-primary;
     .user-select(none);
 
     &:not(&-is-loading) {
@@ -29,8 +28,8 @@
     &-fillingless:not(&-link) {
         background-color: #ffffff;
         padding: 7px 19px;
-        border: @button-fillingless-border-width solid @button-color;
-        color: @button-color;
+        border: @button-fillingless-border-width solid @color-primary;
+        color: @color-primary;
 
         &.ma-button-xs {
             padding-top: 3px;
@@ -49,18 +48,18 @@
         }
 
         .ma-button-rim {
-            border-color: @button-color;
+            border-color: @color-primary;
         }
     }
 
     &-fillingless&-link {
         .ma-button-icon {
             background-color: #ffffff;
-            border: @button-fillingless-border-width solid @button-color;
-            color: @button-color;
+            border: @button-fillingless-border-width solid @color-primary;
+            color: @color-primary;
 
             .ma-button-rim {
-                border-color: @button-color;
+                border-color: @color-primary;
             }
         }
     }
@@ -93,7 +92,7 @@
 
     &-default&-link:not(&-is-disabled):not(&-is-loading):hover &-icon,
     &-default:not(&-link):not(&-is-disabled):not(&-is-loading):hover {
-        background-color: #e6e6e6;
+        background-color: @color-darker-light;
     }
 
     &-danger&-is-disabled:not(&-link),
@@ -103,14 +102,6 @@
         // Don't let disabled button block mouse events from reaching wrapper.
         // Bootstrap tooltip set on a wrapper element won't work witouht it.
         pointer-events: none;
-    }
-
-    &-default .ma-button-rim {
-        border-color: #7d7d87;
-    }
-
-    &-simple .ma-button-rim {
-        border-color: #66afe9;
     }
 
     &-spinner {
@@ -167,11 +158,6 @@
     &-has-text:not(&-link) {
         min-width: 60px;
     }
-
-    // &-icon,
-    // &:not(&-link):not(&-default):not(&-simple) &-text {
-    //     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
-    // }
 
     &-icon {
         font-size: 16px;
@@ -250,7 +236,7 @@
             width: 30px;
             height: 30px;
             margin-top: -15px;
-            background-color: @button-color;
+            background-color: @color-primary;
         }
 
         &.ma-button-is-disabled .ma-button-icon {
@@ -280,12 +266,12 @@
         &.ma-button-secondary {
             &.ma-button-link,
             .ma-button-text {
-                color: #7d7d87;
+                color: @text-color-light;
             }
         }
 
         &.ma-button-secondary:not(.ma-button-is-disabled) .ma-button-icon {
-            background-color: #7d7d87;
+            background-color: @text-color-light;
         }
 
         &.ma-button-danger:not(.ma-button-is-disabled) .ma-button-icon {
@@ -294,12 +280,12 @@
 
         &.ma-button-default .ma-button-icon {
             background-color: #fafafa;
-            border: 1px solid #ccc;
+            border: 1px solid @border-color;
         }
 
         &.ma-button-simple .ma-button-icon {
             background-color: #ffffff;
-            border: 1px solid #ccc;
+            border: 1px solid @border-color;
         }
     }
 
@@ -312,46 +298,17 @@
     }
 
     &-secondary:not(&-link):not(&-is-disabled) {
-        background-color: #7d7d87;
+        background-color: @text-color-light;
     }
 
     &-danger:not(&-link):not(&-is-disabled) {
         background-color: #c9302c;
     }
 
-    &-default,
-    &-simple {
-        color: @text-color;
-        padding-top: 7px;
-        padding-bottom: 7px;
-
-        &:not(.ma-button-link) {
-            background-color: #fafafa;
-            border: 1px solid #ccc;
-        }
-
-        .ma-button-icon {
-            color: @text-color;
-        }
-
-        &.ma-button-xs.ma-button-has-right-icon:not(.ma-button-has-text) {
-            padding-right: 8px;
-        }
-
-        &.ma-button-is-disabled .ma-button-icon {
-            color: #d7d7e1;
-        }
-    }
-
-    &-simple:not(&-link) {
-        background-color: #ffffff;
-        border: 1px solid #ccc;
-    }
-
-    &-flat {
+    &-default {
         border-radius: 4px;
 
-        &.ma-button-is-disabled.ma-button-default {
+        &.ma-button-is-disabled {
             opacity: 0.75;
         }
 
@@ -369,5 +326,38 @@
                 border-radius: 4px;
             }
         }
+    }
+
+    &-default,
+    &-simple {
+        color: @text-color;
+        padding-top: 7px;
+        padding-bottom: 7px;
+
+        &:not(.ma-button-link) {
+            background-color: #fafafa;
+            border: 1px solid @border-color;
+        }
+
+        .ma-button-icon {
+            color: @text-color;
+        }
+
+        &.ma-button-xs.ma-button-has-right-icon:not(.ma-button-has-text) {
+            padding-right: 8px;
+        }
+
+        &.ma-button-is-disabled .ma-button-icon {
+            color: #d7d7e1;
+        }
+
+        .ma-button-rim {
+            border-color: #66afe9;
+        }
+    }
+
+    &-simple:not(&-link) {
+        background-color: #ffffff;
+        border: 1px solid @border-color;
     }
 }

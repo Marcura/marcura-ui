@@ -16,11 +16,11 @@
 
     &-is-text-focused &-text {
         .box-shadow(@input-shadow-focused);
-        border-color: @input-border-color-focused;
+        border-color: @color-primary;
     }
 
     &-is-select-focused .select2-container-multi .select2-choices {
-        border-color: @input-border-color-focused;
+        border-color: @color-primary;
         .box-shadow(@input-shadow-focused);
     }
 
@@ -41,7 +41,7 @@
         .ma-select-box-text,
         .select2-container-multi.select2-container:not(.select2-dropdown-open) .select2-choices,
         .select2-container:not(.select2-dropdown-open) .select2-choice {
-            border-color: @input-border-color-invalid;
+            border-color: @color-danger;
         }
     }
 
@@ -87,7 +87,7 @@
         width: 100%;
         font-family: @font-family;
         background-color: @input-background-color;
-        border: 1px solid @input-border-color;
+        border: 1px solid @border-color;
         line-height: 20px;
         height: 30px;
     }
@@ -120,7 +120,7 @@
 
         &.select2-container-disabled .select2-choice {
             background-color: #eee;
-            border-color: @input-border-color;
+            border-color: @border-color;
             .box-shadow(none);
 
             .select2-arrow {
@@ -135,7 +135,7 @@
 
         &.select2-container-disabled.select2-container-multi .select2-choices {
             background-color: #eee;
-            border-color: @input-border-color;
+            border-color: @border-color;
             .box-shadow(none);
         }
 
@@ -152,7 +152,7 @@
             height: 30px;
             line-height: 28px;
             border-radius: 0;
-            border-color: @input-border-color;
+            border-color: @border-color;
             background-image: none;
             width: 100%;
             max-width: 100%;
@@ -196,20 +196,20 @@
         }
 
         &-active .select2-choice {
-            border-color: @input-border-color-focused;
+            border-color: @color-primary;
             outline: 0;
             .box-shadow(@input-shadow-focused);
         }
 
         &-multi {
             &.select2-container-active .select2-choices {
-                border-color: @input-border-color-focused;
+                border-color: @color-primary;
                 .box-shadow(@input-shadow-focused);
             }
 
             .select2-choices {
                 border-radius: 0;
-                border-color: @input-border-color;
+                border-color: @border-color;
                 background-image: none;
                 padding-right: 3px;
                 .input-transition;
@@ -229,12 +229,12 @@
                     padding: 4px 5px 2px 18px;
                     margin-left: 3px;
                     background-image: none;
-                    border-color: @input-border-color;
+                    border-color: @border-color;
                     background-color: #f5f5f5;
                     .box-shadow(none);
 
                     &-focus {
-                        border-color: @input-border-color-focused;
+                        border-color: @color-primary;
                     }
                 }
             }
@@ -242,7 +242,7 @@
     }
 
     &-search input {
-        border-color: @input-border-color;
+        border-color: @border-color;
         font-size: 14px;
         background: none;
         border-radius: 0;
@@ -254,13 +254,13 @@
 
     &-dropdown-open {
         .select2-choice {
-            border-color: @input-border-color-focused;
+            border-color: @color-primary;
             border-radius: 0;
             background-color: #fff;
         }
 
         .select2-choices {
-            border-color: @input-border-color-focused;
+            border-color: @color-primary;
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
         }
@@ -272,7 +272,7 @@
         border-radius: 0;
 
         &-active {
-            border-color: @input-border-color-focused;
+            border-color: @color-primary;
         }
 
         &-above {
@@ -289,7 +289,7 @@
         }
 
         .select2-highlighted {
-            background-color: #36a4ff;
+            background-color: @color-primary;
         }
 
         .select2-result-label {

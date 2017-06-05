@@ -38,7 +38,7 @@
     &-is-focused {
         .ma-date-box-inner {
             .box-shadow(@input-shadow-focused);
-            border-color: @input-border-color-focused;
+            border-color: @color-primary;
         }
     }
 
@@ -52,7 +52,7 @@
         }
 
         .ma-date-box-inner {
-            border-color: @input-border-color-invalid;
+            border-color: @color-danger;
         }
     }
 
@@ -66,7 +66,7 @@
         height: 30px;
         position: relative;
         padding: 5px 30px 5px 10px;
-        border: 1px solid @input-border-color;
+        border: 1px solid @border-color;
         background-color: @input-background-color;
         .box-shadow(@input-shadow);
         .input-transition;
@@ -141,6 +141,8 @@
 }
 
 .pika-single {
+    border-color: @border-color;
+
     .is-selected .pika-button {
         border-radius: 0;
     }

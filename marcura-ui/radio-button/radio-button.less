@@ -26,7 +26,7 @@
 
         &-is-selected {
             .ma-button {
-                background-color: #e6e6e6;
+                background-color: @color-darker-light;
             }
         }
 
@@ -75,7 +75,7 @@
 
         .ma-button:focus {
             .box-shadow(@input-shadow-focused);
-            border-color: @input-border-color-focused;
+            border-color: @color-primary;
 
             .ma-button-rim {
                 width: 1px;
@@ -84,7 +84,7 @@
                 top: 0;
                 bottom: 0;
                 border: 0;
-                background-color: @input-border-color-focused;
+                background-color: @color-primary;
             }
         }
     }
