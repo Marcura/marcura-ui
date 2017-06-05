@@ -142,12 +142,6 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         controller: 'radioButtonPageController'
     });
 
-    $stateProvider.state('reset-value', {
-        url: '/reset-value',
-        templateUrl: 'reset-value-page/reset-value-page.html',
-        controller: 'resetValuePageController'
-    });
-
     $stateProvider.state('text-area', {
         url: '/text-area',
         templateUrl: 'text-area-page/text-area-page.html',
