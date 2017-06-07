@@ -1,9 +1,12 @@
 @import 'marcura-ui/less.less';
 
+@progress-step-height: 30px;
+@progress-step-width: 30px;
+
 .ma-progress {
     &-inner {
         position: relative;
-        height: 28px;
+        height: @progress-step-height;
     }
 
     &-background {
@@ -23,15 +26,15 @@
     }
 
     &-text {
-        line-height: 28px;
+        line-height: @progress-step-height;
         text-align: center;
         font-size: 16px;
     }
 
     &-step {
         position: absolute;
-        width: 28px;
-        height: 28px;
+        width: @progress-step-width;
+        height: @progress-step-height;
         background-color: #ffffff;
         top: 0;
         border-radius: 14px;
