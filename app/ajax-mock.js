@@ -60,6 +60,8 @@ window.marcuraApp = {
 
 $.ajax = function (parameters) {
     if (parameters.url === '/api/ports') {
-        parameters.success(window.marcuraApp.ports);
+        setTimeout(function () {
+            parameters.success(window.marcuraApp.ports);
+        }, 1000);
     }
 };

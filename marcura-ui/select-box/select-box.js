@@ -839,6 +839,11 @@ angular.module('marcuraUI.components')
                 setValidators();
 
                 $timeout(function () {
+                    // Add a search icon and spinner for Select2 input field.
+                    angular.element(element[0].querySelector('.select2-search'))
+                        .append('<div class="pace"><div class="pace-activity"></div></div>')
+                        .append('<i class="ma-select-box-input-search-icon fa fa-search"></i>');
+
                     // Set initial value.
                     // Value is set inside timeout to ensure that we get the latest value.
                     // If put outside timeout then there could be issues when value is set
