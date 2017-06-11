@@ -51,17 +51,28 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
             scope.hasLeftIcon = scope.leftIcon ? true : false;
             scope.hasRightIcon = scope.rightIcon ? true : false;
             scope.hasText = scope.text ? true : false;
-            var modifiers = '';
-
-            if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
-                modifiers = scope.modifier.split(' ');
-            }
-
-            for (var i = 0; i < modifiers.length; i++) {
-                element.addClass('ma-button-' + modifiers[i]);
-            }
-
             element.addClass('ma-button-' + scope.size);
+
+            var setModifiers = function (oldModifiers) {
+                // Remove previous modifiers first.
+                if (!maHelper.isNullOrWhiteSpace(oldModifiers)) {
+                    oldModifiers = oldModifiers.split(' ');
+
+                    for (var i = 0; i < oldModifiers.length; i++) {
+                        element.removeClass('ma-button-' + oldModifiers[i]);
+                    }
+                }
+
+                var modifiers = '';
+
+                if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
+                    modifiers = scope.modifier.split(' ');
+                }
+
+                for (var i = 0; i < modifiers.length; i++) {
+                    element.addClass('ma-button-' + modifiers[i]);
+                }
+            };
 
             scope.onClick = function () {
                 if (scope.isDisabled || scope.isLoading) {
@@ -74,6 +85,16 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
             scope.isLink = function functionName() {
                 return scope.kind === 'link';
             };
+
+            scope.$watch('modifier', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setModifiers(oldValue);
+            });
+
+            setModifiers();
         }
     };
 }]);
