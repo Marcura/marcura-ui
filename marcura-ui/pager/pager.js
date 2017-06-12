@@ -1,96 +1,174 @@
-angular.module('marcuraUI.components').directive('maPager', ['$timeout', function($timeout) {
+// TODO:
+// - Include items per page select box with a parameter showItemsPerPage, which is enabled by default.
+// - If all items fit in one page hide the pager.
+// - Mobile view.
+
+angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
     return {
         restrict: 'E',
         scope: {
             page: '=',
             totalPages: '=',
+            visiblePages: '=',
             change: '&'
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '<div class="ma-pager"\
                 ><ma-button\
+                    class="ma-button-first"\
+                    text="First"\
+                    size="xs"\
+                    modifier="default"\
+                    click="firstClick()"\
+                    is-disabled="_page <= 1"\
+                ></ma-button><ma-button\
                     class="ma-button-previous"\
-                    right-icon="chevron-left"\
+                    text="Previous"\
                     size="xs"\
                     modifier="default"\
                     click="previousClick()"\
-                    is-disabled="getPage(internalPage) <= 1"\
-                ></ma-button\
-                ><ma-text-box\
-                    class="ma-pager-value"\
-                    change="onChange(maValue, maOldValue)"\
-                    value="internalPage">\
-                </ma-text-box><div class="ma-pager-text">of {{getPage(totalPages)}} pages</div\
+                    is-disabled="_page <= 1"\
+                ></ma-button><ma-button\
+                    class="ma-button-previous-range"\
+                    text="..."\
+                    size="xs"\
+                    modifier="default"\
+                    click="previousRangeClick()"\
+                    is-disabled="isFirstRange"\
+                ></ma-button><div class="ma-pager-pages"><ma-button\
+                    ng-repeat="rangePage in rangePages"\
+                    class="ma-button-page"\
+                    text="{{rangePage}}"\
+                    size="xs"\
+                    modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
+                    click="pageClick(rangePage)"></div></ma-button\
                 ><ma-button\
+                    class="ma-button-next-range"\
+                    text="..."\
+                    size="xs"\
+                    modifier="default"\
+                    click="nextRangeClick()"\
+                    is-disabled="isLastRange"\
+                ></ma-button><ma-button\
                     class="ma-button-next"\
-                    right-icon="chevron-right"\
+                    text="Next"\
                     size="xs"\
                     modifier="default"\
                     click="nextClick()"\
-                    is-disabled="getPage(internalPage) >= getPage(totalPages)">\
-                </ma-button></div>';
+                    is-disabled="_page >= totalPages"\
+                ></ma-button><ma-button\
+                    class="ma-button-last"\
+                    text="Last"\
+                    size="xs"\
+                    modifier="default"\
+                    click="lastClick()"\
+                    is-disabled="_page >= totalPages"\
+                ></ma-button>\
+            </div>';
 
             return html;
         },
-        link: function(scope) {
-            var pageCorrected = false;
+        link: function (scope) {
+            scope._page = scope.page;
 
-            var triggerChange = function(page) {
-                scope.page = page;
+            var setRangePages = function () {
+                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
+
+                if (scope.totalPages < scope._visiblePages) {
+                    scope._visiblePages = scope.totalPages;
+                }
+
+                scope.rangePages = [];
+                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
+                scope.isFirstRange = scope.range === 0;
+                scope.isLastRange = scope.totalPages - scope._page < scope._visiblePages;
+                var startPage = scope.range * scope._visiblePages;
+
+                for (var visiblePage = 1; visiblePage <= scope._visiblePages; visiblePage++) {
+                    scope.rangePages.push(startPage + visiblePage);
+                }
+            };
+
+            var onChange = function () {
+                if (scope.page === scope._page) {
+                    return;
+                }
+
+                scope.page = scope._page;
+                setRangePages();
 
                 // Postpone change event for $apply (which is being invoked by $timeout)
-                // to have time to take effect and update scope.value,
-                $timeout(function() {
+                // to have time to take effect and update scope.page.
+                $timeout(function () {
                     scope.change({
-                        maPage: page
+                        maPage: scope.page
                     });
                 });
             };
 
-            scope.previousClick = function() {
-                var page = scope.getPage(scope.internalPage);
-                scope.internalPage = page <= 1 ? 1 : page - 1;
-                triggerChange(scope.internalPage);
+            scope.firstClick = function () {
+                scope._page = 1;
+                onChange();
             };
 
-            scope.nextClick = function() {
-                var page = scope.getPage(scope.internalPage);
-                scope.internalPage = page >= scope.totalPages ? 1 : page + 1;
-                triggerChange(scope.internalPage);
+            scope.previousClick = function () {
+                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
+                onChange();
             };
 
-            scope.onChange = function(newValue, oldValue) {
-                var page = scope.getPage(newValue),
-                    oldPage = scope.getPage(oldValue);
+            scope.nextClick = function () {
+                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
+                onChange();
+            };
 
-                if (page === oldPage) {
+            scope.lastClick = function () {
+                scope._page = scope.totalPages;
+                onChange();
+            };
+
+            scope.pageClick = function (page) {
+                scope._page = page;
+                onChange();
+            };
+
+            scope.previousRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages;
+                onChange();
+            };
+
+            scope.nextRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
+                onChange();
+            };
+
+            scope.$watch('visiblePages', function (newValue, oldValue) {
+                if (newValue === oldValue) {
                     return;
                 }
 
-                if (page < 1 || page > scope.getPage(scope.totalPages)) {
-                    scope.internalPage = oldPage;
-                    pageCorrected = true;
-                    return;
-                }
-
-                if (!pageCorrected) {
-                    triggerChange(page);
-                }
-
-                pageCorrected = false;
-            };
-
-            $timeout(function() {
-                // Set initial value.
-                scope.internalPage = scope.page;
+                setRangePages();
             });
 
-            scope.getPage = function(page) {
-                page = Number(page);
+            scope.$watch('page', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
 
-                return typeof page !== 'number' || isNaN(page) ? 0 : page;
-            };
+                var page = scope.page;
+
+                // Correct page.
+                if (page < 1) {
+                    page = 1;
+                } else if (page > scope.totalPages) {
+                    page = scope.totalPages;
+                }
+
+                scope._page = page;
+                setRangePages();
+            });
+
+            setRangePages();
         }
     };
 }]);

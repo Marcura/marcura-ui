@@ -17,8 +17,9 @@
 
     &-is-disabled &-value {
         .box-shadow(none);
-        background-color: @input-background-color-disabled;
+        background-color: @color-disabled;
         cursor: default;
+        color: @text-color-disabled;
     }
 
     &-is-invalid&-is-touched {
@@ -52,7 +53,6 @@
         display: inline-block;
         font-size: 14px;
         height: 30px;
-        color: #555;
         vertical-align: top;
         font-family: @font-family;
         line-height: normal;
@@ -76,7 +76,7 @@
     }
 
     .ma-button-toggle-password.ma-button-is-disabled {
-        background-color: @input-background-color-disabled;
+        background-color: @color-disabled;
     }
 
     .ma-button-toggle-password.ma-button-is-disabled .ma-button-icon {

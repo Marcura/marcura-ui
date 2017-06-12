@@ -69,8 +69,8 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
                     modifiers = scope.modifier.split(' ');
                 }
 
-                for (var i = 0; i < modifiers.length; i++) {
-                    element.addClass('ma-button-' + modifiers[i]);
+                for (var j = 0; j < modifiers.length; j++) {
+                    element.addClass('ma-button-' + modifiers[j]);
                 }
             };
 

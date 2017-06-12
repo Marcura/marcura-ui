@@ -2,7 +2,7 @@ angular.module('app.controllers').controller('pagerPageController', pagerPageCon
 
 function pagerPageController($scope) {
     $scope.page1 = 2;
-    $scope.totalPages = 25;
+    $scope.page2 = 2;
 
     $scope.change = function(page) {
         console.log('change');

@@ -14,14 +14,15 @@
 
     &-is-disabled {
         .ma-date-box-inner {
-            background-color: @input-background-color-disabled;
+            background-color: @color-disabled;
             .box-shadow(none);
         }
 
         .ma-date-box-date,
         .ma-date-box-hour,
         .ma-date-box-minute {
-            background-color: @input-background-color-disabled;
+            background-color: @color-disabled;
+            color: @text-color-disabled;
             cursor: default;
         }
 
@@ -80,7 +81,6 @@
         display: inline-block;
         font-size: 14px;
         height: 17px;
-        color: #555;
         vertical-align: top;
         font-family: @font-family;
         line-height: normal;
@@ -112,7 +112,6 @@
         font-size: 14px;
         height: 17px;
         width: 2px;
-        color: #555;
         text-align: center;
         position: absolute;
         top: 5px;

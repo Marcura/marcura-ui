@@ -26,7 +26,8 @@
 
     &-is-disabled &-text {
         .box-shadow(none);
-        background-color: @input-background-color-disabled;
+        background-color: @color-disabled;
+        color: @text-color-disabled;
         cursor: default;
     }
 
@@ -65,7 +66,7 @@
     }
 
     .ma-button-switch.ma-button-is-disabled {
-        background-color: @input-background-color-disabled;
+        background-color: @color-disabled;
     }
 
     .ma-button-switch.ma-button-is-disabled .ma-button-icon {
@@ -135,8 +136,9 @@
         width: 100%;
 
         &.select2-container-disabled .select2-choice {
-            background-color: #eee;
+            background-color: @color-disabled;
             border-color: @border-color;
+            color: @text-color-disabled;
             .box-shadow(none);
 
             .select2-arrow {
@@ -150,7 +152,8 @@
         }
 
         &.select2-container-disabled.select2-container-multi .select2-choices {
-            background-color: #eee;
+            background-color: @color-disabled;
+            color: @text-color-disabled;
             border-color: @border-color;
             .box-shadow(none);
         }
