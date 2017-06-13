@@ -14,8 +14,18 @@
     <div class="nodes-item">
         <ma-pager
             page="page1"
-            total-pages="25"
-            change="change(maPage)">
+            total-pages="55"
+            change="change(maPage, maItemsPerPage)">
+        </ma-pager>
+    </div>
+    <div class="nodes-item">
+        <h2>Without items per page</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-pager
+            page="page3"
+            total-pages="50"
+            show-items-per-page="false">
         </ma-pager>
     </div>
     <div class="nodes-item">
@@ -24,7 +34,18 @@
     <div class="nodes-item">
         <ma-pager
             page="page2"
-            total-pages="3">
+            total-pages="3"
+            show-items-per-page="false">
+        </ma-pager>
+    </div>
+    <div class="nodes-item">
+        <h2>Items per page text</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-pager
+            page="page3"
+            total-pages="50"
+            items-per-page-text="Items per page:">
         </ma-pager>
     </div>
 </div>

@@ -3,10 +3,12 @@ angular.module('app.controllers').controller('pagerPageController', pagerPageCon
 function pagerPageController($scope) {
     $scope.page1 = 2;
     $scope.page2 = 2;
+    $scope.page3 = 2;
 
-    $scope.change = function(page) {
+    $scope.change = function(page, itemsPerPage) {
         console.log('change');
-        console.log('event:', page);
-        console.log('scope:', $scope.page1);
+        console.log('page:', page);
+        console.log('itemsPerPage:', itemsPerPage);
+        console.log('scope page:', $scope.page1);
     };
 }

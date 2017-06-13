@@ -1,3 +1,6 @@
+@import 'marcura-ui/button/button-variables.less';
+@import 'marcura-ui/pager/pager-variables.less';
+
 @font-family: 'Helvetica Neue', 'Helvetica', sans-serif;
 
 @header-color: #4A4A4A;
@@ -16,6 +19,24 @@
 @input-shadow-invalid: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483;
 @border-color: #c3c3cd;
 @input-background-color: #ffffff;
+
+@content-margin: 10px;
+@content-padding: 10px;
+
+@screen-xs: 480px;
+@screen-xs-min: @screen-xs;
+@screen-sm: 768px;
+@screen-sm-min: @screen-sm;
+@screen-md: 992px;
+@screen-md-min: @screen-md;
+@screen-lg: 1200px;
+@screen-lg-min: @screen-lg;
+
+// So media queries don't overlap when required, provide a maximum.
+@screen-xxs-max: (@screen-xs-min - 1);
+@screen-xs-max: (@screen-sm-min - 1);
+@screen-sm-max: (@screen-md-min - 1);
+@screen-md-max: (@screen-lg-min - 1);
 
 .user-select(@value) {
     -webkit-user-select: @value;
@@ -53,6 +74,13 @@
     display: -moz-flex;
     display: -ms-flexbox;
     display: flex;
+}
+
+.display-inline-flex {
+    display: -webkit-inline-flex;
+    display: -moz-inline-flex;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
 }
 
 .input {

@@ -1,8 +1,5 @@
 @import 'marcura-ui/less.less';
 
-@button-icon-padding: 35px;
-@button-fillingless-border-width: 1px;
-
 .ma-button {
     position: relative;
     padding: 8px 20px;
@@ -306,7 +303,7 @@
     }
 
     &-default {
-        border-radius: 4px;
+        border-radius: @button-border-radius;
 
         &.ma-button-is-disabled {
             opacity: 0.75;
@@ -317,7 +314,7 @@
         }
 
         .ma-button-rim {
-            border-radius: 3px;
+            border-radius: @button-rim-border-radius;
         }
 
         .ma-button-text {
@@ -327,7 +324,7 @@
 
         &.ma-button-link {
             .ma-button-icon {
-                border-radius: 4px;
+                border-radius: @button-border-radius;
             }
         }
     }

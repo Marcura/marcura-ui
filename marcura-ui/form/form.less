@@ -185,7 +185,7 @@ input.form-control,
 textarea.form-control {
     border-radius: 0;
 }
-@media (max-width: 767px) {
+@media (max-width: @screen-xs-max) {
     .form-col {
         &.col-xs-12 {
             margin-top: 10px;
@@ -202,7 +202,7 @@ textarea.form-control {
         }
     }
 }
-@media (min-width: 768px) {
+@media (min-width: @screen-sm) {
     .form-group {
         &-labels-right .form-label {
             text-align: right;

@@ -1,8 +1,3 @@
-// TODO:
-// - Include items per page select box with a parameter showItemsPerPage, which is enabled by default.
-// - If all items fit in one page hide the pager.
-// - Mobile view.
-
 angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
     return {
         restrict: 'E',
@@ -10,67 +5,109 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
             page: '=',
             totalPages: '=',
             visiblePages: '=',
+            showItemsPerPage: '=',
+            itemsPerPageNumbers: '=',
+            itemsPerPageText: '@',
+            itemsPerPage: '=',
             change: '&'
         },
         replace: true,
         template: function () {
-            var html = '<div class="ma-pager"\
-                ><ma-button\
-                    class="ma-button-first"\
-                    text="First"\
-                    size="xs"\
-                    modifier="default"\
-                    click="firstClick()"\
-                    is-disabled="_page <= 1"\
-                ></ma-button><ma-button\
-                    class="ma-button-previous"\
-                    text="Previous"\
-                    size="xs"\
-                    modifier="default"\
-                    click="previousClick()"\
-                    is-disabled="_page <= 1"\
-                ></ma-button><ma-button\
-                    class="ma-button-previous-range"\
-                    text="..."\
-                    size="xs"\
-                    modifier="default"\
-                    click="previousRangeClick()"\
-                    is-disabled="isFirstRange"\
-                ></ma-button><div class="ma-pager-pages"><ma-button\
-                    ng-repeat="rangePage in rangePages"\
-                    class="ma-button-page"\
-                    text="{{rangePage}}"\
-                    size="xs"\
-                    modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
-                    click="pageClick(rangePage)"></div></ma-button\
-                ><ma-button\
-                    class="ma-button-next-range"\
-                    text="..."\
-                    size="xs"\
-                    modifier="default"\
-                    click="nextRangeClick()"\
-                    is-disabled="isLastRange"\
-                ></ma-button><ma-button\
-                    class="ma-button-next"\
-                    text="Next"\
-                    size="xs"\
-                    modifier="default"\
-                    click="nextClick()"\
-                    is-disabled="_page >= totalPages"\
-                ></ma-button><ma-button\
-                    class="ma-button-last"\
-                    text="Last"\
-                    size="xs"\
-                    modifier="default"\
-                    click="lastClick()"\
-                    is-disabled="_page >= totalPages"\
-                ></ma-button>\
+            var html = '<div class="ma-pager" ng-class="{\
+                \'ma-pager-has-pager\': _hasPager\
+            }">\
+                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
+                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
+                        items="_itemsPerPageNumbers"\
+                        value="_itemsPerPage"\
+                        change="itemsPerPageChange(maValue)">\
+                    </ma-select-box>\
+                </div><div class="ma-pager-pager">\
+                    <div class="ma-pager-start">\
+                        <ma-button\
+                            class="ma-button-first"\
+                            text="First"\
+                            size="xs"\
+                            modifier="default"\
+                            click="firstClick()"\
+                            is-disabled="_page <= 1"\
+                        ></ma-button><ma-button\
+                            class="ma-button-previous"\
+                            text="Previous"\
+                            size="xs"\
+                            modifier="default"\
+                            click="previousClick()"\
+                            is-disabled="_page <= 1">\
+                        </ma-button>\
+                    </div\
+                    ><div class="ma-pager-middle">\
+                        <ma-button\
+                            class="ma-button-previous-range"\
+                            text="..."\
+                            size="xs"\
+                            modifier="default"\
+                            click="previousRangeClick()"\
+                            is-disabled="isFirstRange"\
+                        ></ma-button><div class="ma-pager-pages"><ma-button\
+                            ng-repeat="rangePage in rangePages"\
+                            class="ma-button-page"\
+                            text="{{rangePage}}"\
+                            size="xs"\
+                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
+                            click="pageClick(rangePage)"></div></ma-button\
+                        ><ma-button\
+                            class="ma-button-next-range"\
+                            text="..."\
+                            size="xs"\
+                            modifier="default"\
+                            click="nextRangeClick()"\
+                            is-disabled="isLastRange"\
+                        ></ma-button>\
+                    </div\
+                    ><div class="ma-pager-end">\
+                        <ma-button\
+                            class="ma-button-next"\
+                            text="Next"\
+                            size="xs"\
+                            modifier="default"\
+                            click="nextClick()"\
+                            is-disabled="_page >= totalPages"\
+                        ></ma-button><ma-button\
+                            class="ma-button-last"\
+                            text="Last"\
+                            size="xs"\
+                            modifier="default"\
+                            click="lastClick()"\
+                            is-disabled="_page >= totalPages">\
+                        </ma-button>\
+                    </div>\
+                </div>\
             </div>';
 
             return html;
         },
         link: function (scope) {
             scope._page = scope.page;
+            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
+            scope._itemsPerPageNumbers = ['25', '50', '75', '100'];
+            scope._itemsPerPage = '25';
+            scope.hasItemsPerPageChanged = false;
+
+            var setItemsPerPage = function () {
+                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
+                    return;
+                }
+
+                scope._itemsPerPage = scope.itemsPerPage.toString();
+            };
+
+            var setItemsPerPageNumbers = function () {
+                if (!scope._showItemsPerPage || !angular.isArray(scope.itemsPerPageNumbers)) {
+                    return;
+                }
+
+                scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
+            };
 
             var setRangePages = function () {
                 scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
@@ -90,21 +127,39 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 }
             };
 
+            var setHasPager = function () {
+                scope._hasPager = !scope._showItemsPerPage || scope.totalPages > Number(scope._itemsPerPage);
+            };
+
             var onChange = function () {
-                if (scope.page === scope._page) {
+                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
                     return;
                 }
 
                 scope.page = scope._page;
                 setRangePages();
 
+                var value = {
+                    maPage: scope.page
+                };
+
+                if (scope._showItemsPerPage) {
+                    value.maItemsPerPage = Number(scope._itemsPerPage);
+                    scope.hasItemsPerPageChanged = false;
+                }
+
                 // Postpone change event for $apply (which is being invoked by $timeout)
                 // to have time to take effect and update scope.page.
                 $timeout(function () {
-                    scope.change({
-                        maPage: scope.page
-                    });
+                    scope.change(value);
                 });
+            };
+
+            scope.itemsPerPageChange = function (itemsPerPage) {
+                scope._itemsPerPage = itemsPerPage;
+                scope.hasItemsPerPageChanged = true;
+                setHasPager();
+                onChange();
             };
 
             scope.firstClick = function () {
@@ -168,7 +223,27 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 setRangePages();
             });
 
+            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
+                if (angular.equals(newValue, oldValue)) {
+                    return;
+                }
+
+                setItemsPerPageNumbers();
+            });
+
+            scope.$watch('itemsPerPage', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setItemsPerPage();
+                setHasPager();
+            });
+
             setRangePages();
+            setItemsPerPageNumbers();
+            setItemsPerPage();
+            setHasPager();
         }
     };
 }]);

@@ -3,25 +3,59 @@
 .ma-pager {
     display: inline-block;
 
+    &:not(&-has-pager) {
+        .ma-pager-pager {
+            display: none;
+        }
+    }
+
     &-pages {
         display: inline-block;
+    }
+
+    &-pager {
+        display: inline-block;
+    }
+
+    &-start,
+    &-end,
+    &-middle {
+        display: inline-block;
+    }
+
+    &-items-per-page {
+        display: inline-block;
+        margin-right: @content-margin * 2;
+
+        &-text {
+            display: inline-block;
+            line-height: 30px;
+            height: 30px;
+            vertical-align: top;
+            margin-right: @content-margin;
+        }
+
+        .ma-select-box {
+            width: auto;
+            min-width: 64px;
+        }
     }
 
     .ma-button {
         border-radius: 0;
 
         &-first {
-            border-top-left-radius: 4px;
-            border-bottom-left-radius: 4px;
+            border-top-left-radius: @button-border-radius;
+            border-bottom-left-radius: @button-border-radius;
         }
 
         &-last {
-            border-top-right-radius: 4px;
-            border-bottom-right-radius: 4px;
+            border-top-right-radius: @button-border-radius;
+            border-bottom-right-radius: @button-border-radius;
         }
 
         &-previous-range, &-next-range {
-            min-width: 30px;
+            min-width: @pager-button-min-width;
             padding-left: 5px;
             padding-right: 5px;
         }
@@ -35,11 +69,9 @@
         }
 
         &-page {
-            &.ma-button-has-text {
-                min-width: 30px;
-                padding-left: 5px;
-                padding-right: 5px;
-            }
+            min-width: @pager-button-min-width;
+            padding-left: 5px;
+            padding-right: 5px;
 
             &.ma-button-default:not(:last-child) {
                 border-right-width: 0;
@@ -52,4 +84,60 @@
             }
         }
     } 
+}
+
+@media (max-width: @screen-xxs-max) {
+    .ma-pager {
+        width: 100%;
+        
+        &-pager {
+            display: block;
+        }
+
+        &-items-per-page {
+            margin-bottom: @content-margin;
+        }
+
+        .ma-button-first {
+            width: 50%;
+            border-bottom-left-radius: 0;
+            border-bottom-width: 0;
+        }
+
+        .ma-button-previous {
+            width: 50%;
+            border-right-width: 1px;
+            border-top-right-radius: @button-border-radius;
+            border-bottom-width: 0;
+        }
+
+        &-start,
+        &-end,
+        &-middle {
+            display: block;
+        }
+
+        &-pages {
+            width:  ~'calc(100% - @{pager-button-min-width} * 2)';
+            .display-inline-flex;
+
+            .ma-button-page {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+
+        .ma-button-next {
+            width: 50%;
+            border-left-width: 1px;
+            border-bottom-left-radius: @button-border-radius;
+            border-top-width: 0;
+        }
+
+        .ma-button-last {
+            width: 50%;
+            border-top-right-radius: 0;
+            border-top-width: 0;
+        }
+    }
 }
