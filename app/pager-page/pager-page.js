@@ -4,6 +4,7 @@ function pagerPageController($scope) {
     $scope.page1 = 2;
     $scope.page2 = 2;
     $scope.page3 = 2;
+    $scope.page4 = 2;
 
     $scope.change = function(page, itemsPerPage) {
         console.log('change');

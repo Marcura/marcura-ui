@@ -3,7 +3,7 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
         restrict: 'E',
         scope: {
             page: '=',
-            totalPages: '=',
+            totalItems: '=',
             visiblePages: '=',
             showItemsPerPage: '=',
             itemsPerPageNumbers: '=',
@@ -92,6 +92,11 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
             scope._itemsPerPageNumbers = ['25', '50', '75', '100'];
             scope._itemsPerPage = '25';
             scope.hasItemsPerPageChanged = false;
+            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
+
+            var setTotalPages = function () {
+                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
+            };
 
             var setItemsPerPage = function () {
                 if (!scope._showItemsPerPage || !scope.itemsPerPage) {
@@ -113,22 +118,23 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
 
                 if (scope.totalPages < scope._visiblePages) {
-                    scope._visiblePages = scope.totalPages;
+                    scope._visiblePages = scope.totalPages || 1;
                 }
 
                 scope.rangePages = [];
                 scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
                 scope.isFirstRange = scope.range === 0;
-                scope.isLastRange = scope.totalPages - scope._page < scope._visiblePages;
+                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
                 var startPage = scope.range * scope._visiblePages;
 
-                for (var visiblePage = 1; visiblePage <= scope._visiblePages; visiblePage++) {
+                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
                     scope.rangePages.push(startPage + visiblePage);
                 }
             };
 
             var setHasPager = function () {
-                scope._hasPager = !scope._showItemsPerPage || scope.totalPages > Number(scope._itemsPerPage);
+                var itemsPerPage = Number(scope._itemsPerPage);
+                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * itemsPerPage > itemsPerPage);
             };
 
             var onChange = function () {
@@ -146,6 +152,11 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 if (scope._showItemsPerPage) {
                     value.maItemsPerPage = Number(scope._itemsPerPage);
                     scope.hasItemsPerPageChanged = false;
+
+                    // If itemsPerPage is set update its value.
+                    if (scope.itemsPerPage !== undefined) {
+                        scope.itemsPerPage = value.maItemsPerPage;
+                    }
                 }
 
                 // Postpone change event for $apply (which is being invoked by $timeout)
@@ -158,6 +169,14 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
             scope.itemsPerPageChange = function (itemsPerPage) {
                 scope._itemsPerPage = itemsPerPage;
                 scope.hasItemsPerPageChanged = true;
+                var oldTotalPages = scope.totalPages;
+                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
+
+                // Correct current page if it's out of new range.
+                if (scope.totalPages < oldTotalPages) {
+                    scope._page = scope.totalPages;
+                }
+
                 setHasPager();
                 onChange();
             };
@@ -197,6 +216,26 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 onChange();
             };
 
+            scope.$watch('totalItems', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
+                setTotalPages();
+
+                // Correct the page and trigger change.
+                if (scope._totalItems === 0 || scope._totalItems <= Number(scope._itemsPerPage)) {
+                    scope._page = 1;
+                    onChange();
+                    setHasPager();
+                    return;
+                }
+
+                setRangePages();
+                setHasPager();
+            });
+
             scope.$watch('visiblePages', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
@@ -219,8 +258,10 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                     page = scope.totalPages;
                 }
 
-                scope._page = page;
+                // Correct page to 1 in case totalPages is 0 and page is 0.
+                scope._page = page || 1;
                 setRangePages();
+                setHasPager();
             });
 
             scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
@@ -240,9 +281,10 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 setHasPager();
             });
 
-            setRangePages();
             setItemsPerPageNumbers();
             setItemsPerPage();
+            setTotalPages();
+            setRangePages();
             setHasPager();
         }
     };
