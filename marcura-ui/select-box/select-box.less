@@ -90,7 +90,7 @@
         background-color: @input-background-color;
         border: 1px solid @border-color;
         line-height: 20px;
-        height: 30px;
+        height: @component-height;
     }
 
     &-spinner {
@@ -127,6 +127,12 @@
             top: 6px;
             left: 7px;
         }
+    }
+
+    // Hide the underlying select as it spoils the appearence for a moment before the component is initialized.
+    // It also takes up some width which makes horizontal scroll to appear in some layouts.
+    select {
+        display: none;
     }
 }
 
@@ -168,7 +174,7 @@
         }
 
         .select2-choice {
-            height: 30px;
+            height: @component-height;
             line-height: 28px;
             border-radius: 0;
             border-color: @border-color;
@@ -185,7 +191,7 @@
                 background-color: transparent;
                 width: 33px;
                 border-left: 0;
-                height: 30px;
+                height: @component-height;
                 padding: 7px 10px 0;
                 font-size: 12px;
                 background-image: none;
@@ -267,7 +273,7 @@
             background: none;
             border-radius: 0;
             .box-shadow(inset 0 1px 1px rgba(0, 0, 0, .075));
-            height: 30px !important;
+            height: @component-height !important;
             padding: 5px 39px 5px 10px;
             line-height: 1.5;
 
