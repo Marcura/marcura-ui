@@ -22,129 +22,8 @@
         overflow-x: initial;
     }
 
-    &-header {
-        border-top: 1px solid #979797;
-        border-bottom: 1px solid #c3c3cd;
-        background-color: #fafafa;
-        .display-flex;
-
-        &-col {
-            font-weight: bold;
-            color: #4a4a4a;
-            border-right: 1px solid #c3c3cd;
-            padding: 10px;
-            cursor: default;
-
-            &-sortable {
-                cursor: pointer;
-
-                .ma-grid-caption {
-                    position: relative;
-                    padding-right: 16px;
-                }
-            }
-
-            &:last-child {
-                border-right-width: 0;
-            }
-
-            &-5 {
-                width: 5%;
-            }
-
-            &-10 {
-                width: 10%;
-            }
-
-            &-15 {
-                width: 15%;
-            }
-
-            &-20 {
-                width: 20%;
-            }
-
-            &-25 {
-                width: 25%;
-            }
-
-            &-30 {
-                width: 30%;
-            }
-
-            &-35 {
-                width: 35%;
-            }
-
-            &-40 {
-                width: 40%;
-            }
-
-            &-45 {
-                width: 45%;
-            }
-
-            &-50 {
-                width: 50%;
-            }
-
-            &-55 {
-                width: 55%;
-            }
-
-            &-60 {
-                width: 60%;
-            }
-
-            &-65 {
-                width: 65%;
-            }
-
-            &-70 {
-                width: 70%;
-            }
-
-            &-75 {
-                width: 75%;
-            }
-
-            &-80 {
-                width: 80%;
-            }
-
-            &-85 {
-                width: 85%;
-            }
-
-            &-90 {
-                width: 90%;
-            }
-
-            &-95 {
-                width: 95%;
-            }
-        }
-    }
-
-    &-content {
-        color: #4a4a4a;
-        border-bottom: 1px solid #e0e0dc;
-    }
-
-    &-caption {
-        display: inline-block;
-        .user-select(none);
-    }
-
-    &-col {
-        padding: 10px;
-        border-right: solid 1px #f0f0f0;
-        border-top: 1px solid #f0f0f0;
-
-        &:last-child {
-            border-right-width: 0;
-        }
-
+    &-col-xs,
+    &-header-col-xs {
         &-5 {
             width: 5%;
         }
@@ -220,6 +99,58 @@
         &-95 {
             width: 95%;
         }
+
+        &-100 {
+            width: 100%;
+        }
+    }
+
+    &-header {
+        border-top: 1px solid #979797;
+        border-bottom: 1px solid #c3c3cd;
+        background-color: #fafafa;
+        .display-flex;
+
+        &-col {
+            font-weight: bold;
+            color: #4a4a4a;
+            border-right: 1px solid #c3c3cd;
+            padding: 10px;
+            cursor: default;
+
+            &-sortable {
+                cursor: pointer;
+
+                .ma-grid-caption {
+                    position: relative;
+                    padding-right: 16px;
+                }
+            }
+
+            &:last-child {
+                border-right-width: 0;
+            }
+        }
+    }
+
+    &-content {
+        color: #4a4a4a;
+        border-bottom: 1px solid #e0e0dc;
+    }
+
+    &-caption {
+        display: inline-block;
+        .user-select(none);
+    }
+
+    &-col {
+        padding: 10px;
+        border-right: solid 1px #f0f0f0;
+        border-top: 1px solid #f0f0f0;
+
+        &:last-child {
+            border-right-width: 0;
+        }
     }
 
     &-row {
@@ -266,6 +197,93 @@
 
         &.ma-grid-size-lg .ma-grid-inner {
             width: @screen-lg;
+        }
+    }
+}
+
+@media (min-width: @screen-sm-min) {
+    .ma-grid {
+        &-col-sm,
+        &-header-col-sm {
+            &-5 {
+                width: 5%;
+            }
+
+            &-10 {
+                width: 10%;
+            }
+
+            &-15 {
+                width: 15%;
+            }
+
+            &-20 {
+                width: 20%;
+            }
+
+            &-25 {
+                width: 25%;
+            }
+
+            &-30 {
+                width: 30%;
+            }
+
+            &-35 {
+                width: 35%;
+            }
+
+            &-40 {
+                width: 40%;
+            }
+
+            &-45 {
+                width: 45%;
+            }
+
+            &-50 {
+                width: 50%;
+            }
+
+            &-55 {
+                width: 55%;
+            }
+
+            &-60 {
+                width: 60%;
+            }
+
+            &-65 {
+                width: 65%;
+            }
+
+            &-70 {
+                width: 70%;
+            }
+
+            &-75 {
+                width: 75%;
+            }
+
+            &-80 {
+                width: 80%;
+            }
+
+            &-85 {
+                width: 85%;
+            }
+
+            &-90 {
+                width: 90%;
+            }
+
+            &-95 {
+                width: 95%;
+            }
+
+            &-100 {
+                width: 100%;
+            }
         }
     }
 }

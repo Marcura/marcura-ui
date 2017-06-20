@@ -19,42 +19,42 @@
                 </div>
             </div>
             <div class="ma-grid-header">
-                <div class="ma-grid-header-col ma-grid-header-col-25 ma-grid-header-col-sortable"
+                <div class="ma-grid-header-col ma-grid-header-col-xs-25 ma-grid-header-col-sortable"
                     ng-click="maHelper.changeSortingOrder(sorting, 'vessel')">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">Vessel</div>
                         <ma-grid-order order-by="vessel" sorting="sorting"></ma-grid-order>
                     </div>
                 </div>
-                <div class="ma-grid-header-col ma-grid-header-col-5 ma-grid-header-col-sortable"
+                <div class="ma-grid-header-col ma-grid-header-col-xs-5 ma-grid-header-col-sortable"
                     ng-click="maHelper.changeSortingOrder(sorting, 'operation')">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">O</div>
                         <ma-grid-order order-by="operation" sorting="sorting"></ma-grid-order>
                     </div>
                 </div>
-                <div class="ma-grid-header-col ma-grid-header-col-20 ma-grid-header-col-sortable"
+                <div class="ma-grid-header-col ma-grid-header-col-xs-20 ma-grid-header-col-sortable"
                     ng-click="maHelper.changeSortingOrder(sorting, 'commodity')">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">Commodity</div>
                         <ma-grid-order order-by="commodity" sorting="sorting"></ma-grid-order>
                     </div>
                 </div>
-                <div class="ma-grid-header-col ma-grid-header-col-10 ma-grid-header-col-sortable"
+                <div class="ma-grid-header-col ma-grid-header-col-xs-10 ma-grid-header-col-sortable"
                     ng-click="maHelper.changeSortingOrder(sorting, 'eta')">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">ETA</div>
                         <ma-grid-order order-by="eta" sorting="sorting"></ma-grid-order>
                     </div>
                 </div>
-                <div class="ma-grid-header-col ma-grid-header-col-25 ma-grid-header-col-sortable"
+                <div class="ma-grid-header-col ma-grid-header-col-xs-25 ma-grid-header-col-sortable"
                     ng-click="maHelper.changeSortingOrder(sorting, 'status')">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">Status</div>
                         <ma-grid-order order-by="status" sorting="sorting"></ma-grid-order>
                     </div>
                 </div>
-                <div class="ma-grid-header-col ma-grid-header-col-15 ma-grid-header-col-sortable"
+                <div class="ma-grid-header-col ma-grid-header-col-xs-15 ma-grid-header-col-sortable"
                     ng-click="maHelper.changeSortingOrder(sorting, 'total')">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">Total</div>
@@ -66,22 +66,22 @@
                 <div class="ma-grid-row"
                     ng-repeat="da in das | orderBy: sorting.orderedBy">
                     <div class="ma-grid-row-inner">
-                        <div class="ma-grid-col ma-grid-col-25">
+                        <div class="ma-grid-col ma-grid-col-xs-25">
                             {{da.vessel}}
                         </div>
-                        <div class="ma-grid-col ma-grid-col-5">
+                        <div class="ma-grid-col ma-grid-col-xs-5">
                             {{da.operation.substring(0,1)}}
                         </div>
-                        <div class="ma-grid-col ma-grid-col-20">
+                        <div class="ma-grid-col ma-grid-col-xs-20">
                             {{da.commodity}}
                         </div>
-                        <div class="ma-grid-col ma-grid-col-10">
+                        <div class="ma-grid-col ma-grid-col-xs-10">
                             {{da.eta | date: 'dd/MM'}}
                         </div>
-                        <div class="ma-grid-col ma-grid-col-25">
+                        <div class="ma-grid-col ma-grid-col-xs-25">
                             {{da.status}}
                         </div>
-                        <div class="ma-grid-col ma-grid-col-15">
+                        <div class="ma-grid-col ma-grid-col-xs-15">
                             {{da.total | number: 2}} USD
                         </div>
                     </div>
@@ -107,42 +107,42 @@
                     </div>
                 </div>
                 <div class="ma-grid-header">
-                    <div class="ma-grid-header-col ma-grid-header-col-25 ma-grid-header-col-sortable"
+                    <div class="ma-grid-header-col ma-grid-header-col-xs-25 ma-grid-header-col-sortable"
                         ng-click="maHelper.changeSortingOrder(sorting, 'vessel')">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Vessel</div>
                             <ma-grid-order order-by="vessel" sorting="sorting"></ma-grid-order>
                         </div>
                     </div>
-                    <div class="ma-grid-header-col ma-grid-header-col-5 ma-grid-header-col-sortable"
+                    <div class="ma-grid-header-col ma-grid-header-col-xs-5 ma-grid-header-col-sortable"
                         ng-click="maHelper.changeSortingOrder(sorting, 'operation')">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">O</div>
                             <ma-grid-order order-by="operation" sorting="sorting"></ma-grid-order>
                         </div>
                     </div>
-                    <div class="ma-grid-header-col ma-grid-header-col-20 ma-grid-header-col-sortable"
+                    <div class="ma-grid-header-col ma-grid-header-col-xs-20 ma-grid-header-col-sortable"
                         ng-click="maHelper.changeSortingOrder(sorting, 'commodity')">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Commodity</div>
                             <ma-grid-order order-by="commodity" sorting="sorting"></ma-grid-order>
                         </div>
                     </div>
-                    <div class="ma-grid-header-col ma-grid-header-col-10 ma-grid-header-col-sortable"
+                    <div class="ma-grid-header-col ma-grid-header-col-xs-10 ma-grid-header-col-sortable"
                         ng-click="maHelper.changeSortingOrder(sorting, 'eta')">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">ETA</div>
                             <ma-grid-order order-by="eta" sorting="sorting"></ma-grid-order>
                         </div>
                     </div>
-                    <div class="ma-grid-header-col ma-grid-header-col-25 ma-grid-header-col-sortable"
+                    <div class="ma-grid-header-col ma-grid-header-col-xs-25 ma-grid-header-col-sortable"
                         ng-click="maHelper.changeSortingOrder(sorting, 'status')">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Status</div>
                             <ma-grid-order order-by="status" sorting="sorting"></ma-grid-order>
                         </div>
                     </div>
-                    <div class="ma-grid-header-col ma-grid-header-col-15 ma-grid-header-col-sortable"
+                    <div class="ma-grid-header-col ma-grid-header-col-xs-15 ma-grid-header-col-sortable"
                         ng-click="maHelper.changeSortingOrder(sorting, 'total')">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Total</div>
@@ -154,22 +154,22 @@
                     <div class="ma-grid-row"
                         ng-repeat="da in das | orderBy: sorting.orderedBy">
                         <div class="ma-grid-row-inner">
-                            <div class="ma-grid-col ma-grid-col-25">
+                            <div class="ma-grid-col ma-grid-col-xs-25">
                                 {{da.vessel}}
                             </div>
-                            <div class="ma-grid-col ma-grid-col-5">
+                            <div class="ma-grid-col ma-grid-col-xs-5">
                                 {{da.operation.substring(0,1)}}
                             </div>
-                            <div class="ma-grid-col ma-grid-col-20">
+                            <div class="ma-grid-col ma-grid-col-xs-20">
                                 {{da.commodity}}
                             </div>
-                            <div class="ma-grid-col ma-grid-col-10">
+                            <div class="ma-grid-col ma-grid-col-xs-10">
                                 {{da.eta | date: 'dd/MM'}}
                             </div>
-                            <div class="ma-grid-col ma-grid-col-25">
+                            <div class="ma-grid-col ma-grid-col-xs-25">
                                 {{da.status}}
                             </div>
-                            <div class="ma-grid-col ma-grid-col-15">
+                            <div class="ma-grid-col ma-grid-col-xs-15">
                                 {{da.total | number: 2}} USD
                             </div>
                         </div>
