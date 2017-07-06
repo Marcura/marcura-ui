@@ -1,7 +1,9 @@
 @import 'marcura-ui/button/button-variables.less';
 @import 'marcura-ui/pager/pager-variables.less';
 
-@font-family: 'Helvetica Neue', 'Helvetica', sans-serif;
+@font-family: 'Helvetica Neue',
+'Helvetica',
+sans-serif;
 
 @heading-color: #4A4A4A;
 @text-color: #333333;
@@ -17,8 +19,10 @@
 @background-color-dark: #e6e7e8;
 
 @input-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
-@input-shadow-focused: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
-@input-shadow-invalid: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483;
+@input-shadow-focused: inset 0 1px 1px rgba(0, 0, 0, .075),
+0 0 8px rgba(102, 175, 233, .6);
+@input-shadow-invalid: inset 0 1px 1px rgba(0, 0, 0, .075),
+0 0 6px #ce8483;
 @border-color: #c3c3cd;
 @input-background-color: #ffffff;
 
@@ -100,7 +104,8 @@
 }
 
 .input-transition {
-    .transition(border-color ease-in-out .15s, box-shadow ease-in-out .15s;);
+    .transition(border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    );
 }
 
 .input-reset-button {
@@ -136,4 +141,9 @@
             opacity: 0.15;
         }
     }
+}
+
+// This is for Flex to work.
+* {
+    box-sizing: border-box;
 }
