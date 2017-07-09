@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maSideMenu', ['$state', function($state) {
+angular.module('marcuraUI.components').directive('maSideMenu', ['$state', '$sce', function ($state, $sce) {
     return {
         restrict: 'E',
         scope: {
@@ -7,7 +7,7 @@ angular.module('marcuraUI.components').directive('maSideMenu', ['$state', functi
             useState: '='
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '\
             <div class="ma-side-menu">\
                 <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.hidden" ng-class="{\
@@ -16,18 +16,18 @@ angular.module('marcuraUI.components').directive('maSideMenu', ['$state', functi
                     }"\
                     ng-click="onSelect(item)">\
                     <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
-                    <div class="ma-side-menu-text">{{item.text}}</div>\
+                    <div class="ma-side-menu-text" ng-bind-html="getItemText(item)"></div>\
                     <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
                 </div>\
             </div>';
 
             return html;
         },
-        link: function(scope, element, attributes) {
+        link: function (scope, element, attributes) {
             scope.$state = $state;
             var useState = scope.useState === false ? false : true;
 
-            scope.isItemSelected = function(item) {
+            scope.isItemSelected = function (item) {
                 if (item.selector) {
                     return item.selector();
                 }
@@ -43,7 +43,7 @@ angular.module('marcuraUI.components').directive('maSideMenu', ['$state', functi
                 return false;
             };
 
-            scope.onSelect = function(item) {
+            scope.onSelect = function (item) {
                 if (item.isDisabled) {
                     return;
                 }
@@ -53,7 +53,7 @@ angular.module('marcuraUI.components').directive('maSideMenu', ['$state', functi
                         $state.go(item.state.name, item.state.parameters);
                     }
                 } else {
-                    angular.forEach(scope.items, function(item) {
+                    angular.forEach(scope.items, function (item) {
                         item.isSelected = false;
                     });
                     item.isSelected = true;
@@ -62,6 +62,10 @@ angular.module('marcuraUI.components').directive('maSideMenu', ['$state', functi
                         item: item
                     });
                 }
+            };
+
+            scope.getItemText = function (item) {
+                return $sce.trustAsHtml(item.text);
             };
         }
     };
