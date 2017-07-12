@@ -113,26 +113,6 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope'
             return formattedString;
         },
 
-        changeSortingOrder: function (sorting, orderBy) {
-            if (orderBy.charAt(0) === '-') {
-                if (sorting.orderedBy !== orderBy) {
-                    sorting.direction = 'desc';
-                    sorting.orderedBy = orderBy;
-                } else {
-                    sorting.direction = 'asc';
-                    sorting.orderedBy = orderBy.substr(1);
-                }
-            } else {
-                if (sorting.orderedBy !== orderBy) {
-                    sorting.direction = 'asc';
-                    sorting.orderedBy = orderBy;
-                } else {
-                    sorting.direction = 'desc';
-                    sorting.orderedBy = '-' + orderBy;
-                }
-            }
-        },
-
         getTextHeight: function (text, font, width, lineHeight) {
             if (!font) {
                 return 0;

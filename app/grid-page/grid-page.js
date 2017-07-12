@@ -1,7 +1,8 @@
 angular.module('app.controllers').controller('gridPageController', gridPageController);
 
-function gridPageController($scope, maHelper) {
-    $scope.maHelper = maHelper;
+function gridPageController($scope) {
+    $scope.orderBy1 = '-eta';
+    $scope.orderBy2 = '-eta';
     $scope.das = [{
         vessel: 'Densa Felcon',
         operation: 'Discharging',
@@ -24,8 +25,4 @@ function gridPageController($scope, maHelper) {
         status: 'Appointment accepted, PDA approval completed',
         total: 50000
     }];
-    $scope.sorting = {
-        orderedBy: '-eta',
-        direction: 'desc'
-    };
 }

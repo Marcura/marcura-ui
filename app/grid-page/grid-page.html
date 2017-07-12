@@ -12,59 +12,53 @@
         <h2>Basic</h2>
     </div>
     <div class="nodes-item">
-        <div class="ma-grid ma-grid-das">
+        <ma-grid modifier="das" order-by="orderBy1">
             <div class="ma-grid-top">
                 <div class="ma-grid-title">
                     DAs
                 </div>
             </div>
             <div class="ma-grid-header">
-                <div class="ma-grid-header-col ma-grid-header-col-xs-25 ma-grid-header-col-sortable"
-                    ng-click="maHelper.changeSortingOrder(sorting, 'vessel')">
+                <div class="ma-grid-header-col ma-grid-header-col-xs-25">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">Vessel</div>
-                        <ma-grid-order order-by="vessel" sorting="sorting"></ma-grid-order>
+                        <ma-grid-order order-by="vessel"></ma-grid-order>
                     </div>
                 </div>
-                <div class="ma-grid-header-col ma-grid-header-col-xs-5 ma-grid-header-col-sortable"
-                    ng-click="maHelper.changeSortingOrder(sorting, 'operation')">
+                <div class="ma-grid-header-col ma-grid-header-col-xs-5">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">O</div>
-                        <ma-grid-order order-by="operation" sorting="sorting"></ma-grid-order>
+                        <ma-grid-order order-by="operation"></ma-grid-order>
                     </div>
                 </div>
-                <div class="ma-grid-header-col ma-grid-header-col-xs-20 ma-grid-header-col-sortable"
-                    ng-click="maHelper.changeSortingOrder(sorting, 'commodity')">
+                <div class="ma-grid-header-col ma-grid-header-col-xs-20">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">Commodity</div>
-                        <ma-grid-order order-by="commodity" sorting="sorting"></ma-grid-order>
+                        <ma-grid-order order-by="commodity"></ma-grid-order>
                     </div>
                 </div>
-                <div class="ma-grid-header-col ma-grid-header-col-xs-10 ma-grid-header-col-sortable"
-                    ng-click="maHelper.changeSortingOrder(sorting, 'eta')">
+                <div class="ma-grid-header-col ma-grid-header-col-xs-10">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">ETA</div>
-                        <ma-grid-order order-by="eta" sorting="sorting"></ma-grid-order>
+                        <ma-grid-order order-by="eta"></ma-grid-order>
                     </div>
                 </div>
-                <div class="ma-grid-header-col ma-grid-header-col-xs-25 ma-grid-header-col-sortable"
-                    ng-click="maHelper.changeSortingOrder(sorting, 'status')">
+                <div class="ma-grid-header-col ma-grid-header-col-xs-25">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">Status</div>
-                        <ma-grid-order order-by="status" sorting="sorting"></ma-grid-order>
+                        <ma-grid-order order-by="status"></ma-grid-order>
                     </div>
                 </div>
-                <div class="ma-grid-header-col ma-grid-header-col-xs-15 ma-grid-header-col-sortable"
-                    ng-click="maHelper.changeSortingOrder(sorting, 'total')">
+                <div class="ma-grid-header-col ma-grid-header-col-xs-15">
                     <div class="ma-grid-caption">
                         <div class="ma-grid-label">Total</div>
-                        <ma-grid-order order-by="total" sorting="sorting"></ma-grid-order>
+                        <ma-grid-order order-by="total"></ma-grid-order>
                     </div>
                 </div>
             </div>
             <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
                 <div class="ma-grid-row"
-                    ng-repeat="da in das | orderBy: sorting.orderedBy">
+                    ng-repeat="da in das | orderBy: orderBy1">
                     <div class="ma-grid-row-inner">
                         <div class="ma-grid-col ma-grid-col-xs-25">
                             {{da.vessel}}
@@ -93,95 +87,87 @@
                 </div>
                 <div class="ma-grid-empty-text">No items found.</div>
             </div>
-        </div>
+        </ma-grid>
     </div>
     <div class="nodes-item">
         <h2>Responsive</h2>
     </div>
     <div class="nodes-item">
-        <div class="ma-grid ma-grid-das ma-grid-responsive ma-grid-size-md">
-            <div class="ma-grid-inner">
-                <div class="ma-grid-top">
-                    <div class="ma-grid-title">
-                        DAs
-                    </div>
-                </div>
-                <div class="ma-grid-header">
-                    <div class="ma-grid-header-col ma-grid-header-col-xs-25 ma-grid-header-col-sortable"
-                        ng-click="maHelper.changeSortingOrder(sorting, 'vessel')">
-                        <div class="ma-grid-caption">
-                            <div class="ma-grid-label">Vessel</div>
-                            <ma-grid-order order-by="vessel" sorting="sorting"></ma-grid-order>
-                        </div>
-                    </div>
-                    <div class="ma-grid-header-col ma-grid-header-col-xs-5 ma-grid-header-col-sortable"
-                        ng-click="maHelper.changeSortingOrder(sorting, 'operation')">
-                        <div class="ma-grid-caption">
-                            <div class="ma-grid-label">O</div>
-                            <ma-grid-order order-by="operation" sorting="sorting"></ma-grid-order>
-                        </div>
-                    </div>
-                    <div class="ma-grid-header-col ma-grid-header-col-xs-20 ma-grid-header-col-sortable"
-                        ng-click="maHelper.changeSortingOrder(sorting, 'commodity')">
-                        <div class="ma-grid-caption">
-                            <div class="ma-grid-label">Commodity</div>
-                            <ma-grid-order order-by="commodity" sorting="sorting"></ma-grid-order>
-                        </div>
-                    </div>
-                    <div class="ma-grid-header-col ma-grid-header-col-xs-10 ma-grid-header-col-sortable"
-                        ng-click="maHelper.changeSortingOrder(sorting, 'eta')">
-                        <div class="ma-grid-caption">
-                            <div class="ma-grid-label">ETA</div>
-                            <ma-grid-order order-by="eta" sorting="sorting"></ma-grid-order>
-                        </div>
-                    </div>
-                    <div class="ma-grid-header-col ma-grid-header-col-xs-25 ma-grid-header-col-sortable"
-                        ng-click="maHelper.changeSortingOrder(sorting, 'status')">
-                        <div class="ma-grid-caption">
-                            <div class="ma-grid-label">Status</div>
-                            <ma-grid-order order-by="status" sorting="sorting"></ma-grid-order>
-                        </div>
-                    </div>
-                    <div class="ma-grid-header-col ma-grid-header-col-xs-15 ma-grid-header-col-sortable"
-                        ng-click="maHelper.changeSortingOrder(sorting, 'total')">
-                        <div class="ma-grid-caption">
-                            <div class="ma-grid-label">Total</div>
-                            <ma-grid-order order-by="total" sorting="sorting"></ma-grid-order>
-                        </div>
-                    </div>
-                </div>
-                <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
-                    <div class="ma-grid-row"
-                        ng-repeat="da in das | orderBy: sorting.orderedBy">
-                        <div class="ma-grid-row-inner">
-                            <div class="ma-grid-col ma-grid-col-xs-25">
-                                {{da.vessel}}
-                            </div>
-                            <div class="ma-grid-col ma-grid-col-xs-5">
-                                {{da.operation.substring(0,1)}}
-                            </div>
-                            <div class="ma-grid-col ma-grid-col-xs-20">
-                                {{da.commodity}}
-                            </div>
-                            <div class="ma-grid-col ma-grid-col-xs-10">
-                                {{da.eta | date: 'dd/MM'}}
-                            </div>
-                            <div class="ma-grid-col ma-grid-col-xs-25">
-                                {{da.status}}
-                            </div>
-                            <div class="ma-grid-col ma-grid-col-xs-15">
-                                {{da.total | number: 2}} USD
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="ma-grid-empty" ng-if="_.isEmpty(das)">
-                    <div class="ma-grid-empty-icon">
-                        <i class="fa fa-search"></i>
-                    </div>
-                    <div class="ma-grid-empty-text">No items found.</div>
+        <ma-grid modifier="das" order-by="orderBy2" is-responsive="true">
+            <div class="ma-grid-top">
+                <div class="ma-grid-title">
+                    DAs
                 </div>
             </div>
-        </div>
+            <div class="ma-grid-header">
+                <div class="ma-grid-header-col ma-grid-header-col-xs-25">
+                    <div class="ma-grid-caption">
+                        <div class="ma-grid-label">Vessel</div>
+                        <ma-grid-order order-by="vessel"></ma-grid-order>
+                    </div>
+                </div>
+                <div class="ma-grid-header-col ma-grid-header-col-xs-5">
+                    <div class="ma-grid-caption">
+                        <div class="ma-grid-label">O</div>
+                        <ma-grid-order order-by="operation"></ma-grid-order>
+                    </div>
+                </div>
+                <div class="ma-grid-header-col ma-grid-header-col-xs-20">
+                    <div class="ma-grid-caption">
+                        <div class="ma-grid-label">Commodity</div>
+                        <ma-grid-order order-by="commodity"></ma-grid-order>
+                    </div>
+                </div>
+                <div class="ma-grid-header-col ma-grid-header-col-xs-10">
+                    <div class="ma-grid-caption">
+                        <div class="ma-grid-label">ETA</div>
+                        <ma-grid-order order-by="eta"></ma-grid-order>
+                    </div>
+                </div>
+                <div class="ma-grid-header-col ma-grid-header-col-xs-25">
+                    <div class="ma-grid-caption">
+                        <div class="ma-grid-label">Status</div>
+                        <ma-grid-order order-by="status"></ma-grid-order>
+                    </div>
+                </div>
+                <div class="ma-grid-header-col ma-grid-header-col-xs-15">
+                    <div class="ma-grid-caption">
+                        <div class="ma-grid-label">Total</div>
+                        <ma-grid-order order-by="total"></ma-grid-order>
+                    </div>
+                </div>
+            </div>
+            <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
+                <div class="ma-grid-row"
+                    ng-repeat="da in das | orderBy: orderBy2">
+                    <div class="ma-grid-row-inner">
+                        <div class="ma-grid-col ma-grid-col-xs-25">
+                            {{da.vessel}}
+                        </div>
+                        <div class="ma-grid-col ma-grid-col-xs-5">
+                            {{da.operation.substring(0,1)}}
+                        </div>
+                        <div class="ma-grid-col ma-grid-col-xs-20">
+                            {{da.commodity}}
+                        </div>
+                        <div class="ma-grid-col ma-grid-col-xs-10">
+                            {{da.eta | date: 'dd/MM'}}
+                        </div>
+                        <div class="ma-grid-col ma-grid-col-xs-25">
+                            {{da.status}}
+                        </div>
+                        <div class="ma-grid-col ma-grid-col-xs-15">
+                            {{da.total | number: 2}} USD
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ma-grid-empty" ng-if="_.isEmpty(das)">
+                <div class="ma-grid-empty-icon">
+                    <i class="fa fa-search"></i>
+                </div>
+                <div class="ma-grid-empty-text">No items found.</div>
+            </div>
+        </ma-grid>
     </div>
 </div>

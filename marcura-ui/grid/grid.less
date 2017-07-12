@@ -13,12 +13,12 @@
         position: relative;
     }
 
-    // The spinner makes horizontal bar appear on the table - hide it.
+    /*The spinner makes horizontal bar appear on the table - hide it.*/
     &-is-loading {
         overflow: hidden;
     }
 
-    &-responsive:not(&-is-loading) {
+    &-is-responsive:not(&-is-loading) {
         overflow-x: initial;
     }
 
@@ -182,20 +182,21 @@
         }
     }
 }
+
 @media (max-width: @screen-xs-max) {
-    .ma-grid-responsive {
+    .ma-grid-is-responsive {
         overflow-y: hidden;
         border-bottom: 1px solid #e0e0dc;
 
-        &.ma-grid-size-sm .ma-grid-inner {
+        &.ma-grid-responsive-size-sm .ma-grid-inner {
             width: @screen-sm;
         }
 
-        &.ma-grid-size-md .ma-grid-inner {
+        &.ma-grid-responsive-size-md .ma-grid-inner {
             width: @screen-md;
         }
 
-        &.ma-grid-size-lg .ma-grid-inner {
+        &.ma-grid-responsive-size-lg .ma-grid-inner {
             width: @screen-lg;
         }
     }
