@@ -81,18 +81,21 @@ angular.module('marcuraUI.components').directive('maGrid', ['maHelper', function
                 setModifier('is-responsive', scope.isResponsive);
             });
 
-            scope.$watch('responsiveSize', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                responsiveSize = newValue;
-                setModifier('responsive-size', responsiveSize);
-            });
-
             setModifiers();
             setModifier('is-responsive', scope.isResponsive);
-            setModifier('responsive-size', responsiveSize);
+
+            if (scope.isResponsive) {
+                scope.$watch('responsiveSize', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    responsiveSize = newValue;
+                    setModifier('responsive-size', responsiveSize);
+                });
+
+                setModifier('responsive-size', responsiveSize);
+            }
         }
     };
 }]);
