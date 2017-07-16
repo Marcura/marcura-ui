@@ -1,8 +1,10 @@
 angular.module('app.controllers').controller('gridPageController', gridPageController);
 
 function gridPageController($scope) {
-    $scope.orderBy1 = '-eta';
-    $scope.orderBy2 = '-eta';
+    $scope.orderBy1 = 'eta';
+    $scope.orderIsReverse1 = true;
+    $scope.orderBy2 = 'eta';
+    $scope.orderIsReverse2 = true;
     $scope.das = [{
         vessel: 'Densa Felcon',
         operation: 'Discharging',

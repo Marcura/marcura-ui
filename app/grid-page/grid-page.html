@@ -12,7 +12,7 @@
         <h2>Basic</h2>
     </div>
     <div class="nodes-item">
-        <ma-grid modifier="das" order-by="orderBy1">
+        <ma-grid modifier="das" order-by="orderBy1" order-is-reverse="orderIsReverse1">
             <div class="ma-grid-top">
                 <div class="ma-grid-title">
                     DAs
@@ -57,8 +57,7 @@
                 </div>
             </div>
             <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
-                <div class="ma-grid-row"
-                    ng-repeat="da in das | orderBy: orderBy1">
+                <div class="ma-grid-row" ng-repeat="da in das | orderBy: orderBy1:orderIsReverse1">
                     <div class="ma-grid-row-inner">
                         <div class="ma-grid-col ma-grid-col-xs-25">
                             {{da.vessel}}
@@ -93,7 +92,7 @@
         <h2>Responsive</h2>
     </div>
     <div class="nodes-item">
-        <ma-grid modifier="das" order-by="orderBy2" is-responsive="true">
+        <ma-grid modifier="das" order-by="orderBy2" order-is-reverse="orderIsReverse2" is-responsive="true">
             <div class="ma-grid-top">
                 <div class="ma-grid-title">
                     DAs
@@ -138,8 +137,7 @@
                 </div>
             </div>
             <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
-                <div class="ma-grid-row"
-                    ng-repeat="da in das | orderBy: orderBy2">
+                <div class="ma-grid-row" ng-repeat="da in das | orderBy: orderBy2:orderIsReverse2">
                     <div class="ma-grid-row-inner">
                         <div class="ma-grid-col ma-grid-col-xs-25">
                             {{da.vessel}}

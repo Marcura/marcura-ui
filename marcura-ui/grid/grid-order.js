@@ -41,23 +41,18 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', fun
                 headerColElement.addClass('ma-grid-header-col-sortable');
             }
 
-            var getOrderDirection = function () {
-                if (gridScope.orderBy && new RegExp('^-?' + scope.orderBy + '$', 'i').test(gridScope.orderBy)) {
-                    return gridScope.orderBy.charAt(0) === '-' ? 'desc' : 'asc';
-                }
-
-                return '';
-            };
-
             var order = function () {
-                scope.direction = getOrderDirection() === 'desc' ? 'asc' : 'desc';
-                gridScope.orderBy = scope.direction === 'asc' ? scope.orderBy : '-' + scope.orderBy;
+                gridScope.orderBy = scope.orderBy;
+                gridScope.orderIsReverse = !gridScope.orderIsReverse;
+                scope.direction = gridScope.orderIsReverse ? 'desc' : 'asc';
             };
 
-            scope.direction = getOrderDirection();
+            if (gridScope.orderBy === scope.orderBy) {
+                scope.direction = gridScope.orderIsReverse ? 'desc' : 'asc';
+            }
 
             scope.isVisible = function () {
-                return gridScope.orderBy === scope.orderBy || gridScope.orderBy === '-' + scope.orderBy;
+                return gridScope.orderBy === scope.orderBy;
             };
 
             captionElement.on('click', function () {
