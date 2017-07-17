@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', function (maHelper) {
+angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', '$timeout', function (maHelper, $timeout) {
     return {
         // maGridOrder should always be located inside maGrid.
         require: '^^maGrid',
@@ -18,6 +18,10 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', fun
             return html;
         },
         link: function (scope, element, attributes, grid) {
+            var gridScope,
+                headerColElement = element.closest('.ma-grid-header-col'),
+                captionElement = element.closest('.ma-grid-caption');
+
             var getGridScope = function () {
                 var gridScope = null,
                     initialScope = scope.$parent;
@@ -33,26 +37,31 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', fun
                 return gridScope;
             };
 
-            var gridScope = getGridScope(),
-                headerColElement = element.closest('.ma-grid-header-col'),
-                captionElement = element.closest('.ma-grid-caption');
-
-            if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
-                headerColElement.addClass('ma-grid-header-col-sortable');
-            }
-
             var order = function () {
+                if (!gridScope) {
+                    return;
+                }
+
                 gridScope.orderBy = scope.orderBy;
                 gridScope.orderIsReverse = !gridScope.orderIsReverse;
                 scope.direction = gridScope.orderIsReverse ? 'desc' : 'asc';
             };
 
-            if (gridScope.orderBy === scope.orderBy) {
-                scope.direction = gridScope.orderIsReverse ? 'desc' : 'asc';
+            if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
+                headerColElement.addClass('ma-grid-header-col-sortable');
             }
 
+            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
+            $timeout(function () {
+                gridScope = getGridScope();
+
+                if (gridScope.orderBy === scope.orderBy) {
+                    scope.direction = gridScope.orderIsReverse ? 'desc' : 'asc';
+                }
+            });
+
             scope.isVisible = function () {
-                return gridScope.orderBy === scope.orderBy;
+                return gridScope && gridScope.orderBy === scope.orderBy;
             };
 
             captionElement.on('click', function () {
