@@ -85,6 +85,38 @@
         <pre>'{{text8 || ''}}'</pre>
     </div>
     <div class="nodes-item">
+        <h2>Number</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-text-box
+            value="number1"
+            type="number"
+            can-reset="true">
+        </ma-text-box>
+    </div>
+    <div class="nodes-item">
+         <pre>{{(number1 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>Number min and max</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-text-box
+            value="number2"
+            type="number"
+            min="number2Min"
+            max="number2Max"
+            can-reset="true">
+        </ma-text-box>
+    </div>
+    <div class="nodes-item">
+        <pre>min: {{number2Min}}
+max: {{number2Max}}</pre>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(number2 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
         <h2>Reset button</h2>
     </div>
     <div class="nodes-item">

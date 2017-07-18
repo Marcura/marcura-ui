@@ -1,9 +1,9 @@
-describe('maHelper service', function() {
+describe('maHelper service', function () {
     var maValidators,
         maHelper;
 
     beforeEach(module('marcuraUI.services'));
-    beforeEach(inject(function(_maHelper_, _maValidators_) {
+    beforeEach(inject(function (_maHelper_, _maValidators_) {
         maHelper = _maHelper_;
         maValidators = _maValidators_;
     }));
@@ -28,10 +28,16 @@ describe('maHelper service', function() {
 
     describe('isLess method', function () {
         it('creates a validator which indicates whether a specified value is less than other value', function () {
-            var validator = maValidators.isLess();
-
-            expect(validator.name).toEqual('IsLess');
+            expect(maValidators.isLess().name).toEqual('IsLess');
             expect(maValidators.isLess(2).validate(1)).toEqual(true);
+        });
+    });
+
+    describe('isNumber method', function () {
+        it('creates a validator which indicates whether a specified value is a number', function () {
+            expect(maValidators.isNumber().name).toEqual('IsNumber');
+            expect(maValidators.isNumber().validate('20.10')).toEqual(true);
+            expect(maValidators.isNumber(true).validate('')).toEqual(true);
         });
     });
 });

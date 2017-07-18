@@ -12,7 +12,7 @@ var app = angular.module('app', [
     'app.controllers'
 ]);
 
-app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationProvider) {
+app.config(function ($stateProvider, $urlRouterProvider, maDateBoxConfigurationProvider) {
     maDateBoxConfigurationProvider.displayFormat = 'dd MMM yy';
 
     $stateProvider.state('home', {
@@ -58,10 +58,10 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
     });
 
     $stateProvider.state('side-menu.das', {
-            url: '/side-menu/:id/das',
-            templateUrl: 'side-menu-page/side-menu-page.html',
-            controller: 'sideMenuPageController'
-        })
+        url: '/side-menu/:id/das',
+        templateUrl: 'side-menu-page/side-menu-page.html',
+        controller: 'sideMenuPageController'
+    })
         .state('side-menu.payments', {
             url: '/side-menu/:id/payments',
             templateUrl: 'side-menu-page/side-menu-page.html',
@@ -74,10 +74,10 @@ app.config(function($stateProvider, $urlRouterProvider, maDateBoxConfigurationPr
         });
 
     $stateProvider.state('tabs', {
-            url: '/tabs',
-            templateUrl: 'tabs-page/tabs-page.html',
-            controller: 'tabsPageController'
-        })
+        url: '/tabs',
+        templateUrl: 'tabs-page/tabs-page.html',
+        controller: 'tabsPageController'
+    })
         .state('tabs.appointment-letter', {
             url: '/tabs/:id/appointment-letter',
             templateUrl: 'tabs-page/tabs-page.html',

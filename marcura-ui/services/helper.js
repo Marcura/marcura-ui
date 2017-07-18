@@ -202,6 +202,18 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope'
             return value <= valueToCompare;
         },
 
+        isNumber: function (value) {
+            if (typeof value === 'number') {
+                return true;
+            }
+
+            if (this.isNullOrWhiteSpace(value)) {
+                return false;
+            }
+
+            return value.match(/^-?\d+\.?\d*$/) !== null;
+        },
+
         isJson: function (value) {
             try {
                 JSON.parse(value);

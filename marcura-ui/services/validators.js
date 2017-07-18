@@ -1,5 +1,5 @@
-angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDate', function(maHelper, MaDate) {
-    var formatValueToCompare = function(value) {
+angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDate', function (maHelper, MaDate) {
+    var formatValueToCompare = function (value) {
         if (!value) {
             return null;
         }
@@ -14,11 +14,11 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
     };
 
     return {
-        isNotEmpty: function() {
+        isNotEmpty: function () {
             return {
                 name: 'IsNotEmpty',
-                message: 'This field can not be empty.',
-                validate: function(value) {
+                message: 'This field cannot be empty.',
+                validate: function (value) {
                     if (angular.isArray(value)) {
                         return value.length > 0;
                     }
@@ -28,17 +28,17 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
             };
         },
 
-        isGreater: function(valueToCompare, allowEmpty) {
+        isGreater: function (valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
-                message = 'This field can not be less than or equal to ' + formatValueToCompare(valueToCompare) + '.';
+                message = 'This field cannot be less than or equal to ' + formatValueToCompare(valueToCompare) + '.';
             }
 
             return {
                 name: 'IsGreater',
                 message: message,
-                validate: function(value) {
+                validate: function (value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
@@ -48,17 +48,17 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
             };
         },
 
-        isGreaterOrEqual: function(valueToCompare, allowEmpty) {
+        isGreaterOrEqual: function (valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
-                message = 'This field can not be less than ' + formatValueToCompare(valueToCompare) + '.';
+                message = 'This field cannot be less than ' + formatValueToCompare(valueToCompare) + '.';
             }
 
             return {
                 name: 'IsGreaterOrEqual',
                 message: message,
-                validate: function(value) {
+                validate: function (value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
@@ -68,17 +68,17 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
             };
         },
 
-        isLess: function(valueToCompare, allowEmpty) {
+        isLess: function (valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
-                message = 'This field can not be greater than or equal to ' + formatValueToCompare(valueToCompare) + '.';
+                message = 'This field cannot be greater than or equal to ' + formatValueToCompare(valueToCompare) + '.';
             }
 
             return {
                 name: 'IsLess',
                 message: message,
-                validate: function(value) {
+                validate: function (value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
@@ -88,22 +88,36 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
             };
         },
 
-        isLessOrEqual: function(valueToCompare, allowEmpty) {
+        isLessOrEqual: function (valueToCompare, allowEmpty) {
             var message = null;
 
             if (valueToCompare) {
-                message = 'This field can not be greater than ' + formatValueToCompare(valueToCompare) + '.';
+                message = 'This field cannot be greater than ' + formatValueToCompare(valueToCompare) + '.';
             }
 
             return {
                 name: 'IsLessOrEqual',
                 message: message,
-                validate: function(value) {
+                validate: function (value) {
                     if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
                     return maHelper.isLessOrEqual(value, valueToCompare);
+                }
+            };
+        },
+
+        isNumber: function (allowEmpty) {
+            return {
+                name: 'IsNumber',
+                message: 'This field should be a number.',
+                validate: function (value) {
+                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return maHelper.isNumber(value);
                 }
             };
         }

@@ -300,7 +300,7 @@ describe('MaDate', function() {
             expect(MaDate.parse('Feb21,2015').format()).toEqual('2015-02-21T00:00:00Z');
         });
 
-        it('returns empty instance if it can not parse date', function() {
+        it('returns empty instance if it cannot parse date', function() {
             expect(MaDate.parse('Incorrect date').isEmpty()).toEqual(true);
             expect(MaDate.parse(null).isEmpty()).toEqual(true);
             expect(MaDate.parse(true).isEmpty()).toEqual(true);

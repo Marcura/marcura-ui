@@ -6,8 +6,12 @@ function textBoxPageController($scope) {
     $scope.text4 = '';
     $scope.text5 = '';
     $scope.text7 = 'Vladivostok';
+    $scope.number1 = 4500;
+    $scope.number2 = 2500.47;
+    $scope.number2Min = 1000.50;
+    $scope.number2Max = 5000.50;
 
-    $scope.change1 = function(text, oldText) {
+    $scope.change1 = function (text, oldText) {
         console.log('change');
         console.log('event:', text);
         console.log('scope:', $scope.text1);
@@ -15,7 +19,7 @@ function textBoxPageController($scope) {
         console.log('---');
     };
 
-    $scope.blur1 = function(text, oldText, hasChanged) {
+    $scope.blur1 = function (text, oldText, hasChanged) {
         console.log('blur');
         console.log('event:', text);
         console.log('scope:', $scope.text1);
@@ -24,21 +28,21 @@ function textBoxPageController($scope) {
         console.log('---');
     };
 
-    $scope.focus1 = function(text) {
+    $scope.focus1 = function (text) {
         console.log('focus');
         console.log('event:', text);
         console.log('scope:', $scope.text1);
         console.log('---');
     };
 
-    $scope.change3 = function(text) {
+    $scope.change3 = function (text) {
         console.log('change');
         console.log('event:', text);
         console.log('scope:', $scope.text3);
         console.log('---');
     };
 
-    $scope.change4 = function(text, oldText) {
+    $scope.change4 = function (text, oldText) {
         console.log('change');
         console.log('event:', text);
         console.log('scope:', $scope.text4);
@@ -46,14 +50,14 @@ function textBoxPageController($scope) {
         console.log('---');
     };
 
-    $scope.change6 = function(text) {
+    $scope.change6 = function (text) {
         console.log('change');
         console.log('event:', text);
         console.log('scope:', $scope.text6);
         console.log('---');
     };
 
-    $scope.change7 = function(text, oldText) {
+    $scope.change7 = function (text, oldText) {
         console.log('change');
         console.log('event:', text);
         console.log('scope:', $scope.text7);
@@ -61,14 +65,14 @@ function textBoxPageController($scope) {
         console.log('---');
     };
 
-    $scope.focus7 = function(text) {
+    $scope.focus7 = function (text) {
         console.log('focus');
         console.log('event:', text);
         console.log('scope:', $scope.text7);
         console.log('---');
     };
 
-    $scope.blur7 = function(text, oldText) {
+    $scope.blur7 = function (text, oldText) {
         console.log('blur');
         console.log('event:', text);
         console.log('scope:', $scope.text7);

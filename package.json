@@ -1,5 +1,5 @@
 {
-    "version": "0.29.3",
+    "version": "0.30.0",
     "name": "marcura-ui",
     "description": "Marcura UI",
     "author": "Marcura",
@@ -27,6 +27,7 @@
         "gulp-less": "3.0.1",
         "gulp-uglify": "1.5.4",
         "gulp-wrap": "0.13.0",
+        "jasmine-core": "^2.4.1",
         "jquery": "2.2.0",
         "jshint": "^2.9.4",
         "karma": "1.1.1",
