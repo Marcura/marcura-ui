@@ -281,14 +281,18 @@ angular.module('marcuraUI.components')
                     return !scope.isDisabled && valueElement.val() !== '';
                 };
 
+                scope.reset = function () {
+                    setPreviousValue(getValue());
+                    valueElement.val('');
+                };
+
                 scope.onReset = function () {
                     if (scope.isDisabled) {
                         return;
                     }
 
-                    setPreviousValue(getValue());
+                    scope.reset();
                     scope.isTouched = true;
-                    valueElement.val('');
                     triggerChange(scope.type === 'number' ? null : '');
                     validate();
                     valueElement.focus();
@@ -530,6 +534,14 @@ angular.module('marcuraUI.components')
 
                     scope.instance.failedValidator = function () {
                         return failedValidator;
+                    };
+
+                    scope.instance.clear = function () {
+                        scope.reset();
+
+                        $timeout(function () {
+                            scope.isTouched = false;
+                        });
                     };
                 }
             }
