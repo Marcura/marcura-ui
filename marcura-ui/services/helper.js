@@ -17,7 +17,9 @@ angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope'
             shift: 16,
             space: 32,
             tab: 9,
-            up: 38
+            up: 38,
+            dash: 109,
+            dash2: 189,
         },
 
         isEmail: function (value) {

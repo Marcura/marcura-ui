@@ -27,7 +27,8 @@ angular.module('marcuraUI.components')
                 max: '=',
                 min: '=',
                 decimals: '=',
-                reset: '&'
+                reset: '&',
+                defaultValue: '='
             },
             replace: true,
             template: function (element, attributes) {
@@ -84,7 +85,7 @@ angular.module('marcuraUI.components')
                     scope.configuration.decimals = 2;
                 }
             }],
-            link: function (scope, element) {
+            link: function (scope, element, attributes) {
                 var valueElement = angular.element(element[0].querySelector('.ma-text-box-value')),
                     resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset')),
                     togglePasswordButtonElement = angular.element(element[0].querySelector('.ma-button-toggle-password')),
@@ -102,7 +103,13 @@ angular.module('marcuraUI.components')
                     trim = scope.trim === false ? false : true,
                     isInternalChange = false,
                     failedValidator = null,
-                    decimals = scope.configuration.decimals;
+                    decimals = scope.configuration.decimals,
+                    hasDefaultValue = attributes.defaultValue !== undefined,
+                    defaultValue = maHelper.isNullOrUndefined(scope.defaultValue) ? '' : scope.defaultValue;
+
+                if (scope.type === 'number') {
+                    defaultValue = typeof scope.defaultValue === 'number' ? scope.defaultValue : null;
+                }
 
                 var setPreviousValue = function (value) {
                     value = maHelper.isNullOrUndefined(value) ? '' : value;
@@ -193,13 +200,17 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                var parseNumber = function (value) {
+                var parseNumber = function (value, keepDecimals) {
                     if (maHelper.isNullOrWhiteSpace(value)) {
                         return null;
                     }
 
                     value = parseFloat(removeCommasFromNumber(value));
-                    value = parseFloat(value.toFixed(decimals));
+
+                    if (!keepDecimals) {
+                        value = parseFloat(value.toFixed(decimals));
+                    }
+
                     return value;
                 };
 
@@ -280,12 +291,20 @@ angular.module('marcuraUI.components')
                 }
 
                 scope.isResetEnabled = function () {
-                    return !scope.isDisabled && valueElement.val() !== '';
+                    if (scope.isDisabled) {
+                        return false;
+                    }
+
+                    if (scope.type === 'number') {
+                        return parseNumber(valueElement.val(), true) !== defaultValue && valueElement.val() !== '';
+                    }
+
+                    return valueElement.val() !== defaultValue;
                 };
 
                 scope.doReset = function () {
                     setPreviousValue(getValue());
-                    valueElement.val('');
+                    valueElement.val(defaultValue);
                 };
 
                 scope.onReset = function () {
@@ -295,12 +314,12 @@ angular.module('marcuraUI.components')
 
                     scope.doReset();
                     scope.isTouched = true;
-                    triggerChange(scope.type === 'number' ? null : '');
+                    triggerChange(defaultValue);
                     validate();
                     valueElement.focus();
 
                     // Postpone reset event to fire after change event.
-                    $timeout(function() {
+                    $timeout(function () {
                         scope.reset();
                     });
                 };
@@ -366,8 +385,17 @@ angular.module('marcuraUI.components')
                     }
 
                     if (elementName === 'value') {
-                        // Format value when a user has finished editing it.
+                        if (hasDefaultValue && getValue() === null) {
+                            scope.value = defaultValue;
+                            valueElement.val(formatValue(scope.value));
+                        }
+
+                        if (!scope.isResetEnabled() && elementTo[0] === resetButtonElement[0]) {
+                            isFocusLost = true;
+                        }
+
                         if (scope.isValid) {
+                            // Format value when a user has finished editing it.
                             valueElement.val(formatValue(scope.value));
                         }
                     }
@@ -391,9 +419,19 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.onKeydown = function (event) {
-                    // Ignore tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    if (
+                        // Allow backspace, tab, delete.
+                        $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.tab, maHelper.keyCode.delete, maHelper.keyCode.home, maHelper.keyCode.end, maHelper.keyCode.period, maHelper.keyCode.dash, maHelper.keyCode.dash2]) !== -1 ||
+                        // Allow left, right.
+                        (event.keyCode === 37 || event.keyCode === 39)) {
                         return;
+                    }
+
+                    if (scope.type === 'number') {
+                        // Ensure that it is a number and stop the keypress.
+                        if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event.keyCode > 105)) {
+                            event.preventDefault();
+                        }
                     }
 
                     keydownValue = angular.element(event.target).val();
@@ -516,6 +554,10 @@ angular.module('marcuraUI.components')
                 });
 
                 // Set initial value.
+                if (scope.value === undefined && hasDefaultValue) {
+                    scope.value = defaultValue;
+                }
+
                 valueElement.val(formatValue(scope.value));
                 validate();
                 setPreviousValue(scope.value);

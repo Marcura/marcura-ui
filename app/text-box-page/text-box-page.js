@@ -1,7 +1,6 @@
 angular.module('app.controllers').controller('textBoxPageController', textBoxPageController);
 
 function textBoxPageController($scope) {
-    // $scope.text1 = '';
     $scope.text3 = '';
     $scope.text4 = '';
     $scope.text5 = '';
