@@ -22,7 +22,7 @@
         color: @text-color-disabled;
     }
 
-    &-is-invalid&-is-touched {
+    &-is-invalid&-is-touched:not(&-is-disabled) {
         &.ma-text-box-is-focused .ma-text-box-value {
             .box-shadow(@input-shadow-invalid);
         }
