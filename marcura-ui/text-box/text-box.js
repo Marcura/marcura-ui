@@ -16,6 +16,7 @@ angular.module('marcuraUI.components')
                 validators: '=',
                 instance: '=',
                 change: '&',
+                changeWhenIsInvalid: '=',
                 blur: '&',
                 focus: '&',
                 changeTimeout: '=',
@@ -186,7 +187,7 @@ angular.module('marcuraUI.components')
 
                     validate();
 
-                    if (scope.isValid) {
+                    if (scope.isValid || scope.changeWhenIsInvalid) {
                         triggerChange(getValue());
                     }
                 };
@@ -495,7 +496,7 @@ angular.module('marcuraUI.components')
                         }
                     }
 
-                    if (scope.isValid) {
+                    if (scope.isValid || scope.changeWhenIsInvalid) {
                         triggerChange(value);
                     }
                 };
