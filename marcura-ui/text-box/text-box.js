@@ -26,7 +26,8 @@ angular.module('marcuraUI.components')
                 trim: '=',
                 max: '=',
                 min: '=',
-                decimals: '='
+                decimals: '=',
+                reset: '&'
             },
             replace: true,
             template: function (element, attributes) {
@@ -282,7 +283,7 @@ angular.module('marcuraUI.components')
                     return !scope.isDisabled && valueElement.val() !== '';
                 };
 
-                scope.reset = function () {
+                scope.doReset = function () {
                     setPreviousValue(getValue());
                     valueElement.val('');
                 };
@@ -292,11 +293,16 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
-                    scope.reset();
+                    scope.doReset();
                     scope.isTouched = true;
                     triggerChange(scope.type === 'number' ? null : '');
                     validate();
                     valueElement.focus();
+
+                    // Postpone reset event to fire after change event.
+                    $timeout(function() {
+                        scope.reset();
+                    });
                 };
 
                 scope.onFocus = function (elementName) {
@@ -538,7 +544,7 @@ angular.module('marcuraUI.components')
                     };
 
                     scope.instance.clear = function () {
-                        scope.reset();
+                        scope.doReset();
 
                         $timeout(function () {
                             scope.isTouched = false;
