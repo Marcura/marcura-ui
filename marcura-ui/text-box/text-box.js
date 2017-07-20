@@ -445,22 +445,27 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.onKeydown = function (event) {
-                    if (
-                        // Allow backspace, tab, delete.
-                        $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.tab, maHelper.keyCode.delete, maHelper.keyCode.home, maHelper.keyCode.end, maHelper.keyCode.period, maHelper.keyCode.dash, maHelper.keyCode.dash2]) !== -1 ||
-                        // Allow left, right.
-                        (event.keyCode === 37 || event.keyCode === 39)) {
+                    // No need to save keydown value when the user is navigating with tab key.
+                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
                         return;
                     }
 
+                    keydownValue = angular.element(event.target).val();
+
                     if (scope.type === 'number') {
-                        // Ensure that it is a number and stop the keypress.
+                        if (
+                            // Allow backspace, tab, delete.
+                            $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.delete, maHelper.keyCode.home, maHelper.keyCode.end, maHelper.keyCode.period, maHelper.keyCode.dash, maHelper.keyCode.dash2]) !== -1 ||
+                            // Allow left, right.
+                            (event.keyCode === 37 || event.keyCode === 39)) {
+                            return;
+                        }
+
+                        // Don't allow to enter not numbers.
                         if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event.keyCode > 105)) {
                             event.preventDefault();
                         }
                     }
-
-                    keydownValue = angular.element(event.target).val();
                 };
 
                 // Use input event to support value change from contextual menu,
