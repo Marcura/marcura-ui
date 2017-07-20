@@ -160,6 +160,16 @@ angular.module('marcuraUI.components')
                         value = value.trim();
                     }
 
+                    if (hasDefaultValue) {
+                        if (maHelper.isNullOrUndefined(value)) {
+                            value = defaultValue;
+                        }
+
+                        if (maHelper.isNullOrUndefined(oldValue)) {
+                            oldValue = defaultValue;
+                        }
+                    }
+
                     scope.value = value;
                     setPreviousValue(value);
 
@@ -209,6 +219,10 @@ angular.module('marcuraUI.components')
 
                     if (!keepDecimals) {
                         value = parseFloat(value.toFixed(decimals));
+                    }
+
+                    if (isNaN(value)) {
+                        return null;
                     }
 
                     return value;
@@ -296,7 +310,13 @@ angular.module('marcuraUI.components')
                     }
 
                     if (scope.type === 'number') {
-                        return parseNumber(valueElement.val(), true) !== defaultValue && valueElement.val() !== '';
+                        var value = valueElement.val();
+
+                        if (value !== '' && !maHelper.isNumber(value)) {
+                            return true;
+                        }
+
+                        return parseNumber(value, true) !== defaultValue && value !== '';
                     }
 
                     return valueElement.val() !== defaultValue;
@@ -385,7 +405,13 @@ angular.module('marcuraUI.components')
                     }
 
                     if (elementName === 'value') {
-                        if (hasDefaultValue && getValue() === null) {
+                        if (hasDefaultValue && valueElement.val().trim() === '') {
+                            // Prevent value watcher from triggering twice.
+                            // It'll be triggered later in isFocusLost condition by the sequence of method calls: changeValue -> triggerChange.
+                            // We need to suppress the trigger or change event won't fire if isRequired is set to true
+                            // and the user clears the value.
+                            // E.g., value is 0, user types 1, and then removes the value.
+                            isInternalChange = true;
                             scope.value = defaultValue;
                             valueElement.val(formatValue(scope.value));
                         }
@@ -554,7 +580,7 @@ angular.module('marcuraUI.components')
                 });
 
                 // Set initial value.
-                if (scope.value === undefined && hasDefaultValue) {
+                if (hasDefaultValue && maHelper.isNullOrUndefined(scope.value)) {
                     scope.value = defaultValue;
                 }
 

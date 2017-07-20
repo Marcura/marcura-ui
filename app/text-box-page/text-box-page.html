@@ -125,7 +125,11 @@ max: {{number2Max}}</pre>
             type="number"
             can-reset="true"
             reset="reset()"
-            default-value="0">
+            default-value="0"
+            is-required="true"
+            change="changeNumber3(maValue, maOldValue)"
+            focus="focusNumber3(maValue, maOldValue)"
+            blur="blurNumber3(maValue, maOldValue, maHasValueChanged)">
         </ma-text-box>
     </div>
     <div class="nodes-item">

@@ -10,6 +10,30 @@ function textBoxPageController($scope) {
     $scope.number2Min = 1000.50;
     $scope.number2Max = 5000.50;
 
+    $scope.changeNumber3 = function (value, oldValue) {
+        console.log('change');
+        console.log('event:', value);
+        console.log('scope:', $scope.number3);
+        console.log('event old:', oldValue);
+        console.log('---');
+    };
+
+    $scope.focusNumber3 = function (value) {
+        console.log('focus');
+        console.log('event:', value);
+        console.log('scope:', $scope.number3);
+        console.log('---');
+    };
+
+    $scope.blurNumber3 = function (value, oldValue, hasChanged) {
+        console.log('blur');
+        console.log('event:', value);
+        console.log('scope:', $scope.number3);
+        console.log('event old:', oldValue);
+        console.log('hasChanged:', hasChanged);
+        console.log('---');
+    };
+
     $scope.change1 = function (text, oldText) {
         console.log('change');
         console.log('event:', text);
