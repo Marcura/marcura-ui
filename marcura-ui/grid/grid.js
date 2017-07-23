@@ -4,7 +4,6 @@ angular.module('marcuraUI.components').directive('maGrid', ['maHelper', function
         transclude: true,
         scope: {
             orderBy: '=',
-            orderIsReverse: '=',
             modifier: '@',
             isResponsive: '=',
             responsiveSize: '@'
