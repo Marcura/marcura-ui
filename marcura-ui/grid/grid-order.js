@@ -48,6 +48,10 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', '$t
                 scope.direction = isReverse ? 'desc' : 'asc';
             };
 
+            var cleanOrderBy = function (orderBy) {
+                return orderBy.charAt(0) === '-' ? orderBy.substring(1) : orderBy;
+            };
+
             if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
                 headerColElement.addClass('ma-grid-header-col-sortable');
             }
@@ -56,13 +60,17 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', '$t
             $timeout(function () {
                 gridScope = getGridScope();
 
-                if (new RegExp('^-?' + scope.orderBy + '$').test(gridScope.orderBy)) {
+                if (cleanOrderBy(gridScope.orderBy) === scope.orderBy) {
                     scope.direction = gridScope.orderBy.charAt(0) === '-' ? 'desc' : 'asc';
                 }
             });
 
             scope.isVisible = function () {
-                return gridScope && new RegExp('^-?' + scope.orderBy + '$').test(gridScope.orderBy);
+                if (!gridScope) {
+                    return false;
+                }
+
+                return cleanOrderBy(gridScope.orderBy) === scope.orderBy;
             };
 
             captionElement.on('click', function () {
