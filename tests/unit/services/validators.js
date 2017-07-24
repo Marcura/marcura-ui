@@ -40,4 +40,13 @@ describe('maHelper service', function () {
             expect(maValidators.isNumber(true).validate('')).toEqual(true);
         });
     });
+
+    describe('isEmail method', function () {
+        it('creates a validator which indicates whether a specified value is an email', function () {
+            expect(maValidators.isEmail().name).toEqual('IsEmail');
+            expect(maValidators.isEmail().validate('p.smith@gmail.com')).toEqual(true);
+            expect(maValidators.isEmail().validate('p.smithgmail.com')).toEqual(false);
+            expect(maValidators.isEmail(true).validate('')).toEqual(true);
+        });
+    });
 });

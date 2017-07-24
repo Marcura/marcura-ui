@@ -34,7 +34,7 @@ angular.module('marcuraUI.components')
             template: function (element, attributes) {
                 var type = attributes.type === 'password' ? 'password' : 'text';
 
-                if (type === 'number') {
+                if (type === 'number' || type === 'email') {
                     type = 'text';
                 }
 
@@ -291,6 +291,10 @@ angular.module('marcuraUI.components')
                         if (typeof scope.max === 'number') {
                             validators.push(maValidators.isLessOrEqual(scope.max, true));
                         }
+                    }
+
+                    if (scope.type === 'email') {
+                        validators.push(maValidators.isEmail(true));
                     }
                 };
 

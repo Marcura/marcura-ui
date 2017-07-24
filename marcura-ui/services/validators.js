@@ -120,6 +120,20 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
                     return maHelper.isNumber(value);
                 }
             };
+        },
+
+        isEmail: function (allowEmpty) {
+            return {
+                name: 'IsEmail',
+                message: 'This field should be an email.',
+                validate: function (value) {
+                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return maHelper.isEmail(value);
+                }
+            };
         }
     };
 }]);
