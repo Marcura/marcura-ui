@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maButton', ['maHelper', function (maHelper) {
+angular.module('marcuraUI.components').directive('maButton', ['maHelper', '$sce', function (maHelper, $sce) {
     return {
         restrict: 'E',
         scope: {
@@ -23,7 +23,7 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
                         \'ma-button-has-left-icon\': hasLeftIcon,\
                         \'ma-button-has-right-icon\': hasRightIcon,\
                         \'ma-button-is-disabled\': isDisabled,\
-                        \'ma-button-has-text\': hasText,\
+                        \'ma-button-has-text\': hasText(),\
                         \'ma-button-is-loading\': isLoading\
                     }">\
                     <span class="ma-button-spinner" ng-if="isLoading">\
@@ -34,7 +34,7 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
                     <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
                         <i class="fa fa-{{leftIcon}}"></i>\
                         <span class="ma-button-rim" ng-if="isLink()"></span>\
-                    </span><span class="ma-button-text">{{text || \'&nbsp;\'}}</span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
+                    </span><span class="ma-button-text" ng-bind-html="getText()"></span><span ng-if="rightIcon" class="ma-button-icon ma-button-icon-right">\
                         <i class="fa fa-{{rightIcon}}"></i>\
                         <span class="ma-button-rim" ng-if="isLink()"></span>\
                     </span>\
@@ -44,13 +44,11 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
             return html;
         },
         link: function (scope, element) {
-            scope.hasText = false;
             scope.hasLeftIcon = false;
             scope.hasRightIcon = false;
             scope.size = scope.size ? scope.size : 'md';
             scope.hasLeftIcon = scope.leftIcon ? true : false;
             scope.hasRightIcon = scope.rightIcon ? true : false;
-            scope.hasText = scope.text ? true : false;
             element.addClass('ma-button-' + scope.size);
 
             var setModifiers = function (oldModifiers) {
@@ -84,6 +82,18 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', functi
 
             scope.isLink = function functionName() {
                 return scope.kind === 'link';
+            };
+
+            scope.hasText = function () {
+                return scope.getText() !== maHelper.html.nbsp;
+            };
+
+            scope.getText = function () {
+                if (!scope.text) {
+                    return maHelper.html.nbsp;
+                }
+
+                return $sce.trustAsHtml(scope.text);
             };
 
             scope.$watch('modifier', function (newValue, oldValue) {
