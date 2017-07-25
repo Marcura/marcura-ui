@@ -85,15 +85,11 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', '$sce'
             };
 
             scope.hasText = function () {
-                return scope.getText() !== maHelper.html.nbsp;
+                return scope.text ? true : false;
             };
 
             scope.getText = function () {
-                if (!scope.text) {
-                    return maHelper.html.nbsp;
-                }
-
-                return $sce.trustAsHtml(scope.text);
+                return $sce.trustAsHtml(scope.text ? scope.text : maHelper.html.nbsp);
             };
 
             scope.$watch('modifier', function (newValue, oldValue) {
