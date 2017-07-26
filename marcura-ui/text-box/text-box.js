@@ -135,7 +135,6 @@ angular.module('marcuraUI.components')
                     if (scope.type === 'number') {
                         value = removeCommasFromNumber(value);
                     }
-                    console.log(value);
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
