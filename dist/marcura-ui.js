@@ -158,27 +158,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function(maHelper, $timeout, maValidators) {
     return {
         restrict: 'E',
@@ -350,6 +329,27 @@ if (!String.prototype.endsWith) {
 
             setTabindex();
             setText();
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
         }
     };
 }]);
@@ -1100,33 +1100,6 @@ if (!String.prototype.endsWith) {
         };
     }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            for: '@',
-            isRequired: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-label" ng-class="{\
-                    \'ma-label-is-required\': isRequired,\
-                    \'ma-label-has-content\': hasContent\
-                }">\
-                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;</div>\
-                    <i class="fa fa-star" ng-if="isRequired"></i>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            scope.hasContent = element.find('span').contents().length > 0;
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', '$timeout', function (maHelper, $timeout) {
     return {
         // maGridOrder should always be located inside maGrid.
@@ -1308,6 +1281,33 @@ if (!String.prototype.endsWith) {
 
                 setModifier('responsive-size', responsiveSize);
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            for: '@',
+            isRequired: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-label" ng-class="{\
+                    \'ma-label-is-required\': isRequired,\
+                    \'ma-label-has-content\': hasContent\
+                }">\
+                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;</div>\
+                    <i class="fa fa-star" ng-if="isRequired"></i>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            scope.hasContent = element.find('span').contents().length > 0;
         }
     };
 }]);})();
@@ -5192,6 +5192,7 @@ if (!String.prototype.endsWith) {
                     if (scope.type === 'number') {
                         value = removeCommasFromNumber(value);
                     }
+                    console.log(value);
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
@@ -5302,7 +5303,7 @@ if (!String.prototype.endsWith) {
                         return '';
                     }
 
-                    return value.trim().replace(',', '');
+                    return value.trim().replace(/,/g, '');
                 };
 
                 var formatValue = function (value) {
@@ -5313,6 +5314,7 @@ if (!String.prototype.endsWith) {
                     var formattedValue = value;
 
                     if (scope.type === 'number') {
+                        value = typeof value === 'number' ? value : Number(value);
                         formattedValue = addCommasToNumber(value.toFixed(decimals));
                     }
 
@@ -5448,7 +5450,8 @@ if (!String.prototype.endsWith) {
                 };
 
                 var onFocusout = function (event, elementName) {
-                    var elementTo = angular.element(event.relatedTarget);
+                    var elementTo = angular.element(event.relatedTarget),
+                        value = valueElement.val();
 
                     // Trigger blur event when focus goes to an element outside the component.
                     if (scope.canTogglePassword) {
@@ -5466,7 +5469,7 @@ if (!String.prototype.endsWith) {
                     }
 
                     if (elementName === 'value') {
-                        if (hasDefaultValue && valueElement.val().trim() === '') {
+                        if (hasDefaultValue && value.trim() === '') {
                             // Prevent value watcher from triggering twice.
                             // It'll be triggered later in isFocusLost condition by the sequence of method calls: changeValue -> triggerChange.
                             // We need to suppress the trigger or change event won't fire if isRequired is set to true
@@ -5474,16 +5477,18 @@ if (!String.prototype.endsWith) {
                             // E.g., value is 0, user types 1, and then removes the value.
                             isInternalChange = true;
                             scope.value = defaultValue;
-                            valueElement.val(formatValue(scope.value));
+                            valueElement.val(formatValue(defaultValue));
                         }
 
                         if (!scope.isResetEnabled() && elementTo[0] === resetButtonElement[0]) {
                             isFocusLost = true;
                         }
 
+                        validate();
+
                         if (scope.isValid) {
                             // Format value when a user has finished editing it.
-                            valueElement.val(formatValue(scope.value));
+                            valueElement.val(formatValue(value));
                         }
                     }
 

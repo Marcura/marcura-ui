@@ -135,6 +135,7 @@ angular.module('marcuraUI.components')
                     if (scope.type === 'number') {
                         value = removeCommasFromNumber(value);
                     }
+                    console.log(value);
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
@@ -245,7 +246,7 @@ angular.module('marcuraUI.components')
                         return '';
                     }
 
-                    return value.trim().replace(',', '');
+                    return value.trim().replace(/,/g, '');
                 };
 
                 var formatValue = function (value) {
@@ -256,6 +257,7 @@ angular.module('marcuraUI.components')
                     var formattedValue = value;
 
                     if (scope.type === 'number') {
+                        value = typeof value === 'number' ? value : Number(value);
                         formattedValue = addCommasToNumber(value.toFixed(decimals));
                     }
 
@@ -391,7 +393,8 @@ angular.module('marcuraUI.components')
                 };
 
                 var onFocusout = function (event, elementName) {
-                    var elementTo = angular.element(event.relatedTarget);
+                    var elementTo = angular.element(event.relatedTarget),
+                        value = valueElement.val();
 
                     // Trigger blur event when focus goes to an element outside the component.
                     if (scope.canTogglePassword) {
@@ -409,7 +412,7 @@ angular.module('marcuraUI.components')
                     }
 
                     if (elementName === 'value') {
-                        if (hasDefaultValue && valueElement.val().trim() === '') {
+                        if (hasDefaultValue && value.trim() === '') {
                             // Prevent value watcher from triggering twice.
                             // It'll be triggered later in isFocusLost condition by the sequence of method calls: changeValue -> triggerChange.
                             // We need to suppress the trigger or change event won't fire if isRequired is set to true
@@ -417,16 +420,18 @@ angular.module('marcuraUI.components')
                             // E.g., value is 0, user types 1, and then removes the value.
                             isInternalChange = true;
                             scope.value = defaultValue;
-                            valueElement.val(formatValue(scope.value));
+                            valueElement.val(formatValue(defaultValue));
                         }
 
                         if (!scope.isResetEnabled() && elementTo[0] === resetButtonElement[0]) {
                             isFocusLost = true;
                         }
 
+                        validate();
+
                         if (scope.isValid) {
                             // Format value when a user has finished editing it.
-                            valueElement.val(formatValue(scope.value));
+                            valueElement.val(formatValue(value));
                         }
                     }
 
