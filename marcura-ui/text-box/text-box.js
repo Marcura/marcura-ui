@@ -48,7 +48,8 @@ angular.module('marcuraUI.components')
                     \'ma-text-box-can-reset\': canReset,\
                     \'ma-text-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
                     \'ma-text-box-can-toggle-password\': canTogglePassword,\
-                    \'ma-text-box-is-toggle-password-disabled\': canTogglePassword && !isDisabled && !isTogglePasswordEnabled()\
+                    \'ma-text-box-is-toggle-password-disabled\': canTogglePassword && !isDisabled && !isTogglePasswordEnabled(),\
+                    \'ma-text-box-has-value\': hasValue()\
                 }">\
                 <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
                     autocomplete="off"\
@@ -308,6 +309,20 @@ angular.module('marcuraUI.components')
                 if (scope.type === 'password') {
                     scope.canTogglePassword = scope.hasShowPasswordButton !== false;
                 }
+
+                scope.hasValue = function () {
+                    if (scope.type === 'number') {
+                        var value = valueElement.val();
+
+                        if (value !== '' && !maHelper.isNumber(value)) {
+                            return true;
+                        }
+
+                        return parseNumber(value, true) !== defaultValue && value !== '';
+                    }
+
+                    return valueElement.val() !== defaultValue;
+                };
 
                 scope.isResetEnabled = function () {
                     if (scope.isDisabled) {

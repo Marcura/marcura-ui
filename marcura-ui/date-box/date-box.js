@@ -1,10 +1,10 @@
 angular.module('marcuraUI.components')
-    .provider('maDateBoxConfiguration', function() {
-        this.$get = function() {
+    .provider('maDateBoxConfiguration', function () {
+        this.$get = function () {
             return this;
         };
     })
-    .directive('maDateBox', ['$timeout', 'MaDate', 'maHelper', 'maValidators', function($timeout, MaDate, maHelper, maValidators) {
+    .directive('maDateBox', ['$timeout', 'MaDate', 'maHelper', 'maValidators', function ($timeout, MaDate, maHelper, maValidators) {
         return {
             restrict: 'E',
             scope: {
@@ -29,7 +29,7 @@ angular.module('marcuraUI.components')
                 placeholder: '@'
             },
             replace: true,
-            template: function(element) {
+            template: function (element) {
                 var html = '\
                 <div class="ma-date-box" ng-class="{\
                         \'ma-date-box-has-time\': hasTime,\
@@ -38,7 +38,8 @@ angular.module('marcuraUI.components')
                         \'ma-date-box-is-focused\': isFocused,\
                         \'ma-date-box-is-touched\': isTouched,\
                         \'ma-date-box-can-reset\': canReset,\
-                        \'ma-date-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled()\
+                        \'ma-date-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
+                        \'ma-date-box-has-value\': hasValue()\
                     }">\
                     <div class="ma-date-box-inner">\
                         <input class="ma-date-box-date" type="text" id="{{id}}"\
@@ -70,7 +71,7 @@ angular.module('marcuraUI.components')
 
                 return html;
             },
-            controller: ['$scope', 'maDateBoxConfiguration', function(scope, maDateBoxConfiguration) {
+            controller: ['$scope', 'maDateBoxConfiguration', function (scope, maDateBoxConfiguration) {
                 scope.configuration = {};
                 scope.configuration.displayFormat = (scope.displayFormat || maDateBoxConfiguration.displayFormat || 'dd MMM yyyy')
                     .replace(/Y/g, 'y').replace(/D/g, 'd');
@@ -79,7 +80,7 @@ angular.module('marcuraUI.components')
                 scope.configuration.timeZone = (scope.timeZone || maDateBoxConfiguration.timeZone || 'Z')
                     .replace(/GMT/g, '');
             }],
-            link: function(scope, element) {
+            link: function (scope, element) {
                 var picker = null,
                     displayFormat = scope.configuration.displayFormat,
                     format = scope.configuration.format,
@@ -108,7 +109,7 @@ angular.module('marcuraUI.components')
                     isHourFocused,
                     isMinuteFocused;
 
-                var hasDateChanged = function(date) {
+                var hasDateChanged = function (date) {
                     if (previousDate.isEqual(date)) {
                         return false;
                     }
@@ -118,7 +119,7 @@ angular.module('marcuraUI.components')
                     return true;
                 };
 
-                var setDisplayDate = function(date) {
+                var setDisplayDate = function (date) {
                     var displayDate = null;
 
                     if (date && !date.isEmpty()) {
@@ -166,7 +167,7 @@ angular.module('marcuraUI.components')
                             });
                         }
 
-                        $timeout(function() {
+                        $timeout(function () {
                             addFocusEvent();
                             addBlurEvent();
                         });
@@ -178,7 +179,7 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                var setMaxDate = function() {
+                var setMaxDate = function () {
                     if (!picker) {
                         return;
                     }
@@ -194,7 +195,7 @@ angular.module('marcuraUI.components')
                     picker.setMaxDate(maxDate.toDate());
                 };
 
-                var setMinDate = function() {
+                var setMinDate = function () {
                     if (!picker) {
                         return;
                     }
@@ -210,7 +211,7 @@ angular.module('marcuraUI.components')
                     picker.setMinDate(minDate.toDate());
                 };
 
-                var parseDate = function(date) {
+                var parseDate = function (date) {
                     var parsedDate = MaDate.createEmpty();
 
                     if (!date) {
@@ -226,22 +227,22 @@ angular.module('marcuraUI.components')
                     return parsedDate;
                 };
 
-                var setDateTime = function(date) {
+                var setDateTime = function (date) {
                     date.hour(Number(hourElement.val()))
                         .minute(Number(minuteElement.val()))
                         .second(0);
                 };
 
-                var resetInitialDateOffset = function() {
+                var resetInitialDateOffset = function () {
                     // Override initial time zone offset after date has been changed.
                     initialDateOffset = timeZoneOffset;
                 };
 
-                var initializePikaday = function() {
+                var initializePikaday = function () {
                     picker = new Pikaday({
                         field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                         position: 'bottom right',
-                        onSelect: function() {
+                        onSelect: function () {
                             var date = new MaDate(picker.getDate());
                             date.offset(timeZoneOffset);
 
@@ -252,7 +253,7 @@ angular.module('marcuraUI.components')
 
                             // Use $timeout to apply scope changes instead of $apply,
                             // which throws digest error at this point.
-                            $timeout(function() {
+                            $timeout(function () {
                                 validate(date);
                             });
 
@@ -277,13 +278,13 @@ angular.module('marcuraUI.components')
                     setMinDate();
                 };
 
-                var destroyPikaday = function() {
+                var destroyPikaday = function () {
                     if (picker) {
                         picker.destroy();
                     }
                 };
 
-                var validate = function(date, triggerEvent) {
+                var validate = function (date, triggerEvent) {
                     scope.isValid = true;
                     failedValidator = null;
                     var formattedDate = date ? date.format(format) : null;
@@ -303,7 +304,7 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                var setValidators = function() {
+                var setValidators = function () {
                     var hasIsNotEmptyValidator = false;
                     validators = scope.validators ? angular.copy(scope.validators) : [];
 
@@ -331,31 +332,31 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                var triggerChange = function(date) {
+                var triggerChange = function (date) {
                     previousDate = date || MaDate.createEmpty();
                     scope.value = date ? date.format(format) : null;
 
                     // Postpone change event for $apply (which is being invoked by $timeout)
                     // to have time to take effect and update scope.value,
                     // so both maValue and scope.value have the same values eventually.
-                    $timeout(function() {
+                    $timeout(function () {
                         scope.change({
                             maValue: scope.value
                         });
                     });
                 };
 
-                var triggerValidate = function(date) {
+                var triggerValidate = function (date) {
                     // Postpone the event to allow scope.value to be updated, so
                     // the event can operate relevant value.
-                    $timeout(function() {
+                    $timeout(function () {
                         scope.validate({
                             maValue: date ? date.format(format) : null
                         });
                     });
                 };
 
-                var changeDate = function() {
+                var changeDate = function () {
                     scope.isTouched = true;
 
                     var displayDate = dateElement.val().trim(),
@@ -424,43 +425,43 @@ angular.module('marcuraUI.components')
                     triggerChange(date);
                 };
 
-                var focusDate = function() {
+                var focusDate = function () {
                     isDateFocused = true;
                     isHourFocused = false;
                     isMinuteFocused = false;
                     scope.onFocus();
                 };
 
-                var focusHour = function() {
+                var focusHour = function () {
                     isHourFocused = true;
                     isDateFocused = false;
                     isMinuteFocused = false;
                     scope.onFocus();
                 };
 
-                var focusMinute = function() {
+                var focusMinute = function () {
                     isMinuteFocused = true;
                     isDateFocused = false;
                     isHourFocused = false;
                     scope.onFocus();
                 };
 
-                var blurDate = function() {
+                var blurDate = function () {
                     isDateFocused = false;
                     scope.onBlur();
                 };
 
-                var blurHour = function() {
+                var blurHour = function () {
                     isHourFocused = false;
                     scope.onBlur();
                 };
 
-                var blurMinute = function() {
+                var blurMinute = function () {
                     isMinuteFocused = false;
                     scope.onBlur();
                 };
 
-                var addFocusEvent = function() {
+                var addFocusEvent = function () {
                     // Remove the event in case it exists.
                     removeFocusEvent();
                     $('.ma-date-box-date', element).on('focus', focusDate);
@@ -468,13 +469,13 @@ angular.module('marcuraUI.components')
                     $('.ma-date-box-minute', element).on('focus', focusMinute);
                 };
 
-                var removeFocusEvent = function() {
+                var removeFocusEvent = function () {
                     $('.ma-date-box-date', element).off('focus', focusDate);
                     $('.ma-date-box-hour', element).off('focus', focusHour);
                     $('.ma-date-box-minute', element).off('focus', focusMinute);
                 };
 
-                var addBlurEvent = function() {
+                var addBlurEvent = function () {
                     // Remove the event in case it exists.
                     removeBlurEvent();
                     $('.ma-date-box-date', element).on('blur', blurDate);
@@ -482,7 +483,7 @@ angular.module('marcuraUI.components')
                     $('.ma-date-box-minute', element).on('blur', blurMinute);
                 };
 
-                var removeBlurEvent = function() {
+                var removeBlurEvent = function () {
                     $('.ma-date-box-date', element).off('blur', blurDate);
                     $('.ma-date-box-hour', element).off('blur', blurHour);
                     $('.ma-date-box-minute', element).off('blur', blurMinute);
@@ -493,30 +494,34 @@ angular.module('marcuraUI.components')
                 scope.isValid = true;
                 scope.isTouched = false;
 
-                scope.isResetEnabled = function() {
+                scope.hasValue = function () {
+                    return dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00';
+                };
+
+                scope.isResetEnabled = function () {
                     return !scope.isDisabled && (dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00');
                 };
 
-                scope.onFocus = function() {
+                scope.onFocus = function () {
                     // Use safeApply to avoid apply error when Reset icon is clicked.
-                    maHelper.safeApply(function() {
+                    maHelper.safeApply(function () {
                         scope.isFocused = true;
                     });
                 };
 
-                scope.onBlur = function() {
+                scope.onBlur = function () {
                     // Cancel change if it is already in process to prevent the event from firing twice.
                     if (changePromise) {
                         $timeout.cancel(changePromise);
                     }
 
-                    scope.$apply(function() {
+                    scope.$apply(function () {
                         scope.isFocused = false;
                         changeDate();
                     });
                 };
 
-                scope.onKeydown = function(event) {
+                scope.onKeydown = function (event) {
                     // Ignore tab key.
                     if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
                         return;
@@ -525,7 +530,7 @@ angular.module('marcuraUI.components')
                     keydownValue = angular.element(event.target).val();
                 };
 
-                scope.onKeyup = function(event) {
+                scope.onKeyup = function (event) {
                     // Ignore tab key.
                     if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
                         return;
@@ -550,13 +555,13 @@ angular.module('marcuraUI.components')
                             $timeout.cancel(changePromise);
                         }
 
-                        changePromise = $timeout(function() {
+                        changePromise = $timeout(function () {
                             changeDate();
                         }, changeTimeout);
                     }
                 };
 
-                scope.onTimeKeydown = function(event) {
+                scope.onTimeKeydown = function (event) {
                     if (
                         // Allow backspace, tab, delete.
                         $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.tab, maHelper.keyCode.delete]) !== -1 ||
@@ -571,7 +576,7 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                scope.onReset = function() {
+                scope.onReset = function () {
                     if (scope.isDisabled) {
                         return;
                     }
@@ -601,7 +606,7 @@ angular.module('marcuraUI.components')
                 addFocusEvent();
                 addBlurEvent();
 
-                $timeout(function() {
+                $timeout(function () {
                     if (!scope.isDisabled) {
                         initializePikaday();
                     }
@@ -611,7 +616,7 @@ angular.module('marcuraUI.components')
                     dateElement.attr('id', scope.id);
                 });
 
-                scope.$watch('value', function(newDate, oldDate) {
+                scope.$watch('value', function (newDate, oldDate) {
                     if (newDate === null && oldDate === null) {
                         return;
                     }
@@ -636,7 +641,7 @@ angular.module('marcuraUI.components')
                     initialDateOffset = date.offset();
                 });
 
-                scope.$watch('isDisabled', function(newValue, oldValue) {
+                scope.$watch('isDisabled', function (newValue, oldValue) {
                     if (newValue === oldValue) {
                         return;
                     }
@@ -648,7 +653,7 @@ angular.module('marcuraUI.components')
                     }
                 });
 
-                var minMaxDateWatcher = function(newValue, oldValue, dateName) {
+                var minMaxDateWatcher = function (newValue, oldValue, dateName) {
                     if (newValue === oldValue) {
                         return;
                     }
@@ -703,11 +708,11 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                scope.$watch('maxDate', function(newValue, oldValue) {
+                scope.$watch('maxDate', function (newValue, oldValue) {
                     minMaxDateWatcher(newValue, oldValue, 'maxDate');
                 });
 
-                scope.$watch('minDate', function(newValue, oldValue) {
+                scope.$watch('minDate', function (newValue, oldValue) {
                     minMaxDateWatcher(newValue, oldValue, 'minDate');
                 });
 
@@ -715,7 +720,7 @@ angular.module('marcuraUI.components')
                 if (scope.instance) {
                     scope.instance.isInitialized = true;
 
-                    scope.instance.validate = function() {
+                    scope.instance.validate = function () {
                         scope.isTouched = true;
 
                         if (isRequired && !scope.value) {
@@ -726,15 +731,15 @@ angular.module('marcuraUI.components')
                         validate(parseDate(scope.value));
                     };
 
-                    scope.instance.isValid = function() {
+                    scope.instance.isValid = function () {
                         return scope.isValid;
                     };
 
-                    scope.instance.failedValidator = function() {
+                    scope.instance.failedValidator = function () {
                         return failedValidator;
                     };
 
-                    scope.instance.refresh = function() {
+                    scope.instance.refresh = function () {
                         var date = parseDate(scope.value);
                         setDisplayDate(date);
                         validate(date, false);
