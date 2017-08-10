@@ -167,15 +167,14 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
             };
 
             scope.itemsPerPageChange = function (itemsPerPage) {
+                var oldItemsPerPage = scope._itemsPerPage;
                 scope._itemsPerPage = itemsPerPage;
                 scope.hasItemsPerPageChanged = true;
                 var oldTotalPages = scope.totalPages;
                 scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
 
-                // Correct current page if it's out of new range.
-                if (scope.totalPages < oldTotalPages) {
-                    scope._page = scope.totalPages;
-                }
+                var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
+                scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
 
                 setHasPager();
                 onChange();
