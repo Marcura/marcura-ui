@@ -2,6 +2,7 @@ window.marcuraApp = {
     ports: [{
         id: 0,
         name: 'Tokai',
+        isEnabled: true,
         country: {
             id: 0,
             name: 'Japan'
@@ -9,6 +10,7 @@ window.marcuraApp = {
     }, {
         id: 2,
         name: 'Vladivostok',
+        isEnabled: true,
         country: {
             id: 2,
             name: 'Russia'
@@ -16,6 +18,7 @@ window.marcuraApp = {
     }, {
         id: 3,
         name: 'Navlakhi',
+        isEnabled: true,
         country: {
             id: 3,
             name: 'India'
@@ -23,6 +26,7 @@ window.marcuraApp = {
     }, {
         id: 4,
         name: 'Cayman Brac',
+        isEnabled: true,
         country: {
             id: 4,
             name: 'Cayman Islands'
@@ -30,6 +34,7 @@ window.marcuraApp = {
     }, {
         id: 5,
         name: 'Areia Branca',
+        isEnabled: true,
         country: {
             id: 5,
             name: 'Brazil'
@@ -37,6 +42,7 @@ window.marcuraApp = {
     }, {
         id: 6,
         name: 'Port Ibrahim',
+        isEnabled: true,
         country: {
             id: 6,
             name: 'Egypt'
@@ -44,6 +50,7 @@ window.marcuraApp = {
     }, {
         id: 7,
         name: 'Brahestad',
+        isEnabled: true,
         country: {
             id: 7,
             name: 'Finland'
@@ -51,6 +58,7 @@ window.marcuraApp = {
     }, {
         id: 8,
         name: 'Brake',
+        isEnabled: true,
         country: {
             id: 8,
             name: 'Germany'

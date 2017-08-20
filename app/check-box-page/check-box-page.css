@@ -5,3 +5,12 @@
 .nodes-check-box .nodes-item .ma-check-box:last-child {
     margin-right: 0;
 }
+
+.nodes-check-box .nodes-item.nodes-item-ports div {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.nodes-check-box .nodes-item.nodes-item-ports div:last-child {
+    margin-right: 0;
+}

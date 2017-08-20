@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function(maHelper, $timeout, maValidators) {
+angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function (maHelper, $timeout, maValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -13,7 +13,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
             instance: '=',
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '\
             <div class="ma-check-box{{cssClass}}"\
                 ng-focus="onFocus()"\
@@ -36,12 +36,13 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
 
             return html;
         },
-        link: function(scope, element) {
+        link: function (scope, element, attributes) {
             var validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
+                hasIsNotEmptyValidator = false,
+                valuePropertyParts = null;
 
-            var setTabindex = function() {
+            var setTabindex = function () {
                 if (scope.isDisabled) {
                     element.removeAttr('tabindex');
                 } else {
@@ -49,7 +50,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
                 }
             };
 
-            var setText = function() {
+            var setText = function () {
                 scope.hasText = scope.text ? true : false;
             };
 
@@ -59,7 +60,34 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
             scope.isValid = true;
             scope.isTouched = false;
 
-            var validate = function() {
+            var getControllerScope = function () {
+                var controllerScope = null,
+                    initialScope = scope.$parent,
+                    property = attributes.value;
+
+                // In case of a nested property binding like 'company.port.id'.
+                if (property.indexOf('.') !== -1) {
+                    valuePropertyParts = property.split('.');
+                    property = valuePropertyParts[0];
+                }
+
+                while (initialScope && !controllerScope) {
+                    if (initialScope.hasOwnProperty(property)) {
+                        controllerScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                // Use parent scope by default if search is unsuccessful.
+                return controllerScope || scope.$parent;
+            };
+
+            // When the component is inside ng-if normal binding like value="isEnabled" won't work,
+            // as the value will be stored by Angular on ng-if scope incorrectly.
+            var controllerScope = getControllerScope();
+
+            var validate = function () {
                 scope.isValid = true;
                 scope.isTouched = true;
 
@@ -78,36 +106,54 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
                 }
             };
 
-            scope.onChange = function() {
-                if (!scope.isDisabled) {
-                    scope.value = !scope.value;
-                    validate();
-
-                    $timeout(function() {
-                        scope.change({
-                            maValue: scope.value
-                        });
-                    });
+            scope.onChange = function () {
+                if (scope.isDisabled) {
+                    return;
                 }
+
+                var value;
+
+                // Handle nested property binding.
+                if (valuePropertyParts) {
+                    var valueProperty = controllerScope;
+
+                    for (var i = 0; i < valuePropertyParts.length; i++) {
+                        valueProperty = valueProperty[valuePropertyParts[i]];
+                    }
+
+                    valueProperty = !valueProperty;
+                    value = valueProperty;
+                } else {
+                    controllerScope[attributes.value] = !controllerScope[attributes.value];
+                    value = controllerScope[attributes.value];
+                }
+
+                scope.value = value;
+                validate();
+
+                $timeout(function () {
+                    scope.change({
+                        maValue: value
+                    });
+                });
             };
 
-            scope.onFocus = function() {
+            scope.onFocus = function () {
                 if (!scope.isDisabled) {
                     scope.isFocused = true;
                 }
             };
 
-            scope.onBlur = function() {
+            scope.onBlur = function () {
                 if (scope.isDisabled) {
                     return;
                 }
 
                 scope.isFocused = false;
-
                 validate();
             };
 
-            scope.onKeypress = function(event) {
+            scope.onKeypress = function (event) {
                 if (event.keyCode === maHelper.keyCode.space) {
                     // Prevent page from scrolling down.
                     event.preventDefault();
@@ -118,7 +164,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
                 }
             };
 
-            scope.$watch('isDisabled', function(newValue, oldValue) {
+            scope.$watch('isDisabled', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }
@@ -130,7 +176,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
                 setTabindex();
             });
 
-            scope.$watch('text', function(newValue, oldValue) {
+            scope.$watch('text', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }
@@ -158,11 +204,11 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
             if (scope.instance) {
                 scope.instance.isInitialized = true;
 
-                scope.instance.isValid = function() {
+                scope.instance.isValid = function () {
                     return scope.isValid;
                 };
 
-                scope.instance.validate = function() {
+                scope.instance.validate = function () {
                     validate();
                 };
             }
