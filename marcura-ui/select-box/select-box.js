@@ -40,7 +40,7 @@ angular.module('marcuraUI.components')
             },
             replace: true,
             template: function (element, attributes) {
-                var isAjax = !maHelper.isNullOrWhiteSpace(attributes.ajax),
+                var hasAjax = !maHelper.isNullOrWhiteSpace(attributes.ajax),
                     multiple = attributes.multiple === 'true';
 
                 var html = '\
@@ -64,7 +64,7 @@ angular.module('marcuraUI.components')
                             </div>\
                         </div>';
 
-                if (isAjax) {
+                if (hasAjax) {
                     html += '<input class="ma-select-box-input" ui-select2="options"\
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
@@ -200,7 +200,7 @@ angular.module('marcuraUI.components')
                 scope.isTextFocused = false;
                 scope.isValid = true;
                 scope.isTouched = false;
-                scope.isAjax = angular.isObject(scope.ajax);
+                scope.hasAjax = angular.isObject(scope.ajax);
 
                 // A custom 'IsNotEmpty' validator, which also checks that
                 // a selected item is in the list.
@@ -217,7 +217,7 @@ angular.module('marcuraUI.components')
 
                         // In select mode check that a selected item is in the list.
                         // In AJAX mode there is no items array and we cannot check it.
-                        if (!scope.isAjax && !scope.isAddMode && !isExistingItem(value)) {
+                        if (!scope.hasAjax && !scope.isAddMode && !isExistingItem(value)) {
                             return false;
                         }
 
@@ -344,7 +344,7 @@ angular.module('marcuraUI.components')
                         } else {
                             if (maHelper.isNullOrWhiteSpace(item)) {
                                 scope.selectedItem = null;
-                            } else if (!scope.isAjax) {
+                            } else if (!scope.hasAjax) {
                                 // Set select value.
                                 // When in AJAX mode Select2 sets values by itself.
                                 if (scope.getItemValue(item) !== null) {
@@ -647,7 +647,7 @@ angular.module('marcuraUI.components')
                         }
 
                         // The change event works differently in AJAX mode.
-                        if (scope.isAjax) {
+                        if (scope.hasAjax) {
                             // The change event fires first time even if scope.value has not changed.
                             if (item === scope.previousSelectedItem) {
                                 return;
@@ -662,7 +662,7 @@ angular.module('marcuraUI.components')
 
                         // Get selected item from items by value field.
                         // There is no items array in AJAX mode.
-                        if (!scope.isAjax) {
+                        if (!scope.hasAjax) {
                             if (scope.itemValueField && !maHelper.isNullOrWhiteSpace(item)) {
                                 for (var i = 0; i < scope._items.length; i++) {
 
@@ -711,7 +711,7 @@ angular.module('marcuraUI.components')
                 // Runs initSelection to force Select2 to refresh its displayed value.
                 // This is only required in AJAX mode.
                 var initializeSelect2Value = function functionName() {
-                    if (!scope.isAjax || !selectData) {
+                    if (!scope.hasAjax || !selectData) {
                         return;
                     }
 
