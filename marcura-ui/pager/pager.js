@@ -6,6 +6,7 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
             totalItems: '=',
             visiblePages: '=',
             showItemsPerPage: '=',
+            allowAllItemsPerPage: '=',
             itemsPerPageNumbers: '=',
             itemsPerPageText: '@',
             itemsPerPage: '=',
@@ -20,7 +21,7 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                     <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
                         items="_itemsPerPageNumbers"\
                         value="_itemsPerPage"\
-                        change="itemsPerPageChange(maValue)">\
+                        change="itemsPerPageChange(maValue, maOldValue)">\
                     </ma-select-box>\
                 </div><div class="ma-pager-pager">\
                     <div class="ma-pager-start">\
@@ -107,11 +108,17 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
             };
 
             var setItemsPerPageNumbers = function () {
-                if (!scope._showItemsPerPage || !angular.isArray(scope.itemsPerPageNumbers)) {
+                if (!scope._showItemsPerPage) {
                     return;
                 }
 
-                scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
+                if (angular.isArray(scope.itemsPerPageNumbers)) {
+                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
+                }
+
+                if (scope.allowAllItemsPerPage) {
+                    scope._itemsPerPageNumbers.push('All');
+                }
             };
 
             var setRangePages = function () {
@@ -133,6 +140,11 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
             };
 
             var setHasPager = function () {
+                if (scope._itemsPerPage === 'All') {
+                    scope._hasPager = false;
+                    return;
+                }
+
                 var itemsPerPage = Number(scope._itemsPerPage);
                 scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * itemsPerPage > itemsPerPage);
             };
@@ -142,7 +154,7 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                     return;
                 }
 
-                scope.page = scope._page;
+                scope.page = scope._page || null;
                 setRangePages();
 
                 var value = {
@@ -150,7 +162,7 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 };
 
                 if (scope._showItemsPerPage) {
-                    value.maItemsPerPage = Number(scope._itemsPerPage);
+                    value.maItemsPerPage = scope._itemsPerPage === 'All' ? null : Number(scope._itemsPerPage);
                     scope.hasItemsPerPageChanged = false;
 
                     // If itemsPerPage is set update its value.
@@ -166,14 +178,18 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 });
             };
 
-            scope.itemsPerPageChange = function (itemsPerPage) {
-                var oldItemsPerPage = scope._itemsPerPage;
+            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
                 scope._itemsPerPage = itemsPerPage;
                 scope.hasItemsPerPageChanged = true;
                 var oldTotalPages = scope.totalPages;
                 scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
-                var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
-                scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
+
+                if (oldItemsPerPage === 'All') {
+                    scope._page = 1;
+                } else {
+                    var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
+                    scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
+                }
 
                 setHasPager();
                 onChange();
