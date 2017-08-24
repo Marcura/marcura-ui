@@ -1,26 +1,28 @@
+@import 'marcura-ui/less.less';
+
 .ma-grid-order {
-    display: inline-block;
     position: absolute;
     top: 0;
     right: 0;
+    width: 16px;
+    height: 16px;
 
     .fa {
-        font-size: 14px;
-        width: 14px;
-        height: 14px;
-        display: block;
-        overflow: hidden;
-        text-align: center;
+        position: absolute;
+        top: 1px;
+        right: 0;
+        opacity: 0.3;
+    }
 
-        &::before {
-            position: absolute;
-            width: 14px;
-            height: 14px;
-            display: block;
+    &-asc {
+        .fa-sort-asc {
+            opacity: 1;
         }
     }
 
-    &-asc .fa::before {
-        top: 6px;
+    &-desc {
+        .fa-sort-desc {
+            opacity: 1;
+        }
     }
 }

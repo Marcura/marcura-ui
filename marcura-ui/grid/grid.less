@@ -129,6 +129,22 @@
             &:last-child {
                 border-right-width: 0;
             }
+
+            &:not(&-vertical-align-none) {
+                .ma-grid-header-col-inner {
+                    display: flex;
+                    height: 100%;
+
+                    .ma-grid-caption,
+                    /*
+                        ma-grid-captions is a wrapper for multiple captions (when a single heading column contains more then one caption).
+                        It helps to align multiple captions to the bottom correctly.
+                    */
+                    .ma-grid-captions {
+                        align-self: flex-end;
+                    }
+                }
+            }
         }
     }
 
@@ -140,6 +156,8 @@
     &-caption {
         display: inline-block;
         .user-select(none);
+        /*Use a normal line-height for correct allignment of .ma-grid-label and .ma-grid-order.*/
+        line-height: normal;
     }
 
     &-col {

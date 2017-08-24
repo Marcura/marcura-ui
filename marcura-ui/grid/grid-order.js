@@ -9,10 +9,10 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', '$t
         replace: true,
         template: function () {
             var html = '\
-            <div class="ma-grid-order ma-grid-order-{{direction}}"\
-                ng-show="isVisible()"\
+            <div class="ma-grid-order{{isVisible() ? \' ma-grid-order-\' + direction : \'\'}}"\
                 ng-click="order()">\
-                <i class="fa fa-sort-{{direction}}"></i>\
+                <i class="fa fa-sort-asc"></i>\
+                <i class="fa fa-sort-desc"></i>\
             </div>';
 
             return html;
