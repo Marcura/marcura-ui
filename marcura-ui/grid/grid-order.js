@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', '$timeout', function (maHelper, $timeout) {
+angular.module('marcuraUI.components').directive('maGridOrder', ['$timeout', function ($timeout) {
     return {
         // maGridOrder should always be located inside maGrid.
         require: '^^maGrid',
@@ -19,8 +19,7 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', '$t
         },
         link: function (scope, element, attributes, grid) {
             var gridScope,
-                headerColElement = element.closest('.ma-grid-header-col'),
-                captionElement = element.closest('.ma-grid-caption');
+                headerColElement = element.closest('.ma-grid-header-col');
 
             var getGridScope = function () {
                 var gridScope = null,
@@ -37,15 +36,21 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', '$t
                 return gridScope;
             };
 
-            var order = function () {
+            scope.order = function () {
                 if (!gridScope) {
                     return;
                 }
 
                 var isReverse = gridScope.orderBy.charAt(0) === '-';
                 isReverse = !isReverse;
+
                 gridScope.orderBy = isReverse ? '-' + scope.orderBy : scope.orderBy;
                 scope.direction = isReverse ? 'desc' : 'asc';
+
+                // Postpone the event to allow gridScope.orderBy to change first.
+                $timeout(function () {
+                    gridScope.order();
+                });
             };
 
             var cleanOrderBy = function (orderBy) {
@@ -72,12 +77,6 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['maHelper', '$t
 
                 return cleanOrderBy(gridScope.orderBy) === scope.orderBy;
             };
-
-            captionElement.on('click', function () {
-                maHelper.safeApply(function () {
-                    order();
-                });
-            });
         }
     };
 }]);

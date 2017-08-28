@@ -6,7 +6,8 @@ angular.module('marcuraUI.components').directive('maGrid', ['maHelper', function
             orderBy: '=',
             modifier: '@',
             isResponsive: '=',
-            responsiveSize: '@'
+            responsiveSize: '@',
+            order: '&'
         },
         replace: true,
         template: function () {
