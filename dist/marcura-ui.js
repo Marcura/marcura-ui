@@ -179,6 +179,757 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components')
+    .provider('maDateBoxConfiguration', function () {
+        this.$get = function () {
+            return this;
+        };
+    })
+    .directive('maDateBox', ['$timeout', 'MaDate', 'maHelper', 'maValidators', function ($timeout, MaDate, maHelper, maValidators) {
+        return {
+            restrict: 'E',
+            scope: {
+                id: '@',
+                value: '=',
+                timeZone: '=',
+                culture: '=',
+                isDisabled: '=',
+                isRequired: '=',
+                change: '&',
+                validate: '&',
+                canReset: '=',
+                displayFormat: '=',
+                format: '=',
+                hasTime: '=',
+                parser: '=',
+                validators: '=',
+                instance: '=',
+                minDate: '=',
+                maxDate: '=',
+                changeTimeout: '=',
+                placeholder: '@'
+            },
+            replace: true,
+            template: function (element) {
+                var html = '\
+                <div class="ma-date-box" ng-class="{\
+                        \'ma-date-box-has-time\': hasTime,\
+                        \'ma-date-box-is-invalid\': !isValid,\
+                        \'ma-date-box-is-disabled\': isDisabled,\
+                        \'ma-date-box-is-focused\': isFocused,\
+                        \'ma-date-box-is-touched\': isTouched,\
+                        \'ma-date-box-can-reset\': canReset,\
+                        \'ma-date-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
+                        \'ma-date-box-has-value\': hasValue()\
+                    }">\
+                    <div class="ma-date-box-inner">\
+                        <input class="ma-date-box-date" type="text" id="{{id}}"\
+                            placeholder="{{placeholder}}"\
+                            ng-disabled="isDisabled"\
+                            ng-keydown="onKeydown($event)"\
+                            ng-keyup="onKeyup($event)"/><input class="ma-date-box-hour"\
+                                maxlength="2"\
+                                ng-disabled="isDisabled"\
+                                ng-show="hasTime"\
+                                ng-keyup="onKeyup($event)"\
+                                ng-keydown="onTimeKeydown($event)"\
+                                /><div class="ma-date-box-colon" ng-if="hasTime">:</div><input \
+                                class="ma-date-box-minute" type="text"\
+                                maxlength="2"\
+                                ng-disabled="isDisabled"\
+                                ng-show="hasTime"\
+                                ng-keyup="onKeyup($event)"\
+                                ng-keydown="onTimeKeydown($event)"/>\
+                        <i class="ma-date-box-icon fa fa-calendar"></i>\
+                    </div>\
+                    <ma-button class="ma-button-reset"\
+                        ng-show="canReset" size="xs" modifier="simple"\
+                        right-icon="times-circle"\
+                        click="onReset()"\
+                        is-disabled="!isResetEnabled()">\
+                    </ma-button>\
+                </div>';
+
+                return html;
+            },
+            controller: ['$scope', 'maDateBoxConfiguration', function (scope, maDateBoxConfiguration) {
+                scope.configuration = {};
+                scope.configuration.displayFormat = (scope.displayFormat || maDateBoxConfiguration.displayFormat || 'dd MMM yyyy')
+                    .replace(/Y/g, 'y').replace(/D/g, 'd');
+                scope.configuration.format = (scope.format || maDateBoxConfiguration.format || 'yyyy-MM-ddTHH:mm:ssZ')
+                    .replace(/Y/g, 'y').replace(/D/g, 'd');
+                scope.configuration.timeZone = (scope.timeZone || maDateBoxConfiguration.timeZone || 'Z')
+                    .replace(/GMT/g, '');
+            }],
+            link: function (scope, element) {
+                var picker = null,
+                    displayFormat = scope.configuration.displayFormat,
+                    format = scope.configuration.format,
+                    timeZone = scope.configuration.timeZone,
+                    dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
+                    hourElement = angular.element(element[0].querySelector('.ma-date-box-hour')),
+                    minuteElement = angular.element(element[0].querySelector('.ma-date-box-minute')),
+                    previousDate = MaDate.createEmpty(),
+                    timeZoneOffset = MaDate.parseTimeZone(timeZone),
+                    initialDisplayDate,
+                    // Variables keydownValue and keyupValue help track touched state.
+                    keydownValue,
+                    keyupValue,
+                    initialDateOffset = 0,
+                    validators = [],
+                    isRequired = scope.isRequired,
+                    minDate = new MaDate(scope.minDate),
+                    maxDate = new MaDate(scope.maxDate),
+                    failedValidator = null,
+                    changePromise,
+                    changeTimeout = Number(scope.changeTimeout),
+                    dateCaretPosition = 0,
+                    hourCaretPosition = 0,
+                    minuteCaretPosition = 0,
+                    isDateFocused,
+                    isHourFocused,
+                    isMinuteFocused;
+
+                var hasDateChanged = function (date) {
+                    if (previousDate.isEqual(date)) {
+                        return false;
+                    }
+
+                    scope.isTouched = true;
+
+                    return true;
+                };
+
+                var setDisplayDate = function (date) {
+                    var displayDate = null;
+
+                    if (date && !date.isEmpty()) {
+                        // Adjust display date offset.
+                        displayDate = date.copy().toUtc().add(timeZoneOffset, 'minute');
+                        dateElement.val(displayDate.format(displayFormat));
+                        hourElement.val(displayDate.format('HH'));
+                        minuteElement.val(displayDate.format('mm'));
+
+                        if (!initialDisplayDate) {
+                            initialDisplayDate = dateElement.val();
+                        }
+                    } else {
+                        dateElement.val('');
+                        hourElement.val('00');
+                        minuteElement.val('00');
+                    }
+
+                    // Restore caret position if the component has focus.
+                    if (scope.isFocused) {
+                        // In IE setting selectionStart/selectionEnd properties triggers focus/blur event.
+                        // Remove the events while properties are being set and then restore them.
+                        removeFocusEvent();
+                        removeBlurEvent();
+
+                        // Set caret for an appropriate field.
+                        if (isDateFocused) {
+                            dateElement.prop({
+                                selectionStart: dateCaretPosition,
+                                selectionEnd: dateCaretPosition
+                            });
+                        }
+
+                        if (isHourFocused) {
+                            hourElement.prop({
+                                selectionStart: hourCaretPosition,
+                                selectionEnd: hourCaretPosition
+                            });
+                        }
+
+                        if (isMinuteFocused) {
+                            minuteElement.prop({
+                                selectionStart: minuteCaretPosition,
+                                selectionEnd: minuteCaretPosition
+                            });
+                        }
+
+                        $timeout(function () {
+                            addFocusEvent();
+                            addBlurEvent();
+                        });
+                    }
+
+                    // Set calendar date.
+                    if (picker) {
+                        picker.setDate(displayDate ? displayDate.toDate() : null, true);
+                    }
+                };
+
+                var setMaxDate = function () {
+                    if (!picker) {
+                        return;
+                    }
+
+                    maxDate = new MaDate(scope.maxDate);
+
+                    // Pikaday does no support clearing maxDate by providing null value.
+                    // So we just set maxDate to 100 years ahead.
+                    if (maxDate.isEmpty()) {
+                        maxDate = new MaDate().add(100, 'year');
+                    }
+
+                    picker.setMaxDate(maxDate.toDate());
+                };
+
+                var setMinDate = function () {
+                    if (!picker) {
+                        return;
+                    }
+
+                    minDate = new MaDate(scope.minDate);
+
+                    // Pikaday does no support clearing minDate by providing null value.
+                    // So we just set minDate to 100 years before.
+                    if (minDate.isEmpty()) {
+                        minDate = new MaDate().subtract(100, 'year');
+                    }
+
+                    picker.setMinDate(minDate.toDate());
+                };
+
+                var parseDate = function (date) {
+                    var parsedDate = MaDate.createEmpty();
+
+                    if (!date) {
+                        return parsedDate;
+                    }
+
+                    if (scope.parser) {
+                        parsedDate = scope.parser(date);
+                    } else {
+                        parsedDate = MaDate.parse(date, scope.culture);
+                    }
+
+                    return parsedDate;
+                };
+
+                var setDateTime = function (date) {
+                    date.hour(Number(hourElement.val()))
+                        .minute(Number(minuteElement.val()))
+                        .second(0);
+                };
+
+                var resetInitialDateOffset = function () {
+                    // Override initial time zone offset after date has been changed.
+                    initialDateOffset = timeZoneOffset;
+                };
+
+                var initializePikaday = function () {
+                    picker = new Pikaday({
+                        field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
+                        position: 'bottom right',
+                        onSelect: function () {
+                            var date = new MaDate(picker.getDate());
+                            date.offset(timeZoneOffset);
+
+                            if (scope.hasTime) {
+                                setDateTime(date);
+                                resetInitialDateOffset();
+                            }
+
+                            // Use $timeout to apply scope changes instead of $apply,
+                            // which throws digest error at this point.
+                            $timeout(function () {
+                                validate(date);
+                            });
+
+                            if (!hasDateChanged(date)) {
+                                // Refresh display date in case the following scenario.
+                                // 1. maxDate is set to 30/10/2016.
+                                // 2. The user enteres greater date by hand 31/10/2016, which
+                                // will not be excepted and become invalid.
+                                // 3. The user then selects the same 30/10/2016 date from the calendar,
+                                // but display date will not be changed as previous date is still 30/10/2016
+                                // (hasDateChanged will return false).
+                                setDisplayDate(date);
+                                return;
+                            }
+
+                            triggerChange(date);
+                        }
+                    });
+
+                    setDisplayDate(previousDate);
+                    setMaxDate();
+                    setMinDate();
+                };
+
+                var destroyPikaday = function () {
+                    if (picker) {
+                        picker.destroy();
+                    }
+                };
+
+                var validate = function (date, triggerEvent) {
+                    scope.isValid = true;
+                    failedValidator = null;
+                    var formattedDate = date ? date.format(format) : null;
+
+                    if (validators && validators.length) {
+                        for (var i = 0; i < validators.length; i++) {
+                            if (!validators[i].validate(formattedDate)) {
+                                scope.isValid = false;
+                                failedValidator = validators[i];
+                                break;
+                            }
+                        }
+                    }
+
+                    if (triggerEvent !== false) {
+                        triggerValidate(date);
+                    }
+                };
+
+                var setValidators = function () {
+                    var hasIsNotEmptyValidator = false;
+                    validators = scope.validators ? angular.copy(scope.validators) : [];
+
+                    for (var i = 0; i < validators.length; i++) {
+                        if (validators[i].name === 'IsNotEmpty') {
+                            hasIsNotEmptyValidator = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasIsNotEmptyValidator && isRequired) {
+                        validators.unshift(maValidators.isNotEmpty());
+                    }
+
+                    if (hasIsNotEmptyValidator) {
+                        isRequired = true;
+                    }
+
+                    if (!minDate.isEmpty()) {
+                        validators.push(maValidators.isGreaterOrEqual(minDate, true));
+                    }
+
+                    if (!maxDate.isEmpty()) {
+                        validators.push(maValidators.isLessOrEqual(maxDate, true));
+                    }
+                };
+
+                var triggerChange = function (date) {
+                    previousDate = date || MaDate.createEmpty();
+                    scope.value = date ? date.format(format) : null;
+
+                    // Postpone change event for $apply (which is being invoked by $timeout)
+                    // to have time to take effect and update scope.value,
+                    // so both maValue and scope.value have the same values eventually.
+                    $timeout(function () {
+                        scope.change({
+                            maValue: scope.value
+                        });
+                    });
+                };
+
+                var triggerValidate = function (date) {
+                    // Postpone the event to allow scope.value to be updated, so
+                    // the event can operate relevant value.
+                    $timeout(function () {
+                        scope.validate({
+                            maValue: date ? date.format(format) : null
+                        });
+                    });
+                };
+
+                var changeDate = function () {
+                    scope.isTouched = true;
+
+                    var displayDate = dateElement.val().trim(),
+                        isEmpty = displayDate === '',
+                        hour = Number(hourElement.val()),
+                        minute = Number(minuteElement.val()),
+                        date = MaDate.createEmpty();
+
+                    // Check time.
+                    if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+                        date = parseDate(displayDate);
+                        date.offset(initialDateOffset);
+                    } else {
+                        scope.isValid = false;
+                        return;
+                    }
+
+                    // Date is empty and remains unchanged.
+                    if (isEmpty && previousDate.isEmpty()) {
+                        validate(null);
+                        return;
+                    }
+
+                    // Date has been emptied.
+                    if (isEmpty) {
+                        validate(date);
+
+                        if (scope.isValid) {
+                            setDisplayDate(null);
+                            triggerChange();
+                        }
+
+                        return;
+                    }
+
+                    // Failed to parse the date.
+                    if (date.isEmpty()) {
+                        scope.isValid = false;
+                        return;
+                    }
+
+                    if (!date.isEmpty() && (scope.hasTime || initialDisplayDate === displayDate)) {
+                        setDateTime(date);
+
+                        // Substruct time zone offset.
+                        date.subtract(timeZoneOffset - initialDateOffset, 'minute');
+                    }
+
+                    validate(date);
+
+                    if (!hasDateChanged(date)) {
+                        // Refresh diplay date in case the user changed its format, e.g.
+                        // from 12 Oct 16 to 12Oct16. We need to set it back to 12 Oct 16.
+                        setDisplayDate(date);
+                        return;
+                    }
+
+                    if (!date.isEmpty()) {
+                        setDisplayDate(date);
+                    }
+
+                    if (!scope.isValid) {
+                        return;
+                    }
+
+                    triggerChange(date);
+                };
+
+                var focusDate = function () {
+                    isDateFocused = true;
+                    isHourFocused = false;
+                    isMinuteFocused = false;
+                    scope.onFocus();
+                };
+
+                var focusHour = function () {
+                    isHourFocused = true;
+                    isDateFocused = false;
+                    isMinuteFocused = false;
+                    scope.onFocus();
+                };
+
+                var focusMinute = function () {
+                    isMinuteFocused = true;
+                    isDateFocused = false;
+                    isHourFocused = false;
+                    scope.onFocus();
+                };
+
+                var blurDate = function () {
+                    isDateFocused = false;
+                    scope.onBlur();
+                };
+
+                var blurHour = function () {
+                    isHourFocused = false;
+                    scope.onBlur();
+                };
+
+                var blurMinute = function () {
+                    isMinuteFocused = false;
+                    scope.onBlur();
+                };
+
+                var addFocusEvent = function () {
+                    // Remove the event in case it exists.
+                    removeFocusEvent();
+                    $('.ma-date-box-date', element).on('focus', focusDate);
+                    $('.ma-date-box-hour', element).on('focus', focusHour);
+                    $('.ma-date-box-minute', element).on('focus', focusMinute);
+                };
+
+                var removeFocusEvent = function () {
+                    $('.ma-date-box-date', element).off('focus', focusDate);
+                    $('.ma-date-box-hour', element).off('focus', focusHour);
+                    $('.ma-date-box-minute', element).off('focus', focusMinute);
+                };
+
+                var addBlurEvent = function () {
+                    // Remove the event in case it exists.
+                    removeBlurEvent();
+                    $('.ma-date-box-date', element).on('blur', blurDate);
+                    $('.ma-date-box-hour', element).on('blur', blurHour);
+                    $('.ma-date-box-minute', element).on('blur', blurMinute);
+                };
+
+                var removeBlurEvent = function () {
+                    $('.ma-date-box-date', element).off('blur', blurDate);
+                    $('.ma-date-box-hour', element).off('blur', blurHour);
+                    $('.ma-date-box-minute', element).off('blur', blurMinute);
+                };
+
+                setValidators();
+                scope.isFocused = false;
+                scope.isValid = true;
+                scope.isTouched = false;
+
+                scope.hasValue = function () {
+                    return dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00';
+                };
+
+                scope.isResetEnabled = function () {
+                    return !scope.isDisabled && (dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00');
+                };
+
+                scope.onFocus = function () {
+                    // Use safeApply to avoid apply error when Reset icon is clicked.
+                    maHelper.safeApply(function () {
+                        scope.isFocused = true;
+                    });
+                };
+
+                scope.onBlur = function () {
+                    // Cancel change if it is already in process to prevent the event from firing twice.
+                    if (changePromise) {
+                        $timeout.cancel(changePromise);
+                    }
+
+                    scope.$apply(function () {
+                        scope.isFocused = false;
+                        changeDate();
+                    });
+                };
+
+                scope.onKeydown = function (event) {
+                    // Ignore tab key.
+                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                        return;
+                    }
+
+                    keydownValue = angular.element(event.target).val();
+                };
+
+                scope.onKeyup = function (event) {
+                    // Ignore tab key.
+                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                        return;
+                    }
+
+                    var hasValueChanged = false;
+                    keyupValue = angular.element(event.target).val();
+
+                    if (keydownValue !== keyupValue) {
+                        hasValueChanged = true;
+                        scope.isTouched = true;
+                        resetInitialDateOffset();
+                    }
+
+                    // Change value after a timeout while the user is typing.
+                    if (hasValueChanged && changeTimeout > 0) {
+                        dateCaretPosition = dateElement.prop('selectionStart');
+                        hourCaretPosition = hourElement.prop('selectionStart');
+                        minuteCaretPosition = minuteElement.prop('selectionStart');
+
+                        if (changePromise) {
+                            $timeout.cancel(changePromise);
+                        }
+
+                        changePromise = $timeout(function () {
+                            changeDate();
+                        }, changeTimeout);
+                    }
+                };
+
+                scope.onTimeKeydown = function (event) {
+                    if (
+                        // Allow backspace, tab, delete.
+                        $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.tab, maHelper.keyCode.delete]) !== -1 ||
+                        // Allow left, right.
+                        (event.keyCode === 37 || event.keyCode === 39)) {
+                        return;
+                    }
+
+                    // Ensure that it is a number and stop the keypress.
+                    if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event.keyCode > 105)) {
+                        event.preventDefault();
+                    }
+                };
+
+                scope.onReset = function () {
+                    if (scope.isDisabled) {
+                        return;
+                    }
+
+                    previousDate = MaDate.createEmpty();
+                    scope.isTouched = true;
+                    validate(null);
+
+                    triggerChange();
+                    setDisplayDate(null);
+                    dateElement.focus();
+                };
+
+                // Set initial date.
+                if (scope.value) {
+                    var date = parseDate(scope.value);
+
+                    if (date.isEmpty()) {
+                        return;
+                    }
+
+                    setDisplayDate(date);
+                    previousDate = date;
+                    initialDateOffset = date.offset();
+                }
+
+                addFocusEvent();
+                addBlurEvent();
+
+                $timeout(function () {
+                    if (!scope.isDisabled) {
+                        initializePikaday();
+                    }
+
+                    // Move id to input.
+                    element.removeAttr('id');
+                    dateElement.attr('id', scope.id);
+                });
+
+                scope.$watch('value', function (newDate, oldDate) {
+                    if (newDate === null && oldDate === null) {
+                        return;
+                    }
+
+                    var date = parseDate(newDate);
+
+                    if (date.isEmpty()) {
+                        previousDate = MaDate.createEmpty();
+                        setDisplayDate(null);
+                    }
+
+                    if (!hasDateChanged(date)) {
+                        setDisplayDate(date);
+                        return;
+                    }
+
+                    // Validate date to make it valid in case it was invalid before or vice versa.
+                    // Pass false as second parameter to avoid loop from triggering validate event.
+                    validate(date, false);
+                    setDisplayDate(date);
+                    previousDate = date;
+                    initialDateOffset = date.offset();
+                });
+
+                scope.$watch('isDisabled', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    if (!scope.isDisabled) {
+                        initializePikaday();
+                    } else {
+                        destroyPikaday();
+                    }
+                });
+
+                var minMaxDateWatcher = function (newValue, oldValue, dateName) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    var date = parseDate(dateElement.val().trim());
+                    date.offset(timeZoneOffset);
+
+                    if (dateName === 'maxDate') {
+                        setMaxDate();
+                    } else {
+                        setMinDate();
+                    }
+
+                    setValidators();
+
+                    // Run only min/max validators to avoid the component being highligthed as invalid
+                    // by other validators like IsNotEmpty, when minDate/maxDate is changed.
+                    var minMaxValidators = [];
+
+                    for (var i = 0; i < validators.length; i++) {
+                        if (validators[i].name === 'IsGreaterOrEqual' || validators[i].name === 'IsLessOrEqual') {
+                            minMaxValidators.push(validators[i]);
+                        }
+                    }
+
+                    if (minMaxValidators.length) {
+                        var formattedDate = date.format(format);
+
+                        // Empty failedValidator if it is min/max validator.
+                        if (failedValidator && (failedValidator.name === 'IsGreaterOrEqual' || failedValidator.name === 'IsLessOrEqual')) {
+                            failedValidator = null;
+                            scope.isValid = true;
+                        }
+
+                        for (i = 0; i < minMaxValidators.length; i++) {
+                            if (!minMaxValidators[i].validate(formattedDate)) {
+                                scope.isValid = false;
+                                failedValidator = minMaxValidators[i];
+                                break;
+                            }
+                        }
+
+                        if (!scope.isValid) {
+                            scope.isTouched = true;
+                        }
+
+                        triggerValidate(date);
+                    }
+
+                    if (scope.isValid && hasDateChanged(date)) {
+                        triggerChange(date);
+                    }
+                };
+
+                scope.$watch('maxDate', function (newValue, oldValue) {
+                    minMaxDateWatcher(newValue, oldValue, 'maxDate');
+                });
+
+                scope.$watch('minDate', function (newValue, oldValue) {
+                    minMaxDateWatcher(newValue, oldValue, 'minDate');
+                });
+
+                // Prepare API instance.
+                if (scope.instance) {
+                    scope.instance.isInitialized = true;
+
+                    scope.instance.validate = function () {
+                        scope.isTouched = true;
+
+                        if (isRequired && !scope.value) {
+                            scope.isValid = false;
+                            return;
+                        }
+
+                        validate(parseDate(scope.value));
+                    };
+
+                    scope.instance.isValid = function () {
+                        return scope.isValid;
+                    };
+
+                    scope.instance.failedValidator = function () {
+                        return failedValidator;
+                    };
+
+                    scope.instance.refresh = function () {
+                        var date = parseDate(scope.value);
+                        setDisplayDate(date);
+                        validate(date, false);
+                    };
+                }
+            }
+        };
+    }]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function (maHelper, $timeout, maValidators) {
     return {
         restrict: 'E',
@@ -400,6 +1151,33 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            for: '@',
+            isRequired: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-label" ng-class="{\
+                    \'ma-label-is-required\': isRequired,\
+                    \'ma-label-has-content\': hasContent\
+                }">\
+                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;</div>\
+                    <i class="fa fa-star" ng-if="isRequired"></i>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            scope.hasContent = element.find('span').contents().length > 0;
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', ['$timeout', function ($timeout) {
     return {
         // maGridOrder should always be located inside maGrid.
@@ -581,33 +1359,6 @@ if (!String.prototype.endsWith) {
 
                 setModifier('responsive-size', responsiveSize);
             }
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            for: '@',
-            isRequired: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-label" ng-class="{\
-                    \'ma-label-is-required\': isRequired,\
-                    \'ma-label-has-content\': hasContent\
-                }">\
-                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;</div>\
-                    <i class="fa fa-star" ng-if="isRequired"></i>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            scope.hasContent = element.find('span').contents().length > 0;
         }
     };
 }]);})();
@@ -848,311 +1599,70 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function() {
     return {
         restrict: 'E',
         scope: {
-            page: '=',
-            totalItems: '=',
-            visiblePages: '=',
-            showItemsPerPage: '=',
-            allowAllItemsPerPage: '=',
-            itemsPerPageNumbers: '=',
-            itemsPerPageText: '@',
-            itemsPerPage: '=',
-            change: '&'
+            steps: '=',
+            currentStep: '='
         },
         replace: true,
-        template: function () {
-            var html = '<div class="ma-pager" ng-class="{\
-                \'ma-pager-has-pager\': _hasPager\
-            }">\
-                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
-                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
-                        items="_itemsPerPageNumbers"\
-                        value="_itemsPerPage"\
-                        change="itemsPerPageChange(maValue, maOldValue)">\
-                    </ma-select-box>\
-                </div><div class="ma-pager-pager">\
-                    <div class="ma-pager-start">\
-                        <ma-button\
-                            class="ma-button-first"\
-                            text="First"\
-                            size="xs"\
-                            modifier="default"\
-                            click="firstClick()"\
-                            is-disabled="_page <= 1"\
-                        ></ma-button><ma-button\
-                            class="ma-button-previous"\
-                            text="Previous"\
-                            size="xs"\
-                            modifier="default"\
-                            click="previousClick()"\
-                            is-disabled="_page <= 1">\
-                        </ma-button>\
-                    </div\
-                    ><div class="ma-pager-middle">\
-                        <ma-button\
-                            class="ma-button-previous-range"\
-                            text="..."\
-                            size="xs"\
-                            modifier="default"\
-                            click="previousRangeClick()"\
-                            is-disabled="isFirstRange"\
-                        ></ma-button><div class="ma-pager-pages"><ma-button\
-                            ng-repeat="rangePage in rangePages"\
-                            class="ma-button-page"\
-                            text="{{rangePage}}"\
-                            size="xs"\
-                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
-                            click="pageClick(rangePage)"></div></ma-button\
-                        ><ma-button\
-                            class="ma-button-next-range"\
-                            text="..."\
-                            size="xs"\
-                            modifier="default"\
-                            click="nextRangeClick()"\
-                            is-disabled="isLastRange"\
-                        ></ma-button>\
-                    </div\
-                    ><div class="ma-pager-end">\
-                        <ma-button\
-                            class="ma-button-next"\
-                            text="Next"\
-                            size="xs"\
-                            modifier="default"\
-                            click="nextClick()"\
-                            is-disabled="_page >= totalPages"\
-                        ></ma-button><ma-button\
-                            class="ma-button-last"\
-                            text="Last"\
-                            size="xs"\
-                            modifier="default"\
-                            click="lastClick()"\
-                            is-disabled="_page >= totalPages">\
-                        </ma-button>\
+        template: function() {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
                     </div>\
                 </div>\
             </div>';
 
             return html;
         },
-        link: function (scope) {
-            scope._page = scope.page;
-            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
-            scope._itemsPerPageNumbers = ['25', '50', '75', '100'];
-            scope._itemsPerPage = '25';
-            scope.hasItemsPerPageChanged = false;
-            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
-
-            var setTotalPages = function () {
-                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
+        link: function(scope) {
+            scope.calculateLeft = function(stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
             };
 
-            var setItemsPerPage = function () {
-                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
-                    return;
+            scope.calculateProgress = function() {
+                if (!scope.currentStep) {
+                    return 0;
                 }
 
-                scope._itemsPerPage = scope.itemsPerPage.toString();
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
             };
 
-            var setItemsPerPageNumbers = function () {
-                if (!scope._showItemsPerPage) {
-                    return;
-                }
-
-                if (angular.isArray(scope.itemsPerPageNumbers)) {
-                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
-                }
-
-                if (scope.allowAllItemsPerPage) {
-                    scope._itemsPerPageNumbers.push('All');
-                }
+            scope.isCurrentStep = function(stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
             };
-
-            var setRangePages = function () {
-                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
-
-                if (scope.totalPages < scope._visiblePages) {
-                    scope._visiblePages = scope.totalPages || 1;
-                }
-
-                scope.rangePages = [];
-                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
-                scope.isFirstRange = scope.range === 0;
-                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
-                var startPage = scope.range * scope._visiblePages;
-
-                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
-                    scope.rangePages.push(startPage + visiblePage);
-                }
-            };
-
-            var setHasPager = function () {
-                if (scope._itemsPerPage === 'All') {
-                    scope._hasPager = false;
-                    return;
-                }
-
-                var itemsPerPage = Number(scope._itemsPerPage);
-                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * itemsPerPage > itemsPerPage);
-            };
-
-            var onChange = function () {
-                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
-                    return;
-                }
-
-                scope.page = scope._page || null;
-                setRangePages();
-
-                var value = {
-                    maPage: scope.page
-                };
-
-                if (scope._showItemsPerPage) {
-                    value.maItemsPerPage = scope._itemsPerPage === 'All' ? null : Number(scope._itemsPerPage);
-                    scope.hasItemsPerPageChanged = false;
-
-                    // If itemsPerPage is set update its value.
-                    if (scope.itemsPerPage !== undefined) {
-                        scope.itemsPerPage = value.maItemsPerPage;
-                    }
-                }
-
-                // Postpone change event for $apply (which is being invoked by $timeout)
-                // to have time to take effect and update scope.page.
-                $timeout(function () {
-                    scope.change(value);
-                });
-            };
-
-            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
-                scope._itemsPerPage = itemsPerPage;
-                scope.hasItemsPerPageChanged = true;
-                var oldTotalPages = scope.totalPages;
-                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
-
-                if (oldItemsPerPage === 'All') {
-                    scope._page = 1;
-                } else {
-                    var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
-                    scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
-                }
-
-                setHasPager();
-                onChange();
-            };
-
-            scope.firstClick = function () {
-                scope._page = 1;
-                onChange();
-            };
-
-            scope.previousClick = function () {
-                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
-                onChange();
-            };
-
-            scope.nextClick = function () {
-                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
-                onChange();
-            };
-
-            scope.lastClick = function () {
-                scope._page = scope.totalPages;
-                onChange();
-            };
-
-            scope.pageClick = function (page) {
-                scope._page = page;
-                onChange();
-            };
-
-            scope.previousRangeClick = function () {
-                scope._page = scope.range * scope._visiblePages;
-                onChange();
-            };
-
-            scope.nextRangeClick = function () {
-                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
-                onChange();
-            };
-
-            scope.$watch('totalItems', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
-                setTotalPages();
-
-                // Correct the page and trigger change.
-                if (scope._totalItems === 0 || scope._totalItems <= Number(scope._itemsPerPage)) {
-                    scope._page = 1;
-                    onChange();
-                    setHasPager();
-                    return;
-                }
-
-                setRangePages();
-                setHasPager();
-            });
-
-            scope.$watch('visiblePages', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setRangePages();
-            });
-
-            scope.$watch('page', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                var page = scope.page;
-
-                // Correct page.
-                if (page < 1) {
-                    page = 1;
-                } else if (page > scope.totalPages) {
-                    page = scope.totalPages;
-                }
-
-                // Correct page to 1 in case totalPages is 0 and page is 0.
-                scope._page = page || 1;
-                setRangePages();
-                setHasPager();
-            });
-
-            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
-                if (angular.equals(newValue, oldValue)) {
-                    return;
-                }
-
-                setItemsPerPageNumbers();
-            });
-
-            scope.$watch('itemsPerPage', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setItemsPerPage();
-                setHasPager();
-            });
-
-            setItemsPerPageNumbers();
-            setItemsPerPage();
-            setTotalPages();
-            setRangePages();
-            setHasPager();
         }
     };
-}]);})();
+}]);
+})();
 (function(){angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', '$sce', 'maValidators', function (maHelper, $timeout, $sce, maValidators) {
     var radioBoxes = {};
 
@@ -1613,70 +2123,311 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function() {
+(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
     return {
         restrict: 'E',
         scope: {
-            steps: '=',
-            currentStep: '='
+            page: '=',
+            totalItems: '=',
+            visiblePages: '=',
+            showItemsPerPage: '=',
+            allowAllItemsPerPage: '=',
+            itemsPerPageNumbers: '=',
+            itemsPerPageText: '@',
+            itemsPerPage: '=',
+            change: '&'
         },
         replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
+        template: function () {
+            var html = '<div class="ma-pager" ng-class="{\
+                \'ma-pager-has-pager\': _hasPager\
+            }">\
+                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
+                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
+                        items="_itemsPerPageNumbers"\
+                        value="_itemsPerPage"\
+                        change="itemsPerPageChange(maValue, maOldValue)">\
+                    </ma-select-box>\
+                </div><div class="ma-pager-pager">\
+                    <div class="ma-pager-start">\
+                        <ma-button\
+                            class="ma-button-first"\
+                            text="First"\
+                            size="xs"\
+                            modifier="default"\
+                            click="firstClick()"\
+                            is-disabled="_page <= 1"\
+                        ></ma-button><ma-button\
+                            class="ma-button-previous"\
+                            text="Previous"\
+                            size="xs"\
+                            modifier="default"\
+                            click="previousClick()"\
+                            is-disabled="_page <= 1">\
+                        </ma-button>\
+                    </div\
+                    ><div class="ma-pager-middle">\
+                        <ma-button\
+                            class="ma-button-previous-range"\
+                            text="..."\
+                            size="xs"\
+                            modifier="default"\
+                            click="previousRangeClick()"\
+                            is-disabled="isFirstRange"\
+                        ></ma-button><div class="ma-pager-pages"><ma-button\
+                            ng-repeat="rangePage in rangePages"\
+                            class="ma-button-page"\
+                            text="{{rangePage}}"\
+                            size="xs"\
+                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
+                            click="pageClick(rangePage)"></div></ma-button\
+                        ><ma-button\
+                            class="ma-button-next-range"\
+                            text="..."\
+                            size="xs"\
+                            modifier="default"\
+                            click="nextRangeClick()"\
+                            is-disabled="isLastRange"\
+                        ></ma-button>\
+                    </div\
+                    ><div class="ma-pager-end">\
+                        <ma-button\
+                            class="ma-button-next"\
+                            text="Next"\
+                            size="xs"\
+                            modifier="default"\
+                            click="nextClick()"\
+                            is-disabled="_page >= totalPages"\
+                        ></ma-button><ma-button\
+                            class="ma-button-last"\
+                            text="Last"\
+                            size="xs"\
+                            modifier="default"\
+                            click="lastClick()"\
+                            is-disabled="_page >= totalPages">\
+                        </ma-button>\
                     </div>\
                 </div>\
             </div>';
 
             return html;
         },
-        link: function(scope) {
-            scope.calculateLeft = function(stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
+        link: function (scope) {
+            scope._page = scope.page;
+            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
+            scope._itemsPerPageNumbers = ['25', '50', '75', '100'];
+            scope._itemsPerPage = '25';
+            scope.hasItemsPerPageChanged = false;
+            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
+
+            var setTotalPages = function () {
+                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
             };
 
-            scope.calculateProgress = function() {
-                if (!scope.currentStep) {
-                    return 0;
+            var setItemsPerPage = function () {
+                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
+                    return;
                 }
 
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
+                scope._itemsPerPage = scope.itemsPerPage.toString();
+            };
+
+            var setItemsPerPageNumbers = function () {
+                if (!scope._showItemsPerPage) {
+                    return;
                 }
 
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+                if (angular.isArray(scope.itemsPerPageNumbers)) {
+                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
+                }
+
+                if (scope.allowAllItemsPerPage) {
+                    scope._itemsPerPageNumbers.push('All');
+                }
             };
 
-            scope.isCurrentStep = function(stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
+            var setRangePages = function () {
+                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
+
+                if (scope.totalPages < scope._visiblePages) {
+                    scope._visiblePages = scope.totalPages || 1;
+                }
+
+                scope.rangePages = [];
+                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
+                scope.isFirstRange = scope.range === 0;
+                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
+                var startPage = scope.range * scope._visiblePages;
+
+                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
+                    scope.rangePages.push(startPage + visiblePage);
+                }
             };
+
+            var setHasPager = function () {
+                if (scope._itemsPerPage === 'All') {
+                    scope._hasPager = false;
+                    return;
+                }
+
+                var itemsPerPage = Number(scope._itemsPerPage);
+                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * itemsPerPage > itemsPerPage);
+            };
+
+            var onChange = function () {
+                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
+                    return;
+                }
+
+                scope.page = scope._page || null;
+                setRangePages();
+
+                var value = {
+                    maPage: scope.page
+                };
+
+                if (scope._showItemsPerPage) {
+                    value.maItemsPerPage = scope._itemsPerPage === 'All' ? null : Number(scope._itemsPerPage);
+                    scope.hasItemsPerPageChanged = false;
+
+                    // If itemsPerPage is set update its value.
+                    if (scope.itemsPerPage !== undefined) {
+                        scope.itemsPerPage = value.maItemsPerPage;
+                    }
+                }
+
+                // Postpone change event for $apply (which is being invoked by $timeout)
+                // to have time to take effect and update scope.page.
+                $timeout(function () {
+                    scope.change(value);
+                });
+            };
+
+            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
+                scope._itemsPerPage = itemsPerPage;
+                scope.hasItemsPerPageChanged = true;
+                var oldTotalPages = scope.totalPages;
+                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
+
+                if (oldItemsPerPage === 'All') {
+                    scope._page = 1;
+                } else {
+                    var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
+                    scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
+                }
+
+                setHasPager();
+                onChange();
+            };
+
+            scope.firstClick = function () {
+                scope._page = 1;
+                onChange();
+            };
+
+            scope.previousClick = function () {
+                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
+                onChange();
+            };
+
+            scope.nextClick = function () {
+                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
+                onChange();
+            };
+
+            scope.lastClick = function () {
+                scope._page = scope.totalPages;
+                onChange();
+            };
+
+            scope.pageClick = function (page) {
+                scope._page = page;
+                onChange();
+            };
+
+            scope.previousRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages;
+                onChange();
+            };
+
+            scope.nextRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
+                onChange();
+            };
+
+            scope.$watch('totalItems', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
+                setTotalPages();
+
+                // Correct the page and trigger change.
+                if (scope._totalItems === 0 || scope._totalItems <= Number(scope._itemsPerPage)) {
+                    scope._page = 1;
+                    onChange();
+                    setHasPager();
+                    return;
+                }
+
+                setRangePages();
+                setHasPager();
+            });
+
+            scope.$watch('visiblePages', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setRangePages();
+            });
+
+            scope.$watch('page', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                var page = scope.page;
+
+                // Correct page.
+                if (page < 1) {
+                    page = 1;
+                } else if (page > scope.totalPages) {
+                    page = scope.totalPages;
+                }
+
+                // Correct page to 1 in case totalPages is 0 and page is 0.
+                scope._page = page || 1;
+                setRangePages();
+                setHasPager();
+            });
+
+            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
+                if (angular.equals(newValue, oldValue)) {
+                    return;
+                }
+
+                setItemsPerPageNumbers();
+            });
+
+            scope.$watch('itemsPerPage', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setItemsPerPage();
+                setHasPager();
+            });
+
+            setItemsPerPageNumbers();
+            setItemsPerPage();
+            setTotalPages();
+            setRangePages();
+            setHasPager();
         }
     };
-}]);
-})();
+}]);})();
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function() {
     var months = [{
             language: 'en',
@@ -3906,6 +4657,106 @@ if (!String.prototype.endsWith) {
             }
         };
     }]);})();
+(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', '$sce', function ($state, $sce) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-side-menu">\
+                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.hidden" ng-class="{\
+                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
+                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
+                    }"\
+                    ng-click="onSelect(item)">\
+                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
+                    <div class="ma-side-menu-text" ng-bind-html="getItemText(item)"></div>\
+                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function (item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function (item) {
+                if (item.isDisabled) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function (item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
+
+            scope.getItemText = function (item) {
+                return $sce.trustAsHtml(item.text);
+            };
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            isVisible: '=',
+            size: '@',
+            position: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
+                    <div class="pace">\
+                        <div class="pace-activity"></div>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            var size = scope.size ? scope.size : 'xs',
+                position = scope.position ? scope.position : 'center';
+            scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
     return {
         restrict: 'E',
@@ -4008,75 +4859,276 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$state', '$sce', function ($state, $sce) {
+(function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', 'maValidators', function($timeout, $window, maHelper, maValidators) {
     return {
         restrict: 'E',
         scope: {
-            items: '=',
-            select: '&',
-            useState: '='
+            id: '@',
+            value: '=',
+            isDisabled: '=',
+            fitContentHeight: '=',
+            isResizable: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+            updateOn: '@',
+            change: '&'
         },
         replace: true,
-        template: function () {
+        template: function() {
             var html = '\
-            <div class="ma-side-menu">\
-                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.hidden" ng-class="{\
-                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
-                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
-                    }"\
-                    ng-click="onSelect(item)">\
-                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
-                    <div class="ma-side-menu-text" ng-bind-html="getItemText(item)"></div>\
-                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
-                </div>\
+            <div class="ma-text-area"\
+                ng-class="{\
+                    \'ma-text-area-is-disabled\': isDisabled,\
+                    \'ma-text-area-is-focused\': isFocused,\
+                    \'ma-text-area-fit-content-height\': fitContentHeight,\
+                    \'ma-text-area-is-invalid\': !isValid,\
+                    \'ma-text-area-is-touched\': isTouched\
+                }">\
+                <textarea class="ma-text-area-value"\
+                    type="text"\
+                    ng-focus="onFocus()"\
+                    ng-blur="onBlur()"\
+                    ng-keydown="onKeydown($event)"\
+                    ng-keyup="onKeyup($event)"\
+                    ng-disabled="isDisabled">\
+                </textarea>\
             </div>';
 
             return html;
         },
-        link: function (scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
+        link: function(scope, element) {
+            var valueElement = angular.element(element[0].querySelector('.ma-text-area-value')),
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false,
+                // Variables keydownValue and keyupValue help track touched state.
+                keydownValue,
+                keyupValue,
+                previousValue,
+                updateOn = scope.updateOn ? scope.updateOn : 'input';
 
-            scope.isItemSelected = function (item) {
-                if (item.selector) {
-                    return item.selector();
-                }
+            var getValueElementStyle = function() {
+                var style = $window.getComputedStyle(valueElement[0], null),
+                    properties = {},
+                    paddingHeight = parseInt(style.getPropertyValue('padding-top')) + parseInt(style.getPropertyValue('padding-bottom')),
+                    paddingWidth = parseInt(style.getPropertyValue('padding-left')) + parseInt(style.getPropertyValue('padding-right')),
+                    borderHeight = parseInt(style.getPropertyValue('border-top-width')) + parseInt(style.getPropertyValue('border-bottom-width')),
+                    borderWidth = parseInt(style.getPropertyValue('border-left-width')) + parseInt(style.getPropertyValue('border-right-width'));
 
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
+                properties.width = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('width')) - paddingWidth;
+                properties.height = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('height')) - paddingHeight;
+                properties.paddingHeight = paddingHeight;
+                properties.paddingWidth = paddingWidth;
+                properties.borderHeight = borderHeight;
+                properties.borderWidth = borderWidth;
+                properties.lineHeight = style.getPropertyValue('line-height');
 
-                return false;
+                // IE and Firefox do not support 'font' property, so we need to get it ourselves.
+                properties.font = style.getPropertyValue('font-style') + ' ' +
+                    style.getPropertyValue('font-variant') + ' ' +
+                    style.getPropertyValue('font-weight') + ' ' +
+                    style.getPropertyValue('font-size') + ' ' +
+                    style.getPropertyValue('font-height') + ' ' +
+                    style.getPropertyValue('font-family');
+
+                return properties;
             };
 
-            scope.onSelect = function (item) {
-                if (item.isDisabled) {
+            var resize = function() {
+                if (!scope.fitContentHeight) {
                     return;
                 }
 
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function (item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
+                var valueElementStyle = getValueElementStyle(),
+                    textHeight = maHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
+                    height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
 
-                    scope.select({
-                        item: item
-                    });
+                if (height < 40) {
+                    height = 30;
+                }
+
+                valueElement[0].style.height = height + 'px';
+                element[0].style.height = height + 'px';
+            };
+
+            var validate = function() {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(valueElement.val())) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
                 }
             };
 
-            scope.getItemText = function (item) {
-                return $sce.trustAsHtml(item.text);
+            var onChange = function(value) {
+                if (previousValue === value) {
+                    return;
+                }
+
+                previousValue = value;
+
+                $timeout(function() {
+                    scope.change({
+                        maValue: value
+                    });
+                });
             };
+
+            scope.isFocused = false;
+            scope.isTouched = false;
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(maValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            scope.onFocus = function() {
+                scope.isFocused = true;
+            };
+
+            scope.onBlur = function() {
+                scope.isFocused = false;
+                scope.isTouched = true;
+
+                if (scope.isValid && updateOn === 'blur') {
+                    scope.value = valueElement.val();
+                    onChange(scope.value);
+                }
+
+                validate();
+            };
+
+            scope.onKeydown = function(event) {
+                // Ignore tab key.
+                if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    return;
+                }
+
+                keydownValue = angular.element(event.target).val();
+            };
+
+            scope.onKeyup = function(event) {
+                // Ignore tab key.
+                if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    return;
+                }
+
+                keyupValue = angular.element(event.target).val();
+
+                if (keydownValue !== keyupValue) {
+                    scope.isTouched = true;
+                }
+            };
+
+            // We are forced to use input event because scope.watch does
+            // not respond to Enter key when the cursor is in the end of text.
+            valueElement.on('input', function(event) {
+                validate();
+                resize();
+
+                if (scope.isValid && updateOn === 'input') {
+                    scope.$apply(function() {
+                        scope.value = valueElement.val();
+                    });
+                }
+            });
+
+            angular.element($window).on('resize', function() {
+                resize();
+            });
+
+            $timeout(function() {
+                resize();
+
+                if (scope.isResizable === false) {
+                    valueElement.css('resize', 'none');
+                }
+
+                // Move id to input.
+                element.removeAttr('id');
+                valueElement.attr('id', scope.id);
+
+                // If TextArea is hidden initially with ng-show then after appearing
+                // it's height is calculated incorectly. This code fixes the issue.
+                if (scope.fitContentHeight) {
+                    var hiddenParent = $(element[0]).closest('.ng-hide[ng-show]');
+
+                    if (hiddenParent.length === 1) {
+                        var parentScope = hiddenParent.scope();
+
+                        parentScope.$watch(hiddenParent.attr('ng-show'), function(isVisible) {
+                            if (isVisible) {
+                                // Wait for the hidden element to appear first.
+                                $timeout(function() {
+                                    resize();
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+
+            scope.$watch('value', function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                scope.isValid = true;
+                scope.isTouched = false;
+
+                // IE 11.0 version moves the caret at the end when textarea value is fully replaced.
+                // In IE 11.126+ the issue has been fixed.
+                var caretPosition = valueElement.prop('selectionStart');
+                valueElement.val(newValue);
+
+                // Restore caret position if text area is visible.
+                var isVisible = $(element).is(':visible');
+
+                if (isVisible) {
+                    valueElement.prop({
+                        selectionStart: caretPosition,
+                        selectionEnd: caretPosition
+                    });
+                }
+
+                resize();
+            });
+
+            // Set initial value.
+            valueElement.val(scope.value);
+            validate();
+            previousValue = scope.value;
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isValid = function() {
+                    return scope.isValid;
+                };
+
+                scope.instance.focus = function() {
+                    if (!scope.isFocused) {
+                        valueElement.focus();
+                    }
+                };
+            }
         }
     };
 }]);
@@ -4733,1055 +5785,3 @@ if (!String.prototype.endsWith) {
             }
         };
     }]);})();
-(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            isVisible: '=',
-            size: '@',
-            position: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
-                    <div class="pace">\
-                        <div class="pace-activity"></div>\
-                    </div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            var size = scope.size ? scope.size : 'xs',
-                position = scope.position ? scope.position : 'center';
-            scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', 'maValidators', function($timeout, $window, maHelper, maValidators) {
-    return {
-        restrict: 'E',
-        scope: {
-            id: '@',
-            value: '=',
-            isDisabled: '=',
-            fitContentHeight: '=',
-            isResizable: '=',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
-            updateOn: '@',
-            change: '&'
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-text-area"\
-                ng-class="{\
-                    \'ma-text-area-is-disabled\': isDisabled,\
-                    \'ma-text-area-is-focused\': isFocused,\
-                    \'ma-text-area-fit-content-height\': fitContentHeight,\
-                    \'ma-text-area-is-invalid\': !isValid,\
-                    \'ma-text-area-is-touched\': isTouched\
-                }">\
-                <textarea class="ma-text-area-value"\
-                    type="text"\
-                    ng-focus="onFocus()"\
-                    ng-blur="onBlur()"\
-                    ng-keydown="onKeydown($event)"\
-                    ng-keyup="onKeyup($event)"\
-                    ng-disabled="isDisabled">\
-                </textarea>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element) {
-            var valueElement = angular.element(element[0].querySelector('.ma-text-area-value')),
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false,
-                // Variables keydownValue and keyupValue help track touched state.
-                keydownValue,
-                keyupValue,
-                previousValue,
-                updateOn = scope.updateOn ? scope.updateOn : 'input';
-
-            var getValueElementStyle = function() {
-                var style = $window.getComputedStyle(valueElement[0], null),
-                    properties = {},
-                    paddingHeight = parseInt(style.getPropertyValue('padding-top')) + parseInt(style.getPropertyValue('padding-bottom')),
-                    paddingWidth = parseInt(style.getPropertyValue('padding-left')) + parseInt(style.getPropertyValue('padding-right')),
-                    borderHeight = parseInt(style.getPropertyValue('border-top-width')) + parseInt(style.getPropertyValue('border-bottom-width')),
-                    borderWidth = parseInt(style.getPropertyValue('border-left-width')) + parseInt(style.getPropertyValue('border-right-width'));
-
-                properties.width = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('width')) - paddingWidth;
-                properties.height = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('height')) - paddingHeight;
-                properties.paddingHeight = paddingHeight;
-                properties.paddingWidth = paddingWidth;
-                properties.borderHeight = borderHeight;
-                properties.borderWidth = borderWidth;
-                properties.lineHeight = style.getPropertyValue('line-height');
-
-                // IE and Firefox do not support 'font' property, so we need to get it ourselves.
-                properties.font = style.getPropertyValue('font-style') + ' ' +
-                    style.getPropertyValue('font-variant') + ' ' +
-                    style.getPropertyValue('font-weight') + ' ' +
-                    style.getPropertyValue('font-size') + ' ' +
-                    style.getPropertyValue('font-height') + ' ' +
-                    style.getPropertyValue('font-family');
-
-                return properties;
-            };
-
-            var resize = function() {
-                if (!scope.fitContentHeight) {
-                    return;
-                }
-
-                var valueElementStyle = getValueElementStyle(),
-                    textHeight = maHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
-                    height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
-
-                if (height < 40) {
-                    height = 30;
-                }
-
-                valueElement[0].style.height = height + 'px';
-                element[0].style.height = height + 'px';
-            };
-
-            var validate = function() {
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(valueElement.val())) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            var onChange = function(value) {
-                if (previousValue === value) {
-                    return;
-                }
-
-                previousValue = value;
-
-                $timeout(function() {
-                    scope.change({
-                        maValue: value
-                    });
-                });
-            };
-
-            scope.isFocused = false;
-            scope.isTouched = false;
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(maValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            scope.onFocus = function() {
-                scope.isFocused = true;
-            };
-
-            scope.onBlur = function() {
-                scope.isFocused = false;
-                scope.isTouched = true;
-
-                if (scope.isValid && updateOn === 'blur') {
-                    scope.value = valueElement.val();
-                    onChange(scope.value);
-                }
-
-                validate();
-            };
-
-            scope.onKeydown = function(event) {
-                // Ignore tab key.
-                if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
-                    return;
-                }
-
-                keydownValue = angular.element(event.target).val();
-            };
-
-            scope.onKeyup = function(event) {
-                // Ignore tab key.
-                if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
-                    return;
-                }
-
-                keyupValue = angular.element(event.target).val();
-
-                if (keydownValue !== keyupValue) {
-                    scope.isTouched = true;
-                }
-            };
-
-            // We are forced to use input event because scope.watch does
-            // not respond to Enter key when the cursor is in the end of text.
-            valueElement.on('input', function(event) {
-                validate();
-                resize();
-
-                if (scope.isValid && updateOn === 'input') {
-                    scope.$apply(function() {
-                        scope.value = valueElement.val();
-                    });
-                }
-            });
-
-            angular.element($window).on('resize', function() {
-                resize();
-            });
-
-            $timeout(function() {
-                resize();
-
-                if (scope.isResizable === false) {
-                    valueElement.css('resize', 'none');
-                }
-
-                // Move id to input.
-                element.removeAttr('id');
-                valueElement.attr('id', scope.id);
-
-                // If TextArea is hidden initially with ng-show then after appearing
-                // it's height is calculated incorectly. This code fixes the issue.
-                if (scope.fitContentHeight) {
-                    var hiddenParent = $(element[0]).closest('.ng-hide[ng-show]');
-
-                    if (hiddenParent.length === 1) {
-                        var parentScope = hiddenParent.scope();
-
-                        parentScope.$watch(hiddenParent.attr('ng-show'), function(isVisible) {
-                            if (isVisible) {
-                                // Wait for the hidden element to appear first.
-                                $timeout(function() {
-                                    resize();
-                                });
-                            }
-                        });
-                    }
-                }
-            });
-
-            scope.$watch('value', function(newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                scope.isValid = true;
-                scope.isTouched = false;
-
-                // IE 11.0 version moves the caret at the end when textarea value is fully replaced.
-                // In IE 11.126+ the issue has been fixed.
-                var caretPosition = valueElement.prop('selectionStart');
-                valueElement.val(newValue);
-
-                // Restore caret position if text area is visible.
-                var isVisible = $(element).is(':visible');
-
-                if (isVisible) {
-                    valueElement.prop({
-                        selectionStart: caretPosition,
-                        selectionEnd: caretPosition
-                    });
-                }
-
-                resize();
-            });
-
-            // Set initial value.
-            valueElement.val(scope.value);
-            validate();
-            previousValue = scope.value;
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isValid = function() {
-                    return scope.isValid;
-                };
-
-                scope.instance.focus = function() {
-                    if (!scope.isFocused) {
-                        valueElement.focus();
-                    }
-                };
-            }
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components')
-    .provider('maDateBoxConfiguration', function () {
-        this.$get = function () {
-            return this;
-        };
-    })
-    .directive('maDateBox', ['$timeout', 'MaDate', 'maHelper', 'maValidators', function ($timeout, MaDate, maHelper, maValidators) {
-        return {
-            restrict: 'E',
-            scope: {
-                id: '@',
-                value: '=',
-                timeZone: '=',
-                culture: '=',
-                isDisabled: '=',
-                isRequired: '=',
-                change: '&',
-                validate: '&',
-                canReset: '=',
-                displayFormat: '=',
-                format: '=',
-                hasTime: '=',
-                parser: '=',
-                validators: '=',
-                instance: '=',
-                minDate: '=',
-                maxDate: '=',
-                changeTimeout: '=',
-                placeholder: '@'
-            },
-            replace: true,
-            template: function (element) {
-                var html = '\
-                <div class="ma-date-box" ng-class="{\
-                        \'ma-date-box-has-time\': hasTime,\
-                        \'ma-date-box-is-invalid\': !isValid,\
-                        \'ma-date-box-is-disabled\': isDisabled,\
-                        \'ma-date-box-is-focused\': isFocused,\
-                        \'ma-date-box-is-touched\': isTouched,\
-                        \'ma-date-box-can-reset\': canReset,\
-                        \'ma-date-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
-                        \'ma-date-box-has-value\': hasValue()\
-                    }">\
-                    <div class="ma-date-box-inner">\
-                        <input class="ma-date-box-date" type="text" id="{{id}}"\
-                            placeholder="{{placeholder}}"\
-                            ng-disabled="isDisabled"\
-                            ng-keydown="onKeydown($event)"\
-                            ng-keyup="onKeyup($event)"/><input class="ma-date-box-hour"\
-                                maxlength="2"\
-                                ng-disabled="isDisabled"\
-                                ng-show="hasTime"\
-                                ng-keyup="onKeyup($event)"\
-                                ng-keydown="onTimeKeydown($event)"\
-                                /><div class="ma-date-box-colon" ng-if="hasTime">:</div><input \
-                                class="ma-date-box-minute" type="text"\
-                                maxlength="2"\
-                                ng-disabled="isDisabled"\
-                                ng-show="hasTime"\
-                                ng-keyup="onKeyup($event)"\
-                                ng-keydown="onTimeKeydown($event)"/>\
-                        <i class="ma-date-box-icon fa fa-calendar"></i>\
-                    </div>\
-                    <ma-button class="ma-button-reset"\
-                        ng-show="canReset" size="xs" modifier="simple"\
-                        right-icon="times-circle"\
-                        click="onReset()"\
-                        is-disabled="!isResetEnabled()">\
-                    </ma-button>\
-                </div>';
-
-                return html;
-            },
-            controller: ['$scope', 'maDateBoxConfiguration', function (scope, maDateBoxConfiguration) {
-                scope.configuration = {};
-                scope.configuration.displayFormat = (scope.displayFormat || maDateBoxConfiguration.displayFormat || 'dd MMM yyyy')
-                    .replace(/Y/g, 'y').replace(/D/g, 'd');
-                scope.configuration.format = (scope.format || maDateBoxConfiguration.format || 'yyyy-MM-ddTHH:mm:ssZ')
-                    .replace(/Y/g, 'y').replace(/D/g, 'd');
-                scope.configuration.timeZone = (scope.timeZone || maDateBoxConfiguration.timeZone || 'Z')
-                    .replace(/GMT/g, '');
-            }],
-            link: function (scope, element) {
-                var picker = null,
-                    displayFormat = scope.configuration.displayFormat,
-                    format = scope.configuration.format,
-                    timeZone = scope.configuration.timeZone,
-                    dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
-                    hourElement = angular.element(element[0].querySelector('.ma-date-box-hour')),
-                    minuteElement = angular.element(element[0].querySelector('.ma-date-box-minute')),
-                    previousDate = MaDate.createEmpty(),
-                    timeZoneOffset = MaDate.parseTimeZone(timeZone),
-                    initialDisplayDate,
-                    // Variables keydownValue and keyupValue help track touched state.
-                    keydownValue,
-                    keyupValue,
-                    initialDateOffset = 0,
-                    validators = [],
-                    isRequired = scope.isRequired,
-                    minDate = new MaDate(scope.minDate),
-                    maxDate = new MaDate(scope.maxDate),
-                    failedValidator = null,
-                    changePromise,
-                    changeTimeout = Number(scope.changeTimeout),
-                    dateCaretPosition = 0,
-                    hourCaretPosition = 0,
-                    minuteCaretPosition = 0,
-                    isDateFocused,
-                    isHourFocused,
-                    isMinuteFocused;
-
-                var hasDateChanged = function (date) {
-                    if (previousDate.isEqual(date)) {
-                        return false;
-                    }
-
-                    scope.isTouched = true;
-
-                    return true;
-                };
-
-                var setDisplayDate = function (date) {
-                    var displayDate = null;
-
-                    if (date && !date.isEmpty()) {
-                        // Adjust display date offset.
-                        displayDate = date.copy().toUtc().add(timeZoneOffset, 'minute');
-                        dateElement.val(displayDate.format(displayFormat));
-                        hourElement.val(displayDate.format('HH'));
-                        minuteElement.val(displayDate.format('mm'));
-
-                        if (!initialDisplayDate) {
-                            initialDisplayDate = dateElement.val();
-                        }
-                    } else {
-                        dateElement.val('');
-                        hourElement.val('00');
-                        minuteElement.val('00');
-                    }
-
-                    // Restore caret position if the component has focus.
-                    if (scope.isFocused) {
-                        // In IE setting selectionStart/selectionEnd properties triggers focus/blur event.
-                        // Remove the events while properties are being set and then restore them.
-                        removeFocusEvent();
-                        removeBlurEvent();
-
-                        // Set caret for an appropriate field.
-                        if (isDateFocused) {
-                            dateElement.prop({
-                                selectionStart: dateCaretPosition,
-                                selectionEnd: dateCaretPosition
-                            });
-                        }
-
-                        if (isHourFocused) {
-                            hourElement.prop({
-                                selectionStart: hourCaretPosition,
-                                selectionEnd: hourCaretPosition
-                            });
-                        }
-
-                        if (isMinuteFocused) {
-                            minuteElement.prop({
-                                selectionStart: minuteCaretPosition,
-                                selectionEnd: minuteCaretPosition
-                            });
-                        }
-
-                        $timeout(function () {
-                            addFocusEvent();
-                            addBlurEvent();
-                        });
-                    }
-
-                    // Set calendar date.
-                    if (picker) {
-                        picker.setDate(displayDate ? displayDate.toDate() : null, true);
-                    }
-                };
-
-                var setMaxDate = function () {
-                    if (!picker) {
-                        return;
-                    }
-
-                    maxDate = new MaDate(scope.maxDate);
-
-                    // Pikaday does no support clearing maxDate by providing null value.
-                    // So we just set maxDate to 100 years ahead.
-                    if (maxDate.isEmpty()) {
-                        maxDate = new MaDate().add(100, 'year');
-                    }
-
-                    picker.setMaxDate(maxDate.toDate());
-                };
-
-                var setMinDate = function () {
-                    if (!picker) {
-                        return;
-                    }
-
-                    minDate = new MaDate(scope.minDate);
-
-                    // Pikaday does no support clearing minDate by providing null value.
-                    // So we just set minDate to 100 years before.
-                    if (minDate.isEmpty()) {
-                        minDate = new MaDate().subtract(100, 'year');
-                    }
-
-                    picker.setMinDate(minDate.toDate());
-                };
-
-                var parseDate = function (date) {
-                    var parsedDate = MaDate.createEmpty();
-
-                    if (!date) {
-                        return parsedDate;
-                    }
-
-                    if (scope.parser) {
-                        parsedDate = scope.parser(date);
-                    } else {
-                        parsedDate = MaDate.parse(date, scope.culture);
-                    }
-
-                    return parsedDate;
-                };
-
-                var setDateTime = function (date) {
-                    date.hour(Number(hourElement.val()))
-                        .minute(Number(minuteElement.val()))
-                        .second(0);
-                };
-
-                var resetInitialDateOffset = function () {
-                    // Override initial time zone offset after date has been changed.
-                    initialDateOffset = timeZoneOffset;
-                };
-
-                var initializePikaday = function () {
-                    picker = new Pikaday({
-                        field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
-                        position: 'bottom right',
-                        onSelect: function () {
-                            var date = new MaDate(picker.getDate());
-                            date.offset(timeZoneOffset);
-
-                            if (scope.hasTime) {
-                                setDateTime(date);
-                                resetInitialDateOffset();
-                            }
-
-                            // Use $timeout to apply scope changes instead of $apply,
-                            // which throws digest error at this point.
-                            $timeout(function () {
-                                validate(date);
-                            });
-
-                            if (!hasDateChanged(date)) {
-                                // Refresh display date in case the following scenario.
-                                // 1. maxDate is set to 30/10/2016.
-                                // 2. The user enteres greater date by hand 31/10/2016, which
-                                // will not be excepted and become invalid.
-                                // 3. The user then selects the same 30/10/2016 date from the calendar,
-                                // but display date will not be changed as previous date is still 30/10/2016
-                                // (hasDateChanged will return false).
-                                setDisplayDate(date);
-                                return;
-                            }
-
-                            triggerChange(date);
-                        }
-                    });
-
-                    setDisplayDate(previousDate);
-                    setMaxDate();
-                    setMinDate();
-                };
-
-                var destroyPikaday = function () {
-                    if (picker) {
-                        picker.destroy();
-                    }
-                };
-
-                var validate = function (date, triggerEvent) {
-                    scope.isValid = true;
-                    failedValidator = null;
-                    var formattedDate = date ? date.format(format) : null;
-
-                    if (validators && validators.length) {
-                        for (var i = 0; i < validators.length; i++) {
-                            if (!validators[i].validate(formattedDate)) {
-                                scope.isValid = false;
-                                failedValidator = validators[i];
-                                break;
-                            }
-                        }
-                    }
-
-                    if (triggerEvent !== false) {
-                        triggerValidate(date);
-                    }
-                };
-
-                var setValidators = function () {
-                    var hasIsNotEmptyValidator = false;
-                    validators = scope.validators ? angular.copy(scope.validators) : [];
-
-                    for (var i = 0; i < validators.length; i++) {
-                        if (validators[i].name === 'IsNotEmpty') {
-                            hasIsNotEmptyValidator = true;
-                            break;
-                        }
-                    }
-
-                    if (!hasIsNotEmptyValidator && isRequired) {
-                        validators.unshift(maValidators.isNotEmpty());
-                    }
-
-                    if (hasIsNotEmptyValidator) {
-                        isRequired = true;
-                    }
-
-                    if (!minDate.isEmpty()) {
-                        validators.push(maValidators.isGreaterOrEqual(minDate, true));
-                    }
-
-                    if (!maxDate.isEmpty()) {
-                        validators.push(maValidators.isLessOrEqual(maxDate, true));
-                    }
-                };
-
-                var triggerChange = function (date) {
-                    previousDate = date || MaDate.createEmpty();
-                    scope.value = date ? date.format(format) : null;
-
-                    // Postpone change event for $apply (which is being invoked by $timeout)
-                    // to have time to take effect and update scope.value,
-                    // so both maValue and scope.value have the same values eventually.
-                    $timeout(function () {
-                        scope.change({
-                            maValue: scope.value
-                        });
-                    });
-                };
-
-                var triggerValidate = function (date) {
-                    // Postpone the event to allow scope.value to be updated, so
-                    // the event can operate relevant value.
-                    $timeout(function () {
-                        scope.validate({
-                            maValue: date ? date.format(format) : null
-                        });
-                    });
-                };
-
-                var changeDate = function () {
-                    scope.isTouched = true;
-
-                    var displayDate = dateElement.val().trim(),
-                        isEmpty = displayDate === '',
-                        hour = Number(hourElement.val()),
-                        minute = Number(minuteElement.val()),
-                        date = MaDate.createEmpty();
-
-                    // Check time.
-                    if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
-                        date = parseDate(displayDate);
-                        date.offset(initialDateOffset);
-                    } else {
-                        scope.isValid = false;
-                        return;
-                    }
-
-                    // Date is empty and remains unchanged.
-                    if (isEmpty && previousDate.isEmpty()) {
-                        validate(null);
-                        return;
-                    }
-
-                    // Date has been emptied.
-                    if (isEmpty) {
-                        validate(date);
-
-                        if (scope.isValid) {
-                            setDisplayDate(null);
-                            triggerChange();
-                        }
-
-                        return;
-                    }
-
-                    // Failed to parse the date.
-                    if (date.isEmpty()) {
-                        scope.isValid = false;
-                        return;
-                    }
-
-                    if (!date.isEmpty() && (scope.hasTime || initialDisplayDate === displayDate)) {
-                        setDateTime(date);
-
-                        // Substruct time zone offset.
-                        date.subtract(timeZoneOffset - initialDateOffset, 'minute');
-                    }
-
-                    validate(date);
-
-                    if (!hasDateChanged(date)) {
-                        // Refresh diplay date in case the user changed its format, e.g.
-                        // from 12 Oct 16 to 12Oct16. We need to set it back to 12 Oct 16.
-                        setDisplayDate(date);
-                        return;
-                    }
-
-                    if (!date.isEmpty()) {
-                        setDisplayDate(date);
-                    }
-
-                    if (!scope.isValid) {
-                        return;
-                    }
-
-                    triggerChange(date);
-                };
-
-                var focusDate = function () {
-                    isDateFocused = true;
-                    isHourFocused = false;
-                    isMinuteFocused = false;
-                    scope.onFocus();
-                };
-
-                var focusHour = function () {
-                    isHourFocused = true;
-                    isDateFocused = false;
-                    isMinuteFocused = false;
-                    scope.onFocus();
-                };
-
-                var focusMinute = function () {
-                    isMinuteFocused = true;
-                    isDateFocused = false;
-                    isHourFocused = false;
-                    scope.onFocus();
-                };
-
-                var blurDate = function () {
-                    isDateFocused = false;
-                    scope.onBlur();
-                };
-
-                var blurHour = function () {
-                    isHourFocused = false;
-                    scope.onBlur();
-                };
-
-                var blurMinute = function () {
-                    isMinuteFocused = false;
-                    scope.onBlur();
-                };
-
-                var addFocusEvent = function () {
-                    // Remove the event in case it exists.
-                    removeFocusEvent();
-                    $('.ma-date-box-date', element).on('focus', focusDate);
-                    $('.ma-date-box-hour', element).on('focus', focusHour);
-                    $('.ma-date-box-minute', element).on('focus', focusMinute);
-                };
-
-                var removeFocusEvent = function () {
-                    $('.ma-date-box-date', element).off('focus', focusDate);
-                    $('.ma-date-box-hour', element).off('focus', focusHour);
-                    $('.ma-date-box-minute', element).off('focus', focusMinute);
-                };
-
-                var addBlurEvent = function () {
-                    // Remove the event in case it exists.
-                    removeBlurEvent();
-                    $('.ma-date-box-date', element).on('blur', blurDate);
-                    $('.ma-date-box-hour', element).on('blur', blurHour);
-                    $('.ma-date-box-minute', element).on('blur', blurMinute);
-                };
-
-                var removeBlurEvent = function () {
-                    $('.ma-date-box-date', element).off('blur', blurDate);
-                    $('.ma-date-box-hour', element).off('blur', blurHour);
-                    $('.ma-date-box-minute', element).off('blur', blurMinute);
-                };
-
-                setValidators();
-                scope.isFocused = false;
-                scope.isValid = true;
-                scope.isTouched = false;
-
-                scope.hasValue = function () {
-                    return dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00';
-                };
-
-                scope.isResetEnabled = function () {
-                    return !scope.isDisabled && (dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00');
-                };
-
-                scope.onFocus = function () {
-                    // Use safeApply to avoid apply error when Reset icon is clicked.
-                    maHelper.safeApply(function () {
-                        scope.isFocused = true;
-                    });
-                };
-
-                scope.onBlur = function () {
-                    // Cancel change if it is already in process to prevent the event from firing twice.
-                    if (changePromise) {
-                        $timeout.cancel(changePromise);
-                    }
-
-                    scope.$apply(function () {
-                        scope.isFocused = false;
-                        changeDate();
-                    });
-                };
-
-                scope.onKeydown = function (event) {
-                    // Ignore tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
-                        return;
-                    }
-
-                    keydownValue = angular.element(event.target).val();
-                };
-
-                scope.onKeyup = function (event) {
-                    // Ignore tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
-                        return;
-                    }
-
-                    var hasValueChanged = false;
-                    keyupValue = angular.element(event.target).val();
-
-                    if (keydownValue !== keyupValue) {
-                        hasValueChanged = true;
-                        scope.isTouched = true;
-                        resetInitialDateOffset();
-                    }
-
-                    // Change value after a timeout while the user is typing.
-                    if (hasValueChanged && changeTimeout > 0) {
-                        dateCaretPosition = dateElement.prop('selectionStart');
-                        hourCaretPosition = hourElement.prop('selectionStart');
-                        minuteCaretPosition = minuteElement.prop('selectionStart');
-
-                        if (changePromise) {
-                            $timeout.cancel(changePromise);
-                        }
-
-                        changePromise = $timeout(function () {
-                            changeDate();
-                        }, changeTimeout);
-                    }
-                };
-
-                scope.onTimeKeydown = function (event) {
-                    if (
-                        // Allow backspace, tab, delete.
-                        $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.tab, maHelper.keyCode.delete]) !== -1 ||
-                        // Allow left, right.
-                        (event.keyCode === 37 || event.keyCode === 39)) {
-                        return;
-                    }
-
-                    // Ensure that it is a number and stop the keypress.
-                    if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event.keyCode > 105)) {
-                        event.preventDefault();
-                    }
-                };
-
-                scope.onReset = function () {
-                    if (scope.isDisabled) {
-                        return;
-                    }
-
-                    previousDate = MaDate.createEmpty();
-                    scope.isTouched = true;
-                    validate(null);
-
-                    triggerChange();
-                    setDisplayDate(null);
-                    dateElement.focus();
-                };
-
-                // Set initial date.
-                if (scope.value) {
-                    var date = parseDate(scope.value);
-
-                    if (date.isEmpty()) {
-                        return;
-                    }
-
-                    setDisplayDate(date);
-                    previousDate = date;
-                    initialDateOffset = date.offset();
-                }
-
-                addFocusEvent();
-                addBlurEvent();
-
-                $timeout(function () {
-                    if (!scope.isDisabled) {
-                        initializePikaday();
-                    }
-
-                    // Move id to input.
-                    element.removeAttr('id');
-                    dateElement.attr('id', scope.id);
-                });
-
-                scope.$watch('value', function (newDate, oldDate) {
-                    if (newDate === null && oldDate === null) {
-                        return;
-                    }
-
-                    var date = parseDate(newDate);
-
-                    if (date.isEmpty()) {
-                        previousDate = MaDate.createEmpty();
-                        setDisplayDate(null);
-                    }
-
-                    if (!hasDateChanged(date)) {
-                        setDisplayDate(date);
-                        return;
-                    }
-
-                    // Validate date to make it valid in case it was invalid before or vice versa.
-                    // Pass false as second parameter to avoid loop from triggering validate event.
-                    validate(date, false);
-                    setDisplayDate(date);
-                    previousDate = date;
-                    initialDateOffset = date.offset();
-                });
-
-                scope.$watch('isDisabled', function (newValue, oldValue) {
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    if (!scope.isDisabled) {
-                        initializePikaday();
-                    } else {
-                        destroyPikaday();
-                    }
-                });
-
-                var minMaxDateWatcher = function (newValue, oldValue, dateName) {
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    var date = parseDate(dateElement.val().trim());
-                    date.offset(timeZoneOffset);
-
-                    if (dateName === 'maxDate') {
-                        setMaxDate();
-                    } else {
-                        setMinDate();
-                    }
-
-                    setValidators();
-
-                    // Run only min/max validators to avoid the component being highligthed as invalid
-                    // by other validators like IsNotEmpty, when minDate/maxDate is changed.
-                    var minMaxValidators = [];
-
-                    for (var i = 0; i < validators.length; i++) {
-                        if (validators[i].name === 'IsGreaterOrEqual' || validators[i].name === 'IsLessOrEqual') {
-                            minMaxValidators.push(validators[i]);
-                        }
-                    }
-
-                    if (minMaxValidators.length) {
-                        var formattedDate = date.format(format);
-
-                        // Empty failedValidator if it is min/max validator.
-                        if (failedValidator && (failedValidator.name === 'IsGreaterOrEqual' || failedValidator.name === 'IsLessOrEqual')) {
-                            failedValidator = null;
-                            scope.isValid = true;
-                        }
-
-                        for (i = 0; i < minMaxValidators.length; i++) {
-                            if (!minMaxValidators[i].validate(formattedDate)) {
-                                scope.isValid = false;
-                                failedValidator = minMaxValidators[i];
-                                break;
-                            }
-                        }
-
-                        if (!scope.isValid) {
-                            scope.isTouched = true;
-                        }
-
-                        triggerValidate(date);
-                    }
-
-                    if (scope.isValid && hasDateChanged(date)) {
-                        triggerChange(date);
-                    }
-                };
-
-                scope.$watch('maxDate', function (newValue, oldValue) {
-                    minMaxDateWatcher(newValue, oldValue, 'maxDate');
-                });
-
-                scope.$watch('minDate', function (newValue, oldValue) {
-                    minMaxDateWatcher(newValue, oldValue, 'minDate');
-                });
-
-                // Prepare API instance.
-                if (scope.instance) {
-                    scope.instance.isInitialized = true;
-
-                    scope.instance.validate = function () {
-                        scope.isTouched = true;
-
-                        if (isRequired && !scope.value) {
-                            scope.isValid = false;
-                            return;
-                        }
-
-                        validate(parseDate(scope.value));
-                    };
-
-                    scope.instance.isValid = function () {
-                        return scope.isValid;
-                    };
-
-                    scope.instance.failedValidator = function () {
-                        return failedValidator;
-                    };
-
-                    scope.instance.refresh = function () {
-                        var date = parseDate(scope.value);
-                        setDisplayDate(date);
-                        validate(date, false);
-                    };
-                }
-            }
-        };
-    }]);
-})();
