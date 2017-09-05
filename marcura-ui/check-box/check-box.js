@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', 'maValidators', function (maHelper, $timeout, maValidators) {
+angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', '$parse', 'maValidators', function (maHelper, $timeout, $parse, maValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -39,8 +39,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
         link: function (scope, element, attributes) {
             var validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false,
-                valuePropertyParts = null;
+                hasIsNotEmptyValidator = false;
 
             var setTabindex = function () {
                 if (scope.isDisabled) {
@@ -61,7 +60,8 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
             scope.isTouched = false;
 
             var getControllerScope = function () {
-                var controllerScope = null,
+                var valuePropertyParts = null,
+                    controllerScope = null,
                     initialScope = scope.$parent,
                     property = attributes.value;
 
@@ -83,8 +83,8 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
                 return controllerScope || scope.$parent;
             };
 
-            // When the component is inside ng-if normal binding like value="isEnabled" won't work,
-            // as the value will be stored by Angular on ng-if scope incorrectly.
+            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
+            // as the value will be stored by Angular on ng-if scope.
             var controllerScope = getControllerScope();
 
             var validate = function () {
@@ -111,29 +111,20 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
                     return;
                 }
 
-                var value;
-
-                // Handle nested property binding.
-                if (valuePropertyParts) {
-                    var valueProperty = controllerScope;
-
-                    for (var i = 0; i < valuePropertyParts.length; i++) {
-                        valueProperty = valueProperty[valuePropertyParts[i]];
-                    }
-
-                    valueProperty = !valueProperty;
-                    value = valueProperty;
-                } else {
-                    controllerScope[attributes.value] = !controllerScope[attributes.value];
-                    value = controllerScope[attributes.value];
-                }
+                // Handle nested properties or function calls with $parse service.
+                // This is related to a case when the component is located inside ng-if,
+                // but it works for other cases as well.
+                var valueGetter = $parse(attributes.value),
+                    valueSetter = valueGetter.assign,
+                    value = !valueGetter(controllerScope);
 
                 scope.value = value;
+                valueSetter(controllerScope, value);
                 validate();
 
                 $timeout(function () {
                     scope.change({
-                        maValue: value
+                        maValue: scope.value
                     });
                 });
             };
