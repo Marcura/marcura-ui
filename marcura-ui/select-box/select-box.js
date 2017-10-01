@@ -477,7 +477,7 @@ angular.module('marcuraUI.components')
                         return !maHelper.isNullOrWhiteSpace(scope.text);
                     }
 
-                    return !maHelper.isNullOrUndefined(scope.value);
+                    return !maHelper.isNullOrUndefined(scope.value) && !scope.isLoading;
                 };
 
                 scope.isResetEnabled = function () {
