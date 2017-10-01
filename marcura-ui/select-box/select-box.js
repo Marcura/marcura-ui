@@ -485,16 +485,7 @@ angular.module('marcuraUI.components')
                         return false;
                     }
 
-                    if (scope.multiple) {
-                        return !maHelper.isNullOrUndefined(scope.value) && scope.value.length;
-                    }
-
-                    // When in add mode check scope.text as user changes it.
-                    if (scope.isAddMode) {
-                        return !maHelper.isNullOrWhiteSpace(scope.text);
-                    }
-
-                    return !maHelper.isNullOrUndefined(scope.value);
+                    return scope.hasValue();
                 };
 
                 scope.reset = function () {
