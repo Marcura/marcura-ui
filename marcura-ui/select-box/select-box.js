@@ -481,11 +481,7 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.isResetEnabled = function () {
-                    if (scope.isDisabled) {
-                        return false;
-                    }
-
-                    return scope.hasValue();
+                    return !scope.isDisabled && scope.hasValue();
                 };
 
                 scope.reset = function () {

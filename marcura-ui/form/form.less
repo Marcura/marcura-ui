@@ -22,7 +22,7 @@
             margin-bottom: 0;
         }
 
-        & > & {
+        &>& {
             padding-left: 15px;
             padding-right: 15px;
         }
@@ -46,8 +46,10 @@
             .form-col-label.col-xs-12 {
                 margin-bottom: -8px;
             }
+        }
 
-            .form-group-editor-text .form-label {
+        &-editor-text {
+            .form-label {
                 margin-top: 0;
                 line-height: 20px;
             }
@@ -104,12 +106,12 @@
             margin-right: 0;
         }
 
-        .form-content > .form-group:not(:last-child) {
+        .form-content>.form-group:not(:last-child) {
             border-bottom: 1px solid @border-color;
             padding-bottom: 10px;
         }
 
-        .form-content > .form-group-has-title.form-group {
+        .form-content>.form-group-has-title.form-group {
             border-bottom: 0;
         }
     }
@@ -139,7 +141,7 @@
             }
         }
 
-        &-left + &-right {
+        &-left+&-right {
             width: 50%;
         }
 
@@ -185,6 +187,7 @@ input.form-control,
 textarea.form-control {
     border-radius: 0;
 }
+
 @media (max-width: @screen-xs-max) {
     .form-col {
         &.col-xs-12 {
@@ -202,13 +205,12 @@ textarea.form-control {
         }
     }
 }
+
 @media (min-width: @screen-sm) {
     .form-group {
         &-labels-right .form-label {
             text-align: right;
-        }
-
-        // Form group with 3 cells per row.
+        } // Form group with 3 cells per row.
         &-sm-cols-3 {
             .form-col {
                 // First cell of each row.
@@ -218,28 +220,20 @@ textarea.form-control {
                     &:last-child {
                         padding-right: 7px;
                     }
-                }
-
-                // Second cell of each row.
+                } // Second cell of each row.
                 &:nth-child(3n+2) {
                     &:last-child {
                         padding-right: 7px;
                     }
-                }
-
-                // Last cell of each row.
+                } // Last cell of each row.
                 &:nth-child(3n+3) {
                     padding-right: 0;
-                }
-
-                // All cells starting from the second row.
+                } // All cells starting from the second row.
                 &:nth-child(n+4) {
                     margin-top: 10px;
                 }
             }
-        }
-
-        // Form group with 2 cells per row.
+        } // Form group with 2 cells per row.
         &-sm-cols-2 {
             .form-col {
                 // First cell of each row.
@@ -249,14 +243,10 @@ textarea.form-control {
                     &:last-child {
                         padding-right: 7px;
                     }
-                }
-
-                // Last cell of each row.
+                } // Last cell of each row.
                 &:nth-child(2n+2) {
                     padding-right: 0;
-                }
-
-                // All cells starting from the second row.
+                } // All cells starting from the second row.
                 &:nth-child(n+3) {
                     margin-top: 10px;
                 }
