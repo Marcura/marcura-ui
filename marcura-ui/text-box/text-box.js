@@ -91,7 +91,6 @@ angular.module('marcuraUI.components')
                     resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset')),
                     togglePasswordButtonElement = angular.element(element[0].querySelector('.ma-button-toggle-password')),
                     validators = [],
-                    isRequired = scope.isRequired,
                     // Variables keydownValue and keyupValue help track touched state.
                     keydownValue,
                     keyupValue,
@@ -275,12 +274,8 @@ angular.module('marcuraUI.components')
                         }
                     }
 
-                    if (!hasIsNotEmptyValidator && isRequired) {
+                    if (!hasIsNotEmptyValidator && scope.isRequired) {
                         validators.unshift(maValidators.isNotEmpty());
-                    }
-
-                    if (hasIsNotEmptyValidator) {
-                        isRequired = true;
                     }
 
                     if (scope.type === 'number') {
@@ -553,6 +548,15 @@ angular.module('marcuraUI.components')
                             selectionEnd: caretPosition
                         });
                     }
+                });
+
+                scope.$watch('isRequired', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    setValidators();
+                    validate();
                 });
 
                 var minMaxWatcher = function (newValue, oldValue) {
