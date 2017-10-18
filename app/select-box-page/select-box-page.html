@@ -185,7 +185,7 @@
             value="port10"
             item-text-field="name"
             item-value-field="id"
-            item-template="port10ItemTemplate"
+            item-template="portItemTemplate"
             focus="focus10(maValue)"
             blur="blur10(maValue)"
             change="change10(maValue, maOldValue)"
@@ -194,6 +194,31 @@
     </div>
     <div class="nodes-item">
         <pre>{{(port10 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>AJAX multiple</h2>
+    </div>
+    <div class="nodes-item">
+        Enter 3 any characters.
+    </div>
+    <div class="nodes-item">
+        <ma-select-box
+            ajax="port17Ajax"
+            value="port17"
+            item-text-field="name"
+            item-value-field="id"
+            item-template="portItemTemplate"
+            multiple="true"
+            placeholder="Select port"
+            is-required="true"
+            focus="focus17(maValue)"
+            blur="blur17(maValue)"
+            change="change17(maValue, maOldValue)"
+            can-reset="true">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(port17 || null) | json}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Reset button</h2>
@@ -242,7 +267,7 @@
             multiple="true"
             focus="focus14(maValue)"
             blur="blur14(maValue)"
-            change="change14(maValue)">
+            change="change14(maValue, maOldValue)">
         </ma-select-box>
     </div>
     <div class="nodes-item">

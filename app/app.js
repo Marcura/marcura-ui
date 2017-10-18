@@ -4,8 +4,6 @@ angular.module('app.services', []);
 var app = angular.module('app', [
     'ui.bootstrap',
     'ui.router',
-    'ui.select2',
-    'ui.select',
     'ngSanitize',
     'marcuraUI',
     'app.services',

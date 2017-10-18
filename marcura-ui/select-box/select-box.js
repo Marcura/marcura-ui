@@ -65,21 +65,22 @@ angular.module('marcuraUI.components')
                         </div>';
 
                 if (hasAjax) {
-                    html += '<input class="ma-select-box-input" ui-select2="options"\
+                    html += '<input class="ma-select-box-input" ma-select2="options"' + (multiple ? ' multiple' : '') + '\
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-change="onChange()"\
                         ng-model="selectedItem"/>';
                 } else {
-                    // Add an empty option (<option></option>) as first item for the placeholder to work.
+                    // Add an empty option <option></option> as first item for the placeholder to work.
                     // It's strange, but that's how Select2 works.
                     html += '\
-                        <select ui-select2="options"' + (multiple ? ' multiple' : '') + '\
+                        <select ma-select2="options"' + (multiple ? ' multiple' : '') + '\
                             ng-show="!isAddMode"\
                             ng-disabled="isDisabled"\
                             ng-model="selectedItem"\
                             ng-change="onChange()"\
-                            placeholder="{{placeholder}}">' + (!multiple ? '<option></option>' : '') + '\
+                            placeholder="{{placeholder}}">\
+                            <option></option>\
                             <option ng-repeat="item in _items | maSelectBoxOrderBy:orderBy" value="{{getOptionValue(item)}}">\
                                 {{formatItem(item)}}\
                             </option>\
@@ -175,6 +176,12 @@ angular.module('marcuraUI.components')
 
                         scope.runInitSelection = false;
                     };
+
+                    if (scope.multiple) {
+                        scope.options.formatSelection = function (item) {
+                            return scope.formatItem(item);
+                        };
+                    }
                 }
             }],
             link: function (scope, element) {
@@ -306,15 +313,27 @@ angular.module('marcuraUI.components')
 
                 var setInternalValue = function (item) {
                     if (scope.multiple) {
-                        var itemsValues = [];
+                        var items = [],
+                            i;
 
-                        if (item && item.length) {
-                            for (var i = 0; i < item.length; i++) {
-                                itemsValues.push(scope.getItemValue(item[i]));
+                        // Set Select2 value.
+                        if (!scope.hasAjax) {
+                            if (item && item.length) {
+                                for (i = 0; i < item.length; i++) {
+                                    items.push(scope.getItemValue(item[i]));
+                                }
                             }
+                        } else {
+                            if (item && item.length) {
+                                for (i = 0; i < item.length; i++) {
+                                    items.push(item[i]);
+                                }
+                            }
+
+                            items = JSON.stringify(items);
                         }
 
-                        scope.selectedItem = itemsValues;
+                        scope.selectedItem = items;
                         validate(item);
                     } else {
                         if (scope.canAddItem && item) {
@@ -345,8 +364,7 @@ angular.module('marcuraUI.components')
                             if (maHelper.isNullOrWhiteSpace(item)) {
                                 scope.selectedItem = null;
                             } else if (!scope.hasAjax) {
-                                // Set select value.
-                                // When in AJAX mode Select2 sets values by itself.
+                                // Set Select2 value. In AJAX mode Select2 sets values by itself.
                                 if (scope.getItemValue(item) !== null) {
                                     // Item is an object.
                                     scope.selectedItem = scope.getItemValue(item);
@@ -604,11 +622,26 @@ angular.module('marcuraUI.components')
                         var itemsValues = scope.selectedItem,
                             items = [];
 
-                        for (var j = 0; j < itemsValues.length; j++) {
-                            item = getItemByValue(itemsValues[j]);
+                        if (scope.hasAjax) {
+                            // Get selected items directly from Select2 component,
+                            // because scope.selectedItem gives only an id of a currently selected item.
+                            items = selectData.data();
 
-                            if (item) {
-                                items.push(item);
+                            // Value hasn't changed.
+                            if (angular.equals(items, scope.value)) {
+                                return;
+                            }
+
+                            previousValue = scope.value;
+                        } else {
+                            previousValue = scope.value;
+
+                            for (var j = 0; j < itemsValues.length; j++) {
+                                item = getItemByValue(itemsValues[j]);
+
+                                if (item) {
+                                    items.push(item);
+                                }
                             }
                         }
 
@@ -617,7 +650,8 @@ angular.module('marcuraUI.components')
 
                         $timeout(function () {
                             scope.change({
-                                maValue: items
+                                maValue: items,
+                                maOldValue: previousValue
                             });
                         });
 
@@ -705,13 +739,13 @@ angular.module('marcuraUI.components')
                     // If placeholder is set Select2 initSelection will not work and thus value will not be set.
                     // We need to add/remove placeholder accordingly.
                     selectData.opts.placeholder = scope.value ? '' : scope.placeholder;
-                    selectData.setPlaceholder();
+
                     scope.runInitSelection = true;
                     selectData.initSelection();
                 };
 
                 scope.$watch('items', function (newItems, oldItems) {
-                    // When an array of items is completely replaced with a new array, angular-ui-select2
+                    // When an array of items is completely replaced with a new array, ma-select2
                     // triggers a watcher which sets the value to undefined, which we do not want.
                     // So instead of replacing an array, we clear it and repopulate with new items.
                     if (angular.equals(newItems, oldItems)) {
@@ -733,9 +767,9 @@ angular.module('marcuraUI.components')
                     // Then items are loaded asynchronously and Select2 value needs to be refreshed.
                     setInternalValue(scope.value);
 
-                    // For some reason angular-ui-select2 does not trigger change for selectedItem
+                    // For some reason ma-select2 does not trigger change for selectedItem
                     // in this case, so we need to set it manually.
-                    // See node_modules\angular-ui-select2\src\select2.js line 121.
+                    // See select-box/select2.js line 123.
                     $timeout(function () {
                         var itemValue,
                             item;
@@ -840,9 +874,17 @@ angular.module('marcuraUI.components')
 
                 $timeout(function () {
                     // Add a search icon and spinner for Select2 input field.
-                    angular.element(element[0].querySelector('.select2-search'))
-                        .append('<div class="pace"><div class="pace-activity"></div></div>')
-                        .append('<i class="ma-select-box-input-search-icon fa fa-search"></i>');
+                    if (scope.hasAjax) {
+                        var elementForSpinner = angular.element(
+                            element[0].querySelector(scope.multiple ? '.select2-search-field' : '.select2-search')
+                        );
+
+                        elementForSpinner.append('<div class="pace"><div class="pace-activity"></div></div>');
+
+                        if (!scope.multiple) {
+                            elementForSpinner.append('<i class="ma-select-box-input-search-icon fa fa-search"></i>');
+                        }
+                    }
 
                     // Set initial value.
                     // Value is set inside timeout to ensure that we get the latest value.

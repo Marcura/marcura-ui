@@ -5,9 +5,13 @@ function selectBoxPageController($scope, $timeout, helper, maHelper) {
     $scope.ports2 = helper.getPorts();
     $scope.ports1 = [];
 
-    angular.forEach($scope.ports2, function(port) {
+    angular.forEach($scope.ports2, function (port) {
         $scope.ports1.push(port.name);
     });
+
+    $scope.portItemTemplate = function (port) {
+        return port.name + ' (' + port.country.name + ')';
+    };
 
     $scope.port1 = $scope.ports1[1];
     $scope.port2 = $scope.ports2[1];
@@ -27,14 +31,11 @@ function selectBoxPageController($scope, $timeout, helper, maHelper) {
     };
     $scope.port9SelectBox = {};
     $scope.port10 = $scope.ports2[2];
-    $scope.port10ItemTemplate = function(port) {
-        return port.name + ' (' + port.country.name + ')';
-    };
     $scope.port10Ajax = {
         url: '/api/ports',
-        results: function(ports, page) {
+        results: function (ports, page) {
             for (var i = 0; i < ports.length; i++) {
-                ports[i].text = $scope.port10ItemTemplate(ports[i]);
+                ports[i].text = $scope.portItemTemplate(ports[i]);
             }
 
             return {
@@ -52,9 +53,22 @@ function selectBoxPageController($scope, $timeout, helper, maHelper) {
     $scope.ports15 = angular.copy($scope.ports2);
     $scope.port15 = [$scope.ports2[1]];
     $scope.port16 = $scope.ports2[1].id;
+    // $scope.port17 = [$scope.ports2[2]];
+    $scope.port17Ajax = {
+        url: '/api/ports',
+        results: function (ports, page) {
+            for (var i = 0; i < ports.length; i++) {
+                ports[i].text = $scope.portItemTemplate(ports[i]);
+            }
+
+            return {
+                results: ports
+            };
+        }
+    };
 
     // port1.
-    $scope.change1 = function(port, oldPort) {
+    $scope.change1 = function (port, oldPort) {
         console.log('change');
         console.log('scope:', $scope.port1);
         console.log('event:', port);
@@ -62,7 +76,7 @@ function selectBoxPageController($scope, $timeout, helper, maHelper) {
     };
 
     // port2.
-    $scope.change2 = function(port, oldPort) {
+    $scope.change2 = function (port, oldPort) {
         console.log('change');
         console.log('scope:', $scope.port2);
         console.log('event:', port);
@@ -70,7 +84,7 @@ function selectBoxPageController($scope, $timeout, helper, maHelper) {
     };
 
     // port3.
-    $scope.change3 = function(port, oldPort) {
+    $scope.change3 = function (port, oldPort) {
         console.log('change');
         console.log('scope:', $scope.port3);
         console.log('event:', port);
@@ -78,7 +92,7 @@ function selectBoxPageController($scope, $timeout, helper, maHelper) {
     };
 
     // port5.
-    $scope.change5 = function(port, oldPort) {
+    $scope.change5 = function (port, oldPort) {
         console.log('change');
         console.log('scope:', $scope.port5);
         console.log('event:', port);
@@ -86,76 +100,76 @@ function selectBoxPageController($scope, $timeout, helper, maHelper) {
     };
 
     // port7.
-    $scope.focus7 = function(port) {
+    $scope.focus7 = function (port) {
         console.log('focus');
         console.log('scope:', $scope.port7);
         console.log('event:', port);
     };
 
-    $scope.blur7 = function(port) {
+    $scope.blur7 = function (port) {
         console.log('blur');
         console.log('scope:', $scope.port7);
         console.log('event:', port);
     };
 
-    $scope.change7 = function(port) {
+    $scope.change7 = function (port) {
         console.log('change');
         console.log('scope:', $scope.port7);
         console.log('event:', port);
     };
 
     // port8.
-    $scope.focus8 = function(port) {
+    $scope.focus8 = function (port) {
         console.log('focus');
         // console.log('scope:', $scope.port8);
         // console.log('event:', port);
     };
 
-    $scope.blur8 = function(port) {
+    $scope.blur8 = function (port) {
         console.log('blur');
         // console.log('scope:', $scope.port8);
         // console.log('event:', port);
     };
 
-    $scope.change8 = function(port) {
+    $scope.change8 = function (port) {
         console.log('change');
         // console.log('scope:', $scope.port8);
         // console.log('event:', port);
     };
 
     // port9.
-    $scope.focus9 = function(port) {
+    $scope.focus9 = function (port) {
         console.log('focus');
         console.log('scope:', $scope.port9);
         console.log('event:', port);
     };
 
-    $scope.blur9 = function(port) {
+    $scope.blur9 = function (port) {
         console.log('blur');
         console.log('scope:', $scope.port9);
         console.log('event:', port);
     };
 
-    $scope.change9 = function(port) {
+    $scope.change9 = function (port) {
         console.log('change');
         console.log('scope:', $scope.port9);
         console.log('event:', port);
     };
 
     // port10.
-    $scope.focus10 = function(port) {
+    $scope.focus10 = function (port) {
         console.log('focus');
         console.log('scope:', $scope.port10);
         console.log('event:', port);
     };
 
-    $scope.blur10 = function(port) {
+    $scope.blur10 = function (port) {
         console.log('blur');
         console.log('scope:', $scope.port10);
         console.log('event:', port);
     };
 
-    $scope.change10 = function(port, oldPort) {
+    $scope.change10 = function (port, oldPort) {
         console.log('change');
         console.log('scope:', $scope.port10);
         console.log('event:', port);
@@ -163,85 +177,107 @@ function selectBoxPageController($scope, $timeout, helper, maHelper) {
     };
 
     // port11.
-    $scope.focus11 = function(port) {
+    $scope.focus11 = function (port) {
         console.log('focus');
         console.log('scope:', $scope.port11);
         console.log('event:', port);
     };
 
-    $scope.blur11 = function(port) {
+    $scope.blur11 = function (port) {
         console.log('blur');
         console.log('scope:', $scope.port11);
         console.log('event:', port);
     };
 
-    $scope.change11 = function(port) {
+    $scope.change11 = function (port) {
         console.log('change');
         console.log('scope:', $scope.port11);
         console.log('event:', port);
     };
 
     // port14.
-    $scope.focus14 = function(ports) {
+    $scope.focus14 = function (ports) {
         console.log('focus');
         console.log('scope:', $scope.port14);
         console.log('event:', ports);
     };
 
-    $scope.blur14 = function(ports) {
+    $scope.blur14 = function (ports) {
         console.log('blur');
         console.log('scope:', $scope.port14);
         console.log('event:', ports);
     };
 
-    $scope.change14 = function(ports) {
+    $scope.change14 = function (ports, oldPort) {
         console.log('change');
         console.log('scope:', $scope.port14);
         console.log('event:', ports);
+        console.log('old value:', oldPort);
     };
 
     // port15.
-    $scope.focus15 = function(ports) {
+    $scope.focus15 = function (ports) {
         console.log('focus');
         console.log('scope:', $scope.port15);
         console.log('event:', ports);
     };
 
-    $scope.blur15 = function(ports) {
+    $scope.blur15 = function (ports) {
         console.log('blur');
         console.log('scope:', $scope.port15);
         console.log('event:', ports);
     };
 
-    $scope.change15 = function(ports) {
+    $scope.change15 = function (ports) {
         console.log('change');
         console.log('scope:', $scope.port15);
         console.log('event:', ports);
     };
 
     // port16.
-    $scope.focus16 = function(port) {
+    $scope.focus16 = function (port) {
         console.log('focus');
         console.log('scope:', $scope.port16);
         console.log('event:', port);
     };
 
-    $scope.blur16 = function(port) {
+    $scope.blur16 = function (port) {
         console.log('blur');
         console.log('scope:', $scope.port16);
         console.log('event:', port);
     };
 
-    $scope.change16 = function(port, oldPort) {
+    $scope.change16 = function (port, oldPort) {
         console.log('change');
         console.log('scope:', $scope.port16);
         console.log('event:', port);
         console.log('old value:', oldPort);
     };
 
-    $timeout(function() {
+    $timeout(function () {
         $scope.port16 = 0;
     }, 3000);
+
+
+    // port17.
+    // $scope.focus17 = function (port) {
+    //     console.log('focus');
+    //     console.log('scope:', $scope.port17);
+    //     console.log('event:', port);
+    // };
+
+    // $scope.blur17 = function (port) {
+    //     console.log('blur');
+    //     console.log('scope:', $scope.port17);
+    //     console.log('event:', port);
+    // };
+
+    $scope.change17 = function (port, oldPort) {
+        console.log('change');
+        console.log('scope:', $scope.port17);
+        console.log('event:', port);
+        console.log('old value:', oldPort);
+    };
 
     // Test placeholder in AJAX mode.
     // $timeout(function () {
