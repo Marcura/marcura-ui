@@ -35,13 +35,13 @@ angular.module('marcuraUI.components')
                 canReset: '=',
                 placeholder: '@',
                 textPlaceholder: '@',
-                multiple: '=',
+                isMultiple: '=',
                 storeItemValueOnly: '='
             },
             replace: true,
             template: function (element, attributes) {
                 var hasAjax = !maHelper.isNullOrWhiteSpace(attributes.ajax),
-                    multiple = attributes.multiple === 'true';
+                    isMultiple = attributes.isMultiple === 'true';
 
                 var html = '\
                     <div class="ma-select-box"\
@@ -65,7 +65,7 @@ angular.module('marcuraUI.components')
                         </div>';
 
                 if (hasAjax) {
-                    html += '<input class="ma-select-box-input" ma-select2="options"' + (multiple ? ' multiple' : '') + '\
+                    html += '<input class="ma-select-box-input" ma-select2="options"' + (isMultiple ? ' multiple' : '') + '\
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-change="onChange()"\
@@ -74,7 +74,7 @@ angular.module('marcuraUI.components')
                     // Add an empty option <option></option> as first item for the placeholder to work.
                     // It's strange, but that's how Select2 works.
                     html += '\
-                        <select ma-select2="options"' + (multiple ? ' multiple' : '') + '\
+                        <select ma-select2="options"' + (isMultiple ? ' multiple' : '') + '\
                             ng-show="!isAddMode"\
                             ng-disabled="isDisabled"\
                             ng-model="selectedItem"\
@@ -177,7 +177,7 @@ angular.module('marcuraUI.components')
                         scope.runInitSelection = false;
                     };
 
-                    if (scope.multiple) {
+                    if (scope.isMultiple) {
                         scope.options.formatSelection = function (item) {
                             return scope.formatItem(item);
                         };
@@ -214,7 +214,7 @@ angular.module('marcuraUI.components')
                 var isNotEmptyAndInListValidator = {
                     name: 'IsNotEmpty',
                     validate: function (value) {
-                        if (scope.multiple && angular.isArray(value)) {
+                        if (scope.isMultiple && angular.isArray(value)) {
                             return value.length > 0;
                         }
 
@@ -312,7 +312,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var setInternalValue = function (item) {
-                    if (scope.multiple) {
+                    if (scope.isMultiple) {
                         var items = [],
                             i;
 
@@ -441,7 +441,7 @@ angular.module('marcuraUI.components')
                         elementTo[0] !== textElement[0] &&
                         elementTo[0] !== selectData.search[0];
 
-                    if (scope.multiple) {
+                    if (scope.isMultiple) {
                         if (isSelectHovered) {
                             isFocusLost = false;
                         }
@@ -487,7 +487,7 @@ angular.module('marcuraUI.components')
                 };
 
                 scope.hasValue = function () {
-                    if (scope.multiple) {
+                    if (scope.isMultiple) {
                         return !maHelper.isNullOrUndefined(scope.value) && scope.value.length;
                     }
 
@@ -504,7 +504,7 @@ angular.module('marcuraUI.components')
 
                 scope.reset = function () {
                     previousValue = scope.value;
-                    scope.value = scope.multiple ? [] : null;
+                    scope.value = scope.isMultiple ? [] : null;
                 };
 
                 scope.onReset = function () {
@@ -618,7 +618,7 @@ angular.module('marcuraUI.components')
                 scope.onChange = function () {
                     var item;
 
-                    if (scope.multiple) {
+                    if (scope.isMultiple) {
                         var itemsValues = scope.selectedItem,
                             items = [];
 
@@ -775,7 +775,7 @@ angular.module('marcuraUI.components')
                             item;
 
                         if (angular.isObject(scope.value)) {
-                            if (scope.multiple && angular.isArray(scope.value)) {
+                            if (scope.isMultiple && angular.isArray(scope.value)) {
                                 var items = [];
 
                                 for (var i = 0; i < scope.value.length; i++) {
@@ -876,12 +876,12 @@ angular.module('marcuraUI.components')
                     // Add a search icon and spinner for Select2 input field.
                     if (scope.hasAjax) {
                         var elementForSpinner = angular.element(
-                            element[0].querySelector(scope.multiple ? '.select2-search-field' : '.select2-search')
+                            element[0].querySelector(scope.isMultiple ? '.select2-search-field' : '.select2-search')
                         );
 
                         elementForSpinner.append('<div class="pace"><div class="pace-activity"></div></div>');
 
-                        if (!scope.multiple) {
+                        if (!scope.isMultiple) {
                             elementForSpinner.append('<i class="ma-select-box-input-search-icon fa fa-search"></i>');
                         }
                     }
@@ -907,7 +907,7 @@ angular.module('marcuraUI.components')
                         });
                     }
 
-                    if (scope.multiple) {
+                    if (scope.isMultiple) {
                         selectData.search.on('focus', function () {
                             element.addClass('ma-select-box-is-select-focused');
                             scope.onFocus();
@@ -982,7 +982,7 @@ angular.module('marcuraUI.components')
                     // Detect if select2 mask is hovered.
                     // This is later used for triggering blur event correctly in IE.
                     $($document).on('mouseenter', '.select2-drop-mask', function () {
-                        if (!scope.multiple) {
+                        if (!scope.isMultiple) {
                             isFocusInside = true;
                         }
                     });
