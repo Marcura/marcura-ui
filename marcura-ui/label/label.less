@@ -2,7 +2,8 @@
 
 .ma-label {
     display: inline-block;
-    position: relative;
+    /*Use max-width, not width, only for overflow to work.*/
+    max-width: 100%;
 
     &-is-required {
         .ma-label-text {
@@ -15,16 +16,26 @@
             width: 10px;
         }
     }
-    
+
+    &-cut-overflow {
+        .ma-label-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
     &-text {
-        display: inline-block;
         .box-sizing(border-box);
+        display: inline-block;
+        vertical-align: top;
         margin: 0;
         padding: 0;
         font-weight: normal;
     }
 
     &-star {
+        position: relative;
         display: inline-block;
         width: 6px;
         line-height: inherit;

@@ -1,4 +1,4 @@
-<div class="nodes nodes-padding-bottom-m">
+<div class="nodes nodes-padding-bottom-m nodes-label">
     <div class="nodes-item">
         <a href="#/home">Home</a>
     </div>
@@ -38,5 +38,33 @@
     </div>
     <div class="nodes-item">
         <ma-label is-required="true"></ma-label>
+    </div>
+    <div class="nodes-item">
+        <h2>Multiline</h1>
+    </div>
+    <div class="nodes-item nodes-item-cut-overflow">
+        <ma-label for="text3" is-required="true">
+            Internal reference number (supplier reference)
+        </ma-label>
+    </div>
+    <div class="nodes-item nodes-item-cut-overflow">
+        <ma-text-box
+            id="text3"
+            value="text3">
+        </ma-text-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Overflow</h1>
+    </div>
+    <div class="nodes-item nodes-item-cut-overflow">
+        <ma-label for="text4" is-required="true" cut-overflow="true">
+            Internal reference number (supplier reference)
+        </ma-label>
+    </div>
+    <div class="nodes-item nodes-item-cut-overflow">
+        <ma-text-box
+            id="text4"
+            value="text5">
+        </ma-text-box>
     </div>
 </div>
