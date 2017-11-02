@@ -1,10 +1,9 @@
-angular.module('marcuraUI.components').directive('maSideMenu', ['$state', '$sce', function ($state, $sce) {
+angular.module('marcuraUI.components').directive('maSideMenu', ['$sce', function ($sce) {
     return {
         restrict: 'E',
         scope: {
             items: '=',
-            select: '&',
-            useState: '='
+            select: '&'
         },
         replace: true,
         template: function () {
@@ -24,44 +23,27 @@ angular.module('marcuraUI.components').directive('maSideMenu', ['$state', '$sce'
             return html;
         },
         link: function (scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
             scope.isItemSelected = function (item) {
                 if (item.selector) {
                     return item.selector();
                 }
 
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
+                return item.isSelected;
             };
 
             scope.onSelect = function (item) {
-                if (item.isDisabled) {
+                if (item.isDisabled || scope.isItemSelected(item)) {
                     return;
                 }
 
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function (item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
+                angular.forEach(scope.items, function (item) {
+                    item.isSelected = false;
+                });
+                item.isSelected = true;
 
-                    scope.select({
-                        item: item
-                    });
-                }
+                scope.select({
+                    item: item
+                });
             };
 
             scope.getItemText = function (item) {
