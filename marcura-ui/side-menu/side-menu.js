@@ -36,10 +36,12 @@ angular.module('marcuraUI.components').directive('maSideMenu', ['$sce', function
                     return;
                 }
 
-                angular.forEach(scope.items, function (item) {
-                    item.isSelected = false;
-                });
-                item.isSelected = true;
+                if (!item.selector) {
+                    angular.forEach(scope.items, function (item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+                }
 
                 scope.select({
                     item: item
