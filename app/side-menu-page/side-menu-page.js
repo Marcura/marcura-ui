@@ -9,7 +9,7 @@ function sideMenuPageController($scope) {
     }, {
         text: 'payments',
         icon: 'calendar',
-        hidden: true
+        isHidden: true
     }, {
         text: 'port information',
         icon: 'anchor'

@@ -9,7 +9,7 @@ angular.module('marcuraUI.components').directive('maSideMenu', ['$sce', function
         template: function () {
             var html = '\
             <div class="ma-side-menu">\
-                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.hidden" ng-class="{\
+                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.isHidden" ng-class="{\
                         \'ma-side-menu-item-is-selected\': isItemSelected(item),\
                         \'ma-side-menu-item-is-disabled\': item.isDisabled\
                     }"\
