@@ -32,7 +32,7 @@ angular.module('marcuraUI.components').directive('maSideMenu', ['$sce', function
             };
 
             scope.onSelect = function (item) {
-                if (item.isDisabled || scope.isItemSelected(item)) {
+                if (item.isDisabled) {
                     return;
                 }
 
