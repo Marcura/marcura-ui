@@ -16,7 +16,8 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             isRequired: '=',
             validators: '=',
             instance: '=',
-            id: '@'
+            id: '@',
+            modifier: '@'
         },
         replace: true,
         template: function () {
@@ -47,6 +48,27 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                 validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
                 hasIsNotEmptyValidator = false;
+
+            var setModifiers = function (oldModifiers) {
+                // Remove previous modifiers first.
+                if (!maHelper.isNullOrWhiteSpace(oldModifiers)) {
+                    oldModifiers = oldModifiers.split(' ');
+
+                    for (var i = 0; i < oldModifiers.length; i++) {
+                        element.removeClass('ma-radio-box-' + oldModifiers[i]);
+                    }
+                }
+
+                var modifiers = '';
+
+                if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
+                    modifiers = scope.modifier.split(' ');
+                }
+
+                for (var j = 0; j < modifiers.length; j++) {
+                    element.addClass('ma-radio-box-' + modifiers[j]);
+                }
+            };
 
             var setTabindex = function () {
                 if (scope.isDisabled) {
@@ -256,6 +278,14 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                 setTabindex();
             });
 
+            scope.$watch('modifier', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setModifiers(oldValue);
+            });
+
             // Set up validators.
             for (var i = 0; i < validators.length; i++) {
                 if (validators[i].name === 'IsNotEmpty') {
@@ -290,6 +320,8 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                 if (scope.id) {
                     element.removeAttr('id');
                 }
+
+                setModifiers();
             });
 
             setTabindex();
