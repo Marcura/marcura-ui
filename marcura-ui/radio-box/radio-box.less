@@ -95,10 +95,25 @@
     }
 
     &-horizontal {
-        margin-right: 10px;
+        display: block;
+        margin-bottom: 10px;
 
         &:last-child {
-            margin-right: 0;
+            margin-bottom: 0;
+        }
+    }
+}
+
+@media (min-width: @screen-sm-min) {
+    .ma-radio-box {
+        &-horizontal {
+            display: inline-block;
+            margin-right: 10px;
+            margin-bottom: 0;
+
+            &:last-child {
+                margin-right: 0;
+            }
         }
     }
 }
