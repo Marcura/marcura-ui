@@ -31,7 +31,7 @@
         cursor: default;
     }
 
-     :not( &-is-loading)&-is-invalid&-is-touched {
+     :not( &-is-loading):not( &-is-disabled)&-is-invalid&-is-touched {
         &.ma-select-box-is-select-focused .select2-container:not(.select2-dropdown-open) .select2-choices,
         &.ma-select-box-is-text-focused .ma-select-box-text,
         .select2-container-active:not(.select2-dropdown-open) .select2-choice,
