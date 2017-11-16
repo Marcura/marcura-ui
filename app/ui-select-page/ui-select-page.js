@@ -22,7 +22,7 @@ function uiSelectPageController($scope) {
     }, {
         id: 5,
         name: 'fifth'
-    }, ];
+    },];
 
     $scope.selected = {
         value: $scope.itemArray[0]
@@ -39,14 +39,14 @@ function uiSelectPageController($scope) {
     }];
     $scope.drink = {};
 
-    $scope.refreshResults = function(select) {
+    $scope.refreshResults = function (select) {
         console.log('refreshResults');
         var search = select.search,
             list = angular.copy(select.items),
             id = -1;
 
         // Remove last user input.
-        list = list.filter(function(item) {
+        list = list.filter(function (item) {
             return item.id !== id;
         });
 
@@ -65,7 +65,7 @@ function uiSelectPageController($scope) {
         }
     };
 
-    $scope.clear = function(event, select) {
+    $scope.clear = function (event, select) {
         console.log('clear');
         event.stopPropagation();
 

@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout', 'MaValidators', function($timeout, MaValidators) {
+angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout', 'MaValidators', function ($timeout, MaValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -14,7 +14,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
             instance: '='
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '\
                 <div class="ma-multi-check-box" ng-class="{\
                         \'ma-multi-check-box-is-disabled\': isDisabled,\
@@ -33,7 +33,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
 
             return html;
         },
-        link: function(scope, element) {
+        link: function (scope, element) {
             var isObjectArray = scope.itemTextField || scope.itemValueField,
                 validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
@@ -44,7 +44,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
             scope.isValid = true;
             scope.isTouched = false;
 
-            var validate = function(value) {
+            var validate = function (value) {
                 scope.isValid = true;
 
                 if (validators && validators.length) {
@@ -57,7 +57,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
                 }
             };
 
-            var setSelectedItems = function() {
+            var setSelectedItems = function () {
                 if (scope.value && scope.value.length && scope.items && scope.items.length) {
                     for (var j = 0; j < scope.value.length; j++) {
                         for (var k = 0; k < scope.items.length; k++) {
@@ -75,7 +75,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
                 }
             };
 
-            scope.getItemMetadata = function(item) {
+            scope.getItemMetadata = function (item) {
                 var itemValue = isObjectArray ? item[scope.itemValueField] : item;
 
                 if (!itemsMetadata[itemValue]) {
@@ -86,7 +86,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
                 return itemsMetadata[itemValue];
             };
 
-            scope.getItemText = function(item) {
+            scope.getItemText = function (item) {
                 if (scope.itemTemplate) {
                     return scope.itemTemplate(item);
                 } else if (!isObjectArray) {
@@ -96,7 +96,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
                 }
             };
 
-            scope.onChange = function(item) {
+            scope.onChange = function (item) {
                 if (scope.isDisabled) {
                     return;
                 }
@@ -117,7 +117,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
 
                 scope.value = value.length ? value : null;
 
-                $timeout(function() {
+                $timeout(function () {
                     validate(scope.value);
 
                     scope.change({
@@ -127,7 +127,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
                 });
             };
 
-            scope.$watch('value', function(newValue, oldValue) {
+            scope.$watch('value', function (newValue, oldValue) {
                 if (angular.equals(newValue, oldValue)) {
                     return;
                 }
@@ -136,7 +136,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
             });
 
             // Set initial value.
-            $timeout(function() {
+            $timeout(function () {
                 setSelectedItems();
             });
 
@@ -160,11 +160,11 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
             if (scope.instance) {
                 scope.instance.isInitialized = true;
 
-                scope.instance.isValid = function() {
+                scope.instance.isValid = function () {
                     return scope.isValid;
                 };
 
-                scope.instance.validate = function() {
+                scope.instance.validate = function () {
                     validate(scope.value);
                 };
             }

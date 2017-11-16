@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function($timeout, MaValidators, MaHelper) {
+angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
     return {
         restrict: 'E',
         scope: {
@@ -15,7 +15,7 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
             canUnselect: '='
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '\
                 <div class="ma-radio-button" ng-class="{\
                         \'ma-radio-button-is-disabled\': isDisabled,\
@@ -40,7 +40,7 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
 
             return html;
         },
-        link: function(scope, element) {
+        link: function (scope, element) {
             var isObjectArray = scope.itemTextField || scope.itemValueField,
                 validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
@@ -50,7 +50,7 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
             scope.isValid = true;
             scope.isTouched = false;
 
-            var validate = function(value) {
+            var validate = function (value) {
                 scope.isValid = true;
 
                 if (validators && validators.length) {
@@ -63,7 +63,7 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                 }
             };
 
-            scope.getItemText = function(item) {
+            scope.getItemText = function (item) {
                 if (scope.itemTemplate) {
                     return scope.itemTemplate(item);
                 } else if (!isObjectArray) {
@@ -73,7 +73,7 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                 }
             };
 
-            scope.isItemSelected = function(item) {
+            scope.isItemSelected = function (item) {
                 if (!isObjectArray) {
                     return item === scope.value;
                 } else if (scope.itemValueField) {
@@ -84,7 +84,7 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                 return false;
             };
 
-            scope.onChange = function(item) {
+            scope.onChange = function (item) {
                 if (scope.isDisabled) {
                     return;
                 }
@@ -117,7 +117,7 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                 }
 
                 if (hasChanged || (scope.canUnselect && !hasChanged)) {
-                    $timeout(function() {
+                    $timeout(function () {
                         validate(scope.value);
 
                         scope.change({
@@ -148,11 +148,11 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
             if (scope.instance) {
                 scope.instance.isInitialized = true;
 
-                scope.instance.isValid = function() {
+                scope.instance.isValid = function () {
                     return scope.isValid;
                 };
 
-                scope.instance.validate = function() {
+                scope.instance.validate = function () {
                     validate(scope.value);
                 };
             }

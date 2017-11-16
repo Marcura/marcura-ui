@@ -1,11 +1,11 @@
-angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+angular.module('marcuraUI.components').directive('maCostsGrid', [function () {
     return {
         restrict: 'E',
         scope: {
             costItems: '='
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '\
             <div class="ma-grid ma-grid-costs"\
                 costs grid\
@@ -13,7 +13,7 @@ angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
 
             return html;
         },
-        link: function(scope) {
+        link: function (scope) {
             console.log('scope.costItems:', scope.costItems);
         }
     };

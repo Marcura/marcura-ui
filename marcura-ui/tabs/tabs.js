@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function($state, MaHelper, $timeout) {
+angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function ($state, MaHelper, $timeout) {
     return {
         restrict: 'E',
         scope: {
@@ -7,7 +7,7 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper'
             useState: '='
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '\
             <div class="ma-tabs">\
                 <ul class="ma-tabs-list clearfix">\
@@ -30,11 +30,11 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper'
 
             return html;
         },
-        link: function(scope, element, attributes) {
+        link: function (scope, element, attributes) {
             scope.$state = $state;
             var useState = scope.useState === false ? false : true;
 
-            scope.isItemSelected = function(item) {
+            scope.isItemSelected = function (item) {
                 if (item.selector) {
                     return item.selector();
                 }
@@ -50,7 +50,7 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper'
                 return false;
             };
 
-            scope.onSelect = function(item) {
+            scope.onSelect = function (item) {
                 if (item.isDisabled || item.isSelected) {
                     return;
                 }
@@ -60,7 +60,7 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper'
                         $state.go(item.state.name, item.state.parameters);
                     }
                 } else {
-                    angular.forEach(scope.items, function(item) {
+                    angular.forEach(scope.items, function (item) {
                         item.isSelected = false;
                     });
                     item.isSelected = true;
@@ -71,24 +71,24 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper'
                 }
             };
 
-            scope.onKeypress = function(event, item) {
+            scope.onKeypress = function (event, item) {
                 if (event.keyCode === MaHelper.keyCode.enter) {
                     scope.onSelect(item);
                 }
             };
 
-            scope.onFocus = function(item) {
+            scope.onFocus = function (item) {
                 item.isFocused = true;
             };
 
-            scope.onBlur = function(item) {
+            scope.onBlur = function (item) {
                 item.isFocused = false;
             };
 
-            $timeout(function() {
+            $timeout(function () {
                 var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
 
-                itemElements.each(function(itemIndex, itemElement) {
+                itemElements.each(function (itemIndex, itemElement) {
                     var item = scope.items[itemIndex];
 
                     if (!item.isDisabled) {

@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maProgress', [function() {
+angular.module('marcuraUI.components').directive('maProgress', [function () {
     return {
         restrict: 'E',
         scope: {
@@ -6,7 +6,7 @@ angular.module('marcuraUI.components').directive('maProgress', [function() {
             currentStep: '='
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '\
             <div class="ma-progress">\
                 <div class="ma-progress-inner">\
@@ -38,12 +38,12 @@ angular.module('marcuraUI.components').directive('maProgress', [function() {
 
             return html;
         },
-        link: function(scope) {
-            scope.calculateLeft = function(stepIndex) {
+        link: function (scope) {
+            scope.calculateLeft = function (stepIndex) {
                 return 100 / (scope.steps.length - 1) * stepIndex;
             };
 
-            scope.calculateProgress = function() {
+            scope.calculateProgress = function () {
                 if (!scope.currentStep) {
                     return 0;
                 }
@@ -55,7 +55,7 @@ angular.module('marcuraUI.components').directive('maProgress', [function() {
                 return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
             };
 
-            scope.isCurrentStep = function(stepIndex) {
+            scope.isCurrentStep = function (stepIndex) {
                 return (stepIndex + 1) <= scope.currentStep;
             };
         }

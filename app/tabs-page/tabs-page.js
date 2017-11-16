@@ -38,7 +38,7 @@ function tabsPageController($scope) {
         text: 'History'
     }];
 
-    $scope.select = function(item) {
+    $scope.select = function (item) {
         console.log('select:', item);
     };
 }

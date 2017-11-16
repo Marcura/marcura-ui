@@ -27,22 +27,22 @@ var paths = {
     }
 };
 
-var build = function(complete) {
+var build = function (complete) {
     runSequence('clean', ['check-js', 'copy-js', 'copy-and-minify-js', 'copy-css'], complete);
 }
 
-gulp.task('clean', function() {
+gulp.task('clean', function () {
     del.sync([paths.dist.root + '/**/*', '!' + paths.dist.root]);
 });
 
-gulp.task('copy-js', function() {
+gulp.task('copy-js', function () {
     return gulp.src(paths.source.js)
         .pipe(wrap('(function(){<%=contents%>})();'))
         .pipe(concat('marcura-ui.js'))
         .pipe(gulp.dest(paths.dist.root));
 });
 
-gulp.task('copy-and-minify-js', function() {
+gulp.task('copy-and-minify-js', function () {
     return gulp.src(paths.source.js)
         .pipe(wrap('(function(){<%=contents%>})();'))
         .pipe(uglify())
@@ -50,15 +50,15 @@ gulp.task('copy-and-minify-js', function() {
         .pipe(gulp.dest(paths.dist.root));
 });
 
-gulp.task('check-js', function() {
+gulp.task('check-js', function () {
     return gulp.src(paths.source.js)
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
 });
 
-gulp.task('copy-css', function() {
+gulp.task('copy-css', function () {
     return gulp.src(paths.source.css)
-        .pipe(less().on('error', function(error) {
+        .pipe(less().on('error', function (error) {
             console.log(error);
             this.emit('end');
         }))
@@ -68,12 +68,12 @@ gulp.task('copy-css', function() {
         .pipe(browserSync.stream());
 });
 
-gulp.task('build', function() {
+gulp.task('build', function () {
     build(browserSync.reload);
 });
 
-gulp.task('start', function() {
-    build(function() {
+gulp.task('start', function () {
+    build(function () {
         browserSync.init({
             startPath: paths.app.root,
             server: {
@@ -83,40 +83,40 @@ gulp.task('start', function() {
 
         // Watch marcura-ui files
         gulp.watch(paths.source.css, ['copy-css']);
-        gulp.watch(paths.source.js).on('change', function() {
+        gulp.watch(paths.source.js).on('change', function () {
             build(browserSync.reload);
         });
 
         // Watch app files
-        gulp.watch(paths.app.css).on('change', function() {
+        gulp.watch(paths.app.css).on('change', function () {
             build(browserSync.reload);
         });
-        gulp.watch(paths.app.js).on('change', function() {
+        gulp.watch(paths.app.js).on('change', function () {
             build(browserSync.reload);
         });
-        gulp.watch(paths.app.html).on('change', function() {
+        gulp.watch(paths.app.html).on('change', function () {
             build(browserSync.reload);
         });
     });
 });
 
-gulp.task('test', function(done) {
+gulp.task('test', function (done) {
     new karma.Server({
-            configFile: karmaConfig,
-            action: 'run'
-        }, function() {
-            done();
-        })
+        configFile: karmaConfig,
+        action: 'run'
+    }, function () {
+        done();
+    })
         .start();
 });
 
-gulp.task('test-single', function(done) {
+gulp.task('test-single', function (done) {
     new karma.Server({
-            configFile: karmaConfig,
-            singleRun: true
-        }, function() {
-            done();
-        })
+        configFile: karmaConfig,
+        singleRun: true
+    }, function () {
+        done();
+    })
         .start();
 });
 

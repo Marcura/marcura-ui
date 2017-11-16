@@ -4,7 +4,7 @@ function radioButtonPageController($scope, helper) {
     $scope.ports2 = helper.getPorts().slice(0, 3);
     $scope.ports1 = [];
 
-    angular.forEach($scope.ports2, function(port) {
+    angular.forEach($scope.ports2, function (port) {
         $scope.ports1.push(port.name);
     });
 
@@ -12,13 +12,13 @@ function radioButtonPageController($scope, helper) {
     $scope.port2 = $scope.ports2[1];
     $scope.port3 = $scope.ports1[1];
 
-    $scope.change1 = function(port) {
+    $scope.change1 = function (port) {
         console.log('change');
         console.log('event:', port);
         console.log('scope:', $scope.port1);
     };
 
-    $scope.change2 = function(port) {
+    $scope.change2 = function (port) {
         console.log('change');
         console.log('event:', port);
         console.log('scope:', $scope.port2);

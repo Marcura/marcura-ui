@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'MaHelper', 'MaValidators', function($timeout, $window, MaHelper, MaValidators) {
+angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'MaHelper', 'MaValidators', function ($timeout, $window, MaHelper, MaValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -14,7 +14,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             change: '&'
         },
         replace: true,
-        template: function() {
+        template: function () {
             var html = '\
             <div class="ma-text-area"\
                 ng-class="{\
@@ -36,7 +36,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
             return html;
         },
-        link: function(scope, element) {
+        link: function (scope, element) {
             var valueElement = angular.element(element[0].querySelector('.ma-text-area-value')),
                 validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
@@ -47,7 +47,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 previousValue,
                 updateOn = scope.updateOn ? scope.updateOn : 'input';
 
-            var getValueElementStyle = function() {
+            var getValueElementStyle = function () {
                 var style = $window.getComputedStyle(valueElement[0], null),
                     properties = {},
                     paddingHeight = parseInt(style.getPropertyValue('padding-top')) + parseInt(style.getPropertyValue('padding-bottom')),
@@ -74,7 +74,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 return properties;
             };
 
-            var resize = function() {
+            var resize = function () {
                 if (!scope.fitContentHeight) {
                     return;
                 }
@@ -91,7 +91,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 element[0].style.height = height + 'px';
             };
 
-            var validate = function() {
+            var validate = function () {
                 scope.isValid = true;
 
                 if (validators && validators.length) {
@@ -104,14 +104,14 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 }
             };
 
-            var onChange = function(value) {
+            var onChange = function (value) {
                 if (previousValue === value) {
                     return;
                 }
 
                 previousValue = value;
 
-                $timeout(function() {
+                $timeout(function () {
                     scope.change({
                         maValue: value
                     });
@@ -137,11 +137,11 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 isRequired = true;
             }
 
-            scope.onFocus = function() {
+            scope.onFocus = function () {
                 scope.isFocused = true;
             };
 
-            scope.onBlur = function() {
+            scope.onBlur = function () {
                 scope.isFocused = false;
                 scope.isTouched = true;
 
@@ -153,7 +153,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 validate();
             };
 
-            scope.onKeydown = function(event) {
+            scope.onKeydown = function (event) {
                 // Ignore tab key.
                 if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                     return;
@@ -162,7 +162,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 keydownValue = angular.element(event.target).val();
             };
 
-            scope.onKeyup = function(event) {
+            scope.onKeyup = function (event) {
                 // Ignore tab key.
                 if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                     return;
@@ -177,22 +177,22 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
             // We are forced to use input event because scope.watch does
             // not respond to Enter key when the cursor is in the end of text.
-            valueElement.on('input', function(event) {
+            valueElement.on('input', function (event) {
                 validate();
                 resize();
 
                 if (scope.isValid && updateOn === 'input') {
-                    scope.$apply(function() {
+                    scope.$apply(function () {
                         scope.value = valueElement.val();
                     });
                 }
             });
 
-            angular.element($window).on('resize', function() {
+            angular.element($window).on('resize', function () {
                 resize();
             });
 
-            $timeout(function() {
+            $timeout(function () {
                 resize();
 
                 if (scope.isResizable === false) {
@@ -211,10 +211,10 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     if (hiddenParent.length === 1) {
                         var parentScope = hiddenParent.scope();
 
-                        parentScope.$watch(hiddenParent.attr('ng-show'), function(isVisible) {
+                        parentScope.$watch(hiddenParent.attr('ng-show'), function (isVisible) {
                             if (isVisible) {
                                 // Wait for the hidden element to appear first.
-                                $timeout(function() {
+                                $timeout(function () {
                                     resize();
                                 });
                             }
@@ -223,7 +223,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 }
             });
 
-            scope.$watch('value', function(newValue, oldValue) {
+            scope.$watch('value', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }
@@ -258,11 +258,11 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             if (scope.instance) {
                 scope.instance.isInitialized = true;
 
-                scope.instance.isValid = function() {
+                scope.instance.isValid = function () {
                     return scope.isValid;
                 };
 
-                scope.instance.focus = function() {
+                scope.instance.focus = function () {
                     if (!scope.isFocused) {
                         valueElement.focus();
                     }

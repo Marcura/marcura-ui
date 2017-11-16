@@ -2,7 +2,7 @@ angular.module('app.services').factory('helper', helper);
 
 function helper($window) {
     return {
-        getCostItems: function() {
+        getCostItems: function () {
             return [{
                 name: 'Agency Fee',
                 accountingCode: '3210-4',
@@ -68,7 +68,7 @@ function helper($window) {
             }];
         },
 
-        getPorts: function() {
+        getPorts: function () {
             return $window.marcuraApp.ports;
         }
     };

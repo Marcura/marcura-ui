@@ -91,23 +91,23 @@ a:hover {
     border-bottom: 1px solid #cccccc;
 }
 
-.nodes-padding-bottom-xs> .nodes-item {
+.nodes-padding-bottom-xs>.nodes-item {
     margin-bottom: 10px;
 }
 
-.nodes-padding-bottom-s> .nodes-item {
+.nodes-padding-bottom-s>.nodes-item {
     margin-bottom: 15px;
 }
 
-.nodes-padding-bottom-m> .nodes-item {
+.nodes-padding-bottom-m>.nodes-item {
     margin-bottom: 20px;
 }
 
-.nodes-padding-bottom-l> .nodes-item {
+.nodes-padding-bottom-l>.nodes-item {
     margin-bottom: 25px;
 }
 
-.nodes-padding-bottom-xl> .nodes-item {
+.nodes-padding-bottom-xl>.nodes-item {
     margin-bottom: 30px;
 }
 
@@ -119,23 +119,23 @@ a:hover {
     font: inherit;
 }
 
-.list-padding-bottom-xs> .list-item {
+.list-padding-bottom-xs>.list-item {
     margin-bottom: 5px;
 }
 
-.list-padding-bottom-s> .list-item {
+.list-padding-bottom-s>.list-item {
     margin-bottom: 10px;
 }
 
-.list-padding-bottom-m> .list-item {
+.list-padding-bottom-m>.list-item {
     margin-bottom: 15px;
 }
 
-.list-padding-bottom-l> .list-item {
+.list-padding-bottom-l>.list-item {
     margin-bottom: 20px;
 }
 
-.list-padding-bottom-xl> .list-item {
+.list-padding-bottom-xl>.list-item {
     margin-bottom: 25px;
 }
 

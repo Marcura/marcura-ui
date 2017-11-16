@@ -7,10 +7,10 @@ app.use('/node_modules', express.static(__dirname + '/node_modules'));
 app.use('/dist', express.static(__dirname + '/dist'));
 app.set('views', __dirname + '/app');
 
-app.get('/', function(request, response) {
+app.get('/', function (request, response) {
     response.render('index');
 });
 
-app.listen(app.get('port'), function() {
+app.listen(app.get('port'), function () {
     console.log('Node app is running on port', app.get('port'));
 });

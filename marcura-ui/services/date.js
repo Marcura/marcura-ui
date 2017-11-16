@@ -1,9 +1,9 @@
-angular.module('marcuraUI.services').factory('MaDate', [function() {
+angular.module('marcuraUI.services').factory('MaDate', [function () {
     var months = [{
-            language: 'en',
-            full: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-            short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        }],
+        language: 'en',
+        full: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    }],
         weekDays = [{
             language: 'en',
             full: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -11,11 +11,11 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }],
         daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-    var isInteger = function(value) {
+    var isInteger = function (value) {
         return value === parseInt(value, 10);
     };
 
-    var isDate = function(value) {
+    var isDate = function (value) {
         if (!value) {
             return false;
         }
@@ -23,15 +23,15 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return Object.prototype.toString.call(value) === '[object Date]' && value.getTime && !isNaN(value.getTime());
     };
 
-    var isMaDate = function(value) {
+    var isMaDate = function (value) {
         return value instanceof MaDate || (!!value && value._isMaDate);
     };
 
-    var isMatch = function(date, substring) {
+    var isMatch = function (date, substring) {
         return date.match(new RegExp(substring, 'i'));
     };
 
-    var getTotalDate = function(year, month, day, hours, minutes, seconds, milliseconds, offset) {
+    var getTotalDate = function (year, month, day, hours, minutes, seconds, milliseconds, offset) {
         var finalMonth,
             maDate = MaDate.createEmpty();
         day = day.toString();
@@ -95,7 +95,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return maDate;
     };
 
-    var getDayAndMonth = function(day, month, culture) {
+    var getDayAndMonth = function (day, month, culture) {
         var dayAndMonth = {
             day: day,
             month: month,
@@ -125,7 +125,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return dayAndMonth;
     };
 
-    var parse = function(value, culture) {
+    var parse = function (value, culture) {
         var pattern, parts, dayAndMonth,
             date = MaDate.createEmpty();
 
@@ -250,7 +250,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return date;
     };
 
-    var formatNumber = function(number, length) {
+    var formatNumber = function (number, length) {
         var string = '';
 
         for (var i = 0; i < length; i++) {
@@ -260,11 +260,11 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return (string + number).slice(-length);
     };
 
-    var isValidTimeZoneOffset = function(offset) {
+    var isValidTimeZoneOffset = function (offset) {
         return offset >= -720 && offset <= 840;
     };
 
-    var offsetToTimeZone = function(offset) {
+    var offsetToTimeZone = function (offset) {
         if (offset === 0) {
             return 'Z';
         }
@@ -302,7 +302,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         - format(date, format, offset)
         - format(MaDate, format, offset)
     */
-    var format = function(date) {
+    var format = function (date) {
         if (!isDate(date) && !isMaDate(date)) {
             return null;
         }
@@ -356,19 +356,19 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             milliseconds = _date.getMilliseconds();
 
         // Checks format string parts on conformity with available date formats.
-        var checkDatePart = function(dateChar) {
+        var checkDatePart = function (dateChar) {
             var datePart = '';
 
             // Try-catch construction because some sub-formats may be not listed.
             try {
                 datePart = format.match(new RegExp(dateChar + '+', ''))[0];
-            } catch (error) {}
+            } catch (error) { }
 
             return datePartFormats[dateChar].indexOf(datePart);
         };
 
         // Formats date parts.
-        var formatDatePart = function(datePartFormat) {
+        var formatDatePart = function (datePartFormat) {
             var datePart = '';
 
             switch (datePartFormat) {
@@ -496,7 +496,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
             .replace(/Z+/, dateParts.timeZone);
     };
 
-    var parseTimeZone = function(timeZone) {
+    var parseTimeZone = function (timeZone) {
         if (!timeZone) {
             return 0;
         }
@@ -595,19 +595,19 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     }
 
-    MaDate.createEmpty = function() {
+    MaDate.createEmpty = function () {
         return new MaDate(null);
     };
 
-    MaDate.prototype.copy = function() {
+    MaDate.prototype.copy = function () {
         return new MaDate(this);
     };
 
-    MaDate.prototype.toDate = function() {
+    MaDate.prototype.toDate = function () {
         return this._date;
     };
 
-    MaDate.prototype.offset = function(offset) {
+    MaDate.prototype.offset = function (offset) {
         if (arguments.length === 0) {
             return this._offset;
         }
@@ -616,7 +616,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return this;
     };
 
-    MaDate.prototype.toUtc = function() {
+    MaDate.prototype.toUtc = function () {
         if (this.isEmpty() || this._offset === 0) {
             return this;
         }
@@ -627,35 +627,35 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return this;
     };
 
-    MaDate.prototype.isEmpty = function() {
+    MaDate.prototype.isEmpty = function () {
         return !this._date;
     };
 
-    MaDate.prototype.isUtc = function() {
+    MaDate.prototype.isUtc = function () {
         return !this.isEmpty() && this._offset === 0;
     };
 
-    MaDate.prototype.isEqual = function(date) {
+    MaDate.prototype.isEqual = function (date) {
         return this.difference(date) === 0;
     };
 
-    MaDate.prototype.isLess = function(date) {
+    MaDate.prototype.isLess = function (date) {
         return this.difference(date) < 0;
     };
 
-    MaDate.prototype.isLessOrEqual = function(date) {
+    MaDate.prototype.isLessOrEqual = function (date) {
         return this.difference(date) <= 0;
     };
 
-    MaDate.prototype.isGreater = function(date) {
+    MaDate.prototype.isGreater = function (date) {
         return this.difference(date) > 0;
     };
 
-    MaDate.prototype.isGreaterOrEqual = function(date) {
+    MaDate.prototype.isGreaterOrEqual = function (date) {
         return this.difference(date) >= 0;
     };
 
-    MaDate.prototype.isBetween = function(startDate, endDate, isInclusive) {
+    MaDate.prototype.isBetween = function (startDate, endDate, isInclusive) {
         var _startDate = new MaDate(startDate),
             _endDate = new MaDate(endDate);
 
@@ -670,11 +670,11 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return this.isGreater(_startDate) && this.isLess(_endDate);
     };
 
-    MaDate.prototype.difference = function(date) {
+    MaDate.prototype.difference = function (date) {
         return this.valueOf() - new MaDate(date).valueOf();
     };
 
-    MaDate.prototype.valueOf = function() {
+    MaDate.prototype.valueOf = function () {
         if (this.isEmpty()) {
             return 0;
         }
@@ -689,7 +689,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return time;
     };
 
-    MaDate.prototype.format = function(_format) {
+    MaDate.prototype.format = function (_format) {
         if (this.isEmpty()) {
             return null;
         }
@@ -697,7 +697,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return format(this._date, _format, this._offset);
     };
 
-    MaDate.prototype.add = function(number, unit) {
+    MaDate.prototype.add = function (number, unit) {
         if (this.isEmpty() || !number) {
             return this;
         }
@@ -740,11 +740,11 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return this;
     };
 
-    MaDate.prototype.subtract = function(number, unit) {
+    MaDate.prototype.subtract = function (number, unit) {
         return this.add(number * -1, unit);
     };
 
-    MaDate.prototype.millisecond = function(millisecond) {
+    MaDate.prototype.millisecond = function (millisecond) {
         if (this.isEmpty()) {
             return 0;
         }
@@ -757,7 +757,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
-    MaDate.prototype.second = function(second) {
+    MaDate.prototype.second = function (second) {
         if (this.isEmpty()) {
             return 0;
         }
@@ -770,7 +770,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
-    MaDate.prototype.minute = function(minute) {
+    MaDate.prototype.minute = function (minute) {
         if (this.isEmpty()) {
             return 0;
         }
@@ -783,7 +783,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
-    MaDate.prototype.hour = function(hour) {
+    MaDate.prototype.hour = function (hour) {
         if (this.isEmpty()) {
             return 0;
         }
@@ -796,7 +796,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
-    MaDate.prototype.date = function(date) {
+    MaDate.prototype.date = function (date) {
         if (this.isEmpty()) {
             return 0;
         }
@@ -809,7 +809,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
-    MaDate.prototype.month = function(month) {
+    MaDate.prototype.month = function (month) {
         if (this.isEmpty()) {
             return 0;
         }
@@ -822,7 +822,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
-    MaDate.prototype.year = function(year) {
+    MaDate.prototype.year = function (year) {
         if (this.isEmpty()) {
             return 0;
         }
@@ -835,23 +835,23 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         }
     };
 
-    MaDate.prototype.startOf = function(unit) {
+    MaDate.prototype.startOf = function (unit) {
         switch (unit) {
             case 'year':
                 this.month(0);
-                /* falls through */
+            /* falls through */
             case 'month':
                 this.date(1);
-                /* falls through */
+            /* falls through */
             case 'day':
                 this.hour(0);
-                /* falls through */
+            /* falls through */
             case 'hour':
                 this.minute(0);
-                /* falls through */
+            /* falls through */
             case 'minute':
                 this.second(0);
-                /* falls through */
+            /* falls through */
             case 'second':
                 this.millisecond(0);
         }
@@ -859,7 +859,7 @@ angular.module('marcuraUI.services').factory('MaDate', [function() {
         return this;
     };
 
-    MaDate.prototype.endOf = function(unit) {
+    MaDate.prototype.endOf = function (unit) {
         if (!unit) {
             return this;
         }
