@@ -1,6 +1,6 @@
 angular.module('app.controllers').controller('dateBoxPageController', dateBoxPageController);
 
-function dateBoxPageController($scope, $timeout, MaDate, maValidators) {
+function dateBoxPageController($scope, $timeout, MaDate) {
     $scope.date1 = '2016-07-25T00:00:00Z';
     $scope.date2 = '2016-07-25T20:00:00Z';
     $scope.date3 = '2016-07-25T16:30:00Z';
@@ -19,7 +19,7 @@ function dateBoxPageController($scope, $timeout, MaDate, maValidators) {
     $scope.date21 = new MaDate().startOf('day').format();
     $scope.date20DateBox = {};
     $scope.date20Validator = {
-        validate: function(date) {
+        validate: function (date) {
             console.log('validate:', date);
             return true;
         }
@@ -64,7 +64,7 @@ function dateBoxPageController($scope, $timeout, MaDate, maValidators) {
     //     }
     // };
 
-    $scope.change1 = function(date) {
+    $scope.change1 = function (date) {
         console.log('change');
         console.log('event:', date);
         console.log('scope:', $scope.date1);
@@ -75,19 +75,19 @@ function dateBoxPageController($scope, $timeout, MaDate, maValidators) {
     //     console.log('scope:', $scope.date2);
     // };
 
-    $scope.change7 = function(date) {
+    $scope.change7 = function (date) {
         console.log('change');
         console.log('event:', date);
         console.log('scope:', $scope.date7);
     };
 
-    $scope.change10 = function(date) {
+    $scope.change10 = function (date) {
         console.log('change');
         console.log('event:', date);
         console.log('scope:', $scope.date10);
     };
 
-    $scope.change20 = function(date) {
+    $scope.change20 = function (date) {
         console.log('change');
         console.log('event:', date);
         console.log('scope:', $scope.date20);

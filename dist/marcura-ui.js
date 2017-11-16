@@ -52,7 +52,7 @@ if (!String.prototype.endsWith) {
         return lastIndex !== -1 && lastIndex === position;
     };
 }})();
-(function(){angular.module('marcuraUI.components').directive('maButton', ['maHelper', '$sce', function (maHelper, $sce) {
+(function(){angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce', function (MaHelper, $sce) {
     return {
         restrict: 'E',
         scope: {
@@ -107,7 +107,7 @@ if (!String.prototype.endsWith) {
 
             var setModifiers = function (oldModifiers) {
                 // Remove previous modifiers first.
-                if (!maHelper.isNullOrWhiteSpace(oldModifiers)) {
+                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
                     oldModifiers = oldModifiers.split(' ');
 
                     for (var i = 0; i < oldModifiers.length; i++) {
@@ -117,7 +117,7 @@ if (!String.prototype.endsWith) {
 
                 var modifiers = '';
 
-                if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
+                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
                     modifiers = scope.modifier.split(' ');
                 }
 
@@ -143,7 +143,7 @@ if (!String.prototype.endsWith) {
             };
 
             scope.getText = function () {
-                return $sce.trustAsHtml(scope.text ? scope.text : maHelper.html.nbsp);
+                return $sce.trustAsHtml(scope.text ? scope.text : MaHelper.html.nbsp);
             };
 
             scope.$watch('modifier', function (newValue, oldValue) {
@@ -158,7 +158,7 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', '$parse', 'maValidators', function (maHelper, $timeout, $parse, maValidators) {
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'maValidators', function (MaHelper, $timeout, $parse, maValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -305,7 +305,7 @@ if (!String.prototype.endsWith) {
             };
 
             scope.onKeypress = function (event) {
-                if (event.keyCode === maHelper.keyCode.space) {
+                if (event.keyCode === MaHelper.keyCode.space) {
                     // Prevent page from scrolling down.
                     event.preventDefault();
 
@@ -370,13 +370,34 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function () {
         this.$get = function () {
             return this;
         };
     })
-    .directive('maDateBox', ['$timeout', 'MaDate', 'maHelper', 'maValidators', function ($timeout, MaDate, maHelper, maValidators) {
+    .directive('maDateBox', ['$timeout', 'MaDate', 'MaHelper', 'maValidators', function ($timeout, MaDate, MaHelper, maValidators) {
         return {
             restrict: 'E',
             scope: {
@@ -876,7 +897,7 @@ if (!String.prototype.endsWith) {
 
                 scope.onFocus = function () {
                     // Use safeApply to avoid apply error when Reset icon is clicked.
-                    maHelper.safeApply(function () {
+                    MaHelper.safeApply(function () {
                         scope.isFocused = true;
                     });
                 };
@@ -895,7 +916,7 @@ if (!String.prototype.endsWith) {
 
                 scope.onKeydown = function (event) {
                     // Ignore tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                         return;
                     }
 
@@ -904,7 +925,7 @@ if (!String.prototype.endsWith) {
 
                 scope.onKeyup = function (event) {
                     // Ignore tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                         return;
                     }
 
@@ -936,7 +957,7 @@ if (!String.prototype.endsWith) {
                 scope.onTimeKeydown = function (event) {
                     if (
                         // Allow backspace, tab, delete.
-                        $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.tab, maHelper.keyCode.delete]) !== -1 ||
+                        $.inArray(event.keyCode, [MaHelper.keyCode.backspace, MaHelper.keyCode.tab, MaHelper.keyCode.delete]) !== -1 ||
                         // Allow left, right.
                         (event.keyCode === 37 || event.keyCode === 39)) {
                         return;
@@ -1121,118 +1142,6 @@ if (!String.prototype.endsWith) {
         };
     }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            cutOverflow: '=',
-            for: '@',
-            isRequired: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-label" ng-class="{\
-                    \'ma-label-is-required\': isRequired,\
-                    \'ma-label-has-content\': hasContent,\
-                    \'ma-label-cut-overflow\': cutOverflow\
-                }">\
-                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            scope.hasContent = element.find('span').contents().length > 0;
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maMessage', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            type: '@',
-            state: '@',
-            size: '@',
-            textAlign: '@',
-            hasIcon: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-message{{cssClass}}">\
-                    <div class="ma-message-icon" ng-if="_hasIcon">\
-                        <i class="fa" ng-class="{\
-                            \'fa-info-circle\': _state === \'info\',\
-                            \'fa-check-circle\': _state === \'success\',\
-                            \'fa-exclamation-triangle\': _state === \'warning\',\
-                            \'fa-times-circle\': _state === \'danger\'\
-                        }"></i>\
-                    </div>\
-                    <div class="ma-message-text"><ng-transclude></ng-transclude></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            var type = scope.type || 'message',
-                size = scope.size ? scope.size : 'sm';
-            scope._hasIcon = scope.hasIcon === false ? false : true;
-
-            var setState = function () {
-                scope._state = scope.state || 'default';
-            };
-
-            var setCssClass = function () {
-                scope.cssClass = ' ma-message-' + type + ' ma-message-' + scope._state + ' ma-message-' + size;
-
-                if (scope.textAlign) {
-                    scope.cssClass += ' ma-message-text-align-' + scope.textAlign;
-                }
-
-                if (scope._hasIcon) {
-                    scope.cssClass += ' ma-message-has-icon';
-                }
-            };
-
-            scope.$watch('state', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setState();
-                setCssClass();
-            });
-
-            setState();
-            setCssClass();
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', ['$timeout', function ($timeout) {
     return {
         // maGridOrder should always be located inside maGrid.
@@ -1315,7 +1224,7 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maGrid', ['maHelper', function (maHelper) {
+(function(){angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function (MaHelper) {
     return {
         restrict: 'E',
         transclude: true,
@@ -1343,7 +1252,7 @@ if (!String.prototype.endsWith) {
 
             var setModifiers = function (oldModifiers) {
                 // Remove previous modifiers first.
-                if (!maHelper.isNullOrWhiteSpace(oldModifiers)) {
+                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
                     oldModifiers = oldModifiers.split(' ');
 
                     for (var i = 0; i < oldModifiers.length; i++) {
@@ -1353,7 +1262,7 @@ if (!String.prototype.endsWith) {
 
                 var modifiers = '';
 
-                if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
+                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
                     modifiers = scope.modifier.split(' ');
                 }
 
@@ -1414,6 +1323,34 @@ if (!String.prototype.endsWith) {
 
                 setModifier('responsive-size', responsiveSize);
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            cutOverflow: '=',
+            for: '@',
+            isRequired: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-label" ng-class="{\
+                    \'ma-label-is-required\': isRequired,\
+                    \'ma-label-has-content\': hasContent,\
+                    \'ma-label-cut-overflow\': cutOverflow\
+                }">\
+                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            scope.hasContent = element.find('span').contents().length > 0;
         }
     };
 }]);})();
@@ -1591,7 +1528,439 @@ if (!String.prototype.endsWith) {
     };
 }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', '$sce', 'maValidators', function (maHelper, $timeout, $sce, maValidators) {
+(function(){angular.module('marcuraUI.components').directive('maMessage', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            type: '@',
+            state: '@',
+            size: '@',
+            textAlign: '@',
+            hasIcon: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-message{{cssClass}}">\
+                    <div class="ma-message-icon" ng-if="_hasIcon">\
+                        <i class="fa" ng-class="{\
+                            \'fa-info-circle\': _state === \'info\',\
+                            \'fa-check-circle\': _state === \'success\',\
+                            \'fa-exclamation-triangle\': _state === \'warning\',\
+                            \'fa-times-circle\': _state === \'danger\'\
+                        }"></i>\
+                    </div>\
+                    <div class="ma-message-text"><ng-transclude></ng-transclude></div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            var type = scope.type || 'message',
+                size = scope.size ? scope.size : 'sm';
+            scope._hasIcon = scope.hasIcon === false ? false : true;
+
+            var setState = function () {
+                scope._state = scope.state || 'default';
+            };
+
+            var setCssClass = function () {
+                scope.cssClass = ' ma-message-' + type + ' ma-message-' + scope._state + ' ma-message-' + size;
+
+                if (scope.textAlign) {
+                    scope.cssClass += ' ma-message-text-align-' + scope.textAlign;
+                }
+
+                if (scope._hasIcon) {
+                    scope.cssClass += ' ma-message-has-icon';
+                }
+            };
+
+            scope.$watch('state', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setState();
+                setCssClass();
+            });
+
+            setState();
+            setCssClass();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            page: '=',
+            totalItems: '=',
+            visiblePages: '=',
+            showItemsPerPage: '=',
+            allowAllItemsPerPage: '=',
+            itemsPerPageNumbers: '=',
+            itemsPerPageText: '@',
+            itemsPerPage: '=',
+            change: '&'
+        },
+        replace: true,
+        template: function () {
+            var html = '<div class="ma-pager" ng-class="{\
+                \'ma-pager-has-pager\': _hasPager\
+            }">\
+                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
+                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
+                        items="_itemsPerPageNumbers"\
+                        value="_itemsPerPage"\
+                        change="itemsPerPageChange(maValue, maOldValue)">\
+                    </ma-select-box>\
+                </div><div class="ma-pager-pager">\
+                    <div class="ma-pager-start">\
+                        <ma-button\
+                            class="ma-button-first"\
+                            text="First"\
+                            size="xs"\
+                            modifier="default"\
+                            click="firstClick()"\
+                            is-disabled="_page <= 1"\
+                        ></ma-button><ma-button\
+                            class="ma-button-previous"\
+                            text="Previous"\
+                            size="xs"\
+                            modifier="default"\
+                            click="previousClick()"\
+                            is-disabled="_page <= 1">\
+                        </ma-button>\
+                    </div\
+                    ><div class="ma-pager-middle">\
+                        <ma-button\
+                            class="ma-button-previous-range"\
+                            text="..."\
+                            size="xs"\
+                            modifier="default"\
+                            click="previousRangeClick()"\
+                            is-disabled="isFirstRange"\
+                        ></ma-button><div class="ma-pager-pages"><ma-button\
+                            ng-repeat="rangePage in rangePages"\
+                            class="ma-button-page"\
+                            text="{{rangePage}}"\
+                            size="xs"\
+                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
+                            click="pageClick(rangePage)"></div></ma-button\
+                        ><ma-button\
+                            class="ma-button-next-range"\
+                            text="..."\
+                            size="xs"\
+                            modifier="default"\
+                            click="nextRangeClick()"\
+                            is-disabled="isLastRange"\
+                        ></ma-button>\
+                    </div\
+                    ><div class="ma-pager-end">\
+                        <ma-button\
+                            class="ma-button-next"\
+                            text="Next"\
+                            size="xs"\
+                            modifier="default"\
+                            click="nextClick()"\
+                            is-disabled="_page >= totalPages"\
+                        ></ma-button><ma-button\
+                            class="ma-button-last"\
+                            text="Last"\
+                            size="xs"\
+                            modifier="default"\
+                            click="lastClick()"\
+                            is-disabled="_page >= totalPages">\
+                        </ma-button>\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            scope._page = scope.page;
+            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
+            scope._itemsPerPageNumbers = ['25', '50', '75', '100'];
+            scope._itemsPerPage = '25';
+            scope.hasItemsPerPageChanged = false;
+            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
+
+            var setTotalPages = function () {
+                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
+            };
+
+            var setItemsPerPage = function () {
+                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
+                    return;
+                }
+
+                scope._itemsPerPage = scope.itemsPerPage.toString();
+            };
+
+            var setItemsPerPageNumbers = function () {
+                if (!scope._showItemsPerPage) {
+                    return;
+                }
+
+                if (angular.isArray(scope.itemsPerPageNumbers)) {
+                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
+                }
+
+                if (scope.allowAllItemsPerPage) {
+                    scope._itemsPerPageNumbers.push('All');
+                }
+            };
+
+            var setRangePages = function () {
+                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
+
+                if (scope.totalPages < scope._visiblePages) {
+                    scope._visiblePages = scope.totalPages || 1;
+                }
+
+                scope.rangePages = [];
+                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
+                scope.isFirstRange = scope.range === 0;
+                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
+                var startPage = scope.range * scope._visiblePages;
+
+                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
+                    scope.rangePages.push(startPage + visiblePage);
+                }
+            };
+
+            var setHasPager = function () {
+                if (scope._itemsPerPage === 'All') {
+                    scope._hasPager = false;
+                    return;
+                }
+
+                var itemsPerPage = Number(scope._itemsPerPage);
+                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * itemsPerPage > itemsPerPage);
+            };
+
+            var onChange = function () {
+                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
+                    return;
+                }
+
+                scope.page = scope._page || null;
+                setRangePages();
+
+                var value = {
+                    maPage: scope.page
+                };
+
+                if (scope._showItemsPerPage) {
+                    value.maItemsPerPage = scope._itemsPerPage === 'All' ? null : Number(scope._itemsPerPage);
+                    scope.hasItemsPerPageChanged = false;
+
+                    // If itemsPerPage is set update its value.
+                    if (scope.itemsPerPage !== undefined) {
+                        scope.itemsPerPage = value.maItemsPerPage;
+                    }
+                }
+
+                // Postpone change event for $apply (which is being invoked by $timeout)
+                // to have time to take effect and update scope.page.
+                $timeout(function () {
+                    scope.change(value);
+                });
+            };
+
+            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
+                scope._itemsPerPage = itemsPerPage;
+                scope.hasItemsPerPageChanged = true;
+                var oldTotalPages = scope.totalPages;
+                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
+
+                if (oldItemsPerPage === 'All') {
+                    scope._page = 1;
+                } else {
+                    var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
+                    scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
+                }
+
+                setHasPager();
+                onChange();
+            };
+
+            scope.firstClick = function () {
+                scope._page = 1;
+                onChange();
+            };
+
+            scope.previousClick = function () {
+                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
+                onChange();
+            };
+
+            scope.nextClick = function () {
+                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
+                onChange();
+            };
+
+            scope.lastClick = function () {
+                scope._page = scope.totalPages;
+                onChange();
+            };
+
+            scope.pageClick = function (page) {
+                scope._page = page;
+                onChange();
+            };
+
+            scope.previousRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages;
+                onChange();
+            };
+
+            scope.nextRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
+                onChange();
+            };
+
+            scope.$watch('totalItems', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
+                setTotalPages();
+
+                // Correct the page and trigger change.
+                if (scope._totalItems === 0 || scope._totalItems <= Number(scope._itemsPerPage)) {
+                    scope._page = 1;
+                    onChange();
+                    setHasPager();
+                    return;
+                }
+
+                setRangePages();
+                setHasPager();
+            });
+
+            scope.$watch('visiblePages', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setRangePages();
+            });
+
+            scope.$watch('page', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                var page = scope.page;
+
+                // Correct page.
+                if (page < 1) {
+                    page = 1;
+                } else if (page > scope.totalPages) {
+                    page = scope.totalPages;
+                }
+
+                // Correct page to 1 in case totalPages is 0 and page is 0.
+                scope._page = page || 1;
+                setRangePages();
+                setHasPager();
+            });
+
+            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
+                if (angular.equals(newValue, oldValue)) {
+                    return;
+                }
+
+                setItemsPerPageNumbers();
+            });
+
+            scope.$watch('itemsPerPage', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setItemsPerPage();
+                setHasPager();
+            });
+
+            setItemsPerPageNumbers();
+            setItemsPerPage();
+            setTotalPages();
+            setRangePages();
+            setHasPager();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope) {
+            scope.calculateLeft = function(stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function() {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function(stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
+        }
+    };
+}]);
+})();
+(function(){angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$timeout', '$sce', 'maValidators', function (MaHelper, $timeout, $sce, maValidators) {
     var radioBoxes = {};
 
     return {
@@ -1644,7 +2013,7 @@ if (!String.prototype.endsWith) {
 
             var setModifiers = function (oldModifiers) {
                 // Remove previous modifiers first.
-                if (!maHelper.isNullOrWhiteSpace(oldModifiers)) {
+                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
                     oldModifiers = oldModifiers.split(' ');
 
                     for (var i = 0; i < oldModifiers.length; i++) {
@@ -1654,7 +2023,7 @@ if (!String.prototype.endsWith) {
 
                 var modifiers = '';
 
-                if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
+                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
                     modifiers = scope.modifier.split(' ');
                 }
 
@@ -1739,7 +2108,7 @@ if (!String.prototype.endsWith) {
 
             scope.getItemText = function () {
                 if (scope.hideText) {
-                    return maHelper.html.nbsp;
+                    return MaHelper.html.nbsp;
                 }
 
                 var text;
@@ -1753,14 +2122,14 @@ if (!String.prototype.endsWith) {
                 }
 
                 if (!angular.isString(text) || !text) {
-                    text = maHelper.html.nbsp;
+                    text = MaHelper.html.nbsp;
                 }
 
                 return $sce.trustAsHtml(text);
             };
 
             scope.hasText = function () {
-                return scope.getItemText() !== maHelper.html.nbsp;
+                return scope.getItemText() !== MaHelper.html.nbsp;
             };
 
             scope.isChecked = function () {
@@ -1849,7 +2218,7 @@ if (!String.prototype.endsWith) {
             };
 
             scope.onKeypress = function (event) {
-                if (event.keyCode === maHelper.keyCode.space) {
+                if (event.keyCode === MaHelper.keyCode.space) {
                     // Prevent page from scrolling down.
                     event.preventDefault();
 
@@ -1921,71 +2290,7 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function() {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope) {
-            scope.calculateLeft = function(stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function() {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function(stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'maValidators', 'maHelper', function($timeout, maValidators, maHelper) {
+(function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'maValidators', 'MaHelper', function($timeout, maValidators, MaHelper) {
     return {
         restrict: 'E',
         scope: {
@@ -2084,14 +2389,14 @@ if (!String.prototype.endsWith) {
                 if (!isObjectArray) {
                     hasChanged = oldValue !== item;
                 } else if (scope.itemValueField) {
-                    if (maHelper.isNullOrUndefined(oldValue) && !maHelper.isNullOrUndefined(item[scope.itemValueField])) {
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item[scope.itemValueField])) {
                         hasChanged = true;
                     } else {
                         hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
                     }
                 } else {
                     // Compare objects if itemValueField is not provided.
-                    if (maHelper.isNullOrUndefined(oldValue) && !maHelper.isNullOrUndefined(item)) {
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item)) {
                         hasChanged = true;
                     } else {
                         hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
@@ -2157,7 +2462,7 @@ if (!String.prototype.endsWith) {
             return items;
         };
     }])
-    .directive('maSelectBox', ['$document', '$timeout', 'maHelper', 'maValidators', function ($document, $timeout, maHelper, maValidators) {
+    .directive('maSelectBox', ['$document', '$timeout', 'MaHelper', 'maValidators', function ($document, $timeout, MaHelper, maValidators) {
         return {
             restrict: 'E',
             scope: {
@@ -2189,7 +2494,7 @@ if (!String.prototype.endsWith) {
             },
             replace: true,
             template: function (element, attributes) {
-                var hasAjax = !maHelper.isNullOrWhiteSpace(attributes.ajax),
+                var hasAjax = !MaHelper.isNullOrWhiteSpace(attributes.ajax),
                     isMultiple = attributes.isMultiple === 'true';
 
                 var html = '\
@@ -2264,7 +2569,7 @@ if (!String.prototype.endsWith) {
             controller: ['$scope', function (scope) {
                 // Gets a value from itemValueField if an item is object.
                 scope.getItemValue = function (item) {
-                    if (maHelper.isNullOrWhiteSpace(item) || !scope.itemValueField) {
+                    if (MaHelper.isNullOrWhiteSpace(item) || !scope.itemValueField) {
                         return null;
                     }
 
@@ -2281,7 +2586,7 @@ if (!String.prototype.endsWith) {
                         value = value[parts[i]];
                     }
 
-                    if (maHelper.isNullOrUndefined(value)) {
+                    if (MaHelper.isNullOrUndefined(value)) {
                         return null;
                     }
 
@@ -2367,7 +2672,7 @@ if (!String.prototype.endsWith) {
                             return value.length > 0;
                         }
 
-                        if (maHelper.isNullOrWhiteSpace(value)) {
+                        if (MaHelper.isNullOrWhiteSpace(value)) {
                             return false;
                         }
 
@@ -2424,7 +2729,7 @@ if (!String.prototype.endsWith) {
                 };
 
                 var getItemByValue = function (itemValue) {
-                    if (maHelper.isNullOrWhiteSpace(itemValue)) {
+                    if (MaHelper.isNullOrWhiteSpace(itemValue)) {
                         return null;
                     }
 
@@ -2510,7 +2815,7 @@ if (!String.prototype.endsWith) {
                             previousAddedItem = item;
                             scope.toggleMode('add');
                         } else {
-                            if (maHelper.isNullOrWhiteSpace(item)) {
+                            if (MaHelper.isNullOrWhiteSpace(item)) {
                                 scope.selectedItem = null;
                             } else if (!scope.hasAjax) {
                                 // Set Select2 value. In AJAX mode Select2 sets values by itself.
@@ -2637,14 +2942,14 @@ if (!String.prototype.endsWith) {
 
                 scope.hasValue = function () {
                     if (scope.isMultiple) {
-                        return !maHelper.isNullOrUndefined(scope.value) && scope.value.length;
+                        return !MaHelper.isNullOrUndefined(scope.value) && scope.value.length;
                     }
 
                     if (scope.isAddMode) {
-                        return !maHelper.isNullOrWhiteSpace(scope.text);
+                        return !MaHelper.isNullOrWhiteSpace(scope.text);
                     }
 
-                    return !maHelper.isNullOrUndefined(scope.value) && !scope.isLoading;
+                    return !MaHelper.isNullOrUndefined(scope.value) && !scope.isLoading;
                 };
 
                 scope.isResetEnabled = function () {
@@ -2808,7 +3113,7 @@ if (!String.prototype.endsWith) {
                         selectData.dropdown.mouseleave();
                     } else {
                         // Validation is required if the item is a simple text, not a JSON object.
-                        item = maHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
+                        item = MaHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
 
                         // In case if JSON.parse has parsed string to a number.
                         // This can happen when items is an array of numbers.
@@ -2833,7 +3138,7 @@ if (!String.prototype.endsWith) {
                         // Get selected item from items by value field.
                         // There is no items array in AJAX mode.
                         if (!scope.hasAjax) {
-                            if (scope.itemValueField && !maHelper.isNullOrWhiteSpace(item)) {
+                            if (scope.itemValueField && !MaHelper.isNullOrWhiteSpace(item)) {
                                 for (var i = 0; i < scope._items.length; i++) {
 
                                     if (scope.getItemValue(scope._items[i]) === item.toString()) {
@@ -3150,7 +3455,7 @@ if (!String.prototype.endsWith) {
  * When AJAX mode is on, your value will be an object (or an array of objects) of the data used by Select2.
  * This change is so that you do not have to do an additional query yourself on top of Select2 own query.
  */
-angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('maSelect2', ['maSelect2Config', '$timeout', 'maHelper', function (maSelect2Config, $timeout, maHelper) {
+angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('maSelect2', ['maSelect2Config', '$timeout', 'MaHelper', function (maSelect2Config, $timeout, MaHelper) {
     // The configuration options passed to $.fn.select2(). See http://select2.github.io/select2/#documentation.
     var options = {};
 
@@ -3254,7 +3559,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                                 var viewValue = controller.$viewValue;
 
                                 if (opts.ajax) {
-                                    viewValue = maHelper.isJson(controller.$viewValue) ? JSON.parse(controller.$viewValue) : controller.$viewValue;
+                                    viewValue = MaHelper.isJson(controller.$viewValue) ? JSON.parse(controller.$viewValue) : controller.$viewValue;
 
                                     // It might be an id of the item first time, the next time it's a real item.
                                     if (angular.isObject(viewValue)) {
@@ -3393,311 +3698,6 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     }
                 });
             };
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            page: '=',
-            totalItems: '=',
-            visiblePages: '=',
-            showItemsPerPage: '=',
-            allowAllItemsPerPage: '=',
-            itemsPerPageNumbers: '=',
-            itemsPerPageText: '@',
-            itemsPerPage: '=',
-            change: '&'
-        },
-        replace: true,
-        template: function () {
-            var html = '<div class="ma-pager" ng-class="{\
-                \'ma-pager-has-pager\': _hasPager\
-            }">\
-                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
-                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
-                        items="_itemsPerPageNumbers"\
-                        value="_itemsPerPage"\
-                        change="itemsPerPageChange(maValue, maOldValue)">\
-                    </ma-select-box>\
-                </div><div class="ma-pager-pager">\
-                    <div class="ma-pager-start">\
-                        <ma-button\
-                            class="ma-button-first"\
-                            text="First"\
-                            size="xs"\
-                            modifier="default"\
-                            click="firstClick()"\
-                            is-disabled="_page <= 1"\
-                        ></ma-button><ma-button\
-                            class="ma-button-previous"\
-                            text="Previous"\
-                            size="xs"\
-                            modifier="default"\
-                            click="previousClick()"\
-                            is-disabled="_page <= 1">\
-                        </ma-button>\
-                    </div\
-                    ><div class="ma-pager-middle">\
-                        <ma-button\
-                            class="ma-button-previous-range"\
-                            text="..."\
-                            size="xs"\
-                            modifier="default"\
-                            click="previousRangeClick()"\
-                            is-disabled="isFirstRange"\
-                        ></ma-button><div class="ma-pager-pages"><ma-button\
-                            ng-repeat="rangePage in rangePages"\
-                            class="ma-button-page"\
-                            text="{{rangePage}}"\
-                            size="xs"\
-                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
-                            click="pageClick(rangePage)"></div></ma-button\
-                        ><ma-button\
-                            class="ma-button-next-range"\
-                            text="..."\
-                            size="xs"\
-                            modifier="default"\
-                            click="nextRangeClick()"\
-                            is-disabled="isLastRange"\
-                        ></ma-button>\
-                    </div\
-                    ><div class="ma-pager-end">\
-                        <ma-button\
-                            class="ma-button-next"\
-                            text="Next"\
-                            size="xs"\
-                            modifier="default"\
-                            click="nextClick()"\
-                            is-disabled="_page >= totalPages"\
-                        ></ma-button><ma-button\
-                            class="ma-button-last"\
-                            text="Last"\
-                            size="xs"\
-                            modifier="default"\
-                            click="lastClick()"\
-                            is-disabled="_page >= totalPages">\
-                        </ma-button>\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            scope._page = scope.page;
-            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
-            scope._itemsPerPageNumbers = ['25', '50', '75', '100'];
-            scope._itemsPerPage = '25';
-            scope.hasItemsPerPageChanged = false;
-            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
-
-            var setTotalPages = function () {
-                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
-            };
-
-            var setItemsPerPage = function () {
-                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
-                    return;
-                }
-
-                scope._itemsPerPage = scope.itemsPerPage.toString();
-            };
-
-            var setItemsPerPageNumbers = function () {
-                if (!scope._showItemsPerPage) {
-                    return;
-                }
-
-                if (angular.isArray(scope.itemsPerPageNumbers)) {
-                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
-                }
-
-                if (scope.allowAllItemsPerPage) {
-                    scope._itemsPerPageNumbers.push('All');
-                }
-            };
-
-            var setRangePages = function () {
-                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
-
-                if (scope.totalPages < scope._visiblePages) {
-                    scope._visiblePages = scope.totalPages || 1;
-                }
-
-                scope.rangePages = [];
-                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
-                scope.isFirstRange = scope.range === 0;
-                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
-                var startPage = scope.range * scope._visiblePages;
-
-                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
-                    scope.rangePages.push(startPage + visiblePage);
-                }
-            };
-
-            var setHasPager = function () {
-                if (scope._itemsPerPage === 'All') {
-                    scope._hasPager = false;
-                    return;
-                }
-
-                var itemsPerPage = Number(scope._itemsPerPage);
-                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * itemsPerPage > itemsPerPage);
-            };
-
-            var onChange = function () {
-                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
-                    return;
-                }
-
-                scope.page = scope._page || null;
-                setRangePages();
-
-                var value = {
-                    maPage: scope.page
-                };
-
-                if (scope._showItemsPerPage) {
-                    value.maItemsPerPage = scope._itemsPerPage === 'All' ? null : Number(scope._itemsPerPage);
-                    scope.hasItemsPerPageChanged = false;
-
-                    // If itemsPerPage is set update its value.
-                    if (scope.itemsPerPage !== undefined) {
-                        scope.itemsPerPage = value.maItemsPerPage;
-                    }
-                }
-
-                // Postpone change event for $apply (which is being invoked by $timeout)
-                // to have time to take effect and update scope.page.
-                $timeout(function () {
-                    scope.change(value);
-                });
-            };
-
-            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
-                scope._itemsPerPage = itemsPerPage;
-                scope.hasItemsPerPageChanged = true;
-                var oldTotalPages = scope.totalPages;
-                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
-
-                if (oldItemsPerPage === 'All') {
-                    scope._page = 1;
-                } else {
-                    var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
-                    scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
-                }
-
-                setHasPager();
-                onChange();
-            };
-
-            scope.firstClick = function () {
-                scope._page = 1;
-                onChange();
-            };
-
-            scope.previousClick = function () {
-                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
-                onChange();
-            };
-
-            scope.nextClick = function () {
-                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
-                onChange();
-            };
-
-            scope.lastClick = function () {
-                scope._page = scope.totalPages;
-                onChange();
-            };
-
-            scope.pageClick = function (page) {
-                scope._page = page;
-                onChange();
-            };
-
-            scope.previousRangeClick = function () {
-                scope._page = scope.range * scope._visiblePages;
-                onChange();
-            };
-
-            scope.nextRangeClick = function () {
-                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
-                onChange();
-            };
-
-            scope.$watch('totalItems', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
-                setTotalPages();
-
-                // Correct the page and trigger change.
-                if (scope._totalItems === 0 || scope._totalItems <= Number(scope._itemsPerPage)) {
-                    scope._page = 1;
-                    onChange();
-                    setHasPager();
-                    return;
-                }
-
-                setRangePages();
-                setHasPager();
-            });
-
-            scope.$watch('visiblePages', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setRangePages();
-            });
-
-            scope.$watch('page', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                var page = scope.page;
-
-                // Correct page.
-                if (page < 1) {
-                    page = 1;
-                } else if (page > scope.totalPages) {
-                    page = scope.totalPages;
-                }
-
-                // Correct page to 1 in case totalPages is 0 and page is 0.
-                scope._page = page || 1;
-                setRangePages();
-                setHasPager();
-            });
-
-            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
-                if (angular.equals(newValue, oldValue)) {
-                    return;
-                }
-
-                setItemsPerPageNumbers();
-            });
-
-            scope.$watch('itemsPerPage', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setItemsPerPage();
-                setHasPager();
-            });
-
-            setItemsPerPageNumbers();
-            setItemsPerPage();
-            setTotalPages();
-            setRangePages();
-            setHasPager();
         }
     };
 }]);})();
@@ -4579,7 +4579,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
     return MaDate;
 }]);
 })();
-(function(){angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope', function (MaDate, $rootScope) {
+(function(){angular.module('marcuraUI.services').factory('MaHelper', ['MaDate', '$rootScope', function (MaDate, $rootScope) {
     return {
         keyCode: {
             backspace: 8,
@@ -4824,7 +4824,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDate', function (maHelper, MaDate) {
+(function(){angular.module('marcuraUI.services').factory('maValidators', ['MaHelper', 'MaDate', function (MaHelper, MaDate) {
     var formatValueToCompare = function (value) {
         if (!value) {
             return null;
@@ -4849,7 +4849,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                         return value.length > 0;
                     }
 
-                    return !maHelper.isNullOrWhiteSpace(value);
+                    return !MaHelper.isNullOrWhiteSpace(value);
                 }
             };
         },
@@ -4865,11 +4865,11 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 name: 'IsGreater',
                 message: message,
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isGreater(value, valueToCompare);
+                    return MaHelper.isGreater(value, valueToCompare);
                 }
             };
         },
@@ -4885,11 +4885,11 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 name: 'IsGreaterOrEqual',
                 message: message,
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isGreaterOrEqual(value, valueToCompare);
+                    return MaHelper.isGreaterOrEqual(value, valueToCompare);
                 }
             };
         },
@@ -4905,11 +4905,11 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 name: 'IsLess',
                 message: message,
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isLess(value, valueToCompare);
+                    return MaHelper.isLess(value, valueToCompare);
                 }
             };
         },
@@ -4925,11 +4925,11 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 name: 'IsLessOrEqual',
                 message: message,
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isLessOrEqual(value, valueToCompare);
+                    return MaHelper.isLessOrEqual(value, valueToCompare);
                 }
             };
         },
@@ -4939,11 +4939,11 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 name: 'IsNumber',
                 message: 'This field should be a number.',
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isNumber(value);
+                    return MaHelper.isNumber(value);
                 }
             };
         },
@@ -4953,11 +4953,11 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 name: 'IsEmail',
                 message: 'This field should be an email.',
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isEmail(value);
+                    return MaHelper.isEmail(value);
                 }
             };
         }
@@ -5046,109 +5046,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function() {
-            var html = '\
-            <div class="ma-tabs">\
-                <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item" ng-repeat="item in items"\
-                        ng-focus="onFocus(item)"\
-                        ng-blur="onBlur(item)"\
-                        ng-keypress="onKeypress($event, item)"\
-                        ng-class="{\
-                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
-                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
-                            \'ma-tabs-item-is-focused\': item.isFocused\
-                        }"\
-                        ng-click="onSelect(item)">\
-                        <a class="ma-tabs-link" href="" tabindex="-1">\
-                            <span class="ma-tabs-text">{{item.text}}</span>\
-                        </a>\
-                    </li>\
-                </ul>\
-            </div>';
-
-            return html;
-        },
-        link: function(scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function(item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function(item) {
-                if (item.isDisabled || item.isSelected) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function(item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
-                }
-            };
-
-            scope.onKeypress = function(event, item) {
-                if (event.keyCode === maHelper.keyCode.enter) {
-                    scope.onSelect(item);
-                }
-            };
-
-            scope.onFocus = function(item) {
-                item.isFocused = true;
-            };
-
-            scope.onBlur = function(item) {
-                item.isFocused = false;
-            };
-
-            $timeout(function() {
-                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
-
-                itemElements.each(function(itemIndex, itemElement) {
-                    var item = scope.items[itemIndex];
-
-                    if (!item.isDisabled) {
-                        angular.element(itemElement).attr('tabindex', '0');
-                    }
-                });
-            });
-        }
-    };
-}]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', 'maValidators', function($timeout, $window, maHelper, maValidators) {
+(function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'MaHelper', 'maValidators', function($timeout, $window, MaHelper, maValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -5230,7 +5128,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 }
 
                 var valueElementStyle = getValueElementStyle(),
-                    textHeight = maHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
+                    textHeight = MaHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
                     height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
 
                 if (height < 40) {
@@ -5305,7 +5203,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
 
             scope.onKeydown = function(event) {
                 // Ignore tab key.
-                if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                     return;
                 }
 
@@ -5314,7 +5212,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
 
             scope.onKeyup = function(event) {
                 // Ignore tab key.
-                if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                     return;
                 }
 
@@ -5422,13 +5320,115 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
     };
 }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function($state, MaHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function() {
+            var html = '\
+            <div class="ma-tabs">\
+                <ul class="ma-tabs-list clearfix">\
+                    <li class="ma-tabs-item" ng-repeat="item in items"\
+                        ng-focus="onFocus(item)"\
+                        ng-blur="onBlur(item)"\
+                        ng-keypress="onKeypress($event, item)"\
+                        ng-class="{\
+                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
+                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
+                            \'ma-tabs-item-is-focused\': item.isFocused\
+                        }"\
+                        ng-click="onSelect(item)">\
+                        <a class="ma-tabs-link" href="" tabindex="-1">\
+                            <span class="ma-tabs-text">{{item.text}}</span>\
+                        </a>\
+                    </li>\
+                </ul>\
+            </div>';
+
+            return html;
+        },
+        link: function(scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function(item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function(item) {
+                if (item.isDisabled || item.isSelected) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function(item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
+
+            scope.onKeypress = function(event, item) {
+                if (event.keyCode === MaHelper.keyCode.enter) {
+                    scope.onSelect(item);
+                }
+            };
+
+            scope.onFocus = function(item) {
+                item.isFocused = true;
+            };
+
+            scope.onBlur = function(item) {
+                item.isFocused = false;
+            };
+
+            $timeout(function() {
+                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
+
+                itemElements.each(function(itemIndex, itemElement) {
+                    var item = scope.items[itemIndex];
+
+                    if (!item.isDisabled) {
+                        angular.element(itemElement).attr('tabindex', '0');
+                    }
+                });
+            });
+        }
+    };
+}]);
+})();
 (function(){angular.module('marcuraUI.components')
     .provider('maTextBoxConfiguration', function () {
         this.$get = function () {
             return this;
         };
     })
-    .directive('maTextBox', ['$timeout', 'maHelper', 'maValidators', function ($timeout, maHelper, maValidators) {
+    .directive('maTextBox', ['$timeout', 'MaHelper', 'maValidators', function ($timeout, MaHelper, maValidators) {
         return {
             restrict: 'E',
             scope: {
@@ -5529,14 +5529,14 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     failedValidator = null,
                     decimals = scope.configuration.decimals,
                     hasDefaultValue = attributes.defaultValue !== undefined,
-                    defaultValue = maHelper.isNullOrUndefined(scope.defaultValue) ? '' : scope.defaultValue;
+                    defaultValue = MaHelper.isNullOrUndefined(scope.defaultValue) ? '' : scope.defaultValue;
 
                 if (scope.type === 'number') {
                     defaultValue = typeof scope.defaultValue === 'number' ? scope.defaultValue : null;
                 }
 
                 var setPreviousValue = function (value) {
-                    value = maHelper.isNullOrUndefined(value) ? '' : value;
+                    value = MaHelper.isNullOrUndefined(value) ? '' : value;
 
                     if (scope.type !== 'number' && trim) {
                         value = value.trim();
@@ -5585,11 +5585,11 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     }
 
                     if (hasDefaultValue) {
-                        if (maHelper.isNullOrUndefined(value)) {
+                        if (MaHelper.isNullOrUndefined(value)) {
                             value = defaultValue;
                         }
 
-                        if (maHelper.isNullOrUndefined(oldValue)) {
+                        if (MaHelper.isNullOrUndefined(oldValue)) {
                             oldValue = defaultValue;
                         }
                     }
@@ -5606,8 +5606,8 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 };
 
                 var hasValueChanged = function (value) {
-                    value = maHelper.isNullOrUndefined(value) ? '' : value;
-                    var oldValue = maHelper.isNullOrUndefined(previousValue) ? '' : previousValue,
+                    value = MaHelper.isNullOrUndefined(value) ? '' : value;
+                    var oldValue = MaHelper.isNullOrUndefined(previousValue) ? '' : previousValue,
                         hasChanged = false;
 
                     if (scope.type !== 'number' && trim) {
@@ -5635,7 +5635,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 };
 
                 var parseNumber = function (value, keepDecimals) {
-                    if (maHelper.isNullOrWhiteSpace(value)) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
                         return null;
                     }
 
@@ -5653,7 +5653,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 };
 
                 var addCommasToNumber = function (value) {
-                    if (maHelper.isNullOrWhiteSpace(value)) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
                         return '';
                     }
 
@@ -5665,7 +5665,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 };
 
                 var removeCommasFromNumber = function (value) {
-                    if (maHelper.isNullOrWhiteSpace(value)) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
                         return '';
                     }
 
@@ -5673,7 +5673,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 };
 
                 var formatValue = function (value) {
-                    if (maHelper.isNullOrWhiteSpace(value)) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
                         return value;
                     }
 
@@ -5733,7 +5733,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     if (scope.type === 'number') {
                         var value = valueElement.val();
 
-                        if (value !== '' && !maHelper.isNumber(value)) {
+                        if (value !== '' && !MaHelper.isNumber(value)) {
                             return true;
                         }
 
@@ -5751,7 +5751,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     if (scope.type === 'number') {
                         var value = valueElement.val();
 
-                        if (value !== '' && !maHelper.isNumber(value)) {
+                        if (value !== '' && !MaHelper.isNumber(value)) {
                             return true;
                         }
 
@@ -5787,7 +5787,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     if (elementName === 'value') {
                         scope.isValueFocused = true;
 
-                        if (scope.type === 'number' && !maHelper.isNullOrUndefined(scope.value) && scope.isValid) {
+                        if (scope.type === 'number' && !MaHelper.isNullOrUndefined(scope.value) && scope.isValid) {
                             // Remove commas from the number.
                             valueElement.val(scope.value.toFixed(decimals));
                         }
@@ -5869,14 +5869,14 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     }
 
                     // Use safeApply to avoid apply error when Reset icon is clicked.
-                    maHelper.safeApply(function () {
+                    MaHelper.safeApply(function () {
                         scope.isValueFocused = false;
                     });
 
                     if (isFocusLost) {
                         changeValue();
 
-                        maHelper.safeApply(function () {
+                        MaHelper.safeApply(function () {
                             scope.blur({
                                 maValue: scope.value,
                                 maOldValue: focusValue,
@@ -5888,7 +5888,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
 
                 scope.onKeydown = function (event) {
                     // No need to save keydown value when the user is navigating with tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                         return;
                     }
 
@@ -5897,7 +5897,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     if (scope.type === 'number') {
                         if (
                             // Allow backspace, tab, delete.
-                            $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.delete, maHelper.keyCode.home, maHelper.keyCode.end, maHelper.keyCode.period, maHelper.keyCode.dash, maHelper.keyCode.dash2]) !== -1 ||
+                            $.inArray(event.keyCode, [MaHelper.keyCode.backspace, MaHelper.keyCode.delete, MaHelper.keyCode.home, MaHelper.keyCode.end, MaHelper.keyCode.period, MaHelper.keyCode.dash, MaHelper.keyCode.dash2]) !== -1 ||
                             // Allow left, right.
                             (event.keyCode === 37 || event.keyCode === 39)) {
                             return;
@@ -5914,7 +5914,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 // e.g. mouse right click + Cut/Copy/Paste etc.
                 valueElement.on('input', function (event) {
                     // Ignore tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                         return;
                     }
 
@@ -6036,7 +6036,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 });
 
                 // Set initial value.
-                if (hasDefaultValue && maHelper.isNullOrUndefined(scope.value)) {
+                if (hasDefaultValue && MaHelper.isNullOrUndefined(scope.value)) {
                     scope.value = defaultValue;
                 }
 

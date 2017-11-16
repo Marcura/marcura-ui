@@ -1,4 +1,4 @@
-angular.module('marcuraUI.services').factory('maHelper', ['MaDate', '$rootScope', function (MaDate, $rootScope) {
+angular.module('marcuraUI.services').factory('MaHelper', ['MaDate', '$rootScope', function (MaDate, $rootScope) {
     return {
         keyCode: {
             backspace: 8,

@@ -4,7 +4,7 @@ angular.module('marcuraUI.components')
             return this;
         };
     })
-    .directive('maTextBox', ['$timeout', 'maHelper', 'maValidators', function ($timeout, maHelper, maValidators) {
+    .directive('maTextBox', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
         return {
             restrict: 'E',
             scope: {
@@ -105,14 +105,14 @@ angular.module('marcuraUI.components')
                     failedValidator = null,
                     decimals = scope.configuration.decimals,
                     hasDefaultValue = attributes.defaultValue !== undefined,
-                    defaultValue = maHelper.isNullOrUndefined(scope.defaultValue) ? '' : scope.defaultValue;
+                    defaultValue = MaHelper.isNullOrUndefined(scope.defaultValue) ? '' : scope.defaultValue;
 
                 if (scope.type === 'number') {
                     defaultValue = typeof scope.defaultValue === 'number' ? scope.defaultValue : null;
                 }
 
                 var setPreviousValue = function (value) {
-                    value = maHelper.isNullOrUndefined(value) ? '' : value;
+                    value = MaHelper.isNullOrUndefined(value) ? '' : value;
 
                     if (scope.type !== 'number' && trim) {
                         value = value.trim();
@@ -161,11 +161,11 @@ angular.module('marcuraUI.components')
                     }
 
                     if (hasDefaultValue) {
-                        if (maHelper.isNullOrUndefined(value)) {
+                        if (MaHelper.isNullOrUndefined(value)) {
                             value = defaultValue;
                         }
 
-                        if (maHelper.isNullOrUndefined(oldValue)) {
+                        if (MaHelper.isNullOrUndefined(oldValue)) {
                             oldValue = defaultValue;
                         }
                     }
@@ -182,8 +182,8 @@ angular.module('marcuraUI.components')
                 };
 
                 var hasValueChanged = function (value) {
-                    value = maHelper.isNullOrUndefined(value) ? '' : value;
-                    var oldValue = maHelper.isNullOrUndefined(previousValue) ? '' : previousValue,
+                    value = MaHelper.isNullOrUndefined(value) ? '' : value;
+                    var oldValue = MaHelper.isNullOrUndefined(previousValue) ? '' : previousValue,
                         hasChanged = false;
 
                     if (scope.type !== 'number' && trim) {
@@ -211,7 +211,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var parseNumber = function (value, keepDecimals) {
-                    if (maHelper.isNullOrWhiteSpace(value)) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
                         return null;
                     }
 
@@ -229,7 +229,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var addCommasToNumber = function (value) {
-                    if (maHelper.isNullOrWhiteSpace(value)) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
                         return '';
                     }
 
@@ -241,7 +241,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var removeCommasFromNumber = function (value) {
-                    if (maHelper.isNullOrWhiteSpace(value)) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
                         return '';
                     }
 
@@ -249,7 +249,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var formatValue = function (value) {
-                    if (maHelper.isNullOrWhiteSpace(value)) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
                         return value;
                     }
 
@@ -275,23 +275,23 @@ angular.module('marcuraUI.components')
                     }
 
                     if (!hasIsNotEmptyValidator && scope.isRequired) {
-                        validators.unshift(maValidators.isNotEmpty());
+                        validators.unshift(MaValidators.isNotEmpty());
                     }
 
                     if (scope.type === 'number') {
-                        validators.push(maValidators.isNumber(true));
+                        validators.push(MaValidators.isNumber(true));
 
                         if (typeof scope.min === 'number') {
-                            validators.push(maValidators.isGreaterOrEqual(scope.min, true));
+                            validators.push(MaValidators.isGreaterOrEqual(scope.min, true));
                         }
 
                         if (typeof scope.max === 'number') {
-                            validators.push(maValidators.isLessOrEqual(scope.max, true));
+                            validators.push(MaValidators.isLessOrEqual(scope.max, true));
                         }
                     }
 
                     if (scope.type === 'email') {
-                        validators.push(maValidators.isEmail(true));
+                        validators.push(MaValidators.isEmail(true));
                     }
                 };
 
@@ -309,7 +309,7 @@ angular.module('marcuraUI.components')
                     if (scope.type === 'number') {
                         var value = valueElement.val();
 
-                        if (value !== '' && !maHelper.isNumber(value)) {
+                        if (value !== '' && !MaHelper.isNumber(value)) {
                             return true;
                         }
 
@@ -327,7 +327,7 @@ angular.module('marcuraUI.components')
                     if (scope.type === 'number') {
                         var value = valueElement.val();
 
-                        if (value !== '' && !maHelper.isNumber(value)) {
+                        if (value !== '' && !MaHelper.isNumber(value)) {
                             return true;
                         }
 
@@ -363,7 +363,7 @@ angular.module('marcuraUI.components')
                     if (elementName === 'value') {
                         scope.isValueFocused = true;
 
-                        if (scope.type === 'number' && !maHelper.isNullOrUndefined(scope.value) && scope.isValid) {
+                        if (scope.type === 'number' && !MaHelper.isNullOrUndefined(scope.value) && scope.isValid) {
                             // Remove commas from the number.
                             valueElement.val(scope.value.toFixed(decimals));
                         }
@@ -445,14 +445,14 @@ angular.module('marcuraUI.components')
                     }
 
                     // Use safeApply to avoid apply error when Reset icon is clicked.
-                    maHelper.safeApply(function () {
+                    MaHelper.safeApply(function () {
                         scope.isValueFocused = false;
                     });
 
                     if (isFocusLost) {
                         changeValue();
 
-                        maHelper.safeApply(function () {
+                        MaHelper.safeApply(function () {
                             scope.blur({
                                 maValue: scope.value,
                                 maOldValue: focusValue,
@@ -464,7 +464,7 @@ angular.module('marcuraUI.components')
 
                 scope.onKeydown = function (event) {
                     // No need to save keydown value when the user is navigating with tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                         return;
                     }
 
@@ -473,7 +473,7 @@ angular.module('marcuraUI.components')
                     if (scope.type === 'number') {
                         if (
                             // Allow backspace, tab, delete.
-                            $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.delete, maHelper.keyCode.home, maHelper.keyCode.end, maHelper.keyCode.period, maHelper.keyCode.dash, maHelper.keyCode.dash2]) !== -1 ||
+                            $.inArray(event.keyCode, [MaHelper.keyCode.backspace, MaHelper.keyCode.delete, MaHelper.keyCode.home, MaHelper.keyCode.end, MaHelper.keyCode.period, MaHelper.keyCode.dash, MaHelper.keyCode.dash2]) !== -1 ||
                             // Allow left, right.
                             (event.keyCode === 37 || event.keyCode === 39)) {
                             return;
@@ -490,7 +490,7 @@ angular.module('marcuraUI.components')
                 // e.g. mouse right click + Cut/Copy/Paste etc.
                 valueElement.on('input', function (event) {
                     // Ignore tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                         return;
                     }
 
@@ -612,7 +612,7 @@ angular.module('marcuraUI.components')
                 });
 
                 // Set initial value.
-                if (hasDefaultValue && maHelper.isNullOrUndefined(scope.value)) {
+                if (hasDefaultValue && MaHelper.isNullOrUndefined(scope.value)) {
                     scope.value = defaultValue;
                 }
 

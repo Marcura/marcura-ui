@@ -1,4 +1,4 @@
-angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDate', function (maHelper, MaDate) {
+angular.module('marcuraUI.services').factory('MaValidators', ['MaHelper', 'MaDate', function (MaHelper, MaDate) {
     var formatValueToCompare = function (value) {
         if (!value) {
             return null;
@@ -23,7 +23,7 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
                         return value.length > 0;
                     }
 
-                    return !maHelper.isNullOrWhiteSpace(value);
+                    return !MaHelper.isNullOrWhiteSpace(value);
                 }
             };
         },
@@ -39,11 +39,11 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
                 name: 'IsGreater',
                 message: message,
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isGreater(value, valueToCompare);
+                    return MaHelper.isGreater(value, valueToCompare);
                 }
             };
         },
@@ -59,11 +59,11 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
                 name: 'IsGreaterOrEqual',
                 message: message,
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isGreaterOrEqual(value, valueToCompare);
+                    return MaHelper.isGreaterOrEqual(value, valueToCompare);
                 }
             };
         },
@@ -79,11 +79,11 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
                 name: 'IsLess',
                 message: message,
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isLess(value, valueToCompare);
+                    return MaHelper.isLess(value, valueToCompare);
                 }
             };
         },
@@ -99,11 +99,11 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
                 name: 'IsLessOrEqual',
                 message: message,
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isLessOrEqual(value, valueToCompare);
+                    return MaHelper.isLessOrEqual(value, valueToCompare);
                 }
             };
         },
@@ -113,11 +113,11 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
                 name: 'IsNumber',
                 message: 'This field should be a number.',
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isNumber(value);
+                    return MaHelper.isNumber(value);
                 }
             };
         },
@@ -127,11 +127,11 @@ angular.module('marcuraUI.services').factory('maValidators', ['maHelper', 'MaDat
                 name: 'IsEmail',
                 message: 'This field should be an email.',
                 validate: function (value) {
-                    if (allowEmpty && maHelper.isNullOrWhiteSpace(value)) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
                         return true;
                     }
 
-                    return maHelper.isEmail(value);
+                    return MaHelper.isEmail(value);
                 }
             };
         }

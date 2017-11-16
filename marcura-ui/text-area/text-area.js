@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'maHelper', 'maValidators', function($timeout, $window, maHelper, maValidators) {
+angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'MaHelper', 'MaValidators', function($timeout, $window, MaHelper, MaValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -80,7 +80,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 }
 
                 var valueElementStyle = getValueElementStyle(),
-                    textHeight = maHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
+                    textHeight = MaHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
                     height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
 
                 if (height < 40) {
@@ -130,7 +130,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             }
 
             if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(maValidators.isNotEmpty());
+                validators.unshift(MaValidators.isNotEmpty());
             }
 
             if (hasIsNotEmptyValidator) {
@@ -155,7 +155,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
             scope.onKeydown = function(event) {
                 // Ignore tab key.
-                if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                     return;
                 }
 
@@ -164,7 +164,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
             scope.onKeyup = function(event) {
                 // Ignore tab key.
-                if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                     return;
                 }
 

@@ -8,7 +8,7 @@ angular.module('marcuraUI.components')
             return items;
         };
     }])
-    .directive('maSelectBox', ['$document', '$timeout', 'maHelper', 'maValidators', function ($document, $timeout, maHelper, maValidators) {
+    .directive('maSelectBox', ['$document', '$timeout', 'MaHelper', function ($document, $timeout, MaHelper) {
         return {
             restrict: 'E',
             scope: {
@@ -40,7 +40,7 @@ angular.module('marcuraUI.components')
             },
             replace: true,
             template: function (element, attributes) {
-                var hasAjax = !maHelper.isNullOrWhiteSpace(attributes.ajax),
+                var hasAjax = !MaHelper.isNullOrWhiteSpace(attributes.ajax),
                     isMultiple = attributes.isMultiple === 'true';
 
                 var html = '\
@@ -115,7 +115,7 @@ angular.module('marcuraUI.components')
             controller: ['$scope', function (scope) {
                 // Gets a value from itemValueField if an item is object.
                 scope.getItemValue = function (item) {
-                    if (maHelper.isNullOrWhiteSpace(item) || !scope.itemValueField) {
+                    if (MaHelper.isNullOrWhiteSpace(item) || !scope.itemValueField) {
                         return null;
                     }
 
@@ -132,7 +132,7 @@ angular.module('marcuraUI.components')
                         value = value[parts[i]];
                     }
 
-                    if (maHelper.isNullOrUndefined(value)) {
+                    if (MaHelper.isNullOrUndefined(value)) {
                         return null;
                     }
 
@@ -218,7 +218,7 @@ angular.module('marcuraUI.components')
                             return value.length > 0;
                         }
 
-                        if (maHelper.isNullOrWhiteSpace(value)) {
+                        if (MaHelper.isNullOrWhiteSpace(value)) {
                             return false;
                         }
 
@@ -275,7 +275,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var getItemByValue = function (itemValue) {
-                    if (maHelper.isNullOrWhiteSpace(itemValue)) {
+                    if (MaHelper.isNullOrWhiteSpace(itemValue)) {
                         return null;
                     }
 
@@ -361,7 +361,7 @@ angular.module('marcuraUI.components')
                             previousAddedItem = item;
                             scope.toggleMode('add');
                         } else {
-                            if (maHelper.isNullOrWhiteSpace(item)) {
+                            if (MaHelper.isNullOrWhiteSpace(item)) {
                                 scope.selectedItem = null;
                             } else if (!scope.hasAjax) {
                                 // Set Select2 value. In AJAX mode Select2 sets values by itself.
@@ -488,14 +488,14 @@ angular.module('marcuraUI.components')
 
                 scope.hasValue = function () {
                     if (scope.isMultiple) {
-                        return !maHelper.isNullOrUndefined(scope.value) && scope.value.length;
+                        return !MaHelper.isNullOrUndefined(scope.value) && scope.value.length;
                     }
 
                     if (scope.isAddMode) {
-                        return !maHelper.isNullOrWhiteSpace(scope.text);
+                        return !MaHelper.isNullOrWhiteSpace(scope.text);
                     }
 
-                    return !maHelper.isNullOrUndefined(scope.value) && !scope.isLoading;
+                    return !MaHelper.isNullOrUndefined(scope.value) && !scope.isLoading;
                 };
 
                 scope.isResetEnabled = function () {
@@ -659,7 +659,7 @@ angular.module('marcuraUI.components')
                         selectData.dropdown.mouseleave();
                     } else {
                         // Validation is required if the item is a simple text, not a JSON object.
-                        item = maHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
+                        item = MaHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
 
                         // In case if JSON.parse has parsed string to a number.
                         // This can happen when items is an array of numbers.
@@ -684,7 +684,7 @@ angular.module('marcuraUI.components')
                         // Get selected item from items by value field.
                         // There is no items array in AJAX mode.
                         if (!scope.hasAjax) {
-                            if (scope.itemValueField && !maHelper.isNullOrWhiteSpace(item)) {
+                            if (scope.itemValueField && !MaHelper.isNullOrWhiteSpace(item)) {
                                 for (var i = 0; i < scope._items.length; i++) {
 
                                     if (scope.getItemValue(scope._items[i]) === item.toString()) {

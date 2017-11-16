@@ -1,7 +1,7 @@
 angular.module('app.controllers').controller('selectBoxPageController', selectBoxPageController);
 
-function selectBoxPageController($scope, $timeout, helper, maHelper) {
-    $scope.maHelper = maHelper;
+function selectBoxPageController($scope, $timeout, helper, MaHelper) {
+    $scope.MaHelper = MaHelper;
     $scope.ports2 = helper.getPorts();
     $scope.ports1 = [];
 

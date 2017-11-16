@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'maValidators', 'maHelper', function($timeout, maValidators, maHelper) {
+angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function($timeout, MaValidators, MaHelper) {
     return {
         restrict: 'E',
         scope: {
@@ -97,14 +97,14 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                 if (!isObjectArray) {
                     hasChanged = oldValue !== item;
                 } else if (scope.itemValueField) {
-                    if (maHelper.isNullOrUndefined(oldValue) && !maHelper.isNullOrUndefined(item[scope.itemValueField])) {
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item[scope.itemValueField])) {
                         hasChanged = true;
                     } else {
                         hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
                     }
                 } else {
                     // Compare objects if itemValueField is not provided.
-                    if (maHelper.isNullOrUndefined(oldValue) && !maHelper.isNullOrUndefined(item)) {
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item)) {
                         hasChanged = true;
                     } else {
                         hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
@@ -137,7 +137,7 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
             }
 
             if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(maValidators.isNotEmpty());
+                validators.unshift(MaValidators.isNotEmpty());
             }
 
             if (hasIsNotEmptyValidator) {

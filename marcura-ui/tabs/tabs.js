@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper', '$timeout', function($state, maHelper, $timeout) {
+angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function($state, MaHelper, $timeout) {
     return {
         restrict: 'E',
         scope: {
@@ -72,7 +72,7 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'maHelper'
             };
 
             scope.onKeypress = function(event, item) {
-                if (event.keyCode === maHelper.keyCode.enter) {
+                if (event.keyCode === MaHelper.keyCode.enter) {
                     scope.onSelect(item);
                 }
             };

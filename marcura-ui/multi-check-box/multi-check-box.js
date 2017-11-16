@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout', 'maValidators', function($timeout, maValidators) {
+angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout', 'MaValidators', function($timeout, MaValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -149,7 +149,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
             }
 
             if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(maValidators.isNotEmpty());
+                validators.unshift(MaValidators.isNotEmpty());
             }
 
             if (hasIsNotEmptyValidator) {

@@ -1,16 +1,16 @@
-describe('maHelper service', function () {
-    var maValidators,
-        maHelper;
+describe('MaValidators service', function () {
+    var MaValidators,
+        MaHelper;
 
     beforeEach(module('marcuraUI.services'));
-    beforeEach(inject(function (_maHelper_, _maValidators_) {
-        maHelper = _maHelper_;
-        maValidators = _maValidators_;
+    beforeEach(inject(function (_MaHelper_, _MaValidators_) {
+        MaHelper = _MaHelper_;
+        MaValidators = _MaValidators_;
     }));
 
     describe('isNotEmpty method', function () {
         it('creates a validator which indicates whether a specified value is not empty', function () {
-            var validator = maValidators.isNotEmpty();
+            var validator = MaValidators.isNotEmpty();
 
             expect(validator.name).toEqual('IsNotEmpty');
             expect(validator.validate('Paul Smith')).toEqual(true);
@@ -19,34 +19,34 @@ describe('maHelper service', function () {
 
     describe('isGreater method', function () {
         it('creates a validator which indicates whether a specified value is greater than other value', function () {
-            var validator = maValidators.isGreater();
+            var validator = MaValidators.isGreater();
 
             expect(validator.name).toEqual('IsGreater');
-            expect(maValidators.isGreater(1).validate(2)).toEqual(true);
+            expect(MaValidators.isGreater(1).validate(2)).toEqual(true);
         });
     });
 
     describe('isLess method', function () {
         it('creates a validator which indicates whether a specified value is less than other value', function () {
-            expect(maValidators.isLess().name).toEqual('IsLess');
-            expect(maValidators.isLess(2).validate(1)).toEqual(true);
+            expect(MaValidators.isLess().name).toEqual('IsLess');
+            expect(MaValidators.isLess(2).validate(1)).toEqual(true);
         });
     });
 
     describe('isNumber method', function () {
         it('creates a validator which indicates whether a specified value is a number', function () {
-            expect(maValidators.isNumber().name).toEqual('IsNumber');
-            expect(maValidators.isNumber().validate('20.10')).toEqual(true);
-            expect(maValidators.isNumber(true).validate('')).toEqual(true);
+            expect(MaValidators.isNumber().name).toEqual('IsNumber');
+            expect(MaValidators.isNumber().validate('20.10')).toEqual(true);
+            expect(MaValidators.isNumber(true).validate('')).toEqual(true);
         });
     });
 
     describe('isEmail method', function () {
         it('creates a validator which indicates whether a specified value is an email', function () {
-            expect(maValidators.isEmail().name).toEqual('IsEmail');
-            expect(maValidators.isEmail().validate('p.smith@gmail.com')).toEqual(true);
-            expect(maValidators.isEmail().validate('p.smithgmail.com')).toEqual(false);
-            expect(maValidators.isEmail(true).validate('')).toEqual(true);
+            expect(MaValidators.isEmail().name).toEqual('IsEmail');
+            expect(MaValidators.isEmail().validate('p.smith@gmail.com')).toEqual(true);
+            expect(MaValidators.isEmail().validate('p.smithgmail.com')).toEqual(false);
+            expect(MaValidators.isEmail(true).validate('')).toEqual(true);
         });
     });
 });

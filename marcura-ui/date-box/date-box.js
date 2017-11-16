@@ -4,7 +4,7 @@ angular.module('marcuraUI.components')
             return this;
         };
     })
-    .directive('maDateBox', ['$timeout', 'MaDate', 'maHelper', 'maValidators', function ($timeout, MaDate, maHelper, maValidators) {
+    .directive('maDateBox', ['$timeout', 'MaDate', 'MaHelper', 'MaValidators', function ($timeout, MaDate, MaHelper, MaValidators) {
         return {
             restrict: 'E',
             scope: {
@@ -316,7 +316,7 @@ angular.module('marcuraUI.components')
                     }
 
                     if (!hasIsNotEmptyValidator && isRequired) {
-                        validators.unshift(maValidators.isNotEmpty());
+                        validators.unshift(MaValidators.isNotEmpty());
                     }
 
                     if (hasIsNotEmptyValidator) {
@@ -324,11 +324,11 @@ angular.module('marcuraUI.components')
                     }
 
                     if (!minDate.isEmpty()) {
-                        validators.push(maValidators.isGreaterOrEqual(minDate, true));
+                        validators.push(MaValidators.isGreaterOrEqual(minDate, true));
                     }
 
                     if (!maxDate.isEmpty()) {
-                        validators.push(maValidators.isLessOrEqual(maxDate, true));
+                        validators.push(MaValidators.isLessOrEqual(maxDate, true));
                     }
                 };
 
@@ -504,7 +504,7 @@ angular.module('marcuraUI.components')
 
                 scope.onFocus = function () {
                     // Use safeApply to avoid apply error when Reset icon is clicked.
-                    maHelper.safeApply(function () {
+                    MaHelper.safeApply(function () {
                         scope.isFocused = true;
                     });
                 };
@@ -523,7 +523,7 @@ angular.module('marcuraUI.components')
 
                 scope.onKeydown = function (event) {
                     // Ignore tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                         return;
                     }
 
@@ -532,7 +532,7 @@ angular.module('marcuraUI.components')
 
                 scope.onKeyup = function (event) {
                     // Ignore tab key.
-                    if (event.keyCode === maHelper.keyCode.tab || event.keyCode === maHelper.keyCode.shift) {
+                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
                         return;
                     }
 
@@ -564,7 +564,7 @@ angular.module('marcuraUI.components')
                 scope.onTimeKeydown = function (event) {
                     if (
                         // Allow backspace, tab, delete.
-                        $.inArray(event.keyCode, [maHelper.keyCode.backspace, maHelper.keyCode.tab, maHelper.keyCode.delete]) !== -1 ||
+                        $.inArray(event.keyCode, [MaHelper.keyCode.backspace, MaHelper.keyCode.tab, MaHelper.keyCode.delete]) !== -1 ||
                         // Allow left, right.
                         (event.keyCode === 37 || event.keyCode === 39)) {
                         return;

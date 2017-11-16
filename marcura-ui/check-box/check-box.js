@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$timeout', '$parse', 'maValidators', function (maHelper, $timeout, $parse, maValidators) {
+angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -145,7 +145,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
             };
 
             scope.onKeypress = function (event) {
-                if (event.keyCode === maHelper.keyCode.space) {
+                if (event.keyCode === MaHelper.keyCode.space) {
                     // Prevent page from scrolling down.
                     event.preventDefault();
 
@@ -184,7 +184,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['maHelper', '$ti
             }
 
             if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(maValidators.isNotEmpty());
+                validators.unshift(MaValidators.isNotEmpty());
             }
 
             if (hasIsNotEmptyValidator) {

@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maButton', ['maHelper', '$sce', function (maHelper, $sce) {
+angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce', function (MaHelper, $sce) {
     return {
         restrict: 'E',
         scope: {
@@ -53,7 +53,7 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', '$sce'
 
             var setModifiers = function (oldModifiers) {
                 // Remove previous modifiers first.
-                if (!maHelper.isNullOrWhiteSpace(oldModifiers)) {
+                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
                     oldModifiers = oldModifiers.split(' ');
 
                     for (var i = 0; i < oldModifiers.length; i++) {
@@ -63,7 +63,7 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', '$sce'
 
                 var modifiers = '';
 
-                if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
+                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
                     modifiers = scope.modifier.split(' ');
                 }
 
@@ -89,7 +89,7 @@ angular.module('marcuraUI.components').directive('maButton', ['maHelper', '$sce'
             };
 
             scope.getText = function () {
-                return $sce.trustAsHtml(scope.text ? scope.text : maHelper.html.nbsp);
+                return $sce.trustAsHtml(scope.text ? scope.text : MaHelper.html.nbsp);
             };
 
             scope.$watch('modifier', function (newValue, oldValue) {

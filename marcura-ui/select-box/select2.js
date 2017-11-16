@@ -5,7 +5,7 @@
  * When AJAX mode is on, your value will be an object (or an array of objects) of the data used by Select2.
  * This change is so that you do not have to do an additional query yourself on top of Select2 own query.
  */
-angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('maSelect2', ['maSelect2Config', '$timeout', 'maHelper', function (maSelect2Config, $timeout, maHelper) {
+angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('maSelect2', ['maSelect2Config', '$timeout', 'MaHelper', function (maSelect2Config, $timeout, MaHelper) {
     // The configuration options passed to $.fn.select2(). See http://select2.github.io/select2/#documentation.
     var options = {};
 
@@ -109,7 +109,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                                 var viewValue = controller.$viewValue;
 
                                 if (opts.ajax) {
-                                    viewValue = maHelper.isJson(controller.$viewValue) ? JSON.parse(controller.$viewValue) : controller.$viewValue;
+                                    viewValue = MaHelper.isJson(controller.$viewValue) ? JSON.parse(controller.$viewValue) : controller.$viewValue;
 
                                     // It might be an id of the item first time, the next time it's a real item.
                                     if (angular.isObject(viewValue)) {

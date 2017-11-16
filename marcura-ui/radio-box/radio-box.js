@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$timeout', '$sce', 'maValidators', function (maHelper, $timeout, $sce, maValidators) {
+angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$timeout', '$sce', 'MaValidators', function (MaHelper, $timeout, $sce, MaValidators) {
     var radioBoxes = {};
 
     return {
@@ -51,7 +51,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
 
             var setModifiers = function (oldModifiers) {
                 // Remove previous modifiers first.
-                if (!maHelper.isNullOrWhiteSpace(oldModifiers)) {
+                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
                     oldModifiers = oldModifiers.split(' ');
 
                     for (var i = 0; i < oldModifiers.length; i++) {
@@ -61,7 +61,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
 
                 var modifiers = '';
 
-                if (!maHelper.isNullOrWhiteSpace(scope.modifier)) {
+                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
                     modifiers = scope.modifier.split(' ');
                 }
 
@@ -146,7 +146,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
 
             scope.getItemText = function () {
                 if (scope.hideText) {
-                    return maHelper.html.nbsp;
+                    return MaHelper.html.nbsp;
                 }
 
                 var text;
@@ -160,14 +160,14 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
                 }
 
                 if (!angular.isString(text) || !text) {
-                    text = maHelper.html.nbsp;
+                    text = MaHelper.html.nbsp;
                 }
 
                 return $sce.trustAsHtml(text);
             };
 
             scope.hasText = function () {
-                return scope.getItemText() !== maHelper.html.nbsp;
+                return scope.getItemText() !== MaHelper.html.nbsp;
             };
 
             scope.isChecked = function () {
@@ -256,7 +256,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             };
 
             scope.onKeypress = function (event) {
-                if (event.keyCode === maHelper.keyCode.space) {
+                if (event.keyCode === MaHelper.keyCode.space) {
                     // Prevent page from scrolling down.
                     event.preventDefault();
 
@@ -295,7 +295,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['maHelper', '$ti
             }
 
             if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(maValidators.isNotEmpty());
+                validators.unshift(MaValidators.isNotEmpty());
             }
 
             if (hasIsNotEmptyValidator) {
