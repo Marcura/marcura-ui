@@ -23,8 +23,8 @@ angular.module('marcuraUI.components')
                 parser: '=',
                 validators: '=',
                 instance: '=',
-                minDate: '=',
-                maxDate: '=',
+                min: '=',
+                max: '=',
                 changeTimeout: '=',
                 placeholder: '@'
             },
@@ -97,8 +97,8 @@ angular.module('marcuraUI.components')
                     initialDateOffset = 0,
                     validators = [],
                     isRequired = scope.isRequired,
-                    minDate = new MaDate(scope.minDate),
-                    maxDate = new MaDate(scope.maxDate),
+                    minDate = new MaDate(scope.min),
+                    maxDate = new MaDate(scope.max),
                     failedValidator = null,
                     changePromise,
                     changeTimeout = Number(scope.changeTimeout),
@@ -184,7 +184,7 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
-                    maxDate = new MaDate(scope.maxDate);
+                    maxDate = new MaDate(scope.max);
 
                     // Pikaday does no support clearing maxDate by providing null value.
                     // So we just set maxDate to 100 years ahead.
@@ -200,7 +200,7 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
-                    minDate = new MaDate(scope.minDate);
+                    minDate = new MaDate(scope.min);
 
                     // Pikaday does no support clearing minDate by providing null value.
                     // So we just set minDate to 100 years before.

@@ -102,14 +102,14 @@
     <div class="nodes-item">
         <ma-date-box
             value="date9"
-            min-date="date9Min"
-            max-date="date9Max"
+            min="date9Min"
+            max="date9Max"
             change="change1(maValue)">
         </ma-date-box>
     </div>
     <div class="nodes-item">
-        <pre>minDate: {{date9Min}}
-maxDate: {{date9Max}}</pre>
+        <pre>min: {{date9Min}}
+max: {{date9Max}}</pre>
     </div>
     <div class="nodes-item">
         <pre>{{date9 || 'null'}}</pre>
@@ -145,7 +145,7 @@ maxDate: {{date9Max}}</pre>
         <pre>{{date11 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
-        <h2>An example of maxDate controlled by other DateBox</h2>
+        <h2>An example of max date controlled by another DateBox</h2>
     </div>
     <div class="nodes-item">
         Start date cannot be greater than end date.
@@ -160,7 +160,7 @@ maxDate: {{date9Max}}</pre>
                     <ma-date-box
                         id="date20"
                         value="date20"
-                        max-date="date21"
+                        max="date21"
                         can-reset="true"
                         change="change20(maValue)"
                         validators="[date20Validator]"
@@ -181,7 +181,7 @@ maxDate: {{date9Max}}</pre>
             <div class="form-group">
                 <div class="form-col col-xs-12">
                     <pre>// Start:
-maxDate: {{date21 || 'null'}}
+max: {{date21 || 'null'}}
 value: {{date20 || 'null'}}
 failedValidator: {{(date20DateBox.failedValidator() || null) | json}}</pre>
                 </div>
@@ -214,7 +214,7 @@ value: {{date21 || 'null'}}</pre>
                     <ma-date-box
                         id="start"
                         value="start"
-                        max-date="end"
+                        max="end"
                         can-reset="true"
                         change-timeout="1000"
                         validate="validateStart(maValue)"
@@ -228,8 +228,8 @@ value: {{date21 || 'null'}}</pre>
                     <ma-date-box
                         id="end"
                         value="end"
-                        min-date="start"
-                        max-date="now"
+                        min="start"
+                        max="now"
                         can-reset="true"
                         change-timeout="1000"
                         validate="validateEnd(maValue)"
@@ -240,7 +240,7 @@ value: {{date21 || 'null'}}</pre>
             <div class="form-group">
                 <div class="form-col col-xs-12">
                     <pre>// Start:
-maxDate: {{end || 'null'}}
+max: {{end || 'null'}}
 value: {{start || 'null'}}</pre>
                 </div>
             </div>
