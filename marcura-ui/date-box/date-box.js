@@ -661,7 +661,7 @@ angular.module('marcuraUI.components')
                     var date = parseDate(dateElement.val().trim());
                     date.offset(timeZoneOffset);
 
-                    if (dateName === 'maxDate') {
+                    if (dateName === 'max') {
                         setMaxDate();
                     } else {
                         setMinDate();
@@ -708,12 +708,12 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                scope.$watch('maxDate', function (newValue, oldValue) {
-                    minMaxDateWatcher(newValue, oldValue, 'maxDate');
+                scope.$watch('max', function (newValue, oldValue) {
+                    minMaxDateWatcher(newValue, oldValue, 'max');
                 });
 
-                scope.$watch('minDate', function (newValue, oldValue) {
-                    minMaxDateWatcher(newValue, oldValue, 'minDate');
+                scope.$watch('min', function (newValue, oldValue) {
+                    minMaxDateWatcher(newValue, oldValue, 'min');
                 });
 
                 // Prepare API instance.
