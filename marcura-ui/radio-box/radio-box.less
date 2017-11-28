@@ -28,7 +28,7 @@
         }
     }
 
-    &-is-invalid&-is-touched {
+    &-is-invalid&-is-touched:not( &-is-disabled) {
         &.ma-radio-box-is-focused .ma-radio-box-inner {
             .box-shadow(@input-shadow-invalid);
         }
