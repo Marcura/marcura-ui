@@ -471,9 +471,11 @@ angular.module('marcuraUI.components')
                     keydownValue = angular.element(event.target).val();
 
                     if (scope.type === 'number') {
+                        console.log('event.keyCode:', event.keyCode);
+
                         if (
                             // Allow backspace, tab, delete.
-                            $.inArray(event.keyCode, [MaHelper.keyCode.backspace, MaHelper.keyCode.delete, MaHelper.keyCode.home, MaHelper.keyCode.end, MaHelper.keyCode.period, MaHelper.keyCode.dash, MaHelper.keyCode.dash2]) !== -1 ||
+                            $.inArray(event.keyCode, [MaHelper.keyCode.backspace, MaHelper.keyCode.delete, MaHelper.keyCode.home, MaHelper.keyCode.end, MaHelper.keyCode.period, MaHelper.keyCode.numLock.period, MaHelper.keyCode.dash, MaHelper.keyCode.dash2]) !== -1 ||
                             // Allow left, right.
                             (event.keyCode === 37 || event.keyCode === 39)) {
                             return;

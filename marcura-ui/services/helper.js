@@ -20,6 +20,9 @@ angular.module('marcuraUI.services').factory('MaHelper', ['MaDate', '$rootScope'
             up: 38,
             dash: 109,
             dash2: 189,
+            numLock: {
+                period: 110
+            }
         },
 
         html: {
