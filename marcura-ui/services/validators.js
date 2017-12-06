@@ -68,6 +68,26 @@ angular.module('marcuraUI.services').factory('MaValidators', ['MaHelper', 'MaDat
             };
         },
 
+        isLengthGreaterOrEqual: function (length, allowEmpty) {
+            var message = null;
+
+            if (length) {
+                message = 'Length cannot be less than ' + formatValueToCompare(length) + '.';
+            }
+
+            return {
+                name: 'isLengthGreaterOrEqual',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isLengthGreaterOrEqual(value, length);
+                }
+            };
+        },
+
         isLess: function (valueToCompare, allowEmpty) {
             var message = null;
 
@@ -104,6 +124,26 @@ angular.module('marcuraUI.services').factory('MaValidators', ['MaHelper', 'MaDat
                     }
 
                     return MaHelper.isLessOrEqual(value, valueToCompare);
+                }
+            };
+        },
+
+        isLengthLessOrEqual: function (length, allowEmpty) {
+            var message = null;
+
+            if (length) {
+                message = 'Length cannot be greater than ' + formatValueToCompare(length) + '.';
+            }
+
+            return {
+                name: 'isLengthLessOrEqual',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isLengthLessOrEqual(value, length);
                 }
             };
         },

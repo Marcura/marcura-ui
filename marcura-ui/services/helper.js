@@ -183,6 +183,11 @@ angular.module('marcuraUI.services').factory('MaHelper', ['MaDate', '$rootScope'
             return value >= valueToCompare;
         },
 
+        isLengthGreaterOrEqual: function (value, length) {
+            var valueLength = (value || '').toString().length;
+            return valueLength >= length;
+        },
+
         isLess: function (value, valueToCompare) {
             var date1 = new MaDate(value),
                 date2 = new MaDate(valueToCompare),
@@ -209,6 +214,11 @@ angular.module('marcuraUI.services').factory('MaHelper', ['MaDate', '$rootScope'
             }
 
             return value <= valueToCompare;
+        },
+
+        isLengthLessOrEqual: function (value, length) {
+            var valueLength = (value || '').toString().length;
+            return valueLength <= length;
         },
 
         isNumber: function (value) {

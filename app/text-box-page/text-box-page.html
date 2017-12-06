@@ -117,6 +117,25 @@ max: {{number2Max}}</pre>
         <pre>{{(number2 || null) | json}}</pre>
     </div>
     <div class="nodes-item">
+        <h2>Text min and max</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-text-box
+            value="text10"
+            min="text10Min"
+            max="text10Max"
+            is-required="true"
+            can-reset="true">
+        </ma-text-box>
+    </div>
+    <div class="nodes-item">
+        <pre>min: {{text10Min}}
+max: {{text10Max}}</pre>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(text10 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
         <h2>Number with a default value</h2>
     </div>
     <div class="nodes-item">

@@ -105,7 +105,9 @@ angular.module('marcuraUI.components')
                     failedValidator = null,
                     decimals = scope.configuration.decimals,
                     hasDefaultValue = attributes.defaultValue !== undefined,
-                    defaultValue = MaHelper.isNullOrUndefined(scope.defaultValue) ? '' : scope.defaultValue;
+                    defaultValue = MaHelper.isNullOrUndefined(scope.defaultValue) ? '' : scope.defaultValue,
+                    hasMin = typeof scope.min === 'number',
+                    hasMax = typeof scope.max === 'number';
 
                 if (scope.type === 'number') {
                     defaultValue = typeof scope.defaultValue === 'number' ? scope.defaultValue : null;
@@ -280,13 +282,21 @@ angular.module('marcuraUI.components')
 
                     if (scope.type === 'number') {
                         validators.push(MaValidators.isNumber(true));
+                    }
 
-                        if (typeof scope.min === 'number') {
+                    if (hasMin) {
+                        if (scope.type === 'number') {
                             validators.push(MaValidators.isGreaterOrEqual(scope.min, true));
+                        } else {
+                            validators.push(MaValidators.isLengthGreaterOrEqual(scope.min, true));
                         }
+                    }
 
-                        if (typeof scope.max === 'number') {
+                    if (hasMax) {
+                        if (scope.type === 'number') {
                             validators.push(MaValidators.isLessOrEqual(scope.max, true));
+                        } else {
+                            validators.push(MaValidators.isLengthLessOrEqual(scope.max, true));
                         }
                     }
 

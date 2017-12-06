@@ -5,6 +5,9 @@ function textBoxPageController($scope) {
     $scope.text4 = '';
     $scope.text5 = '';
     $scope.text7 = 'Vladivostok';
+    $scope.text10 = 'Vladivostok';
+    $scope.text10Min = 3;
+    $scope.text10Max = 20;
     $scope.number1 = 4500;
     $scope.number2 = 2500.47;
     $scope.number2Min = 1000.50;
