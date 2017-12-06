@@ -76,7 +76,7 @@ angular.module('marcuraUI.services').factory('MaValidators', ['MaHelper', 'MaDat
             }
 
             return {
-                name: 'isLengthGreaterOrEqual',
+                name: 'IsLengthGreaterOrEqual',
                 message: message,
                 validate: function (value) {
                     if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
@@ -136,7 +136,7 @@ angular.module('marcuraUI.services').factory('MaValidators', ['MaHelper', 'MaDat
             }
 
             return {
-                name: 'isLengthLessOrEqual',
+                name: 'IsLengthLessOrEqual',
                 message: message,
                 validate: function (value) {
                     if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
