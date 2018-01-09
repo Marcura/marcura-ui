@@ -525,11 +525,12 @@ angular.module('marcuraUI.services').factory('MaDate', [function () {
 
     /*
         Overloads:
-        - new MaDate() +
-        - new MaDate(Date) +
-        - new MaDate(MaDate) +
-        - new MaDate(dateString) +
-        - new MaDate(dateString, culture) +
+        - new MaDate()
+        - new MaDate(useLocalTimeZone)
+        - new MaDate(Date)
+        - new MaDate(MaDate)
+        - new MaDate(dateString)
+        - new MaDate(dateString, culture)
         - new MaDate(year)
         - new MaDate(year, month)
         - new MaDate(year, month, date)
@@ -559,6 +560,9 @@ angular.module('marcuraUI.services').factory('MaDate', [function () {
                 }
 
                 this._offset = date.offset();
+            } else if (typeof date === 'boolean') {
+                this._date = new Date();
+                this._offset = -this._date.getTimezoneOffset();
             } else if (typeof date === 'string') {
                 // Parse date.
                 date = parse(date);
@@ -597,6 +601,10 @@ angular.module('marcuraUI.services').factory('MaDate', [function () {
 
     MaDate.createEmpty = function () {
         return new MaDate(null);
+    };
+
+    MaDate.createLocal = function () {
+        return new MaDate(true);
     };
 
     MaDate.prototype.copy = function () {

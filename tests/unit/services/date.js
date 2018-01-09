@@ -13,12 +13,24 @@ describe('MaDate', function () {
         it('creates empty instance if passed date is incorrect', function () {
             expect(new MaDate(undefined).isEmpty()).toEqual(true);
             expect(new MaDate(null).isEmpty()).toEqual(true);
-            expect(new MaDate(true).isEmpty()).toEqual(true);
         });
 
         it('uses current date if date is not passed', function () {
             var date = new MaDate();
             expect(date.isEqual(new Date())).toEqual(true);
+        });
+
+        it('uses local time zone', function () {
+            var date = new Date(),
+                maDate = new MaDate(true);
+            expect(maDate.offset()).toEqual(-date.getTimezoneOffset());
+            expect(maDate.date()).toEqual(date.getDate());
+            expect(maDate.month()).toEqual(date.getMonth());
+            expect(maDate.year()).toEqual(date.getFullYear());
+            expect(maDate.hour()).toEqual(date.getHours());
+            expect(maDate.minute()).toEqual(date.getMinutes());
+            expect(maDate.second()).toEqual(date.getSeconds());
+            expect(maDate.millisecond()).toEqual(date.getMilliseconds());
         });
 
         it('uses date string', function () {
@@ -509,6 +521,12 @@ describe('MaDate', function () {
     describe('createEmpty method', function () {
         it('creates empty instance', function () {
             expect(MaDate.createEmpty().isEmpty()).toEqual(true);
+        });
+    });
+
+    describe('createLocal method', function () {
+        it('creates date in local time zone', function () {
+            expect(MaDate.createLocal().format('yyyy-MM-ddTHH:mm:ss.fffZ')).toEqual(new MaDate(true).format('yyyy-MM-ddTHH:mm:ss.fffZ'));
         });
     });
 
