@@ -1,23 +1,18 @@
 @import 'marcura-ui/button/button-variables.less';
 @import 'marcura-ui/pager/pager-variables.less';
-
 @font-family: 'Helvetica Neue',
 'Helvetica',
 sans-serif;
-
 @heading-color: #4A4A4A;
 @text-color: #333333;
 @text-color-light: #7d7d87;
 @text-color-disabled: #7d7d87;
-
 @color-primary: #36a4ff;
 @color-danger: #d0011b;
 @color-disabled: #eeeeee;
-
 @background-color-darker-light: #e6e6e6;
 @background-color-light: #f2f4f5;
 @background-color-dark: #e6e7e8;
-
 @input-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
 @input-shadow-focused: inset 0 1px 1px rgba(0, 0, 0, .075),
 0 0 8px rgba(102, 175, 233, .6);
@@ -25,10 +20,8 @@ sans-serif;
 0 0 6px #ce8483;
 @border-color: #c3c3cd;
 @input-background-color: #ffffff;
-
 @content-margin: 10px;
 @content-padding: 10px;
-
 @screen-xs: 480px;
 @screen-xs-min: @screen-xs;
 @screen-sm: 768px;
@@ -37,14 +30,18 @@ sans-serif;
 @screen-md-min: @screen-md;
 @screen-lg: 1200px;
 @screen-lg-min: @screen-lg;
-
 // So media queries don't overlap when required, provide a maximum.
 @screen-xxs-max: (@screen-xs-min - 1);
 @screen-xs-max: (@screen-sm-min - 1);
 @screen-sm-max: (@screen-md-min - 1);
 @screen-md-max: (@screen-lg-min - 1);
-
 @component-height: 30px;
+
+.cut-overflow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .user-select(@value) {
     -webkit-user-select: @value;
@@ -96,7 +93,6 @@ sans-serif;
     padding: 0;
     margin: 0;
     outline: 0;
-
     &::-ms-clear,
     &::-ms-reveal {
         display: none;
@@ -116,17 +112,14 @@ sans-serif;
         border-left: 0;
         .box-shadow(none);
     }
-
     .ma-button-reset .ma-button-icon {
         font-size: 20px;
         text-shadow: none;
         color: #bebebe;
     }
-
     .ma-button-reset.ma-button-is-disabled {
         background-color: @color-disabled;
     }
-
     .ma-button-reset.ma-button-is-disabled .ma-button-icon {
         color: inherit;
         opacity: 0.45;
@@ -136,7 +129,6 @@ sans-serif;
 .input-reset-button-disabled {
     .ma-button-reset.ma-button-is-disabled {
         background-color: #ffffff;
-
         .ma-button-icon {
             opacity: 0.15;
         }

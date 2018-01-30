@@ -369,26 +369,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function () {
-    return {
-        restrict: 'E',
-        scope: {
-            costItems: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-grid ma-grid-costs"\
-                costs grid\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            console.log('scope.costItems:', scope.costItems);
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function () {
         this.$get = function () {
@@ -1139,6 +1119,54 @@ if (!String.prototype.endsWith) {
             }
         };
     }]);})();
+(function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function () {
+    return {
+        restrict: 'E',
+        scope: {
+            costItems: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-grid ma-grid-costs"\
+                costs grid\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            console.log('scope.costItems:', scope.costItems);
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            cutOverflow: '=',
+            for: '@',
+            isRequired: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-label" ng-class="{\
+                    \'ma-label-is-required\': isRequired,\
+                    \'ma-label-has-content\': hasContent,\
+                    \'ma-label-cut-overflow\': cutOverflow\
+                }">\
+                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            scope.hasContent = element.find('span').contents().length > 0;
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maGridOrder', ['$timeout', function ($timeout) {
     return {
         // maGridOrder should always be located inside maGrid.
@@ -1319,270 +1347,6 @@ if (!String.prototype.endsWith) {
                 });
 
                 setModifier('responsive-size', responsiveSize);
-            }
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            cutOverflow: '=',
-            for: '@',
-            isRequired: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-label" ng-class="{\
-                    \'ma-label-is-required\': isRequired,\
-                    \'ma-label-has-content\': hasContent,\
-                    \'ma-label-cut-overflow\': cutOverflow\
-                }">\
-                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            scope.hasContent = element.find('span').contents().length > 0;
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maMessage', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            type: '@',
-            state: '@',
-            size: '@',
-            textAlign: '@',
-            hasIcon: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-message{{cssClass}}">\
-                    <div class="ma-message-icon" ng-if="_hasIcon">\
-                        <i class="fa" ng-class="{\
-                            \'fa-info-circle\': _state === \'info\',\
-                            \'fa-check-circle\': _state === \'success\',\
-                            \'fa-exclamation-triangle\': _state === \'warning\',\
-                            \'fa-times-circle\': _state === \'danger\'\
-                        }"></i>\
-                    </div>\
-                    <div class="ma-message-text"><ng-transclude></ng-transclude></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            var type = scope.type || 'message',
-                size = scope.size ? scope.size : 'sm';
-            scope._hasIcon = scope.hasIcon === false ? false : true;
-
-            var setState = function () {
-                scope._state = scope.state || 'default';
-            };
-
-            var setCssClass = function () {
-                scope.cssClass = ' ma-message-' + type + ' ma-message-' + scope._state + ' ma-message-' + size;
-
-                if (scope.textAlign) {
-                    scope.cssClass += ' ma-message-text-align-' + scope.textAlign;
-                }
-
-                if (scope._hasIcon) {
-                    scope.cssClass += ' ma-message-has-icon';
-                }
-            };
-
-            scope.$watch('state', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setState();
-                setCssClass();
-            });
-
-            setState();
-            setCssClass();
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout', 'MaValidators', function ($timeout, MaValidators) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            itemTemplate: '=',
-            itemTextField: '@',
-            itemValueField: '@',
-            value: '=',
-            change: '&',
-            isDisabled: '=',
-            isRequired: '=',
-            validators: '=',
-            instance: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-multi-check-box" ng-class="{\
-                        \'ma-multi-check-box-is-disabled\': isDisabled,\
-                        \'ma-multi-check-box-is-invalid\': !isValid,\
-                        \'ma-multi-check-box-is-touched\': isTouched\
-                    }">\
-                    <div class="ma-multi-check-box-item" ng-repeat="item in items">\
-                        <div class="ma-multi-check-box-background" ng-click="onChange(item)"></div>\
-                        <ma-check-box\
-                            size="sm"\
-                            value="getItemMetadata(item).isSelected"\
-                            is-disabled="isDisabled">\
-                        </ma-check-box><div class="ma-multi-check-box-text">{{getItemText(item)}}</div>\
-                    </div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            var isObjectArray = scope.itemTextField || scope.itemValueField,
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false,
-                itemsMetadata = {};
-
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var validate = function (value) {
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            var setSelectedItems = function () {
-                if (scope.value && scope.value.length && scope.items && scope.items.length) {
-                    for (var j = 0; j < scope.value.length; j++) {
-                        for (var k = 0; k < scope.items.length; k++) {
-                            if (!isObjectArray) {
-                                if (scope.items[k] === scope.value[j]) {
-                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
-                                }
-                            } else if (scope.itemValueField) {
-                                if (scope.items[k][scope.itemValueField] === scope.value[j][scope.itemValueField]) {
-                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            scope.getItemMetadata = function (item) {
-                var itemValue = isObjectArray ? item[scope.itemValueField] : item;
-
-                if (!itemsMetadata[itemValue]) {
-                    itemsMetadata[itemValue] = {};
-                    itemsMetadata[itemValue].item = item;
-                }
-
-                return itemsMetadata[itemValue];
-            };
-
-            scope.getItemText = function (item) {
-                if (scope.itemTemplate) {
-                    return scope.itemTemplate(item);
-                } else if (!isObjectArray) {
-                    return item;
-                } else if (scope.itemTextField) {
-                    return item[scope.itemTextField];
-                }
-            };
-
-            scope.onChange = function (item) {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                var oldValue = scope.value,
-                    value = [],
-                    itemMetadata = scope.getItemMetadata(item);
-
-                itemMetadata.isSelected = !itemMetadata.isSelected;
-
-                for (var itemValue in itemsMetadata) {
-                    if (itemsMetadata.hasOwnProperty(itemValue)) {
-                        if (itemsMetadata[itemValue].isSelected) {
-                            value.push(itemsMetadata[itemValue].item);
-                        }
-                    }
-                }
-
-                scope.value = value.length ? value : null;
-
-                $timeout(function () {
-                    validate(scope.value);
-
-                    scope.change({
-                        maValue: scope.value,
-                        maOldValue: oldValue
-                    });
-                });
-            };
-
-            scope.$watch('value', function (newValue, oldValue) {
-                if (angular.equals(newValue, oldValue)) {
-                    return;
-                }
-
-                setSelectedItems();
-            });
-
-            // Set initial value.
-            $timeout(function () {
-                setSelectedItems();
-            });
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate(scope.value);
-                };
             }
         }
     };
@@ -1892,66 +1656,227 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
+(function(){angular.module('marcuraUI.components').directive('maMessage', [function () {
     return {
         restrict: 'E',
+        transclude: true,
         scope: {
-            steps: '=',
-            currentStep: '='
+            type: '@',
+            state: '@',
+            size: '@',
+            textAlign: '@',
+            hasIcon: '='
         },
         replace: true,
         template: function () {
             var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
+                <div class="ma-message{{cssClass}}">\
+                    <div class="ma-message-icon" ng-if="_hasIcon">\
+                        <i class="fa" ng-class="{\
+                            \'fa-info-circle\': _state === \'info\',\
+                            \'fa-check-circle\': _state === \'success\',\
+                            \'fa-exclamation-triangle\': _state === \'warning\',\
+                            \'fa-times-circle\': _state === \'danger\'\
+                        }"></i>\
                     </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
+                    <div class="ma-message-text"><ng-transclude></ng-transclude></div>\
+                </div>';
 
             return html;
         },
         link: function (scope) {
-            scope.calculateLeft = function (stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
+            var type = scope.type || 'message',
+                size = scope.size ? scope.size : 'sm';
+            scope._hasIcon = scope.hasIcon === false ? false : true;
+
+            var setState = function () {
+                scope._state = scope.state || 'default';
             };
 
-            scope.calculateProgress = function () {
-                if (!scope.currentStep) {
-                    return 0;
+            var setCssClass = function () {
+                scope.cssClass = ' ma-message-' + type + ' ma-message-' + scope._state + ' ma-message-' + size;
+
+                if (scope.textAlign) {
+                    scope.cssClass += ' ma-message-text-align-' + scope.textAlign;
                 }
 
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
+                if (scope._hasIcon) {
+                    scope.cssClass += ' ma-message-has-icon';
+                }
+            };
+
+            scope.$watch('state', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
                 }
 
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+                setState();
+                setCssClass();
+            });
+
+            setState();
+            setCssClass();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            itemTemplate: '=',
+            itemTextField: '@',
+            itemValueField: '@',
+            value: '=',
+            change: '&',
+            isDisabled: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+            canUnselect: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-radio-button" ng-class="{\
+                        \'ma-radio-button-is-disabled\': isDisabled,\
+                        \'ma-radio-button-is-invalid\': !isValid,\
+                        \'ma-radio-button-is-touched\': isTouched,\
+                        \'ma-radio-button-can-unselect\': canUnselect\
+                    }">\
+                    <div class="ma-radio-button-item" ng-class="{\
+                            \'ma-radio-button-item-is-selected\': isItemSelected(item)\
+                        }" ng-style="{ width: (100 / items.length) + \'%\' }"\
+                        ng-repeat="item in items">\
+                        <ma-button\
+                            class="ma-button-radio"\
+                            text="{{getItemText(item)}}"\
+                            modifier="simple"\
+                            size="xs"\
+                            is-disabled="isDisabled"\
+                            click="onChange(item)">\
+                        </ma-button>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            var isObjectArray = scope.itemTextField || scope.itemValueField,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var validate = function (value) {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
             };
 
-            scope.isCurrentStep = function (stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
+            scope.getItemText = function (item) {
+                if (scope.itemTemplate) {
+                    return scope.itemTemplate(item);
+                } else if (!isObjectArray) {
+                    return item;
+                } else if (scope.itemTextField) {
+                    return item[scope.itemTextField];
+                }
             };
+
+            scope.isItemSelected = function (item) {
+                if (!isObjectArray) {
+                    return item === scope.value;
+                } else if (scope.itemValueField) {
+                    return item && scope.value &&
+                        item[scope.itemValueField] === scope.value[scope.itemValueField];
+                }
+
+                return false;
+            };
+
+            scope.onChange = function (item) {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                var oldValue = scope.value,
+                    hasChanged = true;
+                scope.value = item;
+
+                // Check that value has changed.
+                if (!isObjectArray) {
+                    hasChanged = oldValue !== item;
+                } else if (scope.itemValueField) {
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item[scope.itemValueField])) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
+                    }
+                } else {
+                    // Compare objects if itemValueField is not provided.
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item)) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
+                    }
+                }
+
+                // Remove selection if the same item is selected.
+                if (scope.canUnselect && !hasChanged) {
+                    scope.value = null;
+                }
+
+                if (hasChanged || (scope.canUnselect && !hasChanged)) {
+                    $timeout(function () {
+                        validate(scope.value);
+
+                        scope.change({
+                            maValue: scope.value,
+                            maOldValue: oldValue
+                        });
+                    });
+                }
+            };
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate(scope.value);
+                };
+            }
         }
     };
 }]);})();
@@ -2282,167 +2207,6 @@ if (!String.prototype.endsWith) {
             });
 
             setTabindex();
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            itemTemplate: '=',
-            itemTextField: '@',
-            itemValueField: '@',
-            value: '=',
-            change: '&',
-            isDisabled: '=',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
-            canUnselect: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-radio-button" ng-class="{\
-                        \'ma-radio-button-is-disabled\': isDisabled,\
-                        \'ma-radio-button-is-invalid\': !isValid,\
-                        \'ma-radio-button-is-touched\': isTouched,\
-                        \'ma-radio-button-can-unselect\': canUnselect\
-                    }">\
-                    <div class="ma-radio-button-item" ng-class="{\
-                            \'ma-radio-button-item-is-selected\': isItemSelected(item)\
-                        }" ng-style="{ width: (100 / items.length) + \'%\' }"\
-                        ng-repeat="item in items">\
-                        <ma-button\
-                            class="ma-button-radio"\
-                            text="{{getItemText(item)}}"\
-                            modifier="simple"\
-                            size="xs"\
-                            is-disabled="isDisabled"\
-                            click="onChange(item)">\
-                        </ma-button>\
-                    </div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            var isObjectArray = scope.itemTextField || scope.itemValueField,
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
-
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var validate = function (value) {
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.getItemText = function (item) {
-                if (scope.itemTemplate) {
-                    return scope.itemTemplate(item);
-                } else if (!isObjectArray) {
-                    return item;
-                } else if (scope.itemTextField) {
-                    return item[scope.itemTextField];
-                }
-            };
-
-            scope.isItemSelected = function (item) {
-                if (!isObjectArray) {
-                    return item === scope.value;
-                } else if (scope.itemValueField) {
-                    return item && scope.value &&
-                        item[scope.itemValueField] === scope.value[scope.itemValueField];
-                }
-
-                return false;
-            };
-
-            scope.onChange = function (item) {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                var oldValue = scope.value,
-                    hasChanged = true;
-                scope.value = item;
-
-                // Check that value has changed.
-                if (!isObjectArray) {
-                    hasChanged = oldValue !== item;
-                } else if (scope.itemValueField) {
-                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item[scope.itemValueField])) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
-                    }
-                } else {
-                    // Compare objects if itemValueField is not provided.
-                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item)) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
-                    }
-                }
-
-                // Remove selection if the same item is selected.
-                if (scope.canUnselect && !hasChanged) {
-                    scope.value = null;
-                }
-
-                if (hasChanged || (scope.canUnselect && !hasChanged)) {
-                    $timeout(function () {
-                        validate(scope.value);
-
-                        scope.change({
-                            maValue: scope.value,
-                            maOldValue: oldValue
-                        });
-                    });
-                }
-            };
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate(scope.value);
-                };
-            }
         }
     };
 }]);})();
@@ -3695,6 +3459,1029 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout', 'MaValidators', function ($timeout, MaValidators) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            itemTemplate: '=',
+            itemTextField: '@',
+            itemValueField: '@',
+            value: '=',
+            change: '&',
+            isDisabled: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-multi-check-box" ng-class="{\
+                        \'ma-multi-check-box-is-disabled\': isDisabled,\
+                        \'ma-multi-check-box-is-invalid\': !isValid,\
+                        \'ma-multi-check-box-is-touched\': isTouched\
+                    }">\
+                    <div class="ma-multi-check-box-item" ng-repeat="item in items">\
+                        <div class="ma-multi-check-box-background" ng-click="onChange(item)"></div>\
+                        <ma-check-box\
+                            size="sm"\
+                            value="getItemMetadata(item).isSelected"\
+                            is-disabled="isDisabled">\
+                        </ma-check-box><div class="ma-multi-check-box-text">{{getItemText(item)}}</div>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            var isObjectArray = scope.itemTextField || scope.itemValueField,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false,
+                itemsMetadata = {};
+
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var validate = function (value) {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            var setSelectedItems = function () {
+                if (scope.value && scope.value.length && scope.items && scope.items.length) {
+                    for (var j = 0; j < scope.value.length; j++) {
+                        for (var k = 0; k < scope.items.length; k++) {
+                            if (!isObjectArray) {
+                                if (scope.items[k] === scope.value[j]) {
+                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
+                                }
+                            } else if (scope.itemValueField) {
+                                if (scope.items[k][scope.itemValueField] === scope.value[j][scope.itemValueField]) {
+                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            scope.getItemMetadata = function (item) {
+                var itemValue = isObjectArray ? item[scope.itemValueField] : item;
+
+                if (!itemsMetadata[itemValue]) {
+                    itemsMetadata[itemValue] = {};
+                    itemsMetadata[itemValue].item = item;
+                }
+
+                return itemsMetadata[itemValue];
+            };
+
+            scope.getItemText = function (item) {
+                if (scope.itemTemplate) {
+                    return scope.itemTemplate(item);
+                } else if (!isObjectArray) {
+                    return item;
+                } else if (scope.itemTextField) {
+                    return item[scope.itemTextField];
+                }
+            };
+
+            scope.onChange = function (item) {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                var oldValue = scope.value,
+                    value = [],
+                    itemMetadata = scope.getItemMetadata(item);
+
+                itemMetadata.isSelected = !itemMetadata.isSelected;
+
+                for (var itemValue in itemsMetadata) {
+                    if (itemsMetadata.hasOwnProperty(itemValue)) {
+                        if (itemsMetadata[itemValue].isSelected) {
+                            value.push(itemsMetadata[itemValue].item);
+                        }
+                    }
+                }
+
+                scope.value = value.length ? value : null;
+
+                $timeout(function () {
+                    validate(scope.value);
+
+                    scope.change({
+                        maValue: scope.value,
+                        maOldValue: oldValue
+                    });
+                });
+            };
+
+            scope.$watch('value', function (newValue, oldValue) {
+                if (angular.equals(newValue, oldValue)) {
+                    return;
+                }
+
+                setSelectedItems();
+            });
+
+            // Set initial value.
+            $timeout(function () {
+                setSelectedItems();
+            });
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate(scope.value);
+                };
+            }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$sce', function ($sce) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-side-menu">\
+                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.isHidden" ng-class="{\
+                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
+                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
+                    }"\
+                    ng-click="onSelect(item)">\
+                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
+                    <div class="ma-side-menu-text" ng-bind-html="getItemText(item)"></div>\
+                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            scope.isItemSelected = function (item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                return item.isSelected;
+            };
+
+            scope.onSelect = function (item) {
+                if (item.isDisabled) {
+                    return;
+                }
+
+                if (!item.selector) {
+                    angular.forEach(scope.items, function (item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+                }
+
+                scope.select({
+                    item: item
+                });
+            };
+
+            scope.getItemText = function (item) {
+                return $sce.trustAsHtml(item.text);
+            };
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function ($state, MaHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-tabs">\
+                <ul class="ma-tabs-list clearfix">\
+                    <li class="ma-tabs-item" ng-repeat="item in items"\
+                        ng-focus="onFocus(item)"\
+                        ng-blur="onBlur(item)"\
+                        ng-keypress="onKeypress($event, item)"\
+                        ng-class="{\
+                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
+                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
+                            \'ma-tabs-item-is-focused\': item.isFocused\
+                        }"\
+                        ng-click="onSelect(item)">\
+                        <a class="ma-tabs-link" href="" tabindex="-1">\
+                            <span class="ma-tabs-text">{{item.text}}</span>\
+                        </a>\
+                    </li>\
+                </ul>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function (item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function (item) {
+                if (item.isDisabled || item.isSelected) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function (item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        item: item
+                    });
+                }
+            };
+
+            scope.onKeypress = function (event, item) {
+                if (event.keyCode === MaHelper.keyCode.enter) {
+                    scope.onSelect(item);
+                }
+            };
+
+            scope.onFocus = function (item) {
+                item.isFocused = true;
+            };
+
+            scope.onBlur = function (item) {
+                item.isFocused = false;
+            };
+
+            $timeout(function () {
+                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
+
+                itemElements.each(function (itemIndex, itemElement) {
+                    var item = scope.items[itemIndex];
+
+                    if (!item.isDisabled) {
+                        angular.element(itemElement).attr('tabindex', '0');
+                    }
+                });
+            });
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            isVisible: '=',
+            size: '@',
+            position: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
+                    <div class="pace">\
+                        <div class="pace-activity"></div>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            var size = scope.size ? scope.size : 'xs',
+                position = scope.position ? scope.position : 'center';
+            scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components')
+    .provider('maTextBoxConfiguration', function () {
+        this.$get = function () {
+            return this;
+        };
+    })
+    .directive('maTextBox', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
+        return {
+            restrict: 'E',
+            scope: {
+                id: '@',
+                type: '@',
+                value: '=',
+                isDisabled: '=',
+                isRequired: '=',
+                validators: '=',
+                instance: '=',
+                change: '&',
+                changeWhenIsInvalid: '=',
+                blur: '&',
+                focus: '&',
+                changeTimeout: '=',
+                canReset: '=',
+                placeholder: '@',
+                hasShowPasswordButton: '=',
+                trim: '=',
+                max: '=',
+                min: '=',
+                decimals: '=',
+                reset: '&',
+                defaultValue: '='
+            },
+            replace: true,
+            template: function (element, attributes) {
+                var type = attributes.type === 'password' ? 'password' : 'text';
+
+                if (type === 'number' || type === 'email') {
+                    type = 'text';
+                }
+
+                var html = '\
+            <div class="ma-text-box"\
+                ng-class="{\
+                    \'ma-text-box-is-disabled\': isDisabled,\
+                    \'ma-text-box-is-focused\': isValueFocused,\
+                    \'ma-text-box-is-invalid\': !isValid,\
+                    \'ma-text-box-is-touched\': isTouched,\
+                    \'ma-text-box-can-reset\': canReset,\
+                    \'ma-text-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
+                    \'ma-text-box-can-toggle-password\': canTogglePassword,\
+                    \'ma-text-box-is-toggle-password-disabled\': canTogglePassword && !isDisabled && !isTogglePasswordEnabled(),\
+                    \'ma-text-box-has-value\': hasValue()\
+                }">\
+                <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
+                    autocomplete="off"\
+                    placeholder="{{placeholder}}"\
+                    ng-focus="onFocus(\'value\')"\
+                    ng-keydown="onKeydown($event)"\
+                    ng-disabled="isDisabled"/>\
+                <ma-button class="ma-button-toggle-password"\
+                    ng-show="canTogglePassword" size="xs" modifier="simple"\
+                    right-icon="{{isPasswordVisible ? \'eye-slash\' : \'eye\'}}"\
+                    click="togglePassword()"\
+                    ng-focus="onFocus()"\
+                    is-disabled="!isTogglePasswordEnabled()">\
+                </ma-button>\
+                <ma-button class="ma-button-reset"\
+                    ng-show="canReset" size="xs" modifier="simple"\
+                    right-icon="times-circle"\
+                    click="onReset()"\
+                    ng-focus="onFocus()"\
+                    is-disabled="!isResetEnabled()">\
+                </ma-button>\
+            </div>';
+
+                return html;
+            },
+            controller: ['$scope', 'maTextBoxConfiguration', function (scope, maTextBoxConfiguration) {
+                scope.configuration = {};
+
+                if (scope.decimals >= 0) {
+                    scope.configuration.decimals = scope.decimals;
+                } else if (maTextBoxConfiguration.decimals >= 0) {
+                    scope.configuration.decimals = maTextBoxConfiguration.decimals;
+                } else {
+                    scope.configuration.decimals = 2;
+                }
+            }],
+            link: function (scope, element, attributes) {
+                var valueElement = angular.element(element[0].querySelector('.ma-text-box-value')),
+                    resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset')),
+                    togglePasswordButtonElement = angular.element(element[0].querySelector('.ma-button-toggle-password')),
+                    validators = [],
+                    // Variables keydownValue and keyupValue help track touched state.
+                    keydownValue,
+                    keyupValue,
+                    previousValue,
+                    changePromise,
+                    changeTimeout = Number(scope.changeTimeout),
+                    // Value at the moment of focus.
+                    focusValue,
+                    isFocusLost = true,
+                    trim = scope.trim === false ? false : true,
+                    isInternalChange = false,
+                    failedValidator = null,
+                    decimals = scope.configuration.decimals,
+                    hasDefaultValue = attributes.defaultValue !== undefined,
+                    defaultValue = MaHelper.isNullOrUndefined(scope.defaultValue) ? '' : scope.defaultValue,
+                    hasMin = typeof scope.min === 'number',
+                    hasMax = typeof scope.max === 'number';
+
+                if (scope.type === 'number') {
+                    defaultValue = typeof scope.defaultValue === 'number' ? scope.defaultValue : null;
+                }
+
+                var setPreviousValue = function (value) {
+                    value = MaHelper.isNullOrUndefined(value) ? '' : value;
+
+                    if (scope.type !== 'number' && trim) {
+                        value = value.trim();
+                    }
+
+                    previousValue = value;
+                };
+
+                var getValue = function () {
+                    var value = valueElement.val();
+                    return scope.type === 'number' ? parseNumber(value) : value;
+                };
+
+                var validate = function () {
+                    scope.isValid = true;
+                    failedValidator = null;
+                    // Use raw value for validators.
+                    var value = valueElement.val();
+
+                    if (scope.type === 'number') {
+                        value = removeCommasFromNumber(value);
+                    }
+
+                    if (validators && validators.length) {
+                        for (var i = 0; i < validators.length; i++) {
+                            if (!validators[i].validate(value)) {
+                                scope.isValid = false;
+                                failedValidator = validators[i];
+                                break;
+                            }
+                        }
+                    }
+                };
+
+                var triggerChange = function (value) {
+                    if (!hasValueChanged(value)) {
+                        return;
+                    }
+
+                    isInternalChange = true;
+                    var oldValue = previousValue;
+
+                    if (scope.type !== 'number' && trim) {
+                        oldValue = oldValue.trim();
+                        value = value.trim();
+                    }
+
+                    if (hasDefaultValue) {
+                        if (MaHelper.isNullOrUndefined(value)) {
+                            value = defaultValue;
+                        }
+
+                        if (MaHelper.isNullOrUndefined(oldValue)) {
+                            oldValue = defaultValue;
+                        }
+                    }
+
+                    scope.value = value;
+                    setPreviousValue(value);
+
+                    $timeout(function () {
+                        scope.change({
+                            maValue: value,
+                            maOldValue: oldValue
+                        });
+                    });
+                };
+
+                var hasValueChanged = function (value) {
+                    value = MaHelper.isNullOrUndefined(value) ? '' : value;
+                    var oldValue = MaHelper.isNullOrUndefined(previousValue) ? '' : previousValue,
+                        hasChanged = false;
+
+                    if (scope.type !== 'number' && trim) {
+                        hasChanged = oldValue.trim() !== value.trim();
+                    } else {
+                        hasChanged = oldValue !== value;
+                    }
+
+                    return hasChanged;
+                };
+
+                var changeValue = function () {
+                    scope.isTouched = true;
+
+                    if (!hasValueChanged(getValue())) {
+                        validate();
+                        return;
+                    }
+
+                    validate();
+
+                    if (scope.isValid || scope.changeWhenIsInvalid) {
+                        triggerChange(getValue());
+                    }
+                };
+
+                var parseNumber = function (value, keepDecimals) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
+                        return null;
+                    }
+
+                    value = parseFloat(removeCommasFromNumber(value));
+
+                    if (!keepDecimals) {
+                        value = parseFloat(value.toFixed(decimals));
+                    }
+
+                    if (isNaN(value)) {
+                        return null;
+                    }
+
+                    return value;
+                };
+
+                var addCommasToNumber = function (value) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
+                        return '';
+                    }
+
+                    var decimalDigits = value.indexOf('.') == -1 ? '' : value.replace(/^-?\d+(?=\.)/, ''),
+                        wholeDigits = value.replace(/(\.\d+)$/, ''),
+                        commas = wholeDigits.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+
+                    return '' + commas + decimalDigits;
+                };
+
+                var removeCommasFromNumber = function (value) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
+                        return '';
+                    }
+
+                    return value.trim().replace(/,/g, '');
+                };
+
+                var formatValue = function (value) {
+                    if (MaHelper.isNullOrWhiteSpace(value)) {
+                        return value;
+                    }
+
+                    var formattedValue = value;
+
+                    if (scope.type === 'number') {
+                        value = typeof value === 'number' ? value : Number(value);
+                        formattedValue = addCommasToNumber(value.toFixed(decimals));
+                    }
+
+                    return formattedValue;
+                };
+
+                var setValidators = function () {
+                    var hasIsNotEmptyValidator = false;
+                    validators = scope.validators ? angular.copy(scope.validators) : [];
+
+                    for (var i = 0; i < validators.length; i++) {
+                        if (validators[i].name === 'IsNotEmpty') {
+                            hasIsNotEmptyValidator = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasIsNotEmptyValidator && scope.isRequired) {
+                        validators.unshift(MaValidators.isNotEmpty());
+                    }
+
+                    if (scope.type === 'number') {
+                        validators.push(MaValidators.isNumber(true));
+                    }
+
+                    if (hasMin) {
+                        if (scope.type === 'number') {
+                            validators.push(MaValidators.isGreaterOrEqual(scope.min, true));
+                        } else {
+                            validators.push(MaValidators.isLengthGreaterOrEqual(scope.min, true));
+                        }
+                    }
+
+                    if (hasMax) {
+                        if (scope.type === 'number') {
+                            validators.push(MaValidators.isLessOrEqual(scope.max, true));
+                        } else {
+                            validators.push(MaValidators.isLengthLessOrEqual(scope.max, true));
+                        }
+                    }
+
+                    if (scope.type === 'email') {
+                        validators.push(MaValidators.isEmail(true));
+                    }
+                };
+
+                setValidators();
+                scope.isValueFocused = false;
+                scope.isTouched = false;
+                scope.canTogglePassword = false;
+                scope.isPasswordVisible = false;
+
+                if (scope.type === 'password') {
+                    scope.canTogglePassword = scope.hasShowPasswordButton !== false;
+                }
+
+                scope.hasValue = function () {
+                    if (scope.type === 'number') {
+                        var value = valueElement.val();
+
+                        if (value !== '' && !MaHelper.isNumber(value)) {
+                            return true;
+                        }
+
+                        return parseNumber(value, true) !== defaultValue && value !== '';
+                    }
+
+                    return valueElement.val() !== defaultValue;
+                };
+
+                scope.isResetEnabled = function () {
+                    if (scope.isDisabled) {
+                        return false;
+                    }
+
+                    if (scope.type === 'number') {
+                        var value = valueElement.val();
+
+                        if (value !== '' && !MaHelper.isNumber(value)) {
+                            return true;
+                        }
+
+                        return parseNumber(value, true) !== defaultValue && value !== '';
+                    }
+
+                    return valueElement.val() !== defaultValue;
+                };
+
+                scope.doReset = function () {
+                    setPreviousValue(getValue());
+                    valueElement.val(defaultValue);
+                };
+
+                scope.onReset = function () {
+                    if (scope.isDisabled) {
+                        return;
+                    }
+
+                    scope.doReset();
+                    scope.isTouched = true;
+                    triggerChange(defaultValue);
+                    validate();
+                    valueElement.focus();
+
+                    // Postpone reset event to fire after change event.
+                    $timeout(function () {
+                        scope.reset();
+                    });
+                };
+
+                scope.onFocus = function (elementName) {
+                    if (elementName === 'value') {
+                        scope.isValueFocused = true;
+
+                        if (scope.type === 'number' && !MaHelper.isNullOrUndefined(scope.value) && scope.isValid) {
+                            // Remove commas from the number.
+                            valueElement.val(scope.value.toFixed(decimals));
+                        }
+                    }
+
+                    if (isFocusLost) {
+                        focusValue = scope.value;
+
+                        scope.focus({
+                            maValue: scope.value
+                        });
+                    }
+
+                    isFocusLost = false;
+                };
+
+                valueElement.focusout(function (event) {
+                    onFocusout(event, 'value');
+                });
+
+                resetButtonElement.focusout(function (event) {
+                    onFocusout(event);
+                });
+
+                togglePasswordButtonElement.focusout(function (event) {
+                    onFocusout(event);
+                });
+
+                scope.togglePassword = function () {
+                    scope.isPasswordVisible = !scope.isPasswordVisible;
+                    valueElement[0].type = scope.isPasswordVisible ? 'text' : 'password';
+                };
+
+                scope.isTogglePasswordEnabled = function () {
+                    return !scope.isDisabled && valueElement.val() !== '';
+                };
+
+                var onFocusout = function (event, elementName) {
+                    var elementTo = angular.element(event.relatedTarget),
+                        value = valueElement.val();
+
+                    // Trigger blur event when focus goes to an element outside the component.
+                    if (scope.canTogglePassword) {
+                        isFocusLost = elementTo[0] !== valueElement[0] &&
+                            elementTo[0] !== togglePasswordButtonElement[0] &&
+                            elementTo[0] !== resetButtonElement[0];
+                    } else {
+                        isFocusLost = elementTo[0] !== valueElement[0] &&
+                            elementTo[0] !== resetButtonElement[0];
+                    }
+
+                    // Cancel change if it is already in process to prevent the event from firing twice.
+                    if (changePromise) {
+                        $timeout.cancel(changePromise);
+                    }
+
+                    if (elementName === 'value') {
+                        if (hasDefaultValue && value.trim() === '') {
+                            // Prevent value watcher from triggering twice.
+                            // It'll be triggered later in isFocusLost condition by the sequence of method calls: changeValue -> triggerChange.
+                            // We need to suppress the trigger or change event won't fire if isRequired is set to true
+                            // and the user clears the value.
+                            // E.g., value is 0, user types 1, and then removes the value.
+                            isInternalChange = true;
+                            scope.value = defaultValue;
+                            valueElement.val(formatValue(defaultValue));
+                        }
+
+                        if (!scope.isResetEnabled() && elementTo[0] === resetButtonElement[0]) {
+                            isFocusLost = true;
+                        }
+
+                        validate();
+
+                        if (scope.isValid) {
+                            // Format value when a user has finished editing it.
+                            valueElement.val(formatValue(value));
+                        }
+                    }
+
+                    // Use safeApply to avoid apply error when Reset icon is clicked.
+                    MaHelper.safeApply(function () {
+                        scope.isValueFocused = false;
+                    });
+
+                    if (isFocusLost) {
+                        changeValue();
+
+                        MaHelper.safeApply(function () {
+                            scope.blur({
+                                maValue: scope.value,
+                                maOldValue: focusValue,
+                                maHasValueChanged: focusValue !== scope.value
+                            });
+                        });
+                    }
+                };
+
+                scope.onKeydown = function (event) {
+                    // No need to save keydown value when the user is navigating with tab key.
+                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
+                        return;
+                    }
+
+                    keydownValue = angular.element(event.target).val();
+
+                    if (scope.type === 'number') {
+                        if (
+                            // Allow backspace, tab, delete.
+                            $.inArray(event.keyCode, [MaHelper.keyCode.backspace, MaHelper.keyCode.delete, MaHelper.keyCode.home, MaHelper.keyCode.end, MaHelper.keyCode.period, MaHelper.keyCode.numLock.period, MaHelper.keyCode.dash, MaHelper.keyCode.dash2]) !== -1 ||
+                            // Allow left, right.
+                            (event.keyCode === 37 || event.keyCode === 39)) {
+                            return;
+                        }
+
+                        // Don't allow to enter not numbers.
+                        if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event.keyCode > 105)) {
+                            event.preventDefault();
+                        }
+                    }
+                };
+
+                // Use input event to support value change from contextual menu,
+                // e.g. mouse right click + Cut/Copy/Paste etc.
+                valueElement.on('input', function (event) {
+                    // Ignore tab key.
+                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
+                        return;
+                    }
+
+                    var hasChanged = false;
+                    keyupValue = angular.element(event.target).val();
+
+                    if (keydownValue !== keyupValue) {
+                        hasChanged = true;
+                    }
+
+                    // Change value after a timeout while the user is typing.
+                    if (!hasChanged) {
+                        return;
+                    }
+
+                    if (changePromise) {
+                        $timeout.cancel(changePromise);
+                    }
+
+                    // $timeout is required here to apply scope changes, even if changeTimeout is 0.
+                    changePromise = $timeout(function () {
+                        changeValue();
+                    }, changeTimeout);
+                });
+
+                $timeout(function () {
+                    // Move id to input.
+                    element.removeAttr('id');
+                    valueElement.attr('id', scope.id);
+                });
+
+                scope.$watch('value', function (newValue, oldValue) {
+                    if (isInternalChange) {
+                        isInternalChange = false;
+                        return;
+                    }
+
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    if (hasValueChanged(newValue)) {
+                        scope.isTouched = true;
+                    }
+
+                    var caretPosition = valueElement.prop('selectionStart');
+                    setPreviousValue(newValue);
+                    valueElement.val(formatValue(newValue));
+                    validate();
+
+                    // Restore caret position.
+                    if (scope.isValueFocused) {
+                        valueElement.prop({
+                            selectionStart: caretPosition,
+                            selectionEnd: caretPosition
+                        });
+                    }
+                });
+
+                scope.$watch('isRequired', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    setValidators();
+                    validate();
+                });
+
+                var minMaxWatcher = function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    var value = getValue();
+
+                    setValidators();
+
+                    // Run only min/max validators to avoid the component being highligthed as invalid
+                    // by other validators like IsNotEmpty, when min/max is changed.
+                    var minMaxValidators = [];
+
+                    for (var i = 0; i < validators.length; i++) {
+                        if (validators[i].name === 'IsGreaterOrEqual' || validators[i].name === 'IsLessOrEqual') {
+                            minMaxValidators.push(validators[i]);
+                        }
+                    }
+
+                    if (minMaxValidators.length) {
+                        // Empty failedValidator if it is min/max validator.
+                        if (failedValidator && (failedValidator.name === 'IsGreaterOrEqual' || failedValidator.name === 'IsLessOrEqual')) {
+                            failedValidator = null;
+                            scope.isValid = true;
+                        }
+
+                        for (i = 0; i < minMaxValidators.length; i++) {
+                            if (!minMaxValidators[i].validate(value)) {
+                                scope.isValid = false;
+                                failedValidator = minMaxValidators[i];
+                                break;
+                            }
+                        }
+
+                        if (!scope.isValid) {
+                            scope.isTouched = true;
+                        }
+                    }
+
+                    if (scope.isValid || scope.changeWhenIsInvalid) {
+                        triggerChange(value);
+                    }
+                };
+
+                scope.$watch('max', function (newValue, oldValue) {
+                    minMaxWatcher(newValue, oldValue);
+                });
+
+                scope.$watch('min', function (newValue, oldValue) {
+                    minMaxWatcher(newValue, oldValue);
+                });
+
+                // Set initial value.
+                if (hasDefaultValue && MaHelper.isNullOrUndefined(scope.value)) {
+                    scope.value = defaultValue;
+                }
+
+                valueElement.val(formatValue(scope.value));
+                validate();
+                setPreviousValue(scope.value);
+
+                // Prepare API instance.
+                if (scope.instance) {
+                    scope.instance.isInitialized = true;
+
+                    scope.instance.validate = function () {
+                        scope.isTouched = true;
+                        validate();
+                    };
+
+                    scope.instance.isValid = function () {
+                        return scope.isValid;
+                    };
+
+                    scope.instance.focus = function () {
+                        if (!scope.isValueFocused) {
+                            valueElement.focus();
+                        }
+                    };
+
+                    scope.instance.failedValidator = function () {
+                        return failedValidator;
+                    };
+
+                    scope.instance.clear = function () {
+                        scope.doReset();
+
+                        $timeout(function () {
+                            scope.isTouched = false;
+                        });
+                    };
+                }
+            }
+        };
+    }]);})();
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function () {
     var months = [{
         language: 'en',
@@ -5017,190 +5804,6 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maSideMenu', ['$sce', function ($sce) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-side-menu">\
-                <div class="ma-side-menu-item" ng-repeat="item in items" ng-hide="item.isHidden" ng-class="{\
-                        \'ma-side-menu-item-is-selected\': isItemSelected(item),\
-                        \'ma-side-menu-item-is-disabled\': item.isDisabled\
-                    }"\
-                    ng-click="onSelect(item)">\
-                    <i ng-if="item.icon" class="fa fa-{{item.icon}}"></i>\
-                    <div class="ma-side-menu-text" ng-bind-html="getItemText(item)"></div>\
-                    <div class="ma-side-menu-new" ng-if="item.new">{{item.new}}</div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            scope.isItemSelected = function (item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                return item.isSelected;
-            };
-
-            scope.onSelect = function (item) {
-                if (item.isDisabled) {
-                    return;
-                }
-
-                if (!item.selector) {
-                    angular.forEach(scope.items, function (item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-                }
-
-                scope.select({
-                    item: item
-                });
-            };
-
-            scope.getItemText = function (item) {
-                return $sce.trustAsHtml(item.text);
-            };
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            isVisible: '=',
-            size: '@',
-            position: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
-                    <div class="pace">\
-                        <div class="pace-activity"></div>\
-                    </div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            var size = scope.size ? scope.size : 'xs',
-                position = scope.position ? scope.position : 'center';
-            scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function ($state, MaHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-tabs">\
-                <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item" ng-repeat="item in items"\
-                        ng-focus="onFocus(item)"\
-                        ng-blur="onBlur(item)"\
-                        ng-keypress="onKeypress($event, item)"\
-                        ng-class="{\
-                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
-                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
-                            \'ma-tabs-item-is-focused\': item.isFocused\
-                        }"\
-                        ng-click="onSelect(item)">\
-                        <a class="ma-tabs-link" href="" tabindex="-1">\
-                            <span class="ma-tabs-text">{{item.text}}</span>\
-                        </a>\
-                    </li>\
-                </ul>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function (item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function (item) {
-                if (item.isDisabled || item.isSelected) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function (item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        item: item
-                    });
-                }
-            };
-
-            scope.onKeypress = function (event, item) {
-                if (event.keyCode === MaHelper.keyCode.enter) {
-                    scope.onSelect(item);
-                }
-            };
-
-            scope.onFocus = function (item) {
-                item.isFocused = true;
-            };
-
-            scope.onBlur = function (item) {
-                item.isFocused = false;
-            };
-
-            $timeout(function () {
-                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
-
-                itemElements.each(function (itemIndex, itemElement) {
-                    var item = scope.items[itemIndex];
-
-                    if (!item.isDisabled) {
-                        angular.element(itemElement).attr('tabindex', '0');
-                    }
-                });
-            });
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'MaHelper', 'MaValidators', function ($timeout, $window, MaHelper, MaValidators) {
     return {
         restrict: 'E',
@@ -5474,669 +6077,66 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components')
-    .provider('maTextBoxConfiguration', function () {
-        this.$get = function () {
-            return this;
-        };
-    })
-    .directive('maTextBox', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
-        return {
-            restrict: 'E',
-            scope: {
-                id: '@',
-                type: '@',
-                value: '=',
-                isDisabled: '=',
-                isRequired: '=',
-                validators: '=',
-                instance: '=',
-                change: '&',
-                changeWhenIsInvalid: '=',
-                blur: '&',
-                focus: '&',
-                changeTimeout: '=',
-                canReset: '=',
-                placeholder: '@',
-                hasShowPasswordButton: '=',
-                trim: '=',
-                max: '=',
-                min: '=',
-                decimals: '=',
-                reset: '&',
-                defaultValue: '='
-            },
-            replace: true,
-            template: function (element, attributes) {
-                var type = attributes.type === 'password' ? 'password' : 'text';
-
-                if (type === 'number' || type === 'email') {
-                    type = 'text';
-                }
-
-                var html = '\
-            <div class="ma-text-box"\
-                ng-class="{\
-                    \'ma-text-box-is-disabled\': isDisabled,\
-                    \'ma-text-box-is-focused\': isValueFocused,\
-                    \'ma-text-box-is-invalid\': !isValid,\
-                    \'ma-text-box-is-touched\': isTouched,\
-                    \'ma-text-box-can-reset\': canReset,\
-                    \'ma-text-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
-                    \'ma-text-box-can-toggle-password\': canTogglePassword,\
-                    \'ma-text-box-is-toggle-password-disabled\': canTogglePassword && !isDisabled && !isTogglePasswordEnabled(),\
-                    \'ma-text-box-has-value\': hasValue()\
-                }">\
-                <input class="ma-text-box-value" type="' + type + '" id="{{id}}"\
-                    autocomplete="off"\
-                    placeholder="{{placeholder}}"\
-                    ng-focus="onFocus(\'value\')"\
-                    ng-keydown="onKeydown($event)"\
-                    ng-disabled="isDisabled"/>\
-                <ma-button class="ma-button-toggle-password"\
-                    ng-show="canTogglePassword" size="xs" modifier="simple"\
-                    right-icon="{{isPasswordVisible ? \'eye-slash\' : \'eye\'}}"\
-                    click="togglePassword()"\
-                    ng-focus="onFocus()"\
-                    is-disabled="!isTogglePasswordEnabled()">\
-                </ma-button>\
-                <ma-button class="ma-button-reset"\
-                    ng-show="canReset" size="xs" modifier="simple"\
-                    right-icon="times-circle"\
-                    click="onReset()"\
-                    ng-focus="onFocus()"\
-                    is-disabled="!isResetEnabled()">\
-                </ma-button>\
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
             </div>';
 
-                return html;
-            },
-            controller: ['$scope', 'maTextBoxConfiguration', function (scope, maTextBoxConfiguration) {
-                scope.configuration = {};
+            return html;
+        },
+        link: function (scope) {
+            scope.calculateLeft = function (stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
 
-                if (scope.decimals >= 0) {
-                    scope.configuration.decimals = scope.decimals;
-                } else if (maTextBoxConfiguration.decimals >= 0) {
-                    scope.configuration.decimals = maTextBoxConfiguration.decimals;
-                } else {
-                    scope.configuration.decimals = 2;
-                }
-            }],
-            link: function (scope, element, attributes) {
-                var valueElement = angular.element(element[0].querySelector('.ma-text-box-value')),
-                    resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset')),
-                    togglePasswordButtonElement = angular.element(element[0].querySelector('.ma-button-toggle-password')),
-                    validators = [],
-                    // Variables keydownValue and keyupValue help track touched state.
-                    keydownValue,
-                    keyupValue,
-                    previousValue,
-                    changePromise,
-                    changeTimeout = Number(scope.changeTimeout),
-                    // Value at the moment of focus.
-                    focusValue,
-                    isFocusLost = true,
-                    trim = scope.trim === false ? false : true,
-                    isInternalChange = false,
-                    failedValidator = null,
-                    decimals = scope.configuration.decimals,
-                    hasDefaultValue = attributes.defaultValue !== undefined,
-                    defaultValue = MaHelper.isNullOrUndefined(scope.defaultValue) ? '' : scope.defaultValue,
-                    hasMin = typeof scope.min === 'number',
-                    hasMax = typeof scope.max === 'number';
-
-                if (scope.type === 'number') {
-                    defaultValue = typeof scope.defaultValue === 'number' ? scope.defaultValue : null;
+            scope.calculateProgress = function () {
+                if (!scope.currentStep) {
+                    return 0;
                 }
 
-                var setPreviousValue = function (value) {
-                    value = MaHelper.isNullOrUndefined(value) ? '' : value;
-
-                    if (scope.type !== 'number' && trim) {
-                        value = value.trim();
-                    }
-
-                    previousValue = value;
-                };
-
-                var getValue = function () {
-                    var value = valueElement.val();
-                    return scope.type === 'number' ? parseNumber(value) : value;
-                };
-
-                var validate = function () {
-                    scope.isValid = true;
-                    failedValidator = null;
-                    // Use raw value for validators.
-                    var value = valueElement.val();
-
-                    if (scope.type === 'number') {
-                        value = removeCommasFromNumber(value);
-                    }
-
-                    if (validators && validators.length) {
-                        for (var i = 0; i < validators.length; i++) {
-                            if (!validators[i].validate(value)) {
-                                scope.isValid = false;
-                                failedValidator = validators[i];
-                                break;
-                            }
-                        }
-                    }
-                };
-
-                var triggerChange = function (value) {
-                    if (!hasValueChanged(value)) {
-                        return;
-                    }
-
-                    isInternalChange = true;
-                    var oldValue = previousValue;
-
-                    if (scope.type !== 'number' && trim) {
-                        oldValue = oldValue.trim();
-                        value = value.trim();
-                    }
-
-                    if (hasDefaultValue) {
-                        if (MaHelper.isNullOrUndefined(value)) {
-                            value = defaultValue;
-                        }
-
-                        if (MaHelper.isNullOrUndefined(oldValue)) {
-                            oldValue = defaultValue;
-                        }
-                    }
-
-                    scope.value = value;
-                    setPreviousValue(value);
-
-                    $timeout(function () {
-                        scope.change({
-                            maValue: value,
-                            maOldValue: oldValue
-                        });
-                    });
-                };
-
-                var hasValueChanged = function (value) {
-                    value = MaHelper.isNullOrUndefined(value) ? '' : value;
-                    var oldValue = MaHelper.isNullOrUndefined(previousValue) ? '' : previousValue,
-                        hasChanged = false;
-
-                    if (scope.type !== 'number' && trim) {
-                        hasChanged = oldValue.trim() !== value.trim();
-                    } else {
-                        hasChanged = oldValue !== value;
-                    }
-
-                    return hasChanged;
-                };
-
-                var changeValue = function () {
-                    scope.isTouched = true;
-
-                    if (!hasValueChanged(getValue())) {
-                        validate();
-                        return;
-                    }
-
-                    validate();
-
-                    if (scope.isValid || scope.changeWhenIsInvalid) {
-                        triggerChange(getValue());
-                    }
-                };
-
-                var parseNumber = function (value, keepDecimals) {
-                    if (MaHelper.isNullOrWhiteSpace(value)) {
-                        return null;
-                    }
-
-                    value = parseFloat(removeCommasFromNumber(value));
-
-                    if (!keepDecimals) {
-                        value = parseFloat(value.toFixed(decimals));
-                    }
-
-                    if (isNaN(value)) {
-                        return null;
-                    }
-
-                    return value;
-                };
-
-                var addCommasToNumber = function (value) {
-                    if (MaHelper.isNullOrWhiteSpace(value)) {
-                        return '';
-                    }
-
-                    var decimalDigits = value.indexOf('.') == -1 ? '' : value.replace(/^-?\d+(?=\.)/, ''),
-                        wholeDigits = value.replace(/(\.\d+)$/, ''),
-                        commas = wholeDigits.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
-
-                    return '' + commas + decimalDigits;
-                };
-
-                var removeCommasFromNumber = function (value) {
-                    if (MaHelper.isNullOrWhiteSpace(value)) {
-                        return '';
-                    }
-
-                    return value.trim().replace(/,/g, '');
-                };
-
-                var formatValue = function (value) {
-                    if (MaHelper.isNullOrWhiteSpace(value)) {
-                        return value;
-                    }
-
-                    var formattedValue = value;
-
-                    if (scope.type === 'number') {
-                        value = typeof value === 'number' ? value : Number(value);
-                        formattedValue = addCommasToNumber(value.toFixed(decimals));
-                    }
-
-                    return formattedValue;
-                };
-
-                var setValidators = function () {
-                    var hasIsNotEmptyValidator = false;
-                    validators = scope.validators ? angular.copy(scope.validators) : [];
-
-                    for (var i = 0; i < validators.length; i++) {
-                        if (validators[i].name === 'IsNotEmpty') {
-                            hasIsNotEmptyValidator = true;
-                            break;
-                        }
-                    }
-
-                    if (!hasIsNotEmptyValidator && scope.isRequired) {
-                        validators.unshift(MaValidators.isNotEmpty());
-                    }
-
-                    if (scope.type === 'number') {
-                        validators.push(MaValidators.isNumber(true));
-                    }
-
-                    if (hasMin) {
-                        if (scope.type === 'number') {
-                            validators.push(MaValidators.isGreaterOrEqual(scope.min, true));
-                        } else {
-                            validators.push(MaValidators.isLengthGreaterOrEqual(scope.min, true));
-                        }
-                    }
-
-                    if (hasMax) {
-                        if (scope.type === 'number') {
-                            validators.push(MaValidators.isLessOrEqual(scope.max, true));
-                        } else {
-                            validators.push(MaValidators.isLengthLessOrEqual(scope.max, true));
-                        }
-                    }
-
-                    if (scope.type === 'email') {
-                        validators.push(MaValidators.isEmail(true));
-                    }
-                };
-
-                setValidators();
-                scope.isValueFocused = false;
-                scope.isTouched = false;
-                scope.canTogglePassword = false;
-                scope.isPasswordVisible = false;
-
-                if (scope.type === 'password') {
-                    scope.canTogglePassword = scope.hasShowPasswordButton !== false;
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
                 }
 
-                scope.hasValue = function () {
-                    if (scope.type === 'number') {
-                        var value = valueElement.val();
-
-                        if (value !== '' && !MaHelper.isNumber(value)) {
-                            return true;
-                        }
-
-                        return parseNumber(value, true) !== defaultValue && value !== '';
-                    }
-
-                    return valueElement.val() !== defaultValue;
-                };
-
-                scope.isResetEnabled = function () {
-                    if (scope.isDisabled) {
-                        return false;
-                    }
-
-                    if (scope.type === 'number') {
-                        var value = valueElement.val();
-
-                        if (value !== '' && !MaHelper.isNumber(value)) {
-                            return true;
-                        }
-
-                        return parseNumber(value, true) !== defaultValue && value !== '';
-                    }
-
-                    return valueElement.val() !== defaultValue;
-                };
-
-                scope.doReset = function () {
-                    setPreviousValue(getValue());
-                    valueElement.val(defaultValue);
-                };
-
-                scope.onReset = function () {
-                    if (scope.isDisabled) {
-                        return;
-                    }
-
-                    scope.doReset();
-                    scope.isTouched = true;
-                    triggerChange(defaultValue);
-                    validate();
-                    valueElement.focus();
-
-                    // Postpone reset event to fire after change event.
-                    $timeout(function () {
-                        scope.reset();
-                    });
-                };
-
-                scope.onFocus = function (elementName) {
-                    if (elementName === 'value') {
-                        scope.isValueFocused = true;
-
-                        if (scope.type === 'number' && !MaHelper.isNullOrUndefined(scope.value) && scope.isValid) {
-                            // Remove commas from the number.
-                            valueElement.val(scope.value.toFixed(decimals));
-                        }
-                    }
-
-                    if (isFocusLost) {
-                        focusValue = scope.value;
-
-                        scope.focus({
-                            maValue: scope.value
-                        });
-                    }
-
-                    isFocusLost = false;
-                };
-
-                valueElement.focusout(function (event) {
-                    onFocusout(event, 'value');
-                });
-
-                resetButtonElement.focusout(function (event) {
-                    onFocusout(event);
-                });
-
-                togglePasswordButtonElement.focusout(function (event) {
-                    onFocusout(event);
-                });
-
-                scope.togglePassword = function () {
-                    scope.isPasswordVisible = !scope.isPasswordVisible;
-                    valueElement[0].type = scope.isPasswordVisible ? 'text' : 'password';
-                };
-
-                scope.isTogglePasswordEnabled = function () {
-                    return !scope.isDisabled && valueElement.val() !== '';
-                };
-
-                var onFocusout = function (event, elementName) {
-                    var elementTo = angular.element(event.relatedTarget),
-                        value = valueElement.val();
-
-                    // Trigger blur event when focus goes to an element outside the component.
-                    if (scope.canTogglePassword) {
-                        isFocusLost = elementTo[0] !== valueElement[0] &&
-                            elementTo[0] !== togglePasswordButtonElement[0] &&
-                            elementTo[0] !== resetButtonElement[0];
-                    } else {
-                        isFocusLost = elementTo[0] !== valueElement[0] &&
-                            elementTo[0] !== resetButtonElement[0];
-                    }
-
-                    // Cancel change if it is already in process to prevent the event from firing twice.
-                    if (changePromise) {
-                        $timeout.cancel(changePromise);
-                    }
-
-                    if (elementName === 'value') {
-                        if (hasDefaultValue && value.trim() === '') {
-                            // Prevent value watcher from triggering twice.
-                            // It'll be triggered later in isFocusLost condition by the sequence of method calls: changeValue -> triggerChange.
-                            // We need to suppress the trigger or change event won't fire if isRequired is set to true
-                            // and the user clears the value.
-                            // E.g., value is 0, user types 1, and then removes the value.
-                            isInternalChange = true;
-                            scope.value = defaultValue;
-                            valueElement.val(formatValue(defaultValue));
-                        }
-
-                        if (!scope.isResetEnabled() && elementTo[0] === resetButtonElement[0]) {
-                            isFocusLost = true;
-                        }
-
-                        validate();
-
-                        if (scope.isValid) {
-                            // Format value when a user has finished editing it.
-                            valueElement.val(formatValue(value));
-                        }
-                    }
-
-                    // Use safeApply to avoid apply error when Reset icon is clicked.
-                    MaHelper.safeApply(function () {
-                        scope.isValueFocused = false;
-                    });
-
-                    if (isFocusLost) {
-                        changeValue();
-
-                        MaHelper.safeApply(function () {
-                            scope.blur({
-                                maValue: scope.value,
-                                maOldValue: focusValue,
-                                maHasValueChanged: focusValue !== scope.value
-                            });
-                        });
-                    }
-                };
-
-                scope.onKeydown = function (event) {
-                    // No need to save keydown value when the user is navigating with tab key.
-                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
-                        return;
-                    }
-
-                    keydownValue = angular.element(event.target).val();
-
-                    if (scope.type === 'number') {
-                        if (
-                            // Allow backspace, tab, delete.
-                            $.inArray(event.keyCode, [MaHelper.keyCode.backspace, MaHelper.keyCode.delete, MaHelper.keyCode.home, MaHelper.keyCode.end, MaHelper.keyCode.period, MaHelper.keyCode.numLock.period, MaHelper.keyCode.dash, MaHelper.keyCode.dash2]) !== -1 ||
-                            // Allow left, right.
-                            (event.keyCode === 37 || event.keyCode === 39)) {
-                            return;
-                        }
-
-                        // Don't allow to enter not numbers.
-                        if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event.keyCode > 105)) {
-                            event.preventDefault();
-                        }
-                    }
-                };
-
-                // Use input event to support value change from contextual menu,
-                // e.g. mouse right click + Cut/Copy/Paste etc.
-                valueElement.on('input', function (event) {
-                    // Ignore tab key.
-                    if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
-                        return;
-                    }
-
-                    var hasChanged = false;
-                    keyupValue = angular.element(event.target).val();
-
-                    if (keydownValue !== keyupValue) {
-                        hasChanged = true;
-                    }
-
-                    // Change value after a timeout while the user is typing.
-                    if (!hasChanged) {
-                        return;
-                    }
-
-                    if (changePromise) {
-                        $timeout.cancel(changePromise);
-                    }
-
-                    // $timeout is required here to apply scope changes, even if changeTimeout is 0.
-                    changePromise = $timeout(function () {
-                        changeValue();
-                    }, changeTimeout);
-                });
-
-                $timeout(function () {
-                    // Move id to input.
-                    element.removeAttr('id');
-                    valueElement.attr('id', scope.id);
-                });
-
-                scope.$watch('value', function (newValue, oldValue) {
-                    if (isInternalChange) {
-                        isInternalChange = false;
-                        return;
-                    }
-
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    if (hasValueChanged(newValue)) {
-                        scope.isTouched = true;
-                    }
-
-                    var caretPosition = valueElement.prop('selectionStart');
-                    setPreviousValue(newValue);
-                    valueElement.val(formatValue(newValue));
-                    validate();
-
-                    // Restore caret position.
-                    if (scope.isValueFocused) {
-                        valueElement.prop({
-                            selectionStart: caretPosition,
-                            selectionEnd: caretPosition
-                        });
-                    }
-                });
-
-                scope.$watch('isRequired', function (newValue, oldValue) {
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    setValidators();
-                    validate();
-                });
-
-                var minMaxWatcher = function (newValue, oldValue) {
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    var value = getValue();
-
-                    setValidators();
-
-                    // Run only min/max validators to avoid the component being highligthed as invalid
-                    // by other validators like IsNotEmpty, when min/max is changed.
-                    var minMaxValidators = [];
-
-                    for (var i = 0; i < validators.length; i++) {
-                        if (validators[i].name === 'IsGreaterOrEqual' || validators[i].name === 'IsLessOrEqual') {
-                            minMaxValidators.push(validators[i]);
-                        }
-                    }
-
-                    if (minMaxValidators.length) {
-                        // Empty failedValidator if it is min/max validator.
-                        if (failedValidator && (failedValidator.name === 'IsGreaterOrEqual' || failedValidator.name === 'IsLessOrEqual')) {
-                            failedValidator = null;
-                            scope.isValid = true;
-                        }
-
-                        for (i = 0; i < minMaxValidators.length; i++) {
-                            if (!minMaxValidators[i].validate(value)) {
-                                scope.isValid = false;
-                                failedValidator = minMaxValidators[i];
-                                break;
-                            }
-                        }
-
-                        if (!scope.isValid) {
-                            scope.isTouched = true;
-                        }
-                    }
-
-                    if (scope.isValid || scope.changeWhenIsInvalid) {
-                        triggerChange(value);
-                    }
-                };
-
-                scope.$watch('max', function (newValue, oldValue) {
-                    minMaxWatcher(newValue, oldValue);
-                });
-
-                scope.$watch('min', function (newValue, oldValue) {
-                    minMaxWatcher(newValue, oldValue);
-                });
-
-                // Set initial value.
-                if (hasDefaultValue && MaHelper.isNullOrUndefined(scope.value)) {
-                    scope.value = defaultValue;
-                }
-
-                valueElement.val(formatValue(scope.value));
-                validate();
-                setPreviousValue(scope.value);
-
-                // Prepare API instance.
-                if (scope.instance) {
-                    scope.instance.isInitialized = true;
-
-                    scope.instance.validate = function () {
-                        scope.isTouched = true;
-                        validate();
-                    };
-
-                    scope.instance.isValid = function () {
-                        return scope.isValid;
-                    };
-
-                    scope.instance.focus = function () {
-                        if (!scope.isValueFocused) {
-                            valueElement.focus();
-                        }
-                    };
-
-                    scope.instance.failedValidator = function () {
-                        return failedValidator;
-                    };
-
-                    scope.instance.clear = function () {
-                        scope.doReset();
-
-                        $timeout(function () {
-                            scope.isTouched = false;
-                        });
-                    };
-                }
-            }
-        };
-    }]);})();
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function (stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
+        }
+    };
+}]);})();
