@@ -12,21 +12,15 @@
         <h2>Basic</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-area
-            id="text"
-            value="text1"
-            change="change1(maValue)"
-            update-on="blur">
+        <ma-text-area id="text" value="text1" change="change(maValue, maOldValue, 'text1')"
+            blur="blur(maValue, maOldValue, maHasValueChanged, 'text1')" focus="focus(maValue,  'text1')">
         </ma-text-area>
     </div>
     <div class="nodes-item">
         <h2>Fitted to content height</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-area
-            fit-content-height="true"
-            is-resizable="false"
-            value="text2">
+        <ma-text-area fit-content-height="true" is-resizable="false" value="text2">
         </ma-text-area>
     </div>
     <div class="nodes-item">
@@ -37,13 +31,11 @@
             <div class="form-content">
                 <div class="form-group">
                     <div class="form-col col-xs-4">
-                        <ma-text-area
-                            value="text3">
+                        <ma-text-area value="text3">
                         </ma-text-area>
                     </div>
                     <div class="form-col col-xs-8">
-                        <ma-text-area
-                            value="text4">
+                        <ma-text-area value="text4">
                         </ma-text-area>
                     </div>
                 </div>
@@ -54,37 +46,26 @@
         <h2>Disabled</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-area
-            is-disabled="true"
-            value="text2">
+        <ma-text-area is-disabled="true" value="text2">
         </ma-text-area>
     </div>
     <div class="nodes-item">
         <h2>Required</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-area
-            fit-content-height="true"
-            is-resizable="false"
-            is-required="true"
-            instance="textBox7"
-            value="text7">
+        <ma-text-area fit-content-height="true" is-resizable="false" is-required="true" instance="textBox7"
+            value="text7" change="change(maValue, maOldValue, 'text7')" blur="blur(maValue, maOldValue, maHasValueChanged, 'text7')">
         </ma-text-area>
     </div>
     <div class="nodes-item">
         <h2>Initially hidden (inside ng-show)</h2>
     </div>
     <div class="nodes-item">
-        <ma-check-box
-            text="Show or hide"
-            value="showTextArea">
+        <ma-check-box text="Show or hide" value="showTextArea">
         </ma-check-box>
     </div>
     <div class="nodes-item" ng-show="showTextArea">
-        <ma-text-area
-            fit-content-height="true"
-            is-resizable="false"
-            value="text5">
+        <ma-text-area fit-content-height="true" is-resizable="false" value="text5">
         </ma-text-area>
     </div>
     <div class="nodes-item">
@@ -95,15 +76,11 @@
             <div class="form-content">
                 <div class="form-group">
                     <div class="form-col col-xs-4">
-                        <ma-text-area
-                            fit-content-height="true"
-                            is-resizable="false"
-                            value="text6">
+                        <ma-text-area fit-content-height="true" is-resizable="false" value="text6">
                         </ma-text-area>
                     </div>
                     <div class="form-col col-xs-8">
-                        <ma-date-box
-                            value="date1">
+                        <ma-date-box value="date1">
                         </ma-date-box>
                     </div>
                 </div>

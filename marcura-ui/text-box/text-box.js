@@ -529,7 +529,12 @@ angular.module('marcuraUI.components')
                 $timeout(function () {
                     // Move id to input.
                     element.removeAttr('id');
-                    valueElement.attr('id', scope.id);
+
+                    if (scope.id) {
+                        valueElement.attr('id', scope.id);
+                    } else {
+                        valueElement.removeAttr('id');
+                    }
                 });
 
                 scope.$watch('value', function (newValue, oldValue) {

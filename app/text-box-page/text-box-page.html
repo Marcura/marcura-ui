@@ -12,11 +12,8 @@
         <h2>Basic</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="text1"
-            change="change1(maValue, maOldValue)"
-            blur="blur1(maValue, maOldValue, maHasValueChanged)"
-            focus="focus1(maValue)">
+        <ma-text-box id="id1" value="text1" change="change(maValue, maOldValue, 'text1')"
+            blur="blur(maValue, maOldValue, maHasValueChanged, 'text1')" focus="focus(maValue, 'text1')">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -26,20 +23,15 @@
         <h2>Disabled</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            is-disabled="true"
-            can-reset="true"
-            value="text2">
+        <ma-text-box is-disabled="true" can-reset="true" value="text2">
         </ma-text-box>
     </div>
     <div class="nodes-item">
         <h2>Required</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            is-required="true"
-            value="text3"
-            change="change3(maValue)">
+        <ma-text-box is-required="true" value="text3" change="change(maValue, maOldValue, 'text3')"
+            blur="blur(maValue, maOldValue, maHasValueChanged, 'text3')" focus="focus(maValue, 'text3')">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -49,14 +41,12 @@
         <h2>Timeout for change event</h2>
     </div>
     <div class="nodes-item">
-        By default change event fires when value is changed.<br/>
-        However, it is also possible to set a timeout for the event. In this case timeout is 1 second.
+        By default change event fires when value is changed.
+        <br/> However, it is also possible to set a timeout for the event. In this case
+        timeout is 1 second.
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="text4"
-            change="change4(maValue, maOldValue)"
-            change-timeout="1000">
+        <ma-text-box value="text4" change="change(maValue, maOldValue, 'text4')" change-timeout="1000">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -66,19 +56,14 @@
         <h2>Password</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="text5"
-            type="password">
+        <ma-text-box value="text5" type="password">
         </ma-text-box>
     </div>
     <div class="nodes-item">
         <pre>'{{text5 || ''}}'</pre>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="text8"
-            type="password"
-            can-reset="true">
+        <ma-text-box value="text8" type="password" can-reset="true">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -88,25 +73,17 @@
         <h2>Number</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="number1"
-            type="number"
-            can-reset="true">
+        <ma-text-box value="number1" type="number" can-reset="true">
         </ma-text-box>
     </div>
     <div class="nodes-item">
-         <pre>{{(number1 || null) | json}}</pre>
+        <pre>{{(number1 || null) | json}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Number min and max</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="number2"
-            type="number"
-            min="number2Min"
-            max="number2Max"
-            can-reset="true">
+        <ma-text-box value="number2" type="number" min="number2Min" max="number2Max" can-reset="true">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -120,12 +97,7 @@ max: {{number2Max}}</pre>
         <h2>Text min and max</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="text10"
-            min="text10Min"
-            max="text10Max"
-            is-required="true"
-            can-reset="true">
+        <ma-text-box value="text10" min="text10Min" max="text10Max" is-required="true" can-reset="true">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -139,31 +111,22 @@ max: {{text10Max}}</pre>
         <h2>Number with a default value</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="number3"
-            type="number"
-            can-reset="true"
-            reset="reset()"
-            default-value="0"
-            is-required="true"
-            change="changeNumber3(maValue, maOldValue)"
-            focus="focusNumber3(maValue, maOldValue)"
-            blur="blurNumber3(maValue, maOldValue, maHasValueChanged)">
+        <ma-text-box value="number3" type="number" can-reset="true" reset="reset()" default-value="0"
+            is-required="true" change="change(maValue, maOldValue, 'number3')" blur="blur(maValue, maOldValue, maHasValueChanged, 'number3')"
+            focus="focus(maValue, 'number3')">
         </ma-text-box>
     </div>
     <div class="nodes-item">
         <pre>defaultValue: 0</pre>
     </div>
     <div class="nodes-item">
-         <pre>{{(number3) | json}}</pre>
+        <pre>{{(number3) | json}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Email</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="text9"
-            type="email">
+        <ma-text-box value="text9" type="email">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -173,10 +136,7 @@ max: {{text10Max}}</pre>
         <h2>Reset button</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="text6"
-            can-reset="true"
-            change="change6(maValue)">
+        <ma-text-box value="text6" can-reset="true" change="change(maValue, maOldValue, 'text6')">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -186,12 +146,8 @@ max: {{text10Max}}</pre>
         <h2>"blur" and "focus" events</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box
-            value="text7"
-            can-reset="true"
-            change="change7(maValue, maOldValue)"
-            focus="focus7(maValue)"
-            blur="blur7(maValue, maOldValue)">
+        <ma-text-box value="text7" can-reset="true" change="change(maValue, maOldValue, 'text7')"
+            blur="blur(maValue, maOldValue, maHasValueChanged, 'text7')" focus="focus(maValue, 'text7')">
         </ma-text-box>
     </div>
     <div class="nodes-item">

@@ -10,8 +10,9 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             isRequired: '=',
             validators: '=',
             instance: '=',
-            updateOn: '@',
-            change: '&'
+            change: '&',
+            blur: '&',
+            focus: '&'
         },
         replace: true,
         template: function () {
@@ -45,7 +46,9 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 keydownValue,
                 keyupValue,
                 previousValue,
-                updateOn = scope.updateOn ? scope.updateOn : 'input';
+                focusValue;
+            scope.isFocused = false;
+            scope.isTouched = false;
 
             var getValueElementStyle = function () {
                 var style = $window.getComputedStyle(valueElement[0], null),
@@ -104,22 +107,23 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 }
             };
 
-            var onChange = function (value) {
+            var changeValue = function () {
+                var value = valueElement.val();
+
                 if (previousValue === value) {
                     return;
                 }
 
-                previousValue = value;
+                previousValue = scope.value;
+                scope.value = value;
 
                 $timeout(function () {
                     scope.change({
-                        maValue: value
+                        maValue: scope.value,
+                        maOldValue: previousValue
                     });
                 });
             };
-
-            scope.isFocused = false;
-            scope.isTouched = false;
 
             // Set up validators.
             for (var i = 0; i < validators.length; i++) {
@@ -139,18 +143,23 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
             scope.onFocus = function () {
                 scope.isFocused = true;
+                focusValue = scope.value;
+
+                scope.focus({
+                    maValue: scope.value
+                });
             };
 
             scope.onBlur = function () {
                 scope.isFocused = false;
                 scope.isTouched = true;
-
-                if (scope.isValid && updateOn === 'blur') {
-                    scope.value = valueElement.val();
-                    onChange(scope.value);
-                }
-
                 validate();
+
+                scope.blur({
+                    maValue: scope.value,
+                    maOldValue: focusValue,
+                    maHasValueChanged: focusValue !== scope.value
+                });
             };
 
             scope.onKeydown = function (event) {
@@ -175,15 +184,27 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 }
             };
 
-            // We are forced to use input event because scope.watch does
-            // not respond to Enter key when the cursor is in the end of text.
+            // Use input event to support value change from Enter key, and contextual menu,
+            // e.g. mouse right click + Cut/Copy/Paste etc.
             valueElement.on('input', function (event) {
+                var hasChanged = false;
+                keyupValue = angular.element(event.target).val();
+
+                if (keydownValue !== keyupValue) {
+                    hasChanged = true;
+                }
+
+                // Change value after a timeout while the user is typing.
+                if (!hasChanged) {
+                    return;
+                }
+
                 validate();
                 resize();
 
-                if (scope.isValid && updateOn === 'input') {
+                if (scope.isValid) {
                     scope.$apply(function () {
-                        scope.value = valueElement.val();
+                        changeValue();
                     });
                 }
             });

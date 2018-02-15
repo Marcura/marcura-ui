@@ -13,96 +13,15 @@ function textBoxPageController($scope) {
     $scope.number2Min = 1000.50;
     $scope.number2Max = 5000.50;
 
-    $scope.changeNumber3 = function (value, oldValue) {
-        console.log('change');
-        console.log('event:', value);
-        console.log('scope:', $scope.number3);
-        console.log('event old:', oldValue);
-        console.log('---');
+    $scope.change = function (value, oldValue, property) {
+        console.log('change - event:', value, ' new: ', $scope[property], ' old:', oldValue);
     };
 
-    $scope.focusNumber3 = function (value) {
-        console.log('focus');
-        console.log('event:', value);
-        console.log('scope:', $scope.number3);
-        console.log('---');
+    $scope.blur = function (value, oldValue, hasChanged, property) {
+        console.log('blur   - event:', value, ' new: ', $scope[property], ' old:', oldValue, ' changed:', hasChanged);
     };
 
-    $scope.blurNumber3 = function (value, oldValue, hasChanged) {
-        console.log('blur');
-        console.log('event:', value);
-        console.log('scope:', $scope.number3);
-        console.log('event old:', oldValue);
-        console.log('hasChanged:', hasChanged);
-        console.log('---');
-    };
-
-    $scope.change1 = function (text, oldText) {
-        console.log('change');
-        console.log('event:', text);
-        console.log('scope:', $scope.text1);
-        console.log('event old:', oldText);
-        console.log('---');
-    };
-
-    $scope.blur1 = function (text, oldText, hasChanged) {
-        console.log('blur');
-        console.log('event:', text);
-        console.log('scope:', $scope.text1);
-        console.log('event old:', oldText);
-        console.log('hasChanged:', hasChanged);
-        console.log('---');
-    };
-
-    $scope.focus1 = function (text) {
-        console.log('focus');
-        console.log('event:', text);
-        console.log('scope:', $scope.text1);
-        console.log('---');
-    };
-
-    $scope.change3 = function (text) {
-        console.log('change');
-        console.log('event:', text);
-        console.log('scope:', $scope.text3);
-        console.log('---');
-    };
-
-    $scope.change4 = function (text, oldText) {
-        console.log('change');
-        console.log('event:', text);
-        console.log('scope:', $scope.text4);
-        console.log('event old:', oldText);
-        console.log('---');
-    };
-
-    $scope.change6 = function (text) {
-        console.log('change');
-        console.log('event:', text);
-        console.log('scope:', $scope.text6);
-        console.log('---');
-    };
-
-    $scope.change7 = function (text, oldText) {
-        console.log('change');
-        console.log('event:', text);
-        console.log('scope:', $scope.text7);
-        console.log('event old:', oldText);
-        console.log('---');
-    };
-
-    $scope.focus7 = function (text) {
-        console.log('focus');
-        console.log('event:', text);
-        console.log('scope:', $scope.text7);
-        console.log('---');
-    };
-
-    $scope.blur7 = function (text, oldText) {
-        console.log('blur');
-        console.log('event:', text);
-        console.log('scope:', $scope.text7);
-        console.log('event old:', oldText);
-        console.log('---');
+    $scope.focus = function (value, property) {
+        console.log('focus  - event:', value, ' new: ', $scope[property]);
     };
 }
