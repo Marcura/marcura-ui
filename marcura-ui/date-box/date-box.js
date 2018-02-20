@@ -26,7 +26,8 @@ angular.module('marcuraUI.components')
                 min: '=',
                 max: '=',
                 changeTimeout: '=',
-                placeholder: '@'
+                placeholder: '@',
+                modifier: '@'
             },
             replace: true,
             template: function (element) {
@@ -519,6 +520,27 @@ angular.module('marcuraUI.components')
                     $('.ma-date-box-minute', element).off('blur', blurMinute);
                 };
 
+                var setModifiers = function (oldModifiers) {
+                    // Remove previous modifiers first.
+                    if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
+                        oldModifiers = oldModifiers.split(' ');
+
+                        for (var i = 0; i < oldModifiers.length; i++) {
+                            element.removeClass('ma-date-box-' + oldModifiers[i]);
+                        }
+                    }
+
+                    var modifiers = '';
+
+                    if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
+                        modifiers = scope.modifier.split(' ');
+                    }
+
+                    for (var j = 0; j < modifiers.length; j++) {
+                        element.addClass('ma-date-box-' + modifiers[j]);
+                    }
+                };
+
                 setValidators();
                 scope.isFocused = false;
                 scope.isValid = true;
@@ -745,6 +767,16 @@ angular.module('marcuraUI.components')
                 scope.$watch('min', function (newValue, oldValue) {
                     minMaxDateWatcher(newValue, oldValue, 'min');
                 });
+
+                scope.$watch('modifier', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    setModifiers(oldValue);
+                });
+
+                setModifiers();
 
                 // Prepare API instance.
                 if (scope.instance) {
