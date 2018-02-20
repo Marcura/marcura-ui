@@ -17,26 +17,26 @@ I fixed this by setting element[0].style.height in the resize function to 1px fi
     $scope.showTextArea = false;
     $scope.date1 = '2016-07-25T00:00:00Z';
 
-    $scope.change = function (text, oldText, property) {
+    $scope.change = function (value, oldText, property) {
         console.log('change');
-        console.log('event:', text);
+        console.log('event:', value);
         console.log('scope:', $scope[property]);
         console.log('event old:', oldText);
         console.log('');
     };
 
-    $scope.blur = function (text, oldText, hasChanged, property) {
+    $scope.blur = function (value, oldText, hasChanged, property) {
         console.log('blur');
-        console.log('event:', text);
+        console.log('event:', value);
         console.log('scope:', $scope[property]);
         console.log('event old:', oldText);
         console.log('hasChanged:', hasChanged);
         console.log('');
     };
 
-    $scope.focus = function (text, property) {
+    $scope.focus = function (value, property) {
         console.log('focus');
-        console.log('event:', text);
+        console.log('event:', value);
         console.log('scope:', $scope[property]);
         console.log('');
     };

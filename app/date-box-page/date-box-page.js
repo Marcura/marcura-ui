@@ -25,6 +25,13 @@ function dateBoxPageController($scope, $timeout, MaDate) {
         }
     };
 
+    $scope.change = function (value, property) {
+        console.log('change');
+        console.log('event:', value);
+        console.log('scope:', $scope[property]);
+        console.log('');
+    };
+
     // var getStart = function() {
     //     var end = new MaDate($scope.end);
     //
@@ -63,35 +70,6 @@ function dateBoxPageController($scope, $timeout, MaDate) {
     //         $scope.endComponent.refresh();
     //     }
     // };
-
-    $scope.change1 = function (date) {
-        console.log('change');
-        console.log('event:', date);
-        console.log('scope:', $scope.date1);
-    };
-
-    // $scope.change2 = function(date) {
-    //     console.log('event:', date);
-    //     console.log('scope:', $scope.date2);
-    // };
-
-    $scope.change7 = function (date) {
-        console.log('change');
-        console.log('event:', date);
-        console.log('scope:', $scope.date7);
-    };
-
-    $scope.change10 = function (date) {
-        console.log('change');
-        console.log('event:', date);
-        console.log('scope:', $scope.date10);
-    };
-
-    $scope.change20 = function (date) {
-        console.log('change');
-        console.log('event:', date);
-        console.log('scope:', $scope.date20);
-    };
 
     // $scope.$watch('date2', function(newDate, oldDate) {
     //     console.log('change:', newDate);

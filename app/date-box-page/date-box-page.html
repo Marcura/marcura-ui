@@ -12,9 +12,7 @@
         <h2>Date in UTC</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            value="date1"
-            change="change1(maValue)">
+        <ma-date-box value="date1" change="change(maValue, 'date1')">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -24,10 +22,7 @@
         <h2>Date in UTC+09:00</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            value="date2"
-            time-zone="'+09:00'"
-            change="change2(maValue)">
+        <ma-date-box value="date2" time-zone="'+09:00'" change="change(maValue, 'date2')">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -37,9 +32,7 @@
         <h2>Date and time in UTC</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            has-time="true"
-            value="date3">
+        <ma-date-box has-time="true" value="date3">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -49,11 +42,7 @@
         <h2>Date and time in UTC+09:00</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            instance="date4Instance"
-            has-time="true"
-            value="date4"
-            time-zone="'+09:00'"
+        <ma-date-box instance="date4Instance" has-time="true" value="date4" time-zone="'+09:00'"
             is-disabled="date4Disabled">
         </ma-date-box>
     </div>
@@ -64,11 +53,7 @@
         <h2>Disabled</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            has-time="true"
-            value="date6"
-            is-disabled="true"
-            time-zone="'+09:00'"
+        <ma-date-box has-time="true" value="date6" is-disabled="true" time-zone="'+09:00'"
             can-reset="true">
         </ma-date-box>
     </div>
@@ -76,21 +61,14 @@
         <h2>Required</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            value="date7"
-            is-required="true"
-            can-reset="true"
-            change="change7(maValue)">
+        <ma-date-box value="date7" is-required="true" can-reset="true" change="change(maValue, 'date7')">
         </ma-date-box>
     </div>
     <div class="nodes-item">
         <pre>{{date7 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            has-time="true"
-            value="date8"
-            is-required="true">
+        <ma-date-box has-time="true" value="date8" is-required="true">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -100,11 +78,7 @@
         <h2>Min and max dates</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            value="date9"
-            min="date9Min"
-            max="date9Max"
-            change="change1(maValue)">
+        <ma-date-box value="date9" min="date9Min" max="date9Max" change="change(maValue, 'date9')">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -118,10 +92,7 @@ max: {{date9Max}}</pre>
         <h2>Reset button</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            value="date10"
-            can-reset="true"
-            change="change10(maValue)">
+        <ma-date-box value="date10" can-reset="true" change="change(maValue, 'date10')">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -131,14 +102,12 @@ max: {{date9Max}}</pre>
         <h2>Timeout for change event</h2>
     </div>
     <div class="nodes-item">
-        By default change event fires when the field loses focus.<br/>
-        However, it is also possible to set a timeout for the event. In this case timeout is 1 second.
+        By default change event fires when the field loses focus.
+        <br/> However, it is also possible to set a timeout for the event. In this case
+        timeout is 1 second.
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            value="date11"
-            change-timeout="1000"
-            has-time="true">
+        <ma-date-box value="date11" change-timeout="1000" has-time="true">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -157,24 +126,15 @@ max: {{date9Max}}</pre>
                     <div class="form-label">
                         <label for="date20">Start</label>
                     </div>
-                    <ma-date-box
-                        id="date20"
-                        value="date20"
-                        max="date21"
-                        can-reset="true"
-                        change="change20(maValue)"
-                        validators="[date20Validator]"
-                        instance="date20DateBox">
+                    <ma-date-box id="date20" value="date20" max="date21" can-reset="true" change="change(maValue, 'date20')"
+                        validators="[date20Validator]" instance="date20DateBox">
                     </ma-date-box>
                 </div>
                 <div class="form-col col-xs-12 col-sm-3">
                     <div class="form-label">
                         <label for="date21">End</label>
                     </div>
-                    <ma-date-box
-                        id="date21"
-                        value="date21"
-                        can-reset="true">
+                    <ma-date-box id="date21" value="date21" can-reset="true">
                     </ma-date-box>
                 </div>
             </div>
@@ -198,10 +158,7 @@ value: {{date21 || 'null'}}</pre>
         <h2>Placeholder</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box
-            value="date12"
-            can-reset="true"
-            placeholder="Date">
+        <ma-date-box value="date12" can-reset="true" placeholder="Date">
         </ma-date-box>
     </div>
     <!-- <div class="nodes-item">

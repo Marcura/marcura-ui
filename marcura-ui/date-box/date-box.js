@@ -119,6 +119,36 @@ angular.module('marcuraUI.components')
                     return true;
                 };
 
+                // Returns null if display date is invalid.
+                var getDisplayDate = function () {
+                    var displayDate = dateElement.val().trim(),
+                        isEmpty = displayDate === '',
+                        hour = Number(hourElement.val()),
+                        minute = Number(minuteElement.val()),
+                        date = MaDate.createEmpty();
+
+                    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                        return null;
+                    }
+
+                    if (isEmpty) {
+                        return date;
+                    }
+
+                    date = new MaDate(displayDate);
+
+                    // Date can't be parsed.
+                    if (date.isEmpty()) {
+                        return null;
+                    }
+
+                    date.add(hour, 'hour');
+                    date.add(minute, 'minute');
+                    date.offset(initialDateOffset);
+
+                    return date;
+                };
+
                 var setDisplayDate = function (date) {
                     var displayDate = null;
 
@@ -723,12 +753,16 @@ angular.module('marcuraUI.components')
                     scope.instance.validate = function () {
                         scope.isTouched = true;
 
-                        if (isRequired && !scope.value) {
+                        // Use display date, as scope date can't be invalid, because
+                        // we don't update scope value when display date is invalid.
+                        var date = getDisplayDate();
+
+                        if (!date || (isRequired && date.isEmpty())) {
                             scope.isValid = false;
                             return;
                         }
 
-                        validate(parseDate(scope.value));
+                        validate(date);
                     };
 
                     scope.instance.isValid = function () {
