@@ -61,6 +61,10 @@
         }
     }
 
+    &:focus {
+        outline: 0;
+    }
+
     &:focus:not(&-link):not(&-default):not(&-simple):not(&-fillingless),
     &:hover:not(&-link):not(&-default):not(&-simple):not(&-fillingless) {
         text-decoration: none;
@@ -209,7 +213,7 @@
     // Remove 3D push effect in IE.
     &:active &-text,
     &:focus &-text {
-        position:relative;
+        position: relative;
         top: 0;
         left: 0;
     }

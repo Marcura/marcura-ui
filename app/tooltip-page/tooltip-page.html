@@ -1,0 +1,27 @@
+<div class="nodes nodes-padding-bottom-m">
+    <div class="nodes-item">
+        <a href="#/home">Home</a>
+    </div>
+    <div class="nodes-item">
+        <h1>Tooltip</h1>
+        <div class="api-documentation">
+            <a href="https://github.com/Marcura/marcura-ui/wiki/tooltip">API documentation</a>
+        </div>
+    </div>
+    <div class="nodes-item">
+        <h2>Allow to close</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-button size="xs" right-icon="refresh" modifier="default" ma-tooltip="Refresh"
+            ma-tooltip-can-close="canClose" ma-tooltip-instance="tooltipComponent">
+        </ma-button>
+    </div>
+    <div class="nodes-item">
+        <ma-button size="xs" modifier="default" click="show()" text="Show">
+        </ma-button>
+        <ma-button size="xs" modifier="default" click="hide()" text="Hide">
+        </ma-button>
+        <ma-button size="xs" modifier="default" click="close()" text="{{canClose ? 'Disabled' : 'Enable'}} closing">
+        </ma-button>
+    </div>
+</div>

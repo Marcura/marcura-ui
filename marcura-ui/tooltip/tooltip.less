@@ -1,0 +1,170 @@
+@import 'marcura-ui/less.less';
+
+@ma-tooltip-border-color: #000000;
+@ma-tooltip-background-color: #000000;
+@ma-tooltip-inner-padding-left: 8px;
+@ma-tooltip-inner-padding-top: 3px;
+
+.ma-tooltip {
+    position: absolute;
+    z-index: 1070;
+    display: block;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    letter-spacing: normal;
+    line-break: auto;
+    line-height: 1.42857143;
+    text-align: left;
+    text-align: start;
+    text-decoration: none;
+    text-shadow: none;
+    text-transform: none;
+    white-space: normal;
+    word-break: normal;
+    word-spacing: normal;
+    word-wrap: normal;
+    font-size: 12px;
+    opacity: 0;
+
+    &.in {
+        opacity: 0.9;
+    }
+    
+    &.top {
+        margin-top: -3px;
+        padding: 5px 0;
+
+        .ma-tooltip-arrow {
+            bottom: 0;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px 5px 0;
+            border-top-color: @ma-tooltip-border-color;
+        }
+    }
+
+    &.right {
+        margin-left: 3px;
+        padding: 0 5px;
+
+        .ma-tooltip-arrow {
+            top: 50%;
+            left: 0;
+            margin-top: -5px;
+            border-width: 5px 5px 5px 0;
+            border-right-color: @ma-tooltip-border-color;
+        }
+    }
+    
+    &.bottom {
+        margin-top: 3px;
+        padding: 5px 0;
+
+        .ma-tooltip-arrow {
+            top: 0;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 0 5px 5px;
+            border-bottom-color: @ma-tooltip-border-color;
+        }
+    }
+    
+    &.left {
+        margin-left: -3px;
+        padding: 0 5px;
+
+        .ma-tooltip-arrow {
+            top: 50%;
+            right: 0;
+            margin-top: -5px;
+            border-width: 5px 0 5px 5px;
+            border-left-color: @ma-tooltip-border-color;
+        }
+    }
+
+    &-inner {
+        max-width: 200px;
+        padding: @ma-tooltip-inner-padding-top @ma-tooltip-inner-padding-left;
+        color: #ffffff;
+        text-align: center;
+        background-color: @ma-tooltip-background-color;
+        border-radius: 4px;
+    }
+    
+    &-arrow {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-color: transparent;
+        border-style: solid;
+    }
+    
+    &.top-left {
+        .ma-tooltip-arrow {
+            bottom: 0;
+            right: 5px;
+            margin-bottom: -5px;
+            border-width: 5px 5px 0;
+            border-top-color: @ma-tooltip-border-color;
+        }
+    }
+    
+    &.top-right {
+        .ma-tooltip-arrow {
+            bottom: 0;
+            left: 5px;
+            margin-bottom: -5px;
+            border-width: 5px 5px 0;
+            border-top-color: @ma-tooltip-border-color;
+        }
+    }
+    
+    &.bottom-left {
+        .ma-tooltip-arrow {
+            top: 0;
+            right: 5px;
+            margin-top: -5px;
+            border-width: 0 5px 5px;
+            border-bottom-color: @ma-tooltip-border-color;
+        }
+    }
+    
+    &.bottom-right {
+        .ma-tooltip-arrow {
+            top: 0;
+            left: 5px;
+            margin-top: -5px;
+            border-width: 0 5px 5px;
+            border-bottom-color: @ma-tooltip-border-color;
+        }
+    }
+
+    &-close {
+        position: absolute;
+        top: 9px;
+        right: 4px;
+        width: 12px;
+        height: 12px;
+        color: #ffffff;
+        font-size: 14px;
+        cursor: pointer;
+        display: none;
+
+        .fa {
+            width: 100%;
+            height: 100%;
+            vertical-align: top;
+        }
+    }
+
+    &-can-close {
+        .ma-tooltip-close {
+            display: block;
+        }
+
+        .ma-tooltip-inner {
+            padding-right: @ma-tooltip-inner-padding-left + 16px;
+        }
+    }
+}
