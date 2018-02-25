@@ -318,6 +318,7 @@ angular.module('marcuraUI.components')
                 var validate = function (date, triggerEvent) {
                     scope.isValid = true;
                     failedValidator = null;
+                    triggerEvent = triggerEvent !== undefined ? triggerEvent : true;
                     var formattedDate = date ? date.format(format) : null;
 
                     if (validators && validators.length) {
@@ -794,7 +795,9 @@ angular.module('marcuraUI.components')
                             return;
                         }
 
-                        validate(date);
+                        // Prevent loop that might occur if validate method is invoked
+                        // from validate event from outside.
+                        validate(date, false);
                     };
 
                     scope.instance.isValid = function () {
