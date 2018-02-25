@@ -110,12 +110,6 @@ app.config(function ($stateProvider, $urlRouterProvider, maDateBoxConfigurationP
         controller: 'selectBoxPageController'
     });
 
-    $stateProvider.state('ui-select', {
-        url: '/ui-select',
-        templateUrl: 'ui-select-page/ui-select-page.html',
-        controller: 'uiSelectPageController'
-    });
-
     $stateProvider.state('costs-grid', {
         url: '/costs-grid',
         templateUrl: 'costs-grid-page/costs-grid-page.html',
@@ -174,6 +168,12 @@ app.config(function ($stateProvider, $urlRouterProvider, maDateBoxConfigurationP
         url: '/spinner',
         templateUrl: 'spinner-page/spinner-page.html',
         controller: 'spinnerPageController'
+    });
+
+    $stateProvider.state('tooltip', {
+        url: '/tooltip',
+        templateUrl: 'tooltip-page/tooltip-page.html',
+        controller: 'tooltipPageController'
     });
 
     $urlRouterProvider.otherwise('/home');

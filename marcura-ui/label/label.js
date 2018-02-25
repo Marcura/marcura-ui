@@ -5,7 +5,8 @@ angular.module('marcuraUI.components').directive('maLabel', [function () {
         scope: {
             cutOverflow: '=',
             for: '@',
-            isRequired: '='
+            isRequired: '=',
+            hasWarning: '='
         },
         replace: true,
         template: function () {
@@ -13,10 +14,13 @@ angular.module('marcuraUI.components').directive('maLabel', [function () {
                 <div class="ma-label" ng-class="{\
                     \'ma-label-is-required\': isRequired,\
                     \'ma-label-has-content\': hasContent,\
+                    \'ma-label-has-warning\': hasWarning,\
                     \'ma-label-cut-overflow\': cutOverflow\
                 }">\
                     <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div>\
+                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div><!--\
+                    --><div class="ma-label-warning" ng-if="hasWarning">&nbsp;\
+                    <i class="fa fa-exclamation-triangle"></i></div>\
                 </div>';
 
             return html;

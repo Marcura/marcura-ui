@@ -1396,7 +1396,8 @@ if (!String.prototype.endsWith) {
         scope: {
             cutOverflow: '=',
             for: '@',
-            isRequired: '='
+            isRequired: '=',
+            hasWarning: '='
         },
         replace: true,
         template: function () {
@@ -1404,10 +1405,13 @@ if (!String.prototype.endsWith) {
                 <div class="ma-label" ng-class="{\
                     \'ma-label-is-required\': isRequired,\
                     \'ma-label-has-content\': hasContent,\
+                    \'ma-label-has-warning\': hasWarning,\
                     \'ma-label-cut-overflow\': cutOverflow\
                 }">\
                     <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div>\
+                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div><!--\
+                    --><div class="ma-label-warning" ng-if="hasWarning">&nbsp;\
+                    <i class="fa fa-exclamation-triangle"></i></div>\
                 </div>';
 
             return html;
@@ -1477,69 +1481,6 @@ if (!String.prototype.endsWith) {
 
             setState();
             setCssClass();
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            scope.calculateLeft = function (stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function () {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function (stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
         }
     };
 }]);})();
@@ -1713,6 +1654,69 @@ if (!String.prototype.endsWith) {
                     validate(scope.value);
                 };
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            scope.calculateLeft = function (stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function () {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function (stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
         }
     };
 }]);})();
@@ -2043,6 +2047,472 @@ if (!String.prototype.endsWith) {
             });
 
             setTabindex();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            page: '=',
+            totalItems: '=',
+            visiblePages: '=',
+            showItemsPerPage: '=',
+            allowAllItemsPerPage: '=',
+            itemsPerPageNumbers: '=',
+            itemsPerPageText: '@',
+            itemsPerPage: '=',
+            change: '&'
+        },
+        replace: true,
+        template: function () {
+            var html = '<div class="ma-pager" ng-class="{\
+                \'ma-pager-has-pager\': _hasPager\
+            }">\
+                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
+                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
+                        items="_itemsPerPageNumbers"\
+                        value="_itemsPerPage"\
+                        change="itemsPerPageChange(maValue, maOldValue)">\
+                    </ma-select-box>\
+                </div><div class="ma-pager-pager">\
+                    <div class="ma-pager-start">\
+                        <ma-button\
+                            class="ma-button-first"\
+                            text="First"\
+                            size="xs"\
+                            modifier="default"\
+                            click="firstClick()"\
+                            is-disabled="_page <= 1"\
+                        ></ma-button><ma-button\
+                            class="ma-button-previous"\
+                            text="Previous"\
+                            size="xs"\
+                            modifier="default"\
+                            click="previousClick()"\
+                            is-disabled="_page <= 1">\
+                        </ma-button>\
+                    </div\
+                    ><div class="ma-pager-middle">\
+                        <ma-button\
+                            class="ma-button-previous-range"\
+                            text="..."\
+                            size="xs"\
+                            modifier="default"\
+                            click="previousRangeClick()"\
+                            is-disabled="isFirstRange"\
+                        ></ma-button><div class="ma-pager-pages"><ma-button\
+                            ng-repeat="rangePage in rangePages"\
+                            class="ma-button-page"\
+                            text="{{rangePage}}"\
+                            size="xs"\
+                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
+                            click="pageClick(rangePage)"></div></ma-button\
+                        ><ma-button\
+                            class="ma-button-next-range"\
+                            text="..."\
+                            size="xs"\
+                            modifier="default"\
+                            click="nextRangeClick()"\
+                            is-disabled="isLastRange"\
+                        ></ma-button>\
+                    </div\
+                    ><div class="ma-pager-end">\
+                        <ma-button\
+                            class="ma-button-next"\
+                            text="Next"\
+                            size="xs"\
+                            modifier="default"\
+                            click="nextClick()"\
+                            is-disabled="_page >= totalPages"\
+                        ></ma-button><ma-button\
+                            class="ma-button-last"\
+                            text="Last"\
+                            size="xs"\
+                            modifier="default"\
+                            click="lastClick()"\
+                            is-disabled="_page >= totalPages">\
+                        </ma-button>\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            scope._page = scope.page;
+            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
+            scope._itemsPerPageNumbers = ['25', '50', '75', '100'];
+            scope._itemsPerPage = '25';
+            scope.hasItemsPerPageChanged = false;
+            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
+
+            var setTotalPages = function () {
+                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
+            };
+
+            var setItemsPerPage = function () {
+                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
+                    return;
+                }
+
+                scope._itemsPerPage = scope.itemsPerPage.toString();
+            };
+
+            var setItemsPerPageNumbers = function () {
+                if (!scope._showItemsPerPage) {
+                    return;
+                }
+
+                if (angular.isArray(scope.itemsPerPageNumbers)) {
+                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
+                }
+
+                if (scope.allowAllItemsPerPage) {
+                    scope._itemsPerPageNumbers.push('All');
+                }
+            };
+
+            var setRangePages = function () {
+                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
+
+                if (scope.totalPages < scope._visiblePages) {
+                    scope._visiblePages = scope.totalPages || 1;
+                }
+
+                scope.rangePages = [];
+                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
+                scope.isFirstRange = scope.range === 0;
+                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
+                var startPage = scope.range * scope._visiblePages;
+
+                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
+                    scope.rangePages.push(startPage + visiblePage);
+                }
+            };
+
+            var setHasPager = function () {
+                if (scope._itemsPerPage === 'All') {
+                    scope._hasPager = false;
+                    return;
+                }
+
+                var itemsPerPage = Number(scope._itemsPerPage);
+                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * itemsPerPage > itemsPerPage);
+            };
+
+            var onChange = function () {
+                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
+                    return;
+                }
+
+                scope.page = scope._page || null;
+                setRangePages();
+
+                var value = {
+                    maPage: scope.page
+                };
+
+                if (scope._showItemsPerPage) {
+                    value.maItemsPerPage = scope._itemsPerPage === 'All' ? null : Number(scope._itemsPerPage);
+                    scope.hasItemsPerPageChanged = false;
+
+                    // If itemsPerPage is set update its value.
+                    if (scope.itemsPerPage !== undefined) {
+                        scope.itemsPerPage = value.maItemsPerPage;
+                    }
+                }
+
+                // Postpone change event for $apply (which is being invoked by $timeout)
+                // to have time to take effect and update scope.page.
+                $timeout(function () {
+                    scope.change(value);
+                });
+            };
+
+            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
+                scope._itemsPerPage = itemsPerPage;
+                scope.hasItemsPerPageChanged = true;
+                var oldTotalPages = scope.totalPages;
+                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
+
+                if (oldItemsPerPage === 'All') {
+                    scope._page = 1;
+                } else {
+                    var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
+                    scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
+                }
+
+                setHasPager();
+                onChange();
+            };
+
+            scope.firstClick = function () {
+                scope._page = 1;
+                onChange();
+            };
+
+            scope.previousClick = function () {
+                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
+                onChange();
+            };
+
+            scope.nextClick = function () {
+                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
+                onChange();
+            };
+
+            scope.lastClick = function () {
+                scope._page = scope.totalPages;
+                onChange();
+            };
+
+            scope.pageClick = function (page) {
+                scope._page = page;
+                onChange();
+            };
+
+            scope.previousRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages;
+                onChange();
+            };
+
+            scope.nextRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
+                onChange();
+            };
+
+            scope.$watch('totalItems', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
+                setTotalPages();
+
+                // Correct the page and trigger change.
+                if (scope._totalItems === 0 || scope._totalItems <= Number(scope._itemsPerPage)) {
+                    scope._page = 1;
+                    onChange();
+                    setHasPager();
+                    return;
+                }
+
+                setRangePages();
+                setHasPager();
+            });
+
+            scope.$watch('visiblePages', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setRangePages();
+            });
+
+            scope.$watch('page', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                var page = scope.page;
+
+                // Correct page.
+                if (page < 1) {
+                    page = 1;
+                } else if (page > scope.totalPages) {
+                    page = scope.totalPages;
+                }
+
+                // Correct page to 1 in case totalPages is 0 and page is 0.
+                scope._page = page || 1;
+                setRangePages();
+                setHasPager();
+            });
+
+            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
+                if (angular.equals(newValue, oldValue)) {
+                    return;
+                }
+
+                setItemsPerPageNumbers();
+            });
+
+            scope.$watch('itemsPerPage', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setItemsPerPage();
+                setHasPager();
+            });
+
+            setItemsPerPageNumbers();
+            setItemsPerPage();
+            setTotalPages();
+            setRangePages();
+            setHasPager();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            itemTemplate: '=',
+            itemTextField: '@',
+            itemValueField: '@',
+            value: '=',
+            change: '&',
+            isDisabled: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+            canUnselect: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-radio-button" ng-class="{\
+                        \'ma-radio-button-is-disabled\': isDisabled,\
+                        \'ma-radio-button-is-invalid\': !isValid,\
+                        \'ma-radio-button-is-touched\': isTouched,\
+                        \'ma-radio-button-can-unselect\': canUnselect\
+                    }">\
+                    <div class="ma-radio-button-item" ng-class="{\
+                            \'ma-radio-button-item-is-selected\': isItemSelected(item)\
+                        }" ng-style="{ width: (100 / items.length) + \'%\' }"\
+                        ng-repeat="item in items">\
+                        <ma-button\
+                            class="ma-button-radio"\
+                            text="{{getItemText(item)}}"\
+                            modifier="simple"\
+                            size="xs"\
+                            is-disabled="isDisabled"\
+                            click="onChange(item)">\
+                        </ma-button>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            var isObjectArray = scope.itemTextField || scope.itemValueField,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var validate = function (value) {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            scope.getItemText = function (item) {
+                if (scope.itemTemplate) {
+                    return scope.itemTemplate(item);
+                } else if (!isObjectArray) {
+                    return item;
+                } else if (scope.itemTextField) {
+                    return item[scope.itemTextField];
+                }
+            };
+
+            scope.isItemSelected = function (item) {
+                if (!isObjectArray) {
+                    return item === scope.value;
+                } else if (scope.itemValueField) {
+                    return item && scope.value &&
+                        item[scope.itemValueField] === scope.value[scope.itemValueField];
+                }
+
+                return false;
+            };
+
+            scope.onChange = function (item) {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                var oldValue = scope.value,
+                    hasChanged = true;
+                scope.value = item;
+
+                // Check that value has changed.
+                if (!isObjectArray) {
+                    hasChanged = oldValue !== item;
+                } else if (scope.itemValueField) {
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item[scope.itemValueField])) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
+                    }
+                } else {
+                    // Compare objects if itemValueField is not provided.
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item)) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
+                    }
+                }
+
+                // Remove selection if the same item is selected.
+                if (scope.canUnselect && !hasChanged) {
+                    scope.value = null;
+                }
+
+                if (hasChanged || (scope.canUnselect && !hasChanged)) {
+                    $timeout(function () {
+                        validate(scope.value);
+
+                        scope.change({
+                            maValue: scope.value,
+                            maOldValue: oldValue
+                        });
+                    });
+                }
+            };
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate(scope.value);
+                };
+            }
         }
     };
 }]);})();
@@ -3295,167 +3765,6 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            itemTemplate: '=',
-            itemTextField: '@',
-            itemValueField: '@',
-            value: '=',
-            change: '&',
-            isDisabled: '=',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
-            canUnselect: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-radio-button" ng-class="{\
-                        \'ma-radio-button-is-disabled\': isDisabled,\
-                        \'ma-radio-button-is-invalid\': !isValid,\
-                        \'ma-radio-button-is-touched\': isTouched,\
-                        \'ma-radio-button-can-unselect\': canUnselect\
-                    }">\
-                    <div class="ma-radio-button-item" ng-class="{\
-                            \'ma-radio-button-item-is-selected\': isItemSelected(item)\
-                        }" ng-style="{ width: (100 / items.length) + \'%\' }"\
-                        ng-repeat="item in items">\
-                        <ma-button\
-                            class="ma-button-radio"\
-                            text="{{getItemText(item)}}"\
-                            modifier="simple"\
-                            size="xs"\
-                            is-disabled="isDisabled"\
-                            click="onChange(item)">\
-                        </ma-button>\
-                    </div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            var isObjectArray = scope.itemTextField || scope.itemValueField,
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
-
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var validate = function (value) {
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.getItemText = function (item) {
-                if (scope.itemTemplate) {
-                    return scope.itemTemplate(item);
-                } else if (!isObjectArray) {
-                    return item;
-                } else if (scope.itemTextField) {
-                    return item[scope.itemTextField];
-                }
-            };
-
-            scope.isItemSelected = function (item) {
-                if (!isObjectArray) {
-                    return item === scope.value;
-                } else if (scope.itemValueField) {
-                    return item && scope.value &&
-                        item[scope.itemValueField] === scope.value[scope.itemValueField];
-                }
-
-                return false;
-            };
-
-            scope.onChange = function (item) {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                var oldValue = scope.value,
-                    hasChanged = true;
-                scope.value = item;
-
-                // Check that value has changed.
-                if (!isObjectArray) {
-                    hasChanged = oldValue !== item;
-                } else if (scope.itemValueField) {
-                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item[scope.itemValueField])) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
-                    }
-                } else {
-                    // Compare objects if itemValueField is not provided.
-                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item)) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
-                    }
-                }
-
-                // Remove selection if the same item is selected.
-                if (scope.canUnselect && !hasChanged) {
-                    scope.value = null;
-                }
-
-                if (hasChanged || (scope.canUnselect && !hasChanged)) {
-                    $timeout(function () {
-                        validate(scope.value);
-
-                        scope.change({
-                            maValue: scope.value,
-                            maOldValue: oldValue
-                        });
-                    });
-                }
-            };
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate(scope.value);
-                };
-            }
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function () {
     var months = [{
         language: 'en',
@@ -4599,6 +4908,157 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
         }
     };
 }]);})();
+(function(){/**
+* A set of utility methods that can be use to retrieve position of DOM elements.
+* It is meant to be used where we need to absolute-position DOM elements in
+* relation to other, existing elements (this is the case for tooltips, popovers,
+* typeahead suggestions etc.).
+*/
+angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$window', function ($document, $window) {
+    function getStyle(el, cssprop) {
+        // IE
+        if (el.currentStyle) {
+            return el.currentStyle[cssprop];
+        } else if ($window.getComputedStyle) {
+            return $window.getComputedStyle(el)[cssprop];
+        }
+
+        // finally try and get inline style
+        return el.style[cssprop];
+    }
+
+    /**
+     * Checks if a given element is statically positioned
+     * @param element - raw DOM element
+     */
+    function isStaticPositioned(element) {
+        return (getStyle(element, 'position') || 'static') === 'static';
+    }
+
+    /**
+     * returns the closest, non-statically positioned parentOffset of a given element
+     * @param element
+     */
+    var parentOffsetEl = function (element) {
+        var docDomEl = $document[0];
+        var offsetParent = element.offsetParent || docDomEl;
+        while (offsetParent && offsetParent !== docDomEl && isStaticPositioned(offsetParent)) {
+            offsetParent = offsetParent.offsetParent;
+        }
+        return offsetParent || docDomEl;
+    };
+
+    return {
+        /**
+         * Provides read-only equivalent of jQuery's position function:
+         * http://api.jquery.com/position/
+         */
+        position: function (element) {
+            var elBCR = this.offset(element);
+            var offsetParentBCR = { top: 0, left: 0 };
+            var offsetParentEl = parentOffsetEl(element[0]);
+            if (offsetParentEl != $document[0]) {
+                offsetParentBCR = this.offset(angular.element(offsetParentEl));
+                offsetParentBCR.top += offsetParentEl.clientTop - offsetParentEl.scrollTop;
+                offsetParentBCR.left += offsetParentEl.clientLeft - offsetParentEl.scrollLeft;
+            }
+
+            var boundingClientRect = element[0].getBoundingClientRect();
+            return {
+                width: boundingClientRect.width || element.prop('offsetWidth'),
+                height: boundingClientRect.height || element.prop('offsetHeight'),
+                top: elBCR.top - offsetParentBCR.top,
+                left: elBCR.left - offsetParentBCR.left
+            };
+        },
+
+        /**
+         * Provides read-only equivalent of jQuery's offset function:
+         * http://api.jquery.com/offset/
+         */
+        offset: function (element) {
+            var boundingClientRect = element[0].getBoundingClientRect();
+            return {
+                width: boundingClientRect.width || element.prop('offsetWidth'),
+                height: boundingClientRect.height || element.prop('offsetHeight'),
+                top: boundingClientRect.top + ($window.pageYOffset || $document[0].documentElement.scrollTop),
+                left: boundingClientRect.left + ($window.pageXOffset || $document[0].documentElement.scrollLeft)
+            };
+        },
+
+        /**
+         * Provides coordinates for the targetEl in relation to hostEl
+         */
+        positionElements: function (hostEl, targetEl, positionStr, appendToBody) {
+
+            var positionStrParts = positionStr.split('-');
+            var pos0 = positionStrParts[0], pos1 = positionStrParts[1] || 'center';
+
+            var hostElPos,
+                targetElWidth,
+                targetElHeight,
+                targetElPos;
+
+            hostElPos = appendToBody ? this.offset(hostEl) : this.position(hostEl);
+
+            targetElWidth = targetEl.prop('offsetWidth');
+            targetElHeight = targetEl.prop('offsetHeight');
+
+            var shiftWidth = {
+                center: function () {
+                    return hostElPos.left + hostElPos.width / 2 - targetElWidth / 2;
+                },
+                left: function () {
+                    return hostElPos.left;
+                },
+                right: function () {
+                    return hostElPos.left + hostElPos.width;
+                }
+            };
+
+            var shiftHeight = {
+                center: function () {
+                    return hostElPos.top + hostElPos.height / 2 - targetElHeight / 2;
+                },
+                top: function () {
+                    return hostElPos.top;
+                },
+                bottom: function () {
+                    return hostElPos.top + hostElPos.height;
+                }
+            };
+
+            switch (pos0) {
+                case 'right':
+                    targetElPos = {
+                        top: shiftHeight[pos1](),
+                        left: shiftWidth[pos0]()
+                    };
+                    break;
+                case 'left':
+                    targetElPos = {
+                        top: shiftHeight[pos1](),
+                        left: hostElPos.left - targetElWidth
+                    };
+                    break;
+                case 'bottom':
+                    targetElPos = {
+                        top: shiftHeight[pos0](),
+                        left: shiftWidth[pos1]()
+                    };
+                    break;
+                default:
+                    targetElPos = {
+                        top: hostElPos.top - targetElHeight,
+                        left: shiftWidth[pos1]()
+                    };
+                    break;
+            }
+
+            return targetElPos;
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.services').factory('MaValidators', ['MaHelper', 'MaDate', function (MaHelper, MaDate) {
     var formatValueToCompare = function (value) {
         if (!value) {
@@ -5253,311 +5713,6 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     }
                 };
             }
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            page: '=',
-            totalItems: '=',
-            visiblePages: '=',
-            showItemsPerPage: '=',
-            allowAllItemsPerPage: '=',
-            itemsPerPageNumbers: '=',
-            itemsPerPageText: '@',
-            itemsPerPage: '=',
-            change: '&'
-        },
-        replace: true,
-        template: function () {
-            var html = '<div class="ma-pager" ng-class="{\
-                \'ma-pager-has-pager\': _hasPager\
-            }">\
-                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
-                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
-                        items="_itemsPerPageNumbers"\
-                        value="_itemsPerPage"\
-                        change="itemsPerPageChange(maValue, maOldValue)">\
-                    </ma-select-box>\
-                </div><div class="ma-pager-pager">\
-                    <div class="ma-pager-start">\
-                        <ma-button\
-                            class="ma-button-first"\
-                            text="First"\
-                            size="xs"\
-                            modifier="default"\
-                            click="firstClick()"\
-                            is-disabled="_page <= 1"\
-                        ></ma-button><ma-button\
-                            class="ma-button-previous"\
-                            text="Previous"\
-                            size="xs"\
-                            modifier="default"\
-                            click="previousClick()"\
-                            is-disabled="_page <= 1">\
-                        </ma-button>\
-                    </div\
-                    ><div class="ma-pager-middle">\
-                        <ma-button\
-                            class="ma-button-previous-range"\
-                            text="..."\
-                            size="xs"\
-                            modifier="default"\
-                            click="previousRangeClick()"\
-                            is-disabled="isFirstRange"\
-                        ></ma-button><div class="ma-pager-pages"><ma-button\
-                            ng-repeat="rangePage in rangePages"\
-                            class="ma-button-page"\
-                            text="{{rangePage}}"\
-                            size="xs"\
-                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
-                            click="pageClick(rangePage)"></div></ma-button\
-                        ><ma-button\
-                            class="ma-button-next-range"\
-                            text="..."\
-                            size="xs"\
-                            modifier="default"\
-                            click="nextRangeClick()"\
-                            is-disabled="isLastRange"\
-                        ></ma-button>\
-                    </div\
-                    ><div class="ma-pager-end">\
-                        <ma-button\
-                            class="ma-button-next"\
-                            text="Next"\
-                            size="xs"\
-                            modifier="default"\
-                            click="nextClick()"\
-                            is-disabled="_page >= totalPages"\
-                        ></ma-button><ma-button\
-                            class="ma-button-last"\
-                            text="Last"\
-                            size="xs"\
-                            modifier="default"\
-                            click="lastClick()"\
-                            is-disabled="_page >= totalPages">\
-                        </ma-button>\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            scope._page = scope.page;
-            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
-            scope._itemsPerPageNumbers = ['25', '50', '75', '100'];
-            scope._itemsPerPage = '25';
-            scope.hasItemsPerPageChanged = false;
-            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
-
-            var setTotalPages = function () {
-                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
-            };
-
-            var setItemsPerPage = function () {
-                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
-                    return;
-                }
-
-                scope._itemsPerPage = scope.itemsPerPage.toString();
-            };
-
-            var setItemsPerPageNumbers = function () {
-                if (!scope._showItemsPerPage) {
-                    return;
-                }
-
-                if (angular.isArray(scope.itemsPerPageNumbers)) {
-                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
-                }
-
-                if (scope.allowAllItemsPerPage) {
-                    scope._itemsPerPageNumbers.push('All');
-                }
-            };
-
-            var setRangePages = function () {
-                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
-
-                if (scope.totalPages < scope._visiblePages) {
-                    scope._visiblePages = scope.totalPages || 1;
-                }
-
-                scope.rangePages = [];
-                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
-                scope.isFirstRange = scope.range === 0;
-                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
-                var startPage = scope.range * scope._visiblePages;
-
-                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
-                    scope.rangePages.push(startPage + visiblePage);
-                }
-            };
-
-            var setHasPager = function () {
-                if (scope._itemsPerPage === 'All') {
-                    scope._hasPager = false;
-                    return;
-                }
-
-                var itemsPerPage = Number(scope._itemsPerPage);
-                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * itemsPerPage > itemsPerPage);
-            };
-
-            var onChange = function () {
-                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
-                    return;
-                }
-
-                scope.page = scope._page || null;
-                setRangePages();
-
-                var value = {
-                    maPage: scope.page
-                };
-
-                if (scope._showItemsPerPage) {
-                    value.maItemsPerPage = scope._itemsPerPage === 'All' ? null : Number(scope._itemsPerPage);
-                    scope.hasItemsPerPageChanged = false;
-
-                    // If itemsPerPage is set update its value.
-                    if (scope.itemsPerPage !== undefined) {
-                        scope.itemsPerPage = value.maItemsPerPage;
-                    }
-                }
-
-                // Postpone change event for $apply (which is being invoked by $timeout)
-                // to have time to take effect and update scope.page.
-                $timeout(function () {
-                    scope.change(value);
-                });
-            };
-
-            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
-                scope._itemsPerPage = itemsPerPage;
-                scope.hasItemsPerPageChanged = true;
-                var oldTotalPages = scope.totalPages;
-                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
-
-                if (oldItemsPerPage === 'All') {
-                    scope._page = 1;
-                } else {
-                    var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
-                    scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
-                }
-
-                setHasPager();
-                onChange();
-            };
-
-            scope.firstClick = function () {
-                scope._page = 1;
-                onChange();
-            };
-
-            scope.previousClick = function () {
-                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
-                onChange();
-            };
-
-            scope.nextClick = function () {
-                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
-                onChange();
-            };
-
-            scope.lastClick = function () {
-                scope._page = scope.totalPages;
-                onChange();
-            };
-
-            scope.pageClick = function (page) {
-                scope._page = page;
-                onChange();
-            };
-
-            scope.previousRangeClick = function () {
-                scope._page = scope.range * scope._visiblePages;
-                onChange();
-            };
-
-            scope.nextRangeClick = function () {
-                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
-                onChange();
-            };
-
-            scope.$watch('totalItems', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
-                setTotalPages();
-
-                // Correct the page and trigger change.
-                if (scope._totalItems === 0 || scope._totalItems <= Number(scope._itemsPerPage)) {
-                    scope._page = 1;
-                    onChange();
-                    setHasPager();
-                    return;
-                }
-
-                setRangePages();
-                setHasPager();
-            });
-
-            scope.$watch('visiblePages', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setRangePages();
-            });
-
-            scope.$watch('page', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                var page = scope.page;
-
-                // Correct page.
-                if (page < 1) {
-                    page = 1;
-                } else if (page > scope.totalPages) {
-                    page = scope.totalPages;
-                }
-
-                // Correct page to 1 in case totalPages is 0 and page is 0.
-                scope._page = page || 1;
-                setRangePages();
-                setHasPager();
-            });
-
-            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
-                if (angular.equals(newValue, oldValue)) {
-                    return;
-                }
-
-                setItemsPerPageNumbers();
-            });
-
-            scope.$watch('itemsPerPage', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setItemsPerPage();
-                setHasPager();
-            });
-
-            setItemsPerPageNumbers();
-            setItemsPerPage();
-            setTotalPages();
-            setRangePages();
-            setHasPager();
         }
     };
 }]);})();
@@ -6232,3 +6387,483 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
             }
         };
     }]);})();
+(function(){angular.module('marcuraUI.components')
+    /**
+     * The MaTooltip service creates tooltip- and popover-like directives as well as
+     * houses global options for them.
+     */
+    .provider('MaTooltip', function () {
+        // The default options tooltip and popover.
+        var defaultOptions = {
+            position: 'top',
+            animation: true,
+            delay: 0,
+            // TODO: For HTML tooltips.
+            useContentExp: false
+        };
+
+        // Default hide triggers for each show trigger
+        var triggerMap = {
+            'mouseenter': 'mouseleave',
+            'click': 'click',
+            'focus': 'blur'
+        };
+
+        // The options specified to the provider globally.
+        var globalOptions = {};
+
+        /**
+         * `options({})` allows global configuration of all tooltips in the
+         * application.
+         *
+         *   var app = angular.module( 'App', ['ui.bootstrap.tooltip'], function( MaTooltipProvider ) {
+         *     // place tooltips left instead of top by default
+         *     MaTooltipProvider.options( { position: 'left' } );
+         *   });
+         */
+        this.options = function (value) {
+            angular.extend(globalOptions, value);
+        };
+
+        /**
+         * Returns the actual instance of the MaTooltip service.
+         * TODO support multiple triggers
+         */
+        this.$get = ['$window', '$compile', '$timeout', '$document', '$interpolate', '$parse', 'MaPosition', 'MaHelper', function ($window, $compile, $timeout, $document, $interpolate, $parse, MaPosition, MaHelper) {
+            return function MaTooltip(defaultTriggerShow, options) {
+                options = angular.extend({}, defaultOptions, globalOptions, options);
+
+                /**
+                 * Returns an object of show and hide triggers.
+                 *
+                 * If a trigger is supplied,
+                 * it is used to show the tooltip; otherwise, it will use the `trigger`
+                 * option passed to the `MaTooltipProvider.options` method; else it will
+                 * default to the trigger supplied to this directive factory.
+                 *
+                 * The hide trigger is based on the show trigger. If t.he `trigger` option
+                 * was passed to the `MaTooltipProvider.options` method, it will use the
+                 * mapped trigger from `triggerMap` or the passed trigger if the map is
+                 * undefined; otherwise, it uses the `triggerMap` value of the show
+                 * trigger; else it will just use the show trigger.
+                 */
+                var getTriggers = function (trigger) {
+                    var show = trigger || options.trigger || defaultTriggerShow,
+                        hide = triggerMap[show] || show;
+
+                    return {
+                        show: show,
+                        hide: hide
+                    };
+                };
+
+                var startSymbol = $interpolate.startSymbol(),
+                    endSymbol = $interpolate.endSymbol();
+
+                var template = '\
+                    <div ma-tooltip-popup\
+                        ' + (options.useContentExp ? 'content-exp="contentExp()" ' : 'content="' + startSymbol + 'content' + endSymbol + '" ') + '\
+                        position="' + startSymbol + 'position' + endSymbol + '"\
+                        popup-class="' + startSymbol + 'popupClass' + endSymbol + '"\
+                        animation="animation"\
+                        is-visible="isVisible"\
+                        can-close="canClose"\
+                        origin-scope="origScope"\
+                        tooltip-scope="getTooltipScope">\
+                    </div>';
+
+                return {
+                    restrict: 'EA',
+                    compile: function (tElem, tAttrs) {
+                        var tooltipLinker = $compile(template);
+
+                        return function link(scope, element, attributes, tooltipController) {
+                            var tooltip,
+                                tooltipLinkedScope,
+                                transitionTimeout,
+                                popupTimeout,
+                                triggers = getTriggers(),
+                                hasIsDisabled = angular.isDefined(attributes.maTooltipIsDisabled),
+                                tooltipScope = scope.$new(true),
+                                animation = scope.$eval(attributes.maTooltipAnimation),
+                                canClose = scope.$eval(attributes.maTooltipCanClose),
+                                delay = parseInt(attributes.maTooltipDelay),
+                                instance = scope.$eval(attributes.maTooltipInstance);
+
+                            tooltipScope.delay = isNaN(delay) ? options.delay : delay;
+                            tooltipScope.popupClass = attributes.maTooltipClass;
+                            tooltipScope.position = attributes.maTooltipPosition ? attributes.maTooltipPosition : options.position;
+                            tooltipScope.animation = animation !== undefined ? !!animation : options.animation;
+                            tooltipScope.isVisible = false;
+                            tooltipScope.canClose = canClose !== undefined ? !!canClose : false;
+                            // Set up the correct scope to allow transclusion later.
+                            tooltipScope.origScope = scope;
+                            tooltipScope.contentExp = function () {
+                                return scope.$eval(attributes.maTooltip);
+                            };
+                            tooltipScope.getTooltipScope = function () {
+                                return tooltipScope;
+                            };
+
+                            var setPosition = function () {
+                                if (!tooltip) {
+                                    return;
+                                }
+
+                                var position = MaPosition.positionElements(element, tooltip, tooltipScope.position, false);
+                                position.top += 'px';
+                                position.left += 'px';
+
+                                // Now set the calculated positioning.
+                                tooltip.css(position);
+                            };
+
+                            var onToggle = function () {
+                                if (tooltipScope.isVisible) {
+                                    hide();
+                                } else {
+                                    if (!tooltipScope.isVisible) {
+                                        show();
+                                    }
+                                }
+                            };
+
+                            var onShow = function () {
+                                if (!tooltipScope.isVisible) {
+                                    show();
+                                }
+                            };
+
+                            // Show the tooltip with delay if specified, otherwise show it immediately.
+                            var show = function () {
+                                if (hasIsDisabled && scope.$eval(attributes.maTooltipIsDisabled)) {
+                                    return;
+                                }
+
+                                if (tooltipScope.delay) {
+                                    // Do nothing if the tooltip was already scheduled to pop-up.
+                                    // This happens if show is triggered multiple times before any hide is triggered.
+                                    if (!popupTimeout) {
+                                        popupTimeout = $timeout(doShow, tooltipScope.delay, false);
+                                        popupTimeout.then(function (reposition) {
+                                            reposition();
+                                        });
+                                    }
+                                } else {
+                                    doShow()();
+                                }
+                            };
+
+                            // Show the tooltip popup element.
+                            var doShow = function () {
+                                popupTimeout = null;
+
+                                // If there is a pending remove transition, we must cancel it, lest the
+                                // tooltip be mysteriously removed.
+                                if (transitionTimeout) {
+                                    $timeout.cancel(transitionTimeout);
+                                    transitionTimeout = null;
+                                }
+
+                                // Don't show empty tooltips.
+                                if (!(options.useContentExp ? tooltipScope.contentExp() : tooltipScope.content)) {
+                                    return angular.noop;
+                                }
+
+                                create();
+
+                                // Set the initial positioning.
+                                tooltip.css({ top: 0, left: 0, display: 'block' });
+
+                                setPosition();
+
+                                // And show the tooltip.
+                                MaHelper.safeApply(function () {
+                                    tooltipScope.isVisible = true;
+                                });
+
+                                // Return positioning function as promise callback for correct
+                                // positioning after draw.
+                                return setPosition;
+                            };
+
+                            // Hide the tooltip popup element.
+                            var hide = function () {
+                                MaHelper.safeApply(function () {
+                                    tooltipScope.isVisible = false;
+
+                                    // If tooltip is going to be shown after delay, we must cancel this.
+                                    $timeout.cancel(popupTimeout);
+                                    popupTimeout = null;
+
+                                    // And now we remove it from the DOM. However, if we have animation, we
+                                    // need to wait for it to expire beforehand.
+                                    // FIXME: this is a placeholder for a port of the transitions library.
+                                    if (tooltipScope.animation) {
+                                        if (!transitionTimeout) {
+                                            transitionTimeout = $timeout(remove, 500);
+                                        }
+                                    } else {
+                                        remove();
+                                    }
+                                });
+                            };
+
+                            tooltipScope.close = function () {
+                                hide();
+                            };
+
+                            var create = function () {
+                                // There can only be one tooltip element per directive shown at once.
+                                if (tooltip) {
+                                    remove();
+                                }
+                                tooltipLinkedScope = tooltipScope.$new();
+                                tooltip = tooltipLinker(tooltipLinkedScope, function (tooltip) {
+                                    element.after(tooltip);
+                                });
+
+                                tooltipLinkedScope.$watch(function () {
+                                    $timeout(setPosition, 0, false);
+                                });
+
+                                if (options.useContentExp) {
+                                    tooltipLinkedScope.$watch('contentExp()', function (val) {
+                                        if (!val && tooltipScope.isVisible) {
+                                            hide();
+                                        }
+                                    });
+                                }
+                            };
+
+                            var remove = function () {
+                                transitionTimeout = null;
+
+                                if (tooltip) {
+                                    tooltip.remove();
+                                    tooltip = null;
+                                }
+
+                                if (tooltipLinkedScope) {
+                                    tooltipLinkedScope.$destroy();
+                                    tooltipLinkedScope = null;
+                                }
+                            };
+
+                            var setTriggers = function () {
+                                removeTriggers();
+                                triggers = getTriggers(attributes.maTooltipOn);
+
+                                if (triggers.show === triggers.hide) {
+                                    element.bind(triggers.show, onToggle);
+                                } else {
+                                    element.bind(triggers.show, onShow);
+
+                                    // Leave it to user to close tooltip.
+                                    if (!tooltipScope.canClose) {
+                                        element.bind(triggers.hide, hide);
+                                    }
+                                }
+                            };
+
+                            var removeTriggers = function () {
+                                element.unbind(triggers.show, onShow);
+                                element.unbind(triggers.hide, hide);
+                            };
+
+                            if (!options.useContentExp) {
+                                attributes.$observe('maTooltip', function (val) {
+                                    tooltipScope.content = val;
+
+                                    if (!val && tooltipScope.isVisible) {
+                                        hide();
+                                    }
+                                });
+                            }
+
+                            if (attributes.maTooltipCanClose) {
+                                scope.$watch(attributes.maTooltipCanClose, function (newValue, oldValue) {
+                                    if (newValue === oldValue) {
+                                        return;
+                                    }
+
+                                    tooltipScope.canClose = newValue;
+                                    setTriggers();
+
+                                    if (!tooltipScope.canClose && tooltipScope.isVisible) {
+                                        hide();
+                                    }
+                                });
+                            }
+
+                            setTriggers();
+
+                            $timeout(function () {
+                                if (tooltipScope.isVisible) {
+                                    show();
+                                }
+                            });
+
+                            // Prepare API instance.
+                            if (instance) {
+                                instance.isInitialized = true;
+
+                                instance.show = function () {
+                                    if (!tooltipScope.isVisible) {
+                                        show();
+                                    }
+                                };
+
+                                instance.hide = function () {
+                                    if (tooltipScope.isVisible) {
+                                        hide();
+                                    }
+                                };
+                            }
+
+                            // Make sure tooltip is destroyed and removed.
+                            scope.$on('$destroy', function onDestroyTooltip() {
+                                $timeout.cancel(transitionTimeout);
+                                $timeout.cancel(popupTimeout);
+                                removeTriggers();
+                                remove();
+                                tooltipScope = null;
+                            });
+                        };
+                    }
+                };
+            };
+        }];
+    })
+    .directive('maTooltipPopup', function () {
+        return {
+            restrict: 'EA',
+            replace: true,
+            scope: {
+                content: '@',
+                position: '@',
+                popupClass: '@',
+                animation: '&',
+                isVisible: '&',
+                canClose: '&',
+                tooltipScope: '='
+            },
+            template: function () {
+                var html = '<div class="ma-tooltip" ma-tooltip-animation-class="fade" ma-tooltip-classes\
+                    ng-class="{\
+                        \'in\': isVisible(),\
+                        \'ma-tooltip-can-close\': canClose()\
+                    }">\
+                    <div class="ma-tooltip-arrow"></div>\
+                    <div class="ma-tooltip-inner" ng-bind="content"></div>\
+                    <div class="ma-tooltip-close" ng-if="canClose()" ng-click="tooltipScope().close()">\
+                        <i class="fa fa-close"></i>\
+                    </div>\
+                </div>';
+
+                return html;
+            }
+        };
+    })
+    // This is mostly ngInclude code but with a custom scope
+    // .directive('maTooltipTemplateTransclude', ['$animate', '$sce', '$compile', '$templateRequest',
+    //     function ($animate, $sce, $compile, $templateRequest) {
+    //         return {
+    //             link: function (scope, elem, attributes) {
+    //                 var origScope = scope.$eval(attributes.maTooltipTemplateTranscludeScope),
+    //                     changeCounter = 0,
+    //                     currentScope,
+    //                     previousElement,
+    //                     currentElement;
+
+    //                 var cleanupLastIncludeContent = function () {
+    //                     if (previousElement) {
+    //                         previousElement.remove();
+    //                         previousElement = null;
+    //                     }
+    //                     if (currentScope) {
+    //                         currentScope.$destroy();
+    //                         currentScope = null;
+    //                     }
+    //                     if (currentElement) {
+    //                         $animate.leave(currentElement).then(function () {
+    //                             previousElement = null;
+    //                         });
+    //                         previousElement = currentElement;
+    //                         currentElement = null;
+    //                     }
+    //                 };
+
+    //                 scope.$watch($sce.parseAsResourceUrl(attributes.maTooltipTemplateTransclude), function (src) {
+    //                     var thisChangeId = ++changeCounter;
+
+    //                     if (src) {
+    //                         //set the 2nd param to true to ignore the template request error so that the inner
+    //                         //contents and scope can be cleaned up.
+    //                         $templateRequest(src, true).then(function (response) {
+    //                             if (thisChangeId !== changeCounter) { return; }
+    //                             var newScope = origScope.$new();
+    //                             var template = response;
+
+    //                             var clone = $compile(template)(newScope, function (clone) {
+    //                                 cleanupLastIncludeContent();
+    //                                 $animate.enter(clone, elem);
+    //                             });
+
+    //                             currentScope = newScope;
+    //                             currentElement = clone;
+
+    //                             currentScope.$emit('$includeContentLoaded', src);
+    //                         }, function () {
+    //                             if (thisChangeId === changeCounter) {
+    //                                 cleanupLastIncludeContent();
+    //                                 scope.$emit('$includeContentError', src);
+    //                             }
+    //                         });
+    //                         scope.$emit('$includeContentRequested', src);
+    //                     } else {
+    //                         cleanupLastIncludeContent();
+    //                     }
+    //                 });
+
+    //                 scope.$on('$destroy', cleanupLastIncludeContent);
+    //             }
+    //         };
+    //     }])
+    /**
+     * Note that it's intentional that these classes are *not* applied through $animate.
+     * They must not be animated as they're expected to be present on the tooltip on
+     * initialization.
+     */
+    .directive('maTooltipClasses', function () {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attribites) {
+                if (scope.position) {
+                    element.addClass(scope.position);
+                }
+
+                if (scope.popupClass) {
+                    element.addClass(scope.popupClass);
+                }
+
+                if (scope.animation()) {
+                    element.addClass(attribites.maTooltipAnimationClass);
+                }
+            }
+        };
+    })
+    .directive('maTooltip', ['MaTooltip', function (MaTooltip) {
+        return MaTooltip('mouseenter');
+    }]);
+    // .directive('maTooltipTemplate', ['MaTooltip', function (MaTooltip) {
+    //     return MaTooltip('maTooltipTemplate', 'mouseenter', {
+    //         useContentExp: true
+    //     });
+    // }])
+    // .directive('maTooltipHtml', ['MaTooltip', function (MaTooltip) {
+    //     return MaTooltip('maTooltipHtml', 'mouseenter', {
+    //         useContentExp: true
+    //     });
+    // }]);
+})();
