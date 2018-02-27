@@ -309,7 +309,9 @@ angular.module('marcuraUI.components')
                             setTriggers();
 
                             $timeout(function () {
-                                if (tooltipScope.isVisible) {
+                                // Check for scope as it might be already destroyed when, for example,
+                                // user switches between router states quickly.
+                                if (tooltipScope && tooltipScope.isVisible) {
                                     show();
                                 }
                             });
