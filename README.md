@@ -13,8 +13,6 @@ https://marcura-ui.herokuapp.com/#/home
 ## Dependencies
 * [jQuery](https://jquery.com/) (2.2.0 or higher)
 * [Angular](https://angularjs.org/) (1.3.8 or higher)
-* [Angular UI Router](https://github.com/angular-ui/ui-router/wiki) (0.2.14 or higher)  
-Required for [SideMenu](../../wiki/sidemenu) and [Tabs](../../wiki/tabs).
 * [Angular Sanitize](https://www.npmjs.com/package/angular-sanitize) (1.3.8 or higher)  
 Required for [RadioBox](../../wiki/radiobox).
 * [Font Awesome](http://fontawesome.io/) (4.4.0 or higher)
@@ -41,7 +39,6 @@ Include third-party dependencies:
 `<script src="node_modules/jquery/dist/jquery.min.js"></script>`  
 `<script src="node_modules/angular/angular.min.js"></script>`  
 `<script src="node_modules/angular-sanitize/angular-sanitize.min.js"></script>`  
-`<script src="node_modules/angular-ui-router/release/angular-ui-router.min.js"></script>`  
 `<script src="node_modules/pikaday/pikaday.js"></script>`  
 `<script src="node_modules/select2/select2.js"></script>`  
 

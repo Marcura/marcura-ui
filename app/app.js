@@ -49,28 +49,6 @@ app.config(function ($stateProvider, $urlRouterProvider, maDateBoxConfigurationP
         controller: 'gridPageController'
     });
 
-    $stateProvider.state('side-menu', {
-        url: '/side-menu',
-        templateUrl: 'side-menu-page/side-menu-page.html',
-        controller: 'sideMenuPageController'
-    });
-
-    $stateProvider.state('side-menu.das', {
-        url: '/side-menu/:id/das',
-        templateUrl: 'side-menu-page/side-menu-page.html',
-        controller: 'sideMenuPageController'
-    })
-        .state('side-menu.payments', {
-            url: '/side-menu/:id/payments',
-            templateUrl: 'side-menu-page/side-menu-page.html',
-            controller: 'sideMenuPageController'
-        })
-        .state('side-menu.port-information', {
-            url: '/side-menu/port-information',
-            templateUrl: 'side-menu-page/side-menu-page.html',
-            controller: 'sideMenuPageController'
-        });
-
     $stateProvider.state('tabs', {
         url: '/tabs',
         templateUrl: 'tabs-page/tabs-page.html',
