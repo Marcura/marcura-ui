@@ -9,7 +9,8 @@ angular.module('marcuraUI.components')
             position: 'top',
             animation: true,
             delay: 0,
-            // TODO: For HTML tooltips.
+            // TODO:  It might have something to do with templating and transcluding.
+            // Maybe it can be used later.
             useContentExp: false
         };
 
@@ -40,7 +41,7 @@ angular.module('marcuraUI.components')
          * Returns the actual instance of the MaTooltip service.
          * TODO support multiple triggers
          */
-        this.$get = ['$window', '$compile', '$timeout', '$document', '$interpolate', '$parse', 'MaPosition', 'MaHelper', function ($window, $compile, $timeout, $document, $interpolate, $parse, MaPosition, MaHelper) {
+        this.$get = ['$window', '$compile', '$timeout', '$document', '$interpolate', 'MaPosition', 'MaHelper', function ($window, $compile, $timeout, $document, $interpolate, MaPosition, MaHelper) {
             return function MaTooltip(defaultTriggerShow, options) {
                 options = angular.extend({}, defaultOptions, globalOptions, options);
 
@@ -282,15 +283,13 @@ angular.module('marcuraUI.components')
                                 element.unbind(triggers.hide, hide);
                             };
 
-                            if (!options.useContentExp) {
-                                attributes.$observe('maTooltip', function (val) {
-                                    tooltipScope.content = val;
+                            attributes.$observe('maTooltip', function (content) {
+                                tooltipScope.content = content;
 
-                                    if (!val && tooltipScope.isVisible) {
-                                        hide();
-                                    }
-                                });
-                            }
+                                if (!content && tooltipScope.isVisible) {
+                                    hide();
+                                }
+                            });
 
                             if (attributes.maTooltipCanClose) {
                                 scope.$watch(attributes.maTooltipCanClose, function (newValue, oldValue) {
@@ -346,7 +345,7 @@ angular.module('marcuraUI.components')
             };
         }];
     })
-    .directive('maTooltipPopup', function () {
+    .directive('maTooltipPopup', ['$sce', function ($sce) {
         return {
             restrict: 'EA',
             replace: true,
@@ -366,16 +365,47 @@ angular.module('marcuraUI.components')
                         \'ma-tooltip-can-close\': canClose()\
                     }">\
                     <div class="ma-tooltip-arrow"></div>\
-                    <div class="ma-tooltip-inner" ng-bind="content"></div>\
+                    <div class="ma-tooltip-inner" ng-bind-html="getContent()"></div>\
                     <div class="ma-tooltip-close" ng-if="canClose()" ng-click="tooltipScope().close()">\
                         <i class="fa fa-close"></i>\
                     </div>\
                 </div>';
 
                 return html;
+            },
+            link: function (scope) {
+                scope.getContent = function () {
+                    return $sce.trustAsHtml(scope.content);
+                };
             }
         };
-    })
+    }])
+    .directive('maTooltip', ['MaTooltip', function (MaTooltip) {
+        return MaTooltip('mouseenter');
+    }])
+    /**
+     * Note that it's intentional that these classes are *not* applied through $animate.
+     * They must not be animated as they're expected to be present on the tooltip on
+     * initialization.
+     */
+    .directive('maTooltipClasses', function () {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attribites) {
+                if (scope.position) {
+                    element.addClass(scope.position);
+                }
+
+                if (scope.popupClass) {
+                    element.addClass(scope.popupClass);
+                }
+
+                if (scope.animation()) {
+                    element.addClass(attribites.maTooltipAnimationClass);
+                }
+            }
+        };
+    });
     // This is mostly ngInclude code but with a custom scope
     // .directive('maTooltipTemplateTransclude', ['$animate', '$sce', '$compile', '$templateRequest',
     //     function ($animate, $sce, $compile, $templateRequest) {
@@ -441,32 +471,6 @@ angular.module('marcuraUI.components')
     //             }
     //         };
     //     }])
-    /**
-     * Note that it's intentional that these classes are *not* applied through $animate.
-     * They must not be animated as they're expected to be present on the tooltip on
-     * initialization.
-     */
-    .directive('maTooltipClasses', function () {
-        return {
-            restrict: 'A',
-            link: function (scope, element, attribites) {
-                if (scope.position) {
-                    element.addClass(scope.position);
-                }
-
-                if (scope.popupClass) {
-                    element.addClass(scope.popupClass);
-                }
-
-                if (scope.animation()) {
-                    element.addClass(attribites.maTooltipAnimationClass);
-                }
-            }
-        };
-    })
-    .directive('maTooltip', ['MaTooltip', function (MaTooltip) {
-        return MaTooltip('mouseenter');
-    }]);
     // .directive('maTooltipTemplate', ['MaTooltip', function (MaTooltip) {
     //     return MaTooltip('maTooltipTemplate', 'mouseenter', {
     //         useContentExp: true

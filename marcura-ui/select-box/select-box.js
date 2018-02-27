@@ -95,7 +95,7 @@ angular.module('marcuraUI.components')
                         placeholder="{{textPlaceholder}}"/>\
                     <ma-button class="ma-button-switch"\
                         ng-show="canAddItem" size="xs" modifier="simple"\
-                        tooltip="{{getAddItemTooltip()}}"\
+                        ma-tooltip="{{getAddItemTooltip()}}"\
                         right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
                         click="toggleMode()"\
                         ng-focus="onFocus()"\

@@ -127,10 +127,18 @@
             top: 6px;
             left: 7px;
         }
-    } // Hide the underlying select as it spoils the appearence for a moment before the component is initialized.
-    // It also takes up some width which makes horizontal scroll to appear in some layouts.
+    }
+    
+    /*
+    Hide the underlying select as it spoils the appearence for a moment before the component is initialized.
+    It also takes up some width which makes horizontal scroll to appear in some layouts.
+    */
     select {
         display: none;
+    }
+
+    .ma-tooltip {
+        min-width: 70px;
     }
 }
 
