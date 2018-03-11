@@ -438,8 +438,9 @@ angular.module('marcuraUI.components')
                             // and the user clears the value.
                             // E.g., value is 0, user types 1, and then removes the value.
                             isInternalChange = true;
-                            scope.value = defaultValue;
-                            valueElement.val(formatValue(defaultValue));
+                            value = defaultValue;
+                            scope.value = value;
+                            valueElement.val(formatValue(value));
                         }
 
                         if (!scope.isResetEnabled() && elementTo[0] === resetButtonElement[0]) {
