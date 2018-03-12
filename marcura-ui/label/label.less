@@ -3,9 +3,9 @@
 @star-width: 6px;
 @star-width-padding: 4px;
 @star-full-width: @star-width + @star-width-padding;
-@warning-width: 14px;
-@warning-width-padding: 6px;
-@warning-full-width: @warning-width + @warning-width-padding;
+@hint-width: 14px;
+@hint-width-padding: 6px;
+@hint-full-width: @hint-width + @hint-width-padding;
 
 .ma-label {
     display: inline-block;
@@ -21,19 +21,13 @@
 
     &-has-warning {
         .ma-label-text {
-            max-width: ~'calc(100% - @{warning-full-width})';
+            max-width: ~'calc(100% - @{hint-full-width})';
         }
     }
 
     &-is-required.ma-label-has-warning {
         .ma-label-text {
-            max-width: ~'calc(100% - @{star-full-width} - @{warning-full-width})';
-        }
-    }
-
-    &-has-content {
-        .ma-label-star {
-            width: @star-full-width;
+            max-width: ~'calc(100% - @{star-full-width} - @{hint-full-width})';
         }
     }
 
@@ -41,8 +35,35 @@
         &.ma-label-has-content,
         &.ma-label-is-required {
             .ma-label-warning {
-                width: @warning-full-width;
+                width: @hint-full-width;
             }
+        }
+    }
+
+    &-has-hint {
+        .ma-label-text {
+            max-width: ~'calc(100% - @{hint-full-width})';
+        }
+    }
+
+    &-is-required.ma-label-has-hint {
+        .ma-label-text {
+            max-width: ~'calc(100% - @{star-full-width} - @{hint-full-width})';
+        }
+    }
+
+    &-has-hint {
+        &.ma-label-has-content,
+        &.ma-label-is-required {
+            .ma-label-hint {
+                width: @hint-full-width;
+            }
+        }
+    }
+
+    &-has-content {
+        .ma-label-star {
+            width: @star-full-width;
         }
     }
 
@@ -82,13 +103,38 @@
 
     &-warning {
         display: inline-block;
-        width: @warning-width;
+        width: @hint-width;
         position: relative;
+    }
+
+    &-hint {
+        display: inline-block;
+        width: @hint-width;
+        position: relative;
+
+        &-inner {
+            position: absolute;
+            top: 1px;
+            right: 0;
+            background-color: #000000;
+            width: 16px;
+            height: 16px;
+            border-radius: 8px;
+        }
+
+        .fa-question {
+            color: #ffffff;
+            width: @hint-width;
+            position: absolute;
+            left: 4px;
+            top: 3px;
+            font-size: 12px;
+        }
     }
 
     .fa-exclamation-triangle {
         color: @color-warning;
-        width: @warning-width;
+        width: @hint-width;
         position: absolute;
         right: 0;
         top: 3px;
