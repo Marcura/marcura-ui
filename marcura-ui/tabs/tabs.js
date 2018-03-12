@@ -66,7 +66,7 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper'
                     item.isSelected = true;
 
                     scope.select({
-                        item: item
+                        maItem: item
                     });
                 }
             };
