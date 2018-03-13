@@ -21,10 +21,10 @@ function textBoxPageController($scope) {
     };
 
     $scope.blur = function (value, oldValue, hasChanged, property) {
-        console.log('blur   - event:', value, ' scope: ', $scope[property], ' old:', oldValue, ' changed:', hasChanged);
+        console.log('blur: event:', value, ' scope: ', $scope[property], ' old:', oldValue, ' changed:', hasChanged);
     };
 
     $scope.focus = function (value, property) {
-        console.log('focus  - event:', value, ' scope: ', $scope[property]);
+        console.log('focus: event:', value, ' scope: ', $scope[property]);
     };
 }

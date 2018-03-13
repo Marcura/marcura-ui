@@ -222,6 +222,11 @@ angular.module('marcuraUI.components')
                             return false;
                         }
 
+                        // For array of numbers.
+                        if (!isObjectArray && !MaHelper.isNullOrWhiteSpace(value)) {
+                            return true;
+                        }
+
                         // In select mode check that a selected item is in the list.
                         // In AJAX mode there is no items array and we cannot check it.
                         if (!scope.hasAjax && !scope.isAddMode && !isExistingItem(value)) {
