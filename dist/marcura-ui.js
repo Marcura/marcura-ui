@@ -1725,6 +1725,311 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            page: '=',
+            totalItems: '=',
+            visiblePages: '=',
+            showItemsPerPage: '=',
+            allowAllItemsPerPage: '=',
+            itemsPerPageNumbers: '=',
+            itemsPerPageText: '@',
+            itemsPerPage: '=',
+            change: '&'
+        },
+        replace: true,
+        template: function () {
+            var html = '<div class="ma-pager" ng-class="{\
+                \'ma-pager-has-pager\': _hasPager\
+            }">\
+                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
+                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
+                        items="_itemsPerPageNumbers"\
+                        value="_itemsPerPage"\
+                        change="itemsPerPageChange(maValue, maOldValue)">\
+                    </ma-select-box>\
+                </div><div class="ma-pager-pager">\
+                    <div class="ma-pager-start">\
+                        <ma-button\
+                            class="ma-button-first"\
+                            text="First"\
+                            size="xs"\
+                            modifier="default"\
+                            click="firstClick()"\
+                            is-disabled="_page <= 1"\
+                        ></ma-button><ma-button\
+                            class="ma-button-previous"\
+                            text="Previous"\
+                            size="xs"\
+                            modifier="default"\
+                            click="previousClick()"\
+                            is-disabled="_page <= 1">\
+                        </ma-button>\
+                    </div\
+                    ><div class="ma-pager-middle">\
+                        <ma-button\
+                            class="ma-button-previous-range"\
+                            text="..."\
+                            size="xs"\
+                            modifier="default"\
+                            click="previousRangeClick()"\
+                            is-disabled="isFirstRange"\
+                        ></ma-button><div class="ma-pager-pages"><ma-button\
+                            ng-repeat="rangePage in rangePages"\
+                            class="ma-button-page"\
+                            text="{{rangePage}}"\
+                            size="xs"\
+                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
+                            click="pageClick(rangePage)"></div></ma-button\
+                        ><ma-button\
+                            class="ma-button-next-range"\
+                            text="..."\
+                            size="xs"\
+                            modifier="default"\
+                            click="nextRangeClick()"\
+                            is-disabled="isLastRange"\
+                        ></ma-button>\
+                    </div\
+                    ><div class="ma-pager-end">\
+                        <ma-button\
+                            class="ma-button-next"\
+                            text="Next"\
+                            size="xs"\
+                            modifier="default"\
+                            click="nextClick()"\
+                            is-disabled="_page >= totalPages"\
+                        ></ma-button><ma-button\
+                            class="ma-button-last"\
+                            text="Last"\
+                            size="xs"\
+                            modifier="default"\
+                            click="lastClick()"\
+                            is-disabled="_page >= totalPages">\
+                        </ma-button>\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            scope._page = scope.page;
+            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
+            scope._itemsPerPageNumbers = ['25', '50', '75', '100'];
+            scope._itemsPerPage = '25';
+            scope.hasItemsPerPageChanged = false;
+            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
+
+            var setTotalPages = function () {
+                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
+            };
+
+            var setItemsPerPage = function () {
+                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
+                    return;
+                }
+
+                scope._itemsPerPage = scope.itemsPerPage.toString();
+            };
+
+            var setItemsPerPageNumbers = function () {
+                if (!scope._showItemsPerPage) {
+                    return;
+                }
+
+                if (angular.isArray(scope.itemsPerPageNumbers)) {
+                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
+                }
+
+                if (scope.allowAllItemsPerPage) {
+                    scope._itemsPerPageNumbers.push('All');
+                }
+            };
+
+            var setRangePages = function () {
+                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
+
+                if (scope.totalPages < scope._visiblePages) {
+                    scope._visiblePages = scope.totalPages || 1;
+                }
+
+                scope.rangePages = [];
+                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
+                scope.isFirstRange = scope.range === 0;
+                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
+                var startPage = scope.range * scope._visiblePages;
+
+                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
+                    scope.rangePages.push(startPage + visiblePage);
+                }
+            };
+
+            var setHasPager = function () {
+                if (scope._itemsPerPage === 'All') {
+                    scope._hasPager = false;
+                    return;
+                }
+
+                var itemsPerPage = Number(scope._itemsPerPage);
+                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * itemsPerPage > itemsPerPage);
+            };
+
+            var onChange = function () {
+                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
+                    return;
+                }
+
+                scope.page = scope._page || null;
+                setRangePages();
+
+                var value = {
+                    maPage: scope.page
+                };
+
+                if (scope._showItemsPerPage) {
+                    value.maItemsPerPage = scope._itemsPerPage === 'All' ? null : Number(scope._itemsPerPage);
+                    scope.hasItemsPerPageChanged = false;
+
+                    // If itemsPerPage is set update its value.
+                    if (scope.itemsPerPage !== undefined) {
+                        scope.itemsPerPage = value.maItemsPerPage;
+                    }
+                }
+
+                // Postpone change event for $apply (which is being invoked by $timeout)
+                // to have time to take effect and update scope.page.
+                $timeout(function () {
+                    scope.change(value);
+                });
+            };
+
+            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
+                scope._itemsPerPage = itemsPerPage;
+                scope.hasItemsPerPageChanged = true;
+                var oldTotalPages = scope.totalPages;
+                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
+
+                if (oldItemsPerPage === 'All') {
+                    scope._page = 1;
+                } else {
+                    var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
+                    scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
+                }
+
+                setHasPager();
+                onChange();
+            };
+
+            scope.firstClick = function () {
+                scope._page = 1;
+                onChange();
+            };
+
+            scope.previousClick = function () {
+                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
+                onChange();
+            };
+
+            scope.nextClick = function () {
+                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
+                onChange();
+            };
+
+            scope.lastClick = function () {
+                scope._page = scope.totalPages;
+                onChange();
+            };
+
+            scope.pageClick = function (page) {
+                scope._page = page;
+                onChange();
+            };
+
+            scope.previousRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages;
+                onChange();
+            };
+
+            scope.nextRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
+                onChange();
+            };
+
+            scope.$watch('totalItems', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
+                setTotalPages();
+
+                // Correct the page and trigger change.
+                if (scope._totalItems === 0 || scope._totalItems <= Number(scope._itemsPerPage)) {
+                    scope._page = 1;
+                    onChange();
+                    setHasPager();
+                    return;
+                }
+
+                setRangePages();
+                setHasPager();
+            });
+
+            scope.$watch('visiblePages', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setRangePages();
+            });
+
+            scope.$watch('page', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                var page = scope.page;
+
+                // Correct page.
+                if (page < 1) {
+                    page = 1;
+                } else if (page > scope.totalPages) {
+                    page = scope.totalPages;
+                }
+
+                // Correct page to 1 in case totalPages is 0 and page is 0.
+                scope._page = page || 1;
+                setRangePages();
+                setHasPager();
+            });
+
+            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
+                if (angular.equals(newValue, oldValue)) {
+                    return;
+                }
+
+                setItemsPerPageNumbers();
+            });
+
+            scope.$watch('itemsPerPage', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setItemsPerPage();
+                setHasPager();
+            });
+
+            setItemsPerPageNumbers();
+            setItemsPerPage();
+            setTotalPages();
+            setRangePages();
+            setHasPager();
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$timeout', '$sce', 'MaValidators', function (MaHelper, $timeout, $sce, MaValidators) {
     var radioBoxes = {};
 
@@ -2055,311 +2360,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            page: '=',
-            totalItems: '=',
-            visiblePages: '=',
-            showItemsPerPage: '=',
-            allowAllItemsPerPage: '=',
-            itemsPerPageNumbers: '=',
-            itemsPerPageText: '@',
-            itemsPerPage: '=',
-            change: '&'
-        },
-        replace: true,
-        template: function () {
-            var html = '<div class="ma-pager" ng-class="{\
-                \'ma-pager-has-pager\': _hasPager\
-            }">\
-                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
-                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
-                        items="_itemsPerPageNumbers"\
-                        value="_itemsPerPage"\
-                        change="itemsPerPageChange(maValue, maOldValue)">\
-                    </ma-select-box>\
-                </div><div class="ma-pager-pager">\
-                    <div class="ma-pager-start">\
-                        <ma-button\
-                            class="ma-button-first"\
-                            text="First"\
-                            size="xs"\
-                            modifier="default"\
-                            click="firstClick()"\
-                            is-disabled="_page <= 1"\
-                        ></ma-button><ma-button\
-                            class="ma-button-previous"\
-                            text="Previous"\
-                            size="xs"\
-                            modifier="default"\
-                            click="previousClick()"\
-                            is-disabled="_page <= 1">\
-                        </ma-button>\
-                    </div\
-                    ><div class="ma-pager-middle">\
-                        <ma-button\
-                            class="ma-button-previous-range"\
-                            text="..."\
-                            size="xs"\
-                            modifier="default"\
-                            click="previousRangeClick()"\
-                            is-disabled="isFirstRange"\
-                        ></ma-button><div class="ma-pager-pages"><ma-button\
-                            ng-repeat="rangePage in rangePages"\
-                            class="ma-button-page"\
-                            text="{{rangePage}}"\
-                            size="xs"\
-                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
-                            click="pageClick(rangePage)"></div></ma-button\
-                        ><ma-button\
-                            class="ma-button-next-range"\
-                            text="..."\
-                            size="xs"\
-                            modifier="default"\
-                            click="nextRangeClick()"\
-                            is-disabled="isLastRange"\
-                        ></ma-button>\
-                    </div\
-                    ><div class="ma-pager-end">\
-                        <ma-button\
-                            class="ma-button-next"\
-                            text="Next"\
-                            size="xs"\
-                            modifier="default"\
-                            click="nextClick()"\
-                            is-disabled="_page >= totalPages"\
-                        ></ma-button><ma-button\
-                            class="ma-button-last"\
-                            text="Last"\
-                            size="xs"\
-                            modifier="default"\
-                            click="lastClick()"\
-                            is-disabled="_page >= totalPages">\
-                        </ma-button>\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            scope._page = scope.page;
-            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
-            scope._itemsPerPageNumbers = ['25', '50', '75', '100'];
-            scope._itemsPerPage = '25';
-            scope.hasItemsPerPageChanged = false;
-            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
-
-            var setTotalPages = function () {
-                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
-            };
-
-            var setItemsPerPage = function () {
-                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
-                    return;
-                }
-
-                scope._itemsPerPage = scope.itemsPerPage.toString();
-            };
-
-            var setItemsPerPageNumbers = function () {
-                if (!scope._showItemsPerPage) {
-                    return;
-                }
-
-                if (angular.isArray(scope.itemsPerPageNumbers)) {
-                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
-                }
-
-                if (scope.allowAllItemsPerPage) {
-                    scope._itemsPerPageNumbers.push('All');
-                }
-            };
-
-            var setRangePages = function () {
-                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
-
-                if (scope.totalPages < scope._visiblePages) {
-                    scope._visiblePages = scope.totalPages || 1;
-                }
-
-                scope.rangePages = [];
-                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
-                scope.isFirstRange = scope.range === 0;
-                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
-                var startPage = scope.range * scope._visiblePages;
-
-                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
-                    scope.rangePages.push(startPage + visiblePage);
-                }
-            };
-
-            var setHasPager = function () {
-                if (scope._itemsPerPage === 'All') {
-                    scope._hasPager = false;
-                    return;
-                }
-
-                var itemsPerPage = Number(scope._itemsPerPage);
-                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * itemsPerPage > itemsPerPage);
-            };
-
-            var onChange = function () {
-                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
-                    return;
-                }
-
-                scope.page = scope._page || null;
-                setRangePages();
-
-                var value = {
-                    maPage: scope.page
-                };
-
-                if (scope._showItemsPerPage) {
-                    value.maItemsPerPage = scope._itemsPerPage === 'All' ? null : Number(scope._itemsPerPage);
-                    scope.hasItemsPerPageChanged = false;
-
-                    // If itemsPerPage is set update its value.
-                    if (scope.itemsPerPage !== undefined) {
-                        scope.itemsPerPage = value.maItemsPerPage;
-                    }
-                }
-
-                // Postpone change event for $apply (which is being invoked by $timeout)
-                // to have time to take effect and update scope.page.
-                $timeout(function () {
-                    scope.change(value);
-                });
-            };
-
-            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
-                scope._itemsPerPage = itemsPerPage;
-                scope.hasItemsPerPageChanged = true;
-                var oldTotalPages = scope.totalPages;
-                scope.totalPages = Math.ceil(scope._totalItems / Number(scope._itemsPerPage));
-
-                if (oldItemsPerPage === 'All') {
-                    scope._page = 1;
-                } else {
-                    var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
-                    scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
-                }
-
-                setHasPager();
-                onChange();
-            };
-
-            scope.firstClick = function () {
-                scope._page = 1;
-                onChange();
-            };
-
-            scope.previousClick = function () {
-                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
-                onChange();
-            };
-
-            scope.nextClick = function () {
-                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
-                onChange();
-            };
-
-            scope.lastClick = function () {
-                scope._page = scope.totalPages;
-                onChange();
-            };
-
-            scope.pageClick = function (page) {
-                scope._page = page;
-                onChange();
-            };
-
-            scope.previousRangeClick = function () {
-                scope._page = scope.range * scope._visiblePages;
-                onChange();
-            };
-
-            scope.nextRangeClick = function () {
-                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
-                onChange();
-            };
-
-            scope.$watch('totalItems', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
-                setTotalPages();
-
-                // Correct the page and trigger change.
-                if (scope._totalItems === 0 || scope._totalItems <= Number(scope._itemsPerPage)) {
-                    scope._page = 1;
-                    onChange();
-                    setHasPager();
-                    return;
-                }
-
-                setRangePages();
-                setHasPager();
-            });
-
-            scope.$watch('visiblePages', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setRangePages();
-            });
-
-            scope.$watch('page', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                var page = scope.page;
-
-                // Correct page.
-                if (page < 1) {
-                    page = 1;
-                } else if (page > scope.totalPages) {
-                    page = scope.totalPages;
-                }
-
-                // Correct page to 1 in case totalPages is 0 and page is 0.
-                scope._page = page || 1;
-                setRangePages();
-                setHasPager();
-            });
-
-            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
-                if (angular.equals(newValue, oldValue)) {
-                    return;
-                }
-
-                setItemsPerPageNumbers();
-            });
-
-            scope.$watch('itemsPerPage', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setItemsPerPage();
-                setHasPager();
-            });
-
-            setItemsPerPageNumbers();
-            setItemsPerPage();
-            setTotalPages();
-            setRangePages();
-            setHasPager();
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
     return {
         restrict: 'E',
@@ -2518,6 +2518,1479 @@ if (!String.prototype.endsWith) {
                     validate(scope.value);
                 };
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.services').factory('MaDate', [function () {
+    var months = [{
+        language: 'en',
+        full: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    }],
+        weekDays = [{
+            language: 'en',
+            full: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            short: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        }],
+        daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    var isInteger = function (value) {
+        return value === parseInt(value, 10);
+    };
+
+    var isDate = function (value) {
+        if (!value) {
+            return false;
+        }
+
+        return Object.prototype.toString.call(value) === '[object Date]' && value.getTime && !isNaN(value.getTime());
+    };
+
+    var isMaDate = function (value) {
+        return value instanceof MaDate || (!!value && value._isMaDate);
+    };
+
+    var isMatch = function (date, substring) {
+        return date.match(new RegExp(substring, 'i'));
+    };
+
+    var getTotalDate = function (year, month, day, hours, minutes, seconds, milliseconds, offset) {
+        var finalMonth,
+            maDate = MaDate.createEmpty();
+        day = day.toString();
+        month = month.toString();
+        hours = Number(hours) || 0;
+        minutes = Number(minutes) || 0;
+        seconds = Number(seconds) || 0;
+        milliseconds = Number(milliseconds) || 0;
+        offset = offset || 0;
+
+        // Convert YY to YYYY.
+        if (year <= 99) {
+            if (year >= 0 && year < 30) {
+                year = '20' + year;
+            } else {
+                year = '19' + year;
+            }
+        }
+
+        // Detect leap year and change amount of days in daysPerMonth for February.
+        var isLeap = new Date(year, 1, 29).getMonth() === 1;
+
+        if (isLeap) {
+            daysPerMonth[1] = 29;
+        } else {
+            daysPerMonth[1] = 28;
+        }
+
+        // Convert month to number.
+        if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
+            for (var j = 0; j < months.length; j++) {
+                for (var i = 0; i < months[j].full.length; i++) {
+                    if (isMatch(month, months[j].full[i].slice(0, 3))) {
+                        finalMonth = i + 1;
+                        break;
+                    }
+                }
+            }
+
+            if (!finalMonth) {
+                return maDate;
+            }
+
+            month = finalMonth;
+        }
+
+        if (month > 12) {
+            return maDate;
+        }
+
+        if (day > daysPerMonth[month - 1]) {
+            return maDate;
+        }
+
+        var date = new Date(Number(year), Number(month - 1), Number(day), hours, minutes, seconds);
+        date.setMilliseconds(milliseconds);
+
+        maDate = new MaDate(date);
+        maDate.offset(offset);
+
+        return maDate;
+    };
+
+    var getDayAndMonth = function (day, month, culture) {
+        var dayAndMonth = {
+            day: day,
+            month: month,
+            isValid: true
+        };
+
+        // Handle difference between en-GB and en-US culture formats.
+        if (culture === 'en-GB' && month > 12) {
+            dayAndMonth.isValid = false;
+        }
+
+        if (culture === 'en-US') {
+            dayAndMonth.day = month;
+            dayAndMonth.month = day;
+
+            if (day > 12) {
+                dayAndMonth.isValid = false;
+            }
+        }
+
+        // Give priority to en-GB if culture is not set.
+        if (!culture && month > 12) {
+            dayAndMonth.day = month;
+            dayAndMonth.month = day;
+        }
+
+        return dayAndMonth;
+    };
+
+    var parse = function (value, culture) {
+        var pattern, parts, dayAndMonth,
+            date = MaDate.createEmpty();
+
+        // Check if a date requires parsing.
+        if (isDate(value) || isMaDate(value)) {
+            return value;
+        }
+
+        if (typeof value !== 'string') {
+            return date;
+        }
+
+        // Replace multiple whitespaces with a single one.
+        value = value.replace(/\s+/g, ' ');
+
+        // 21
+        pattern = /^\d{1,2}$/;
+
+        if (value.match(pattern) !== null) {
+            var currentDate = new Date();
+
+            return getTotalDate(currentDate.getFullYear(), currentDate.getMonth() + 1, value);
+        }
+
+        // 21-02
+        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+            dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
+
+            if (!dayAndMonth.isValid) {
+                return date;
+            }
+
+            return getTotalDate(new Date().getFullYear(), dayAndMonth.month, dayAndMonth.day);
+        }
+
+        // 21 Feb 15
+        // 21 February 2015
+        pattern = /^(\d{1,2})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{2,4}\b)/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[5], parts[3], parts[1]);
+        }
+
+        // Feb 21, 15
+        // Feb 21, 2015
+        pattern = /([^\u0000-\u0080]|[a-zA-Z]{3})(\s|)(\d{1,2})(,)(\s|)(\d{2,4})$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[6], parts[1], parts[3]);
+        }
+
+        // Feb 21 15
+        // February 21 2015
+        pattern = /^([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4}\b)/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[5], parts[1], parts[3]);
+        }
+
+        // 2015-02-21
+        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[1], parts[3], parts[5]);
+        }
+
+        // 21-02-15
+        // 21-02-2015
+        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4})$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+            dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
+
+            if (!dayAndMonth.isValid) {
+                return date;
+            }
+
+            return getTotalDate(parts[5], dayAndMonth.month, dayAndMonth.day);
+        }
+
+        // 2015-February-21
+        pattern = /^(\d{4})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[1], parts[3], parts[5]);
+        }
+
+        // 2015-02-21T10:00:00Z
+        // 2015-02-21T10:00:00.652+03:00
+        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)(\.(\d{3}))?(?:Z|([+-])(2[0-3]|[01][0-9]):([0-5][0-9]))$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+            var offset = 0;
+
+            // Get time zone offset.
+            if (parts.length === 14) {
+                offset = (Number(parts[12]) || 0) * 60 + (Number(parts[13]) || 0);
+
+                if (parts[11] === '-' && offset !== 0) {
+                    offset = -offset;
+                }
+            }
+
+            return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], parts[10], offset);
+        }
+
+        return date;
+    };
+
+    var formatNumber = function (number, length) {
+        var string = '';
+
+        for (var i = 0; i < length; i++) {
+            string += '0';
+        }
+
+        return (string + number).slice(-length);
+    };
+
+    var isValidTimeZoneOffset = function (offset) {
+        return offset >= -720 && offset <= 840;
+    };
+
+    var offsetToTimeZone = function (offset) {
+        if (offset === 0) {
+            return 'Z';
+        }
+
+        if (!isInteger(offset)) {
+            return null;
+        }
+
+        // Time zones vary from -12:00 to 14:00.
+        if (offset < -720 || offset > 840) {
+            return null;
+        }
+
+        var sign = '+';
+
+        if (offset < 0) {
+            offset *= -1;
+            sign = '-';
+        }
+
+        var minutes = offset % 60,
+            hours = (offset - minutes) / 60;
+
+        return sign + formatNumber(hours, 2) + ':' + formatNumber(minutes, 2);
+    };
+
+    /*
+        Overloads:
+        - format(date)
+        - format(MaDate)
+        - format(date, format)
+        - format(MaDate, format)
+        - format(date, offset)
+        - format(MaDate, offset)
+        - format(date, format, offset)
+        - format(MaDate, format, offset)
+    */
+    var format = function (date) {
+        if (!isDate(date) && !isMaDate(date)) {
+            return null;
+        }
+
+        var parameters = arguments,
+            format,
+            offset = 0;
+
+        if (parameters.length === 2) {
+            if (typeof parameters[1] === 'string') {
+                format = parameters[1];
+            } else {
+                offset = parameters[1];
+
+                if (!isValidTimeZoneOffset(offset)) {
+                    return null;
+                }
+            }
+        } else if (parameters.length === 3) {
+            format = parameters[1];
+            offset = parameters[2];
+
+            if (!isValidTimeZoneOffset(offset)) {
+                return null;
+            }
+        }
+
+        format = format || 'yyyy-MM-ddTHH:mm:ssZ';
+
+        var languageIndex = 0,
+            timeZone = offsetToTimeZone(offset),
+            _date = isMaDate(date) ? date.toDate() : date,
+            // Possible formats of date parts (day, month, year).
+            datePartFormats = {
+                f: ['fff'],
+                s: ['ss'],
+                m: ['mm'],
+                H: ['HH'],
+                d: ['d', 'dd', 'ddd', 'dddd'],
+                M: ['M', 'MM', 'MMM', 'MMMM'],
+                y: ['yy', 'yyyy'],
+                Z: ['Z']
+            },
+            day = _date.getDate(),
+            dayOfWeek = _date.getDay(),
+            month = _date.getMonth(),
+            year = _date.getFullYear(),
+            hours = _date.getHours(),
+            minutes = _date.getMinutes(),
+            seconds = _date.getSeconds(),
+            milliseconds = _date.getMilliseconds();
+
+        // Checks format string parts on conformity with available date formats.
+        var checkDatePart = function (dateChar) {
+            var datePart = '';
+
+            // Try-catch construction because some sub-formats may be not listed.
+            try {
+                datePart = format.match(new RegExp(dateChar + '+', ''))[0];
+            } catch (error) { }
+
+            return datePartFormats[dateChar].indexOf(datePart);
+        };
+
+        // Formats date parts.
+        var formatDatePart = function (datePartFormat) {
+            var datePart = '';
+
+            switch (datePartFormat) {
+                case datePartFormats.d[0]:
+                    // d
+                    {
+                        datePart = day;
+                        break;
+                    }
+                case datePartFormats.d[1]:
+                    // dd
+                    {
+                        datePart = formatNumber(day, 2);
+                        break;
+                    }
+                case datePartFormats.d[2]:
+                    // ddd
+                    {
+                        datePart = weekDays[languageIndex].short[dayOfWeek];
+                        break;
+                    }
+                case datePartFormats.d[3]:
+                    // dddd
+                    {
+                        datePart = weekDays[languageIndex].full[dayOfWeek];
+                        break;
+                    }
+                case datePartFormats.M[0]:
+                    // M
+                    {
+                        datePart = month + 1;
+                        break;
+                    }
+                case datePartFormats.M[1]:
+                    // MM
+                    {
+                        datePart = formatNumber(month + 1, 2);
+                        break;
+                    }
+                case datePartFormats.M[2]:
+                    // MMM
+                    {
+                        datePart = months[languageIndex].short[month];
+                        break;
+                    }
+                case datePartFormats.M[3]:
+                    // MMMM
+                    {
+                        datePart = months[languageIndex].full[month];
+                        break;
+                    }
+                case datePartFormats.y[0]:
+                    // yy
+                    {
+                        datePart = formatNumber(year, 2);
+                        break;
+                    }
+                case datePartFormats.y[1]:
+                    // yyyy
+                    {
+                        datePart = year;
+                        break;
+                    }
+                case datePartFormats.H[0]:
+                    // HH
+                    {
+                        datePart = formatNumber(hours, 2);
+                        break;
+                    }
+                case datePartFormats.m[0]:
+                    // mm
+                    {
+                        datePart = formatNumber(minutes, 2);
+                        break;
+                    }
+                case datePartFormats.s[0]:
+                    // ss
+                    {
+                        datePart = formatNumber(seconds, 2);
+                        break;
+                    }
+                case datePartFormats.f[0]:
+                    // fff
+                    {
+                        datePart = formatNumber(milliseconds, 3);
+                        break;
+                    }
+                case datePartFormats.Z[0]:
+                    // Z
+                    {
+                        datePart = timeZone || 'Z';
+                        break;
+                    }
+                default:
+                    {
+                        return '';
+                    }
+            }
+
+            return datePart;
+        };
+
+        // Check format of each part of the obtained format.
+        var dateParts = {
+            days: formatDatePart(datePartFormats.d[checkDatePart('d')]),
+            months: formatDatePart(datePartFormats.M[checkDatePart('M')]),
+            years: formatDatePart(datePartFormats.y[checkDatePart('y')]),
+            hours: formatDatePart(datePartFormats.H[checkDatePart('H')]),
+            minutes: formatDatePart(datePartFormats.m[checkDatePart('m')]),
+            seconds: formatDatePart(datePartFormats.s[checkDatePart('s')]),
+            milliseconds: formatDatePart(datePartFormats.f[checkDatePart('f')]),
+            timeZone: formatDatePart(datePartFormats.Z[0]),
+            separator: /^\w+([^\w])/.exec(format)
+        };
+
+        // Return formatted date string.
+        return format
+            .replace(/d+/, dateParts.days)
+            .replace(/y+/, dateParts.years)
+            .replace(/M+/, dateParts.months)
+            .replace(/H+/, dateParts.hours)
+            .replace(/m+/, dateParts.minutes)
+            .replace(/s+/, dateParts.seconds)
+            .replace(/f+/, dateParts.milliseconds)
+            .replace(/Z+/, dateParts.timeZone);
+    };
+
+    var parseTimeZone = function (timeZone) {
+        if (!timeZone) {
+            return 0;
+        }
+
+        timeZone = timeZone.replace(/GMT/gi, '');
+
+        var parts = /^(?:Z|([+-]?)(2[0-3]|[01][0-9]):([0-5][0-9]))$/.exec(timeZone);
+
+        if (!parts || parts.length !== 4) {
+            return 0;
+        }
+
+        if (parts[0] === 'Z') {
+            return 0;
+        }
+
+        // Calculate time zone offset in minutes.
+        var offset = Number(parts[2]) * 60 + Number(parts[3]);
+
+        if (offset !== 0 && parts[1] === '-') {
+            offset *= -1;
+        }
+
+        return offset;
+    };
+
+    /*
+        Overloads:
+        - new MaDate()
+        - new MaDate(useLocalTimeZone)
+        - new MaDate(Date)
+        - new MaDate(MaDate)
+        - new MaDate(dateString)
+        - new MaDate(dateString, culture)
+        - new MaDate(year)
+        - new MaDate(year, month)
+        - new MaDate(year, month, date)
+        - new MaDate(year, month, date, hour)
+        - new MaDate(year, month, date, hour, minute)
+        - new MaDate(year, month, date, hour, minute, second)
+    */
+    function MaDate() {
+        var parameters = arguments,
+            date;
+        this._date = null;
+        this._offset = 0;
+        this._isMaDate = true;
+
+        if (parameters.length === 0) {
+            // Create a current date.
+            this._date = new Date();
+        } else if (parameters.length === 1) {
+            date = parameters[0];
+
+            if (isDate(date)) {
+                this._date = new Date(date.valueOf());
+            } else if (isMaDate(date)) {
+                // MaDate is provided - copy it.
+                if (!date.isEmpty()) {
+                    this._date = new Date(date.toDate().valueOf());
+                }
+
+                this._offset = date.offset();
+            } else if (typeof date === 'boolean') {
+                this._date = new Date();
+                this._offset = -this._date.getTimezoneOffset();
+            } else if (typeof date === 'string') {
+                // Parse date.
+                date = parse(date);
+                this._date = date.toDate();
+                this._offset = date.offset();
+            } else if (isInteger(date)) {
+                // Year.
+                this._date = new Date(date, 0, 1, 0, 0, 0);
+            }
+        } else if (parameters.length === 2) {
+            // Date string and culture.
+            if (typeof parameters[0] === 'string' && typeof parameters[1] === 'string') {
+                date = parse(parameters[0], parameters[1]);
+                this._date = date.toDate();
+                this._offset = date.offset();
+            } else if (isInteger(parameters[0]) && isInteger(parameters[1])) {
+                // Year and month.
+                this._date = new Date(parameters[0], parameters[1], 1, 0, 0, 0);
+            }
+        } else if (parameters.length === 3 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], 0, 0, 0);
+        } else if (parameters.length === 4 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], 0, 0);
+        } else if (parameters.length === 5 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
+            isInteger(parameters[4])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], 0);
+        } else if (parameters.length === 6 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
+            isInteger(parameters[4]) && isInteger(parameters[5])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5]);
+        }
+    }
+
+    MaDate.createEmpty = function () {
+        return new MaDate(null);
+    };
+
+    MaDate.createLocal = function () {
+        return new MaDate(true);
+    };
+
+    MaDate.prototype.copy = function () {
+        return new MaDate(this);
+    };
+
+    MaDate.prototype.toDate = function () {
+        return this._date;
+    };
+
+    MaDate.prototype.offset = function (offset) {
+        if (arguments.length === 0) {
+            return this._offset;
+        }
+
+        this._offset = offset;
+        return this;
+    };
+
+    MaDate.prototype.toUtc = function () {
+        if (this.isEmpty() || this._offset === 0) {
+            return this;
+        }
+
+        this.subtract(this._offset, 'minute');
+        this._offset = 0;
+
+        return this;
+    };
+
+    MaDate.prototype.isEmpty = function () {
+        return !this._date;
+    };
+
+    MaDate.prototype.isUtc = function () {
+        return !this.isEmpty() && this._offset === 0;
+    };
+
+    MaDate.prototype.isEqual = function (date) {
+        return this.difference(date) === 0;
+    };
+
+    MaDate.prototype.isLess = function (date) {
+        return this.difference(date) < 0;
+    };
+
+    MaDate.prototype.isLessOrEqual = function (date) {
+        return this.difference(date) <= 0;
+    };
+
+    MaDate.prototype.isGreater = function (date) {
+        return this.difference(date) > 0;
+    };
+
+    MaDate.prototype.isGreaterOrEqual = function (date) {
+        return this.difference(date) >= 0;
+    };
+
+    MaDate.prototype.isBetween = function (startDate, endDate, isInclusive) {
+        var _startDate = new MaDate(startDate),
+            _endDate = new MaDate(endDate);
+
+        if (this.isEmpty() || _startDate.isEmpty() || _endDate.isEmpty()) {
+            return false;
+        }
+
+        if (isInclusive) {
+            return this.isGreaterOrEqual(_startDate) && this.isLessOrEqual(_endDate);
+        }
+
+        return this.isGreater(_startDate) && this.isLess(_endDate);
+    };
+
+    MaDate.prototype.difference = function (date) {
+        return this.valueOf() - new MaDate(date).valueOf();
+    };
+
+    MaDate.prototype.valueOf = function () {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        var time = this._date.valueOf();
+
+        // Add offset which is in minutes, and thus should be converted to milliseconds.
+        if (this._offset !== 0) {
+            time -= this._offset * 60000;
+        }
+
+        return time;
+    };
+
+    MaDate.prototype.format = function (_format) {
+        if (this.isEmpty()) {
+            return null;
+        }
+
+        return format(this._date, _format, this._offset);
+    };
+
+    MaDate.prototype.add = function (number, unit) {
+        if (this.isEmpty() || !number) {
+            return this;
+        }
+
+        // Don't change original date.
+        var date = new Date(this._date);
+
+        switch (unit) {
+            case 'year':
+                date.setFullYear(date.getFullYear() + number);
+                break;
+            case 'quarter':
+                date.setMonth(date.getMonth() + 3 * number);
+                break;
+            case 'month':
+                date.setMonth(date.getMonth() + number);
+                break;
+            case 'week':
+                date.setDate(date.getDate() + 7 * number);
+                break;
+            case 'day':
+                date.setDate(date.getDate() + number);
+                break;
+            case 'hour':
+                date.setTime(date.getTime() + number * 3600000);
+                break;
+            case 'minute':
+                date.setTime(date.getTime() + number * 60000);
+                break;
+            case 'second':
+                date.setTime(date.getTime() + number * 1000);
+                break;
+            case 'millisecond':
+                date.setTime(date.getTime() + number);
+                break;
+        }
+
+        this._date = date;
+
+        return this;
+    };
+
+    MaDate.prototype.subtract = function (number, unit) {
+        return this.add(number * -1, unit);
+    };
+
+    MaDate.prototype.millisecond = function (millisecond) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getMilliseconds();
+        } else {
+            this._date.setMilliseconds(millisecond);
+            return this;
+        }
+    };
+
+    MaDate.prototype.second = function (second) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getSeconds();
+        } else {
+            this._date.setSeconds(second);
+            return this;
+        }
+    };
+
+    MaDate.prototype.minute = function (minute) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getMinutes();
+        } else {
+            this._date.setMinutes(minute);
+            return this;
+        }
+    };
+
+    MaDate.prototype.hour = function (hour) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getHours();
+        } else {
+            this._date.setHours(hour);
+            return this;
+        }
+    };
+
+    MaDate.prototype.date = function (date) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getDate();
+        } else {
+            this._date.setDate(date);
+            return this;
+        }
+    };
+
+    MaDate.prototype.month = function (month) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getMonth();
+        } else {
+            this._date.setMonth(month);
+            return this;
+        }
+    };
+
+    MaDate.prototype.year = function (year) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getFullYear();
+        } else {
+            this._date.setFullYear(year);
+            return this;
+        }
+    };
+
+    MaDate.prototype.startOf = function (unit) {
+        switch (unit) {
+            case 'year':
+                this.month(0);
+            /* falls through */
+            case 'month':
+                this.date(1);
+            /* falls through */
+            case 'day':
+                this.hour(0);
+            /* falls through */
+            case 'hour':
+                this.minute(0);
+            /* falls through */
+            case 'minute':
+                this.second(0);
+            /* falls through */
+            case 'second':
+                this.millisecond(0);
+        }
+
+        return this;
+    };
+
+    MaDate.prototype.endOf = function (unit) {
+        if (!unit) {
+            return this;
+        }
+
+        return this.startOf(unit).add(1, unit).subtract(1, 'millisecond');
+    };
+
+    MaDate.parse = parse;
+    MaDate.parseTimeZone = parseTimeZone;
+    MaDate.offsetToTimeZone = offsetToTimeZone;
+    MaDate.isDate = isDate;
+    MaDate.isMaDate = isMaDate;
+
+    return MaDate;
+}]);})();
+(function(){angular.module('marcuraUI.services').factory('MaHelper', ['MaDate', '$rootScope', function (MaDate, $rootScope) {
+    return {
+        keyCode: {
+            backspace: 8,
+            comma: 188,
+            delete: 46,
+            down: 40,
+            end: 35,
+            enter: 13,
+            escape: 27,
+            home: 36,
+            left: 37,
+            pageDown: 34,
+            pageUp: 33,
+            period: 190,
+            right: 39,
+            shift: 16,
+            space: 32,
+            tab: 9,
+            up: 38,
+            dash: 109,
+            dash2: 189,
+            numLock: {
+                period: 110
+            }
+        },
+
+        html: {
+            nbsp: '&nbsp;'
+        },
+
+        isEmail: function (value) {
+            var pattern = /^([\+\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+            return pattern.test(value);
+        },
+
+        isNullOrWhiteSpace: function (value) {
+            if (value === null || value === undefined) {
+                return true;
+            }
+
+            if (angular.isArray(value)) {
+                return false;
+            }
+
+            // Convert value to string in case if it is not.
+            return value.toString().replace(/\s/g, '').length < 1;
+        },
+
+        isNullOrUndefined: function (value) {
+            return value === null || angular.isUndefined(value);
+        },
+
+        formatString: function (value) {
+            // Source: http://ajaxcontroltoolkit.codeplex.com/SourceControl/latest#Client/MicrosoftAjax/Extensions/String.js
+            var formattedString = '';
+
+            for (var i = 0; ;) {
+                // Search for curly bracers.
+                var open = value.indexOf('{', i);
+                var close = value.indexOf('}', i);
+
+                // Curly bracers are not found - copy rest of string and exit loop.
+                if (open < 0 && close < 0) {
+                    formattedString += value.slice(i);
+                    break;
+                }
+
+                if (close > 0 && (close < open || open < 0)) {
+                    // Closing brace before opening is error.
+                    if (value.charAt(close + 1) !== '}') {
+                        throw new Error('The format string contains an unmatched opening or closing brace.');
+                    }
+
+                    formattedString += value.slice(i, close + 1);
+                    i = close + 2;
+                    continue;
+                }
+
+                // Copy string before brace.
+                formattedString += value.slice(i, open);
+                i = open + 1;
+
+                // Check for double braces (which display as one and are not arguments).
+                if (value.charAt(i) === '{') {
+                    formattedString += '{';
+                    i++;
+                    continue;
+                }
+
+                // At this point we have valid opening brace, which should be matched by closing brace.
+                if (close < 0) {
+                    throw new Error('The format string contains an unmatched opening or closing brace.');
+                }
+
+                // This test is just done to break a potential infinite loop for invalid format strings.
+                // The code here is minimal because this is an error condition in debug mode anyway.
+                if (close < 0) {
+                    break;
+                }
+
+                // Find closing brace.
+                // Get string between braces, and split it around ':' (if any).
+                var brace = value.substring(i, close);
+                var colonIndex = brace.indexOf(':');
+                var argNumber = parseInt((colonIndex < 0) ? brace : brace.substring(0, colonIndex), 10) + 1;
+
+                if (isNaN(argNumber)) {
+                    throw new Error('The format string is invalid.');
+                }
+
+                var arg = arguments[argNumber];
+
+                if (typeof (arg) === 'undefined' || arg === null) {
+                    arg = '';
+                }
+
+                formattedString += arg.toString();
+                i = close + 1;
+            }
+
+            return formattedString;
+        },
+
+        getTextHeight: function (text, font, width, lineHeight) {
+            if (!font) {
+                return 0;
+            }
+
+            // Prepare textarea.
+            var textArea = document.createElement('TEXTAREA');
+            textArea.setAttribute('rows', 1);
+            textArea.style.font = font;
+            textArea.style.width = width || '0px';
+            textArea.style.border = '0';
+            textArea.style.overflow = 'hidden';
+            textArea.style.padding = '0';
+            textArea.style.outline = '0';
+            textArea.style.resize = 'none';
+            textArea.style.lineHeight = lineHeight || 'normal';
+            textArea.value = text;
+
+            // To measure sizes we need to add textarea to DOM.
+            angular.element(document.querySelector('body')).append(textArea);
+
+            // Measure height.
+            textArea.style.height = 'auto';
+            textArea.style.height = textArea.scrollHeight + 'px';
+
+            var height = parseInt(textArea.style.height);
+
+            // Remove textarea.
+            angular.element(textArea).remove();
+
+            return height;
+        },
+
+        isGreater: function (value, valueToCompare) {
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
+
+            if (isNumber) {
+                return parseFloat(value) > parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.isGreater(date2);
+            }
+
+            return value > valueToCompare;
+        },
+
+        isGreaterOrEqual: function (value, valueToCompare) {
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
+
+            if (isNumber) {
+                return parseFloat(value) >= parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.isGreaterOrEqual(date2);
+            }
+
+            return value >= valueToCompare;
+        },
+
+        isLengthGreaterOrEqual: function (value, length) {
+            var valueLength = (value || '').toString().length;
+            return valueLength >= length;
+        },
+
+        isLess: function (value, valueToCompare) {
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
+
+            if (isNumber) {
+                return parseFloat(value) < parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.isLess(date2);
+            }
+
+            return value < valueToCompare;
+        },
+
+        isLessOrEqual: function (value, valueToCompare) {
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
+
+            if (isNumber) {
+                return parseFloat(value) <= parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.isLessOrEqual(date2);
+            }
+
+            return value <= valueToCompare;
+        },
+
+        isLengthLessOrEqual: function (value, length) {
+            var valueLength = (value || '').toString().length;
+            return valueLength <= length;
+        },
+
+        isNumber: function (value) {
+            if (typeof value === 'number') {
+                return true;
+            }
+
+            if (this.isNullOrWhiteSpace(value)) {
+                return false;
+            }
+
+            return value.match(/^-?\d+\.?\d*$/) !== null;
+        },
+
+        isJson: function (value) {
+            try {
+                JSON.parse(value);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+
+        safeApply: function (method) {
+            var phase = $rootScope.$$phase;
+
+            if (phase !== '$apply' && phase !== '$digest') {
+                $rootScope.$apply(method);
+                return;
+            }
+
+            if (method && typeof method === 'function') {
+                method();
+            }
+        }
+    };
+}]);})();
+(function(){/**
+* A set of utility methods that can be use to retrieve position of DOM elements.
+* It is meant to be used where we need to absolute-position DOM elements in
+* relation to other, existing elements (this is the case for tooltips, popovers,
+* typeahead suggestions etc.).
+*/
+angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$window', function ($document, $window) {
+    function getStyle(el, cssprop) {
+        // IE
+        if (el.currentStyle) {
+            return el.currentStyle[cssprop];
+        } else if ($window.getComputedStyle) {
+            return $window.getComputedStyle(el)[cssprop];
+        }
+
+        // finally try and get inline style
+        return el.style[cssprop];
+    }
+
+    /**
+     * Checks if a given element is statically positioned
+     * @param element - raw DOM element
+     */
+    function isStaticPositioned(element) {
+        return (getStyle(element, 'position') || 'static') === 'static';
+    }
+
+    /**
+     * returns the closest, non-statically positioned parentOffset of a given element
+     * @param element
+     */
+    var parentOffsetEl = function (element) {
+        var docDomEl = $document[0];
+        var offsetParent = element.offsetParent || docDomEl;
+        while (offsetParent && offsetParent !== docDomEl && isStaticPositioned(offsetParent)) {
+            offsetParent = offsetParent.offsetParent;
+        }
+        return offsetParent || docDomEl;
+    };
+
+    return {
+        /**
+         * Provides read-only equivalent of jQuery's position function:
+         * http://api.jquery.com/position/
+         */
+        position: function (element) {
+            var elBCR = this.offset(element);
+            var offsetParentBCR = { top: 0, left: 0 };
+            var offsetParentEl = parentOffsetEl(element[0]);
+            if (offsetParentEl != $document[0]) {
+                offsetParentBCR = this.offset(angular.element(offsetParentEl));
+                offsetParentBCR.top += offsetParentEl.clientTop - offsetParentEl.scrollTop;
+                offsetParentBCR.left += offsetParentEl.clientLeft - offsetParentEl.scrollLeft;
+            }
+
+            var boundingClientRect = element[0].getBoundingClientRect();
+            return {
+                width: boundingClientRect.width || element.prop('offsetWidth'),
+                height: boundingClientRect.height || element.prop('offsetHeight'),
+                top: elBCR.top - offsetParentBCR.top,
+                left: elBCR.left - offsetParentBCR.left
+            };
+        },
+
+        /**
+         * Provides read-only equivalent of jQuery's offset function:
+         * http://api.jquery.com/offset/
+         */
+        offset: function (element) {
+            var boundingClientRect = element[0].getBoundingClientRect();
+            return {
+                width: boundingClientRect.width || element.prop('offsetWidth'),
+                height: boundingClientRect.height || element.prop('offsetHeight'),
+                top: boundingClientRect.top + ($window.pageYOffset || $document[0].documentElement.scrollTop),
+                left: boundingClientRect.left + ($window.pageXOffset || $document[0].documentElement.scrollLeft)
+            };
+        },
+
+        /**
+         * Provides coordinates for the targetEl in relation to hostEl
+         */
+        positionElements: function (hostEl, targetEl, positionStr, appendToBody) {
+
+            var positionStrParts = positionStr.split('-');
+            var pos0 = positionStrParts[0], pos1 = positionStrParts[1] || 'center';
+
+            var hostElPos,
+                targetElWidth,
+                targetElHeight,
+                targetElPos;
+
+            hostElPos = appendToBody ? this.offset(hostEl) : this.position(hostEl);
+
+            targetElWidth = targetEl.prop('offsetWidth');
+            targetElHeight = targetEl.prop('offsetHeight');
+
+            var shiftWidth = {
+                center: function () {
+                    return hostElPos.left + hostElPos.width / 2 - targetElWidth / 2;
+                },
+                left: function () {
+                    return hostElPos.left;
+                },
+                right: function () {
+                    return hostElPos.left + hostElPos.width;
+                }
+            };
+
+            var shiftHeight = {
+                center: function () {
+                    return hostElPos.top + hostElPos.height / 2 - targetElHeight / 2;
+                },
+                top: function () {
+                    return hostElPos.top;
+                },
+                bottom: function () {
+                    return hostElPos.top + hostElPos.height;
+                }
+            };
+
+            switch (pos0) {
+                case 'right':
+                    targetElPos = {
+                        top: shiftHeight[pos1](),
+                        left: shiftWidth[pos0]()
+                    };
+                    break;
+                case 'left':
+                    targetElPos = {
+                        top: shiftHeight[pos1](),
+                        left: hostElPos.left - targetElWidth
+                    };
+                    break;
+                case 'bottom':
+                    targetElPos = {
+                        top: shiftHeight[pos0](),
+                        left: shiftWidth[pos1]()
+                    };
+                    break;
+                default:
+                    targetElPos = {
+                        top: hostElPos.top - targetElHeight,
+                        left: shiftWidth[pos1]()
+                    };
+                    break;
+            }
+
+            return targetElPos;
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.services').factory('MaValidators', ['MaHelper', 'MaDate', function (MaHelper, MaDate) {
+    var formatValueToCompare = function (value) {
+        if (!value) {
+            return null;
+        }
+
+        var formattedValue = value.toString();
+
+        if (MaDate.isMaDate(value)) {
+            formattedValue = value.format('dd MMM yyyy');
+        }
+
+        return formattedValue;
+    };
+
+    return {
+        isNotEmpty: function () {
+            return {
+                name: 'IsNotEmpty',
+                message: 'This field cannot be empty.',
+                validate: function (value) {
+                    if (angular.isArray(value)) {
+                        return value.length > 0;
+                    }
+
+                    return !MaHelper.isNullOrWhiteSpace(value);
+                }
+            };
+        },
+
+        isGreater: function (valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field cannot be less than or equal to ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
+            return {
+                name: 'IsGreater',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isGreater(value, valueToCompare);
+                }
+            };
+        },
+
+        isGreaterOrEqual: function (valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field cannot be less than ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
+            return {
+                name: 'IsGreaterOrEqual',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isGreaterOrEqual(value, valueToCompare);
+                }
+            };
+        },
+
+        isLengthGreaterOrEqual: function (length, allowEmpty) {
+            var message = null;
+
+            if (length) {
+                message = 'Length cannot be less than ' + formatValueToCompare(length) + '.';
+            }
+
+            return {
+                name: 'IsLengthGreaterOrEqual',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isLengthGreaterOrEqual(value, length);
+                }
+            };
+        },
+
+        isLess: function (valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field cannot be greater than or equal to ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
+            return {
+                name: 'IsLess',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isLess(value, valueToCompare);
+                }
+            };
+        },
+
+        isLessOrEqual: function (valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field cannot be greater than ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
+            return {
+                name: 'IsLessOrEqual',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isLessOrEqual(value, valueToCompare);
+                }
+            };
+        },
+
+        isLengthLessOrEqual: function (length, allowEmpty) {
+            var message = null;
+
+            if (length) {
+                message = 'Length cannot be greater than ' + formatValueToCompare(length) + '.';
+            }
+
+            return {
+                name: 'IsLengthLessOrEqual',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isLengthLessOrEqual(value, length);
+                }
+            };
+        },
+
+        isNumber: function (allowEmpty) {
+            return {
+                name: 'IsNumber',
+                message: 'This field should be a number.',
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isNumber(value);
+                }
+            };
+        },
+
+        isEmail: function (allowEmpty) {
+            return {
+                name: 'IsEmail',
+                message: 'This field should be an email.',
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isEmail(value);
+                }
+            };
         }
     };
 }]);})();
@@ -3815,7 +5288,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
             var html = '\
             <div class="ma-tabs">\
                 <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item" ng-repeat="item in items"\
+                    <li class="ma-tabs-item{{item.modifier ? (\' ma-tabs-item-\' + item.modifier) : \'\'}}" ng-repeat="item in items"\
                         ng-focus="onFocus(item)"\
                         ng-blur="onBlur(item)"\
                         ng-keypress="onKeypress($event, item)"\
@@ -5355,1476 +6828,3 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
     //     });
     // }]);
 })();
-(function(){angular.module('marcuraUI.services').factory('MaDate', [function () {
-    var months = [{
-        language: 'en',
-        full: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-        short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    }],
-        weekDays = [{
-            language: 'en',
-            full: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-            short: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-        }],
-        daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-    var isInteger = function (value) {
-        return value === parseInt(value, 10);
-    };
-
-    var isDate = function (value) {
-        if (!value) {
-            return false;
-        }
-
-        return Object.prototype.toString.call(value) === '[object Date]' && value.getTime && !isNaN(value.getTime());
-    };
-
-    var isMaDate = function (value) {
-        return value instanceof MaDate || (!!value && value._isMaDate);
-    };
-
-    var isMatch = function (date, substring) {
-        return date.match(new RegExp(substring, 'i'));
-    };
-
-    var getTotalDate = function (year, month, day, hours, minutes, seconds, milliseconds, offset) {
-        var finalMonth,
-            maDate = MaDate.createEmpty();
-        day = day.toString();
-        month = month.toString();
-        hours = Number(hours) || 0;
-        minutes = Number(minutes) || 0;
-        seconds = Number(seconds) || 0;
-        milliseconds = Number(milliseconds) || 0;
-        offset = offset || 0;
-
-        // Convert YY to YYYY.
-        if (year <= 99) {
-            if (year >= 0 && year < 30) {
-                year = '20' + year;
-            } else {
-                year = '19' + year;
-            }
-        }
-
-        // Detect leap year and change amount of days in daysPerMonth for February.
-        var isLeap = new Date(year, 1, 29).getMonth() === 1;
-
-        if (isLeap) {
-            daysPerMonth[1] = 29;
-        } else {
-            daysPerMonth[1] = 28;
-        }
-
-        // Convert month to number.
-        if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
-            for (var j = 0; j < months.length; j++) {
-                for (var i = 0; i < months[j].full.length; i++) {
-                    if (isMatch(month, months[j].full[i].slice(0, 3))) {
-                        finalMonth = i + 1;
-                        break;
-                    }
-                }
-            }
-
-            if (!finalMonth) {
-                return maDate;
-            }
-
-            month = finalMonth;
-        }
-
-        if (month > 12) {
-            return maDate;
-        }
-
-        if (day > daysPerMonth[month - 1]) {
-            return maDate;
-        }
-
-        var date = new Date(Number(year), Number(month - 1), Number(day), hours, minutes, seconds);
-        date.setMilliseconds(milliseconds);
-
-        maDate = new MaDate(date);
-        maDate.offset(offset);
-
-        return maDate;
-    };
-
-    var getDayAndMonth = function (day, month, culture) {
-        var dayAndMonth = {
-            day: day,
-            month: month,
-            isValid: true
-        };
-
-        // Handle difference between en-GB and en-US culture formats.
-        if (culture === 'en-GB' && month > 12) {
-            dayAndMonth.isValid = false;
-        }
-
-        if (culture === 'en-US') {
-            dayAndMonth.day = month;
-            dayAndMonth.month = day;
-
-            if (day > 12) {
-                dayAndMonth.isValid = false;
-            }
-        }
-
-        // Give priority to en-GB if culture is not set.
-        if (!culture && month > 12) {
-            dayAndMonth.day = month;
-            dayAndMonth.month = day;
-        }
-
-        return dayAndMonth;
-    };
-
-    var parse = function (value, culture) {
-        var pattern, parts, dayAndMonth,
-            date = MaDate.createEmpty();
-
-        // Check if a date requires parsing.
-        if (isDate(value) || isMaDate(value)) {
-            return value;
-        }
-
-        if (typeof value !== 'string') {
-            return date;
-        }
-
-        // Replace multiple whitespaces with a single one.
-        value = value.replace(/\s+/g, ' ');
-
-        // 21
-        pattern = /^\d{1,2}$/;
-
-        if (value.match(pattern) !== null) {
-            var currentDate = new Date();
-
-            return getTotalDate(currentDate.getFullYear(), currentDate.getMonth() + 1, value);
-        }
-
-        // 21-02
-        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-            dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
-
-            if (!dayAndMonth.isValid) {
-                return date;
-            }
-
-            return getTotalDate(new Date().getFullYear(), dayAndMonth.month, dayAndMonth.day);
-        }
-
-        // 21 Feb 15
-        // 21 February 2015
-        pattern = /^(\d{1,2})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{2,4}\b)/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-
-            return getTotalDate(parts[5], parts[3], parts[1]);
-        }
-
-        // Feb 21, 15
-        // Feb 21, 2015
-        pattern = /([^\u0000-\u0080]|[a-zA-Z]{3})(\s|)(\d{1,2})(,)(\s|)(\d{2,4})$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-
-            return getTotalDate(parts[6], parts[1], parts[3]);
-        }
-
-        // Feb 21 15
-        // February 21 2015
-        pattern = /^([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4}\b)/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-
-            return getTotalDate(parts[5], parts[1], parts[3]);
-        }
-
-        // 2015-02-21
-        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-
-            return getTotalDate(parts[1], parts[3], parts[5]);
-        }
-
-        // 21-02-15
-        // 21-02-2015
-        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4})$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-            dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
-
-            if (!dayAndMonth.isValid) {
-                return date;
-            }
-
-            return getTotalDate(parts[5], dayAndMonth.month, dayAndMonth.day);
-        }
-
-        // 2015-February-21
-        pattern = /^(\d{4})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-
-            return getTotalDate(parts[1], parts[3], parts[5]);
-        }
-
-        // 2015-02-21T10:00:00Z
-        // 2015-02-21T10:00:00.652+03:00
-        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)(\.(\d{3}))?(?:Z|([+-])(2[0-3]|[01][0-9]):([0-5][0-9]))$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-            var offset = 0;
-
-            // Get time zone offset.
-            if (parts.length === 14) {
-                offset = (Number(parts[12]) || 0) * 60 + (Number(parts[13]) || 0);
-
-                if (parts[11] === '-' && offset !== 0) {
-                    offset = -offset;
-                }
-            }
-
-            return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], parts[10], offset);
-        }
-
-        return date;
-    };
-
-    var formatNumber = function (number, length) {
-        var string = '';
-
-        for (var i = 0; i < length; i++) {
-            string += '0';
-        }
-
-        return (string + number).slice(-length);
-    };
-
-    var isValidTimeZoneOffset = function (offset) {
-        return offset >= -720 && offset <= 840;
-    };
-
-    var offsetToTimeZone = function (offset) {
-        if (offset === 0) {
-            return 'Z';
-        }
-
-        if (!isInteger(offset)) {
-            return null;
-        }
-
-        // Time zones vary from -12:00 to 14:00.
-        if (offset < -720 || offset > 840) {
-            return null;
-        }
-
-        var sign = '+';
-
-        if (offset < 0) {
-            offset *= -1;
-            sign = '-';
-        }
-
-        var minutes = offset % 60,
-            hours = (offset - minutes) / 60;
-
-        return sign + formatNumber(hours, 2) + ':' + formatNumber(minutes, 2);
-    };
-
-    /*
-        Overloads:
-        - format(date)
-        - format(MaDate)
-        - format(date, format)
-        - format(MaDate, format)
-        - format(date, offset)
-        - format(MaDate, offset)
-        - format(date, format, offset)
-        - format(MaDate, format, offset)
-    */
-    var format = function (date) {
-        if (!isDate(date) && !isMaDate(date)) {
-            return null;
-        }
-
-        var parameters = arguments,
-            format,
-            offset = 0;
-
-        if (parameters.length === 2) {
-            if (typeof parameters[1] === 'string') {
-                format = parameters[1];
-            } else {
-                offset = parameters[1];
-
-                if (!isValidTimeZoneOffset(offset)) {
-                    return null;
-                }
-            }
-        } else if (parameters.length === 3) {
-            format = parameters[1];
-            offset = parameters[2];
-
-            if (!isValidTimeZoneOffset(offset)) {
-                return null;
-            }
-        }
-
-        format = format || 'yyyy-MM-ddTHH:mm:ssZ';
-
-        var languageIndex = 0,
-            timeZone = offsetToTimeZone(offset),
-            _date = isMaDate(date) ? date.toDate() : date,
-            // Possible formats of date parts (day, month, year).
-            datePartFormats = {
-                f: ['fff'],
-                s: ['ss'],
-                m: ['mm'],
-                H: ['HH'],
-                d: ['d', 'dd', 'ddd', 'dddd'],
-                M: ['M', 'MM', 'MMM', 'MMMM'],
-                y: ['yy', 'yyyy'],
-                Z: ['Z']
-            },
-            day = _date.getDate(),
-            dayOfWeek = _date.getDay(),
-            month = _date.getMonth(),
-            year = _date.getFullYear(),
-            hours = _date.getHours(),
-            minutes = _date.getMinutes(),
-            seconds = _date.getSeconds(),
-            milliseconds = _date.getMilliseconds();
-
-        // Checks format string parts on conformity with available date formats.
-        var checkDatePart = function (dateChar) {
-            var datePart = '';
-
-            // Try-catch construction because some sub-formats may be not listed.
-            try {
-                datePart = format.match(new RegExp(dateChar + '+', ''))[0];
-            } catch (error) { }
-
-            return datePartFormats[dateChar].indexOf(datePart);
-        };
-
-        // Formats date parts.
-        var formatDatePart = function (datePartFormat) {
-            var datePart = '';
-
-            switch (datePartFormat) {
-                case datePartFormats.d[0]:
-                    // d
-                    {
-                        datePart = day;
-                        break;
-                    }
-                case datePartFormats.d[1]:
-                    // dd
-                    {
-                        datePart = formatNumber(day, 2);
-                        break;
-                    }
-                case datePartFormats.d[2]:
-                    // ddd
-                    {
-                        datePart = weekDays[languageIndex].short[dayOfWeek];
-                        break;
-                    }
-                case datePartFormats.d[3]:
-                    // dddd
-                    {
-                        datePart = weekDays[languageIndex].full[dayOfWeek];
-                        break;
-                    }
-                case datePartFormats.M[0]:
-                    // M
-                    {
-                        datePart = month + 1;
-                        break;
-                    }
-                case datePartFormats.M[1]:
-                    // MM
-                    {
-                        datePart = formatNumber(month + 1, 2);
-                        break;
-                    }
-                case datePartFormats.M[2]:
-                    // MMM
-                    {
-                        datePart = months[languageIndex].short[month];
-                        break;
-                    }
-                case datePartFormats.M[3]:
-                    // MMMM
-                    {
-                        datePart = months[languageIndex].full[month];
-                        break;
-                    }
-                case datePartFormats.y[0]:
-                    // yy
-                    {
-                        datePart = formatNumber(year, 2);
-                        break;
-                    }
-                case datePartFormats.y[1]:
-                    // yyyy
-                    {
-                        datePart = year;
-                        break;
-                    }
-                case datePartFormats.H[0]:
-                    // HH
-                    {
-                        datePart = formatNumber(hours, 2);
-                        break;
-                    }
-                case datePartFormats.m[0]:
-                    // mm
-                    {
-                        datePart = formatNumber(minutes, 2);
-                        break;
-                    }
-                case datePartFormats.s[0]:
-                    // ss
-                    {
-                        datePart = formatNumber(seconds, 2);
-                        break;
-                    }
-                case datePartFormats.f[0]:
-                    // fff
-                    {
-                        datePart = formatNumber(milliseconds, 3);
-                        break;
-                    }
-                case datePartFormats.Z[0]:
-                    // Z
-                    {
-                        datePart = timeZone || 'Z';
-                        break;
-                    }
-                default:
-                    {
-                        return '';
-                    }
-            }
-
-            return datePart;
-        };
-
-        // Check format of each part of the obtained format.
-        var dateParts = {
-            days: formatDatePart(datePartFormats.d[checkDatePart('d')]),
-            months: formatDatePart(datePartFormats.M[checkDatePart('M')]),
-            years: formatDatePart(datePartFormats.y[checkDatePart('y')]),
-            hours: formatDatePart(datePartFormats.H[checkDatePart('H')]),
-            minutes: formatDatePart(datePartFormats.m[checkDatePart('m')]),
-            seconds: formatDatePart(datePartFormats.s[checkDatePart('s')]),
-            milliseconds: formatDatePart(datePartFormats.f[checkDatePart('f')]),
-            timeZone: formatDatePart(datePartFormats.Z[0]),
-            separator: /^\w+([^\w])/.exec(format)
-        };
-
-        // Return formatted date string.
-        return format
-            .replace(/d+/, dateParts.days)
-            .replace(/y+/, dateParts.years)
-            .replace(/M+/, dateParts.months)
-            .replace(/H+/, dateParts.hours)
-            .replace(/m+/, dateParts.minutes)
-            .replace(/s+/, dateParts.seconds)
-            .replace(/f+/, dateParts.milliseconds)
-            .replace(/Z+/, dateParts.timeZone);
-    };
-
-    var parseTimeZone = function (timeZone) {
-        if (!timeZone) {
-            return 0;
-        }
-
-        timeZone = timeZone.replace(/GMT/gi, '');
-
-        var parts = /^(?:Z|([+-]?)(2[0-3]|[01][0-9]):([0-5][0-9]))$/.exec(timeZone);
-
-        if (!parts || parts.length !== 4) {
-            return 0;
-        }
-
-        if (parts[0] === 'Z') {
-            return 0;
-        }
-
-        // Calculate time zone offset in minutes.
-        var offset = Number(parts[2]) * 60 + Number(parts[3]);
-
-        if (offset !== 0 && parts[1] === '-') {
-            offset *= -1;
-        }
-
-        return offset;
-    };
-
-    /*
-        Overloads:
-        - new MaDate()
-        - new MaDate(useLocalTimeZone)
-        - new MaDate(Date)
-        - new MaDate(MaDate)
-        - new MaDate(dateString)
-        - new MaDate(dateString, culture)
-        - new MaDate(year)
-        - new MaDate(year, month)
-        - new MaDate(year, month, date)
-        - new MaDate(year, month, date, hour)
-        - new MaDate(year, month, date, hour, minute)
-        - new MaDate(year, month, date, hour, minute, second)
-    */
-    function MaDate() {
-        var parameters = arguments,
-            date;
-        this._date = null;
-        this._offset = 0;
-        this._isMaDate = true;
-
-        if (parameters.length === 0) {
-            // Create a current date.
-            this._date = new Date();
-        } else if (parameters.length === 1) {
-            date = parameters[0];
-
-            if (isDate(date)) {
-                this._date = new Date(date.valueOf());
-            } else if (isMaDate(date)) {
-                // MaDate is provided - copy it.
-                if (!date.isEmpty()) {
-                    this._date = new Date(date.toDate().valueOf());
-                }
-
-                this._offset = date.offset();
-            } else if (typeof date === 'boolean') {
-                this._date = new Date();
-                this._offset = -this._date.getTimezoneOffset();
-            } else if (typeof date === 'string') {
-                // Parse date.
-                date = parse(date);
-                this._date = date.toDate();
-                this._offset = date.offset();
-            } else if (isInteger(date)) {
-                // Year.
-                this._date = new Date(date, 0, 1, 0, 0, 0);
-            }
-        } else if (parameters.length === 2) {
-            // Date string and culture.
-            if (typeof parameters[0] === 'string' && typeof parameters[1] === 'string') {
-                date = parse(parameters[0], parameters[1]);
-                this._date = date.toDate();
-                this._offset = date.offset();
-            } else if (isInteger(parameters[0]) && isInteger(parameters[1])) {
-                // Year and month.
-                this._date = new Date(parameters[0], parameters[1], 1, 0, 0, 0);
-            }
-        } else if (parameters.length === 3 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2])) {
-            // Year, month and date.
-            this._date = new Date(parameters[0], parameters[1], parameters[2], 0, 0, 0);
-        } else if (parameters.length === 4 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3])) {
-            // Year, month and date.
-            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], 0, 0);
-        } else if (parameters.length === 5 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
-            isInteger(parameters[4])) {
-            // Year, month and date.
-            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], 0);
-        } else if (parameters.length === 6 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
-            isInteger(parameters[4]) && isInteger(parameters[5])) {
-            // Year, month and date.
-            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5]);
-        }
-    }
-
-    MaDate.createEmpty = function () {
-        return new MaDate(null);
-    };
-
-    MaDate.createLocal = function () {
-        return new MaDate(true);
-    };
-
-    MaDate.prototype.copy = function () {
-        return new MaDate(this);
-    };
-
-    MaDate.prototype.toDate = function () {
-        return this._date;
-    };
-
-    MaDate.prototype.offset = function (offset) {
-        if (arguments.length === 0) {
-            return this._offset;
-        }
-
-        this._offset = offset;
-        return this;
-    };
-
-    MaDate.prototype.toUtc = function () {
-        if (this.isEmpty() || this._offset === 0) {
-            return this;
-        }
-
-        this.subtract(this._offset, 'minute');
-        this._offset = 0;
-
-        return this;
-    };
-
-    MaDate.prototype.isEmpty = function () {
-        return !this._date;
-    };
-
-    MaDate.prototype.isUtc = function () {
-        return !this.isEmpty() && this._offset === 0;
-    };
-
-    MaDate.prototype.isEqual = function (date) {
-        return this.difference(date) === 0;
-    };
-
-    MaDate.prototype.isLess = function (date) {
-        return this.difference(date) < 0;
-    };
-
-    MaDate.prototype.isLessOrEqual = function (date) {
-        return this.difference(date) <= 0;
-    };
-
-    MaDate.prototype.isGreater = function (date) {
-        return this.difference(date) > 0;
-    };
-
-    MaDate.prototype.isGreaterOrEqual = function (date) {
-        return this.difference(date) >= 0;
-    };
-
-    MaDate.prototype.isBetween = function (startDate, endDate, isInclusive) {
-        var _startDate = new MaDate(startDate),
-            _endDate = new MaDate(endDate);
-
-        if (this.isEmpty() || _startDate.isEmpty() || _endDate.isEmpty()) {
-            return false;
-        }
-
-        if (isInclusive) {
-            return this.isGreaterOrEqual(_startDate) && this.isLessOrEqual(_endDate);
-        }
-
-        return this.isGreater(_startDate) && this.isLess(_endDate);
-    };
-
-    MaDate.prototype.difference = function (date) {
-        return this.valueOf() - new MaDate(date).valueOf();
-    };
-
-    MaDate.prototype.valueOf = function () {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        var time = this._date.valueOf();
-
-        // Add offset which is in minutes, and thus should be converted to milliseconds.
-        if (this._offset !== 0) {
-            time -= this._offset * 60000;
-        }
-
-        return time;
-    };
-
-    MaDate.prototype.format = function (_format) {
-        if (this.isEmpty()) {
-            return null;
-        }
-
-        return format(this._date, _format, this._offset);
-    };
-
-    MaDate.prototype.add = function (number, unit) {
-        if (this.isEmpty() || !number) {
-            return this;
-        }
-
-        // Don't change original date.
-        var date = new Date(this._date);
-
-        switch (unit) {
-            case 'year':
-                date.setFullYear(date.getFullYear() + number);
-                break;
-            case 'quarter':
-                date.setMonth(date.getMonth() + 3 * number);
-                break;
-            case 'month':
-                date.setMonth(date.getMonth() + number);
-                break;
-            case 'week':
-                date.setDate(date.getDate() + 7 * number);
-                break;
-            case 'day':
-                date.setDate(date.getDate() + number);
-                break;
-            case 'hour':
-                date.setTime(date.getTime() + number * 3600000);
-                break;
-            case 'minute':
-                date.setTime(date.getTime() + number * 60000);
-                break;
-            case 'second':
-                date.setTime(date.getTime() + number * 1000);
-                break;
-            case 'millisecond':
-                date.setTime(date.getTime() + number);
-                break;
-        }
-
-        this._date = date;
-
-        return this;
-    };
-
-    MaDate.prototype.subtract = function (number, unit) {
-        return this.add(number * -1, unit);
-    };
-
-    MaDate.prototype.millisecond = function (millisecond) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getMilliseconds();
-        } else {
-            this._date.setMilliseconds(millisecond);
-            return this;
-        }
-    };
-
-    MaDate.prototype.second = function (second) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getSeconds();
-        } else {
-            this._date.setSeconds(second);
-            return this;
-        }
-    };
-
-    MaDate.prototype.minute = function (minute) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getMinutes();
-        } else {
-            this._date.setMinutes(minute);
-            return this;
-        }
-    };
-
-    MaDate.prototype.hour = function (hour) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getHours();
-        } else {
-            this._date.setHours(hour);
-            return this;
-        }
-    };
-
-    MaDate.prototype.date = function (date) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getDate();
-        } else {
-            this._date.setDate(date);
-            return this;
-        }
-    };
-
-    MaDate.prototype.month = function (month) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getMonth();
-        } else {
-            this._date.setMonth(month);
-            return this;
-        }
-    };
-
-    MaDate.prototype.year = function (year) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getFullYear();
-        } else {
-            this._date.setFullYear(year);
-            return this;
-        }
-    };
-
-    MaDate.prototype.startOf = function (unit) {
-        switch (unit) {
-            case 'year':
-                this.month(0);
-            /* falls through */
-            case 'month':
-                this.date(1);
-            /* falls through */
-            case 'day':
-                this.hour(0);
-            /* falls through */
-            case 'hour':
-                this.minute(0);
-            /* falls through */
-            case 'minute':
-                this.second(0);
-            /* falls through */
-            case 'second':
-                this.millisecond(0);
-        }
-
-        return this;
-    };
-
-    MaDate.prototype.endOf = function (unit) {
-        if (!unit) {
-            return this;
-        }
-
-        return this.startOf(unit).add(1, unit).subtract(1, 'millisecond');
-    };
-
-    MaDate.parse = parse;
-    MaDate.parseTimeZone = parseTimeZone;
-    MaDate.offsetToTimeZone = offsetToTimeZone;
-    MaDate.isDate = isDate;
-    MaDate.isMaDate = isMaDate;
-
-    return MaDate;
-}]);})();
-(function(){angular.module('marcuraUI.services').factory('MaHelper', ['MaDate', '$rootScope', function (MaDate, $rootScope) {
-    return {
-        keyCode: {
-            backspace: 8,
-            comma: 188,
-            delete: 46,
-            down: 40,
-            end: 35,
-            enter: 13,
-            escape: 27,
-            home: 36,
-            left: 37,
-            pageDown: 34,
-            pageUp: 33,
-            period: 190,
-            right: 39,
-            shift: 16,
-            space: 32,
-            tab: 9,
-            up: 38,
-            dash: 109,
-            dash2: 189,
-            numLock: {
-                period: 110
-            }
-        },
-
-        html: {
-            nbsp: '&nbsp;'
-        },
-
-        isEmail: function (value) {
-            var pattern = /^([\+\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
-            return pattern.test(value);
-        },
-
-        isNullOrWhiteSpace: function (value) {
-            if (value === null || value === undefined) {
-                return true;
-            }
-
-            if (angular.isArray(value)) {
-                return false;
-            }
-
-            // Convert value to string in case if it is not.
-            return value.toString().replace(/\s/g, '').length < 1;
-        },
-
-        isNullOrUndefined: function (value) {
-            return value === null || angular.isUndefined(value);
-        },
-
-        formatString: function (value) {
-            // Source: http://ajaxcontroltoolkit.codeplex.com/SourceControl/latest#Client/MicrosoftAjax/Extensions/String.js
-            var formattedString = '';
-
-            for (var i = 0; ;) {
-                // Search for curly bracers.
-                var open = value.indexOf('{', i);
-                var close = value.indexOf('}', i);
-
-                // Curly bracers are not found - copy rest of string and exit loop.
-                if (open < 0 && close < 0) {
-                    formattedString += value.slice(i);
-                    break;
-                }
-
-                if (close > 0 && (close < open || open < 0)) {
-                    // Closing brace before opening is error.
-                    if (value.charAt(close + 1) !== '}') {
-                        throw new Error('The format string contains an unmatched opening or closing brace.');
-                    }
-
-                    formattedString += value.slice(i, close + 1);
-                    i = close + 2;
-                    continue;
-                }
-
-                // Copy string before brace.
-                formattedString += value.slice(i, open);
-                i = open + 1;
-
-                // Check for double braces (which display as one and are not arguments).
-                if (value.charAt(i) === '{') {
-                    formattedString += '{';
-                    i++;
-                    continue;
-                }
-
-                // At this point we have valid opening brace, which should be matched by closing brace.
-                if (close < 0) {
-                    throw new Error('The format string contains an unmatched opening or closing brace.');
-                }
-
-                // This test is just done to break a potential infinite loop for invalid format strings.
-                // The code here is minimal because this is an error condition in debug mode anyway.
-                if (close < 0) {
-                    break;
-                }
-
-                // Find closing brace.
-                // Get string between braces, and split it around ':' (if any).
-                var brace = value.substring(i, close);
-                var colonIndex = brace.indexOf(':');
-                var argNumber = parseInt((colonIndex < 0) ? brace : brace.substring(0, colonIndex), 10) + 1;
-
-                if (isNaN(argNumber)) {
-                    throw new Error('The format string is invalid.');
-                }
-
-                var arg = arguments[argNumber];
-
-                if (typeof (arg) === 'undefined' || arg === null) {
-                    arg = '';
-                }
-
-                formattedString += arg.toString();
-                i = close + 1;
-            }
-
-            return formattedString;
-        },
-
-        getTextHeight: function (text, font, width, lineHeight) {
-            if (!font) {
-                return 0;
-            }
-
-            // Prepare textarea.
-            var textArea = document.createElement('TEXTAREA');
-            textArea.setAttribute('rows', 1);
-            textArea.style.font = font;
-            textArea.style.width = width || '0px';
-            textArea.style.border = '0';
-            textArea.style.overflow = 'hidden';
-            textArea.style.padding = '0';
-            textArea.style.outline = '0';
-            textArea.style.resize = 'none';
-            textArea.style.lineHeight = lineHeight || 'normal';
-            textArea.value = text;
-
-            // To measure sizes we need to add textarea to DOM.
-            angular.element(document.querySelector('body')).append(textArea);
-
-            // Measure height.
-            textArea.style.height = 'auto';
-            textArea.style.height = textArea.scrollHeight + 'px';
-
-            var height = parseInt(textArea.style.height);
-
-            // Remove textarea.
-            angular.element(textArea).remove();
-
-            return height;
-        },
-
-        isGreater: function (value, valueToCompare) {
-            var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare),
-                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
-
-            if (isNumber) {
-                return parseFloat(value) > parseFloat(valueToCompare);
-            } else if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.isGreater(date2);
-            }
-
-            return value > valueToCompare;
-        },
-
-        isGreaterOrEqual: function (value, valueToCompare) {
-            var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare),
-                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
-
-            if (isNumber) {
-                return parseFloat(value) >= parseFloat(valueToCompare);
-            } else if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.isGreaterOrEqual(date2);
-            }
-
-            return value >= valueToCompare;
-        },
-
-        isLengthGreaterOrEqual: function (value, length) {
-            var valueLength = (value || '').toString().length;
-            return valueLength >= length;
-        },
-
-        isLess: function (value, valueToCompare) {
-            var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare),
-                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
-
-            if (isNumber) {
-                return parseFloat(value) < parseFloat(valueToCompare);
-            } else if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.isLess(date2);
-            }
-
-            return value < valueToCompare;
-        },
-
-        isLessOrEqual: function (value, valueToCompare) {
-            var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare),
-                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
-
-            if (isNumber) {
-                return parseFloat(value) <= parseFloat(valueToCompare);
-            } else if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.isLessOrEqual(date2);
-            }
-
-            return value <= valueToCompare;
-        },
-
-        isLengthLessOrEqual: function (value, length) {
-            var valueLength = (value || '').toString().length;
-            return valueLength <= length;
-        },
-
-        isNumber: function (value) {
-            if (typeof value === 'number') {
-                return true;
-            }
-
-            if (this.isNullOrWhiteSpace(value)) {
-                return false;
-            }
-
-            return value.match(/^-?\d+\.?\d*$/) !== null;
-        },
-
-        isJson: function (value) {
-            try {
-                JSON.parse(value);
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-
-        safeApply: function (method) {
-            var phase = $rootScope.$$phase;
-
-            if (phase !== '$apply' && phase !== '$digest') {
-                $rootScope.$apply(method);
-                return;
-            }
-
-            if (method && typeof method === 'function') {
-                method();
-            }
-        }
-    };
-}]);})();
-(function(){/**
-* A set of utility methods that can be use to retrieve position of DOM elements.
-* It is meant to be used where we need to absolute-position DOM elements in
-* relation to other, existing elements (this is the case for tooltips, popovers,
-* typeahead suggestions etc.).
-*/
-angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$window', function ($document, $window) {
-    function getStyle(el, cssprop) {
-        // IE
-        if (el.currentStyle) {
-            return el.currentStyle[cssprop];
-        } else if ($window.getComputedStyle) {
-            return $window.getComputedStyle(el)[cssprop];
-        }
-
-        // finally try and get inline style
-        return el.style[cssprop];
-    }
-
-    /**
-     * Checks if a given element is statically positioned
-     * @param element - raw DOM element
-     */
-    function isStaticPositioned(element) {
-        return (getStyle(element, 'position') || 'static') === 'static';
-    }
-
-    /**
-     * returns the closest, non-statically positioned parentOffset of a given element
-     * @param element
-     */
-    var parentOffsetEl = function (element) {
-        var docDomEl = $document[0];
-        var offsetParent = element.offsetParent || docDomEl;
-        while (offsetParent && offsetParent !== docDomEl && isStaticPositioned(offsetParent)) {
-            offsetParent = offsetParent.offsetParent;
-        }
-        return offsetParent || docDomEl;
-    };
-
-    return {
-        /**
-         * Provides read-only equivalent of jQuery's position function:
-         * http://api.jquery.com/position/
-         */
-        position: function (element) {
-            var elBCR = this.offset(element);
-            var offsetParentBCR = { top: 0, left: 0 };
-            var offsetParentEl = parentOffsetEl(element[0]);
-            if (offsetParentEl != $document[0]) {
-                offsetParentBCR = this.offset(angular.element(offsetParentEl));
-                offsetParentBCR.top += offsetParentEl.clientTop - offsetParentEl.scrollTop;
-                offsetParentBCR.left += offsetParentEl.clientLeft - offsetParentEl.scrollLeft;
-            }
-
-            var boundingClientRect = element[0].getBoundingClientRect();
-            return {
-                width: boundingClientRect.width || element.prop('offsetWidth'),
-                height: boundingClientRect.height || element.prop('offsetHeight'),
-                top: elBCR.top - offsetParentBCR.top,
-                left: elBCR.left - offsetParentBCR.left
-            };
-        },
-
-        /**
-         * Provides read-only equivalent of jQuery's offset function:
-         * http://api.jquery.com/offset/
-         */
-        offset: function (element) {
-            var boundingClientRect = element[0].getBoundingClientRect();
-            return {
-                width: boundingClientRect.width || element.prop('offsetWidth'),
-                height: boundingClientRect.height || element.prop('offsetHeight'),
-                top: boundingClientRect.top + ($window.pageYOffset || $document[0].documentElement.scrollTop),
-                left: boundingClientRect.left + ($window.pageXOffset || $document[0].documentElement.scrollLeft)
-            };
-        },
-
-        /**
-         * Provides coordinates for the targetEl in relation to hostEl
-         */
-        positionElements: function (hostEl, targetEl, positionStr, appendToBody) {
-
-            var positionStrParts = positionStr.split('-');
-            var pos0 = positionStrParts[0], pos1 = positionStrParts[1] || 'center';
-
-            var hostElPos,
-                targetElWidth,
-                targetElHeight,
-                targetElPos;
-
-            hostElPos = appendToBody ? this.offset(hostEl) : this.position(hostEl);
-
-            targetElWidth = targetEl.prop('offsetWidth');
-            targetElHeight = targetEl.prop('offsetHeight');
-
-            var shiftWidth = {
-                center: function () {
-                    return hostElPos.left + hostElPos.width / 2 - targetElWidth / 2;
-                },
-                left: function () {
-                    return hostElPos.left;
-                },
-                right: function () {
-                    return hostElPos.left + hostElPos.width;
-                }
-            };
-
-            var shiftHeight = {
-                center: function () {
-                    return hostElPos.top + hostElPos.height / 2 - targetElHeight / 2;
-                },
-                top: function () {
-                    return hostElPos.top;
-                },
-                bottom: function () {
-                    return hostElPos.top + hostElPos.height;
-                }
-            };
-
-            switch (pos0) {
-                case 'right':
-                    targetElPos = {
-                        top: shiftHeight[pos1](),
-                        left: shiftWidth[pos0]()
-                    };
-                    break;
-                case 'left':
-                    targetElPos = {
-                        top: shiftHeight[pos1](),
-                        left: hostElPos.left - targetElWidth
-                    };
-                    break;
-                case 'bottom':
-                    targetElPos = {
-                        top: shiftHeight[pos0](),
-                        left: shiftWidth[pos1]()
-                    };
-                    break;
-                default:
-                    targetElPos = {
-                        top: hostElPos.top - targetElHeight,
-                        left: shiftWidth[pos1]()
-                    };
-                    break;
-            }
-
-            return targetElPos;
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.services').factory('MaValidators', ['MaHelper', 'MaDate', function (MaHelper, MaDate) {
-    var formatValueToCompare = function (value) {
-        if (!value) {
-            return null;
-        }
-
-        var formattedValue = value.toString();
-
-        if (MaDate.isMaDate(value)) {
-            formattedValue = value.format('dd MMM yyyy');
-        }
-
-        return formattedValue;
-    };
-
-    return {
-        isNotEmpty: function () {
-            return {
-                name: 'IsNotEmpty',
-                message: 'This field cannot be empty.',
-                validate: function (value) {
-                    if (angular.isArray(value)) {
-                        return value.length > 0;
-                    }
-
-                    return !MaHelper.isNullOrWhiteSpace(value);
-                }
-            };
-        },
-
-        isGreater: function (valueToCompare, allowEmpty) {
-            var message = null;
-
-            if (valueToCompare) {
-                message = 'This field cannot be less than or equal to ' + formatValueToCompare(valueToCompare) + '.';
-            }
-
-            return {
-                name: 'IsGreater',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isGreater(value, valueToCompare);
-                }
-            };
-        },
-
-        isGreaterOrEqual: function (valueToCompare, allowEmpty) {
-            var message = null;
-
-            if (valueToCompare) {
-                message = 'This field cannot be less than ' + formatValueToCompare(valueToCompare) + '.';
-            }
-
-            return {
-                name: 'IsGreaterOrEqual',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isGreaterOrEqual(value, valueToCompare);
-                }
-            };
-        },
-
-        isLengthGreaterOrEqual: function (length, allowEmpty) {
-            var message = null;
-
-            if (length) {
-                message = 'Length cannot be less than ' + formatValueToCompare(length) + '.';
-            }
-
-            return {
-                name: 'IsLengthGreaterOrEqual',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isLengthGreaterOrEqual(value, length);
-                }
-            };
-        },
-
-        isLess: function (valueToCompare, allowEmpty) {
-            var message = null;
-
-            if (valueToCompare) {
-                message = 'This field cannot be greater than or equal to ' + formatValueToCompare(valueToCompare) + '.';
-            }
-
-            return {
-                name: 'IsLess',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isLess(value, valueToCompare);
-                }
-            };
-        },
-
-        isLessOrEqual: function (valueToCompare, allowEmpty) {
-            var message = null;
-
-            if (valueToCompare) {
-                message = 'This field cannot be greater than ' + formatValueToCompare(valueToCompare) + '.';
-            }
-
-            return {
-                name: 'IsLessOrEqual',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isLessOrEqual(value, valueToCompare);
-                }
-            };
-        },
-
-        isLengthLessOrEqual: function (length, allowEmpty) {
-            var message = null;
-
-            if (length) {
-                message = 'Length cannot be greater than ' + formatValueToCompare(length) + '.';
-            }
-
-            return {
-                name: 'IsLengthLessOrEqual',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isLengthLessOrEqual(value, length);
-                }
-            };
-        },
-
-        isNumber: function (allowEmpty) {
-            return {
-                name: 'IsNumber',
-                message: 'This field should be a number.',
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isNumber(value);
-                }
-            };
-        },
-
-        isEmail: function (allowEmpty) {
-            return {
-                name: 'IsEmail',
-                message: 'This field should be an email.',
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isEmail(value);
-                }
-            };
-        }
-    };
-}]);})();

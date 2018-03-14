@@ -11,7 +11,7 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper'
             var html = '\
             <div class="ma-tabs">\
                 <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item" ng-repeat="item in items"\
+                    <li class="ma-tabs-item{{item.modifier ? (\' ma-tabs-item-\' + item.modifier) : \'\'}}" ng-repeat="item in items"\
                         ng-focus="onFocus(item)"\
                         ng-blur="onBlur(item)"\
                         ng-keypress="onKeypress($event, item)"\
