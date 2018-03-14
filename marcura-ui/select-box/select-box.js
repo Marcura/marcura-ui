@@ -373,8 +373,8 @@ angular.module('marcuraUI.components')
                                 if (scope.getItemValue(item) !== null) {
                                     // Item is an object.
                                     scope.selectedItem = scope.getItemValue(item);
-                                } else if (typeof item === 'string') {
-                                    // Item is a string.
+                                } else if (!isObjectArray && (typeof item === 'string' || typeof item === 'number')) {
+                                    // Item is a primitive type.
                                     scope.selectedItem = item;
                                 }
                             }

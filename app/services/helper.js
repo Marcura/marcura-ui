@@ -70,6 +70,21 @@ function helper($window) {
 
         getPorts: function () {
             return $window.marcuraApp.ports;
+        },
+
+        getYears: function (startYear) {
+            if (!startYear) {
+                return [];
+            }
+
+            var currentYear = new Date().getFullYear(),
+                years = [];
+
+            while (startYear <= currentYear) {
+                years.push(startYear++);
+            }
+
+            return years;
         }
     };
 }

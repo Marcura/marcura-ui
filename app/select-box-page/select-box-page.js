@@ -13,6 +13,8 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
         return port.name + ' (' + port.country.name + ')';
     };
 
+    $scope.years = helper.getYears(1950);
+    $scope.year = 1958;
     $scope.port1 = $scope.ports1[1];
     $scope.port2 = $scope.ports2[1];
     $scope.port3 = $scope.ports2[1];
@@ -184,15 +186,4 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
     // $timeout(function() {
     //     $scope.isLoading = false;
     // }, 12000);
-
-    $scope.years = (function (startYear) {
-        var currentYear = new Date().getFullYear(), years = [];
-        startYear = startYear || 1980;
-
-        while (startYear <= currentYear) {
-            years.push(startYear++);
-        }
-
-        return years;
-    })(1950);
 }
