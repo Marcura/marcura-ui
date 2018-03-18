@@ -158,217 +158,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            value: '=',
-            isDisabled: '=',
-            change: '&',
-            size: '@',
-            rtl: '=',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-check-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-check-box-is-checked\': value === true,\
-                    \'ma-check-box-is-disabled\': isDisabled,\
-                    \'ma-check-box-has-text\': hasText,\
-                    \'ma-check-box-rtl\': rtl,\
-                    \'ma-check-box-is-focused\': isFocused,\
-                    \'ma-check-box-is-invalid\': !isValid,\
-                    \'ma-check-box-is-touched\': isTouched\
-                }">\
-                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
-                <div class="ma-check-box-inner"></div>\
-                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            var validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
-
-            var setTabindex = function () {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
-
-            var setText = function () {
-                scope.hasText = scope.text ? true : false;
-            };
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-check-box-' + scope._size;
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var getControllerScope = function () {
-                var valuePropertyParts = null,
-                    controllerScope = null,
-                    initialScope = scope.$parent,
-                    property = attributes.value;
-
-                // In case of a nested property binding like 'company.port.id'.
-                if (property.indexOf('.') !== -1) {
-                    valuePropertyParts = property.split('.');
-                    property = valuePropertyParts[0];
-                }
-
-                while (initialScope && !controllerScope) {
-                    if (initialScope.hasOwnProperty(property)) {
-                        controllerScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                // Use parent scope by default if search is unsuccessful.
-                return controllerScope || scope.$parent;
-            };
-
-            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
-            // as the value will be stored by Angular on ng-if scope.
-            var controllerScope = getControllerScope();
-
-            var validate = function () {
-                scope.isValid = true;
-                scope.isTouched = true;
-
-                // Remove 'false' value for 'IsNotEmpty' to work correctly.
-                var value = scope.value === false ? null : scope.value;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        var validator = validators[i];
-
-                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.onChange = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                // Handle nested properties or function calls with $parse service.
-                // This is related to a case when the component is located inside ng-if,
-                // but it works for other cases as well.
-                var valueGetter = $parse(attributes.value),
-                    valueSetter = valueGetter.assign,
-                    value = !valueGetter(controllerScope);
-
-                scope.value = value;
-                valueSetter(controllerScope, value);
-                validate();
-
-                $timeout(function () {
-                    scope.change({
-                        maValue: scope.value
-                    });
-                });
-            };
-
-            scope.onFocus = function () {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                scope.isFocused = false;
-                validate();
-            };
-
-            scope.onKeypress = function (event) {
-                if (event.keyCode === MaHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (!scope.isDisabled) {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            scope.$watch('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            scope.$watch('text', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setText();
-            });
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate();
-                };
-            }
-
-            setTabindex();
-            setText();
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maCostsGrid', [function () {
     return {
         restrict: 'E',
@@ -2030,6 +1819,1751 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$timeout', '$sce', 'MaValidators', function (MaHelper, $timeout, $sce, MaValidators) {
+    var radioBoxes = {};
+
+    return {
+        restrict: 'E',
+        scope: {
+            item: '=',
+            itemTemplate: '=',
+            itemTextField: '@',
+            itemValueField: '@',
+            value: '=',
+            isDisabled: '=',
+            hideText: '=',
+            change: '&',
+            size: '@',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+            id: '@',
+            modifier: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-radio-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
+                ng-click="onChange()"\
+                ng-class="{\
+                    \'ma-radio-box-is-checked\': isChecked(),\
+                    \'ma-radio-box-is-disabled\': isDisabled,\
+                    \'ma-radio-box-has-text\': hasText(),\
+                    \'ma-radio-box-is-focused\': isFocused,\
+                    \'ma-radio-box-is-invalid\': !isValid,\
+                    \'ma-radio-box-is-touched\': isTouched\
+                }">\
+                <span class="ma-radio-box-text" ng-bind-html="getItemText()"></span>\
+                <div class="ma-radio-box-inner"></div>\
+                <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            var valuePropertyParts = null,
+                isStringArray = !scope.itemTextField && !scope.itemValueField,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
+            var setModifiers = function (oldModifiers) {
+                // Remove previous modifiers first.
+                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
+                    oldModifiers = oldModifiers.split(' ');
+
+                    for (var i = 0; i < oldModifiers.length; i++) {
+                        element.removeClass('ma-radio-box-' + oldModifiers[i]);
+                    }
+                }
+
+                var modifiers = '';
+
+                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
+                    modifiers = scope.modifier.split(' ');
+                }
+
+                for (var j = 0; j < modifiers.length; j++) {
+                    element.addClass('ma-radio-box-' + modifiers[j]);
+                }
+            };
+
+            var setTabindex = function () {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
+            var getControllerScope = function () {
+                var controllerScope = null,
+                    initialScope = scope.$parent,
+                    property = attributes.value;
+
+                // In case of a nested property binding like 'company.port.id'.
+                if (property.indexOf('.') !== -1) {
+                    valuePropertyParts = property.split('.');
+                    property = valuePropertyParts[0];
+                }
+
+                while (initialScope && !controllerScope) {
+                    if (initialScope.hasOwnProperty(property)) {
+                        controllerScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                return controllerScope;
+            };
+
+            var controllerScope = getControllerScope();
+
+            scope._size = scope.size ? scope.size : 'xs';
+            scope.cssClass = ' ma-radio-box-' + scope._size;
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            if (scope.id) {
+                if (!radioBoxes[scope.id]) {
+                    radioBoxes[scope.id] = [];
+                }
+
+                radioBoxes[scope.id].push(scope);
+            }
+
+            var validate = function (value) {
+                if (radioBoxes[scope.id]) {
+                    // Validate a group of components.
+                    for (var i = 0; i < radioBoxes[scope.id].length; i++) {
+                        var radioBox = radioBoxes[scope.id][i];
+                        radioBox.isTouched = true;
+                        radioBox.validateThis(radioBox.value);
+                    }
+                } else {
+                    // Validate only the current component.
+                    scope.isTouched = true;
+                    scope.validateThis(value);
+                }
+            };
+
+            scope.validateThis = function (value) {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            scope.getItemText = function () {
+                if (scope.hideText) {
+                    return MaHelper.html.nbsp;
+                }
+
+                var text;
+
+                if (scope.itemTemplate) {
+                    text = scope.itemTemplate(scope.item);
+                } else if (isStringArray) {
+                    text = scope.item;
+                } else if (scope.itemTextField) {
+                    text = scope.item[scope.itemTextField];
+                }
+
+                if (!angular.isString(text) || !text) {
+                    text = MaHelper.html.nbsp;
+                }
+
+                return $sce.trustAsHtml(text);
+            };
+
+            scope.hasText = function () {
+                return scope.getItemText() !== MaHelper.html.nbsp;
+            };
+
+            scope.isChecked = function () {
+                if (isStringArray) {
+                    return scope.item === scope.value;
+                } else if (scope.itemValueField) {
+                    return scope.item && scope.value &&
+                        scope.item[scope.itemValueField] === scope.value[scope.itemValueField];
+                }
+
+                return false;
+            };
+
+            scope.onChange = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                var valueProperty,
+                    oldValue = scope.value;
+                scope.value = scope.item;
+
+                if (controllerScope && valuePropertyParts) {
+                    // When the component is inside ng-repeat normal binding like
+                    // value="port" won't work.
+                    // This is to workaround the problem.
+                    valueProperty = controllerScope;
+
+                    // Handle nested property binding.
+                    for (var i = 0; i < valuePropertyParts.length; i++) {
+                        valueProperty = valueProperty[valuePropertyParts[i]];
+                    }
+
+                    valueProperty = scope.item;
+                } else {
+                    valueProperty = controllerScope[attributes.value];
+                    controllerScope[attributes.value] = scope.item;
+                }
+
+                // Check that value has changed.
+                var hasChanged = true;
+
+                if (isStringArray) {
+                    hasChanged = oldValue !== scope.item;
+                } else if (scope.itemValueField) {
+                    if (!oldValue && !MaHelper.isNullOrWhiteSpace(scope.item[scope.itemValueField])) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = oldValue[scope.itemValueField] !== scope.item[scope.itemValueField];
+                    }
+                } else {
+                    // Compare objects if itemValueField is not provided.
+                    if (!oldValue && scope.item) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(scope.item);
+                    }
+                }
+
+                if (hasChanged) {
+                    $timeout(function () {
+                        validate(scope.value);
+
+                        scope.change({
+                            maValue: scope.item,
+                            maOldValue: oldValue
+                        });
+                    });
+                }
+            };
+
+            scope.onFocus = function () {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                scope.isFocused = false;
+
+                validate(scope.value);
+            };
+
+            scope.onKeypress = function (event) {
+                if (event.keyCode === MaHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (!scope.isDisabled && !scope.isChecked()) {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            scope.$watch('isDisabled', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            scope.$watch('modifier', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setModifiers(oldValue);
+            });
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate(scope.value);
+                };
+            }
+
+            $timeout(function () {
+                // Now id is used only for grouping radioBoxes, so remove it from the element.
+                if (scope.id) {
+                    element.removeAttr('id');
+                }
+
+                setModifiers();
+            });
+
+            setTabindex();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            itemTemplate: '=',
+            itemTextField: '@',
+            itemValueField: '@',
+            value: '=',
+            change: '&',
+            isDisabled: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+            canUnselect: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-radio-button" ng-class="{\
+                        \'ma-radio-button-is-disabled\': isDisabled,\
+                        \'ma-radio-button-is-invalid\': !isValid,\
+                        \'ma-radio-button-is-touched\': isTouched,\
+                        \'ma-radio-button-can-unselect\': canUnselect\
+                    }">\
+                    <div class="ma-radio-button-item" ng-class="{\
+                            \'ma-radio-button-item-is-selected\': isItemSelected(item)\
+                        }" ng-style="{ width: (100 / items.length) + \'%\' }"\
+                        ng-repeat="item in items">\
+                        <ma-button\
+                            class="ma-button-radio"\
+                            text="{{getItemText(item)}}"\
+                            modifier="simple"\
+                            size="xs"\
+                            is-disabled="isDisabled"\
+                            click="onChange(item)">\
+                        </ma-button>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            var isObjectArray = scope.itemTextField || scope.itemValueField,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var validate = function (value) {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            scope.getItemText = function (item) {
+                if (scope.itemTemplate) {
+                    return scope.itemTemplate(item);
+                } else if (!isObjectArray) {
+                    return item;
+                } else if (scope.itemTextField) {
+                    return item[scope.itemTextField];
+                }
+            };
+
+            scope.isItemSelected = function (item) {
+                if (!isObjectArray) {
+                    return item === scope.value;
+                } else if (scope.itemValueField) {
+                    return item && scope.value &&
+                        item[scope.itemValueField] === scope.value[scope.itemValueField];
+                }
+
+                return false;
+            };
+
+            scope.onChange = function (item) {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                var oldValue = scope.value,
+                    hasChanged = true;
+                scope.value = item;
+
+                // Check that value has changed.
+                if (!isObjectArray) {
+                    hasChanged = oldValue !== item;
+                } else if (scope.itemValueField) {
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item[scope.itemValueField])) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
+                    }
+                } else {
+                    // Compare objects if itemValueField is not provided.
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item)) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
+                    }
+                }
+
+                // Remove selection if the same item is selected.
+                if (scope.canUnselect && !hasChanged) {
+                    scope.value = null;
+                }
+
+                if (hasChanged || (scope.canUnselect && !hasChanged)) {
+                    $timeout(function () {
+                        validate(scope.value);
+
+                        scope.change({
+                            maValue: scope.value,
+                            maOldValue: oldValue
+                        });
+                    });
+                }
+            };
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate(scope.value);
+                };
+            }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components')
+    .filter('maSelectBoxOrderBy', ['orderByFilter', function (orderByFilter) {
+        return function (items, orderByExpression) {
+            if (orderByExpression) {
+                return orderByFilter(items, orderByExpression);
+            }
+
+            return items;
+        };
+    }])
+    .directive('maSelectBox', ['$document', '$timeout', 'MaHelper', function ($document, $timeout, MaHelper) {
+        return {
+            restrict: 'E',
+            scope: {
+                id: '@',
+                items: '=',
+                value: '=',
+                isLoading: '=',
+                change: '&',
+                blur: '&',
+                focus: '&',
+                init: '&',
+                itemTemplate: '=',
+                itemTextField: '@',
+                itemValueField: '@',
+                isDisabled: '=',
+                isRequired: '=',
+                validators: '=',
+                canAddItem: '=',
+                addItemTooltip: '@',
+                showAddItemTooltip: '=',
+                instance: '=',
+                orderBy: '=',
+                ajax: '=',
+                canReset: '=',
+                placeholder: '@',
+                textPlaceholder: '@',
+                isMultiple: '=',
+                storeItemValueOnly: '='
+            },
+            replace: true,
+            template: function (element, attributes) {
+                var hasAjax = !MaHelper.isNullOrWhiteSpace(attributes.ajax),
+                    isMultiple = attributes.isMultiple === 'true';
+
+                var html = '\
+                    <div class="ma-select-box"\
+                        ng-class="{\
+                            \'ma-select-box-can-add-item\': canAddItem,\
+                            \'ma-select-box-is-text-focused\': isTextFocused,\
+                            \'ma-select-box-is-disabled\': isDisabled,\
+                            \'ma-select-box-is-invalid\': !isValid,\
+                            \'ma-select-box-is-touched\': isTouched,\
+                            \'ma-select-box-mode-add\': isAddMode,\
+                            \'ma-select-box-mode-select\': !isAddMode,\
+                            \'ma-select-box-can-reset\': canReset,\
+                            \'ma-select-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
+                            \'ma-select-box-is-loading\': isLoading,\
+                            \'ma-select-box-has-value\': hasValue()\
+                        }">\
+                        <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
+                            <div class="pace">\
+                                <div class="pace-activity"></div>\
+                            </div>\
+                        </div>';
+
+                if (hasAjax) {
+                    html += '<input class="ma-select-box-input" ma-select2="options"' + (isMultiple ? ' multiple' : '') + '\
+                        ng-show="!isAddMode"\
+                        ng-disabled="isDisabled"\
+                        ng-change="onChange()"\
+                        ng-model="selectedItem"/>';
+                } else {
+                    // Add an empty option <option></option> as first item for the placeholder to work.
+                    // It's strange, but that's how Select2 works.
+                    html += '\
+                        <select ma-select2="options"' + (isMultiple ? ' multiple' : '') + '\
+                            ng-show="!isAddMode"\
+                            ng-disabled="isDisabled"\
+                            ng-model="selectedItem"\
+                            ng-change="onChange()"\
+                            placeholder="{{placeholder}}">\
+                            <option></option>\
+                            <option ng-repeat="item in _items | maSelectBoxOrderBy:orderBy" value="{{getOptionValue(item)}}">\
+                                {{formatItem(item)}}\
+                            </option>\
+                        </select>';
+                }
+
+                html += '\
+                    <input class="ma-select-box-text" type="text" ng-show="isAddMode"\
+                        ng-model="text"\
+                        ng-disabled="isDisabled"\
+                        ng-focus="onFocus(\'text\')"\
+                        placeholder="{{textPlaceholder}}"/>\
+                    <ma-button class="ma-button-switch"\
+                        ng-show="canAddItem" size="xs" modifier="simple"\
+                        ma-tooltip="{{getAddItemTooltip()}}"\
+                        right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
+                        click="toggleMode()"\
+                        ng-focus="onFocus()"\
+                        is-disabled="isDisabled">\
+                    </ma-button>\
+                    <ma-button class="ma-button-reset"\
+                        ng-show="canReset" size="xs" modifier="simple"\
+                        right-icon="times-circle"\
+                        click="onReset()"\
+                        ng-focus="onFocus(\'reset\')"\
+                        is-disabled="!isResetEnabled()">\
+                    </ma-button>\
+                </div>';
+
+                return html;
+            },
+            controller: ['$scope', function (scope) {
+                // Gets a value from itemValueField if an item is object.
+                scope.getItemValue = function (item) {
+                    if (MaHelper.isNullOrWhiteSpace(item) || !scope.itemValueField) {
+                        return null;
+                    }
+
+                    // Item is already a value (an object might be passed as well).
+                    if (scope.storeItemValueOnly) {
+                        return (angular.isObject(item) ? item[scope.itemValueField] : item).toString();
+                    }
+
+                    // In case of a nested property binding like 'company.port.id'.
+                    var parts = scope.itemValueField.split('.'),
+                        value = item[parts[0]];
+
+                    for (var i = 1; i < parts.length; i++) {
+                        value = value[parts[i]];
+                    }
+
+                    if (MaHelper.isNullOrUndefined(value)) {
+                        return null;
+                    }
+
+                    return value.toString();
+                };
+
+                scope.formatItem = function (item) {
+                    if (scope.itemTemplate) {
+                        return scope.itemTemplate(item);
+                    }
+
+                    if (!item) {
+                        return '';
+                    }
+
+                    return scope.itemTextField ? item[scope.itemTextField] : item.toString();
+                };
+
+                // Setting Select2 options does not work from link function, so they are set here.
+                scope.options = {};
+                scope.runInitSelection = true;
+
+                // AJAX options.
+                if (scope.ajax) {
+                    scope.options.ajax = scope.ajax;
+                    scope.options.minimumInputLength = 3;
+                    scope.options.escapeMarkup = function (markup) {
+                        return markup;
+                    };
+                    scope.options.initSelection = function initSelection(element, callback) {
+                        // Run init function only when it is required to update Select2 value.
+                        if (scope.runInitSelection && scope.getItemValue(scope.value)) {
+                            var item = angular.copy(scope.value);
+                            item.text = scope.formatItem(item);
+                            item.id = scope.getItemValue(item);
+                            scope.previousSelectedItem = item;
+                            callback(item);
+                        } else {
+                            callback();
+                        }
+
+                        scope.runInitSelection = false;
+                    };
+
+                    if (scope.isMultiple) {
+                        scope.options.formatSelection = function (item) {
+                            return scope.formatItem(item);
+                        };
+                    }
+                }
+            }],
+            link: function (scope, element) {
+                var textElement = angular.element(element[0].querySelector('.ma-select-box-text')),
+                    previousAddedItem = null,
+                    switchButtonElement,
+                    resetButtonElement,
+                    selectElement,
+                    selectData,
+                    labelElement,
+                    isFocusLost = true,
+                    isFocusInside = false,
+                    isSelectHovered = false,
+                    showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
+                    validators = scope.validators ? angular.copy(scope.validators) : [],
+                    previousValue,
+                    isObjectArray = scope.itemTextField || scope.itemValueField;
+
+                // We need a copy of items. See 'scope.$watch('items', ...)' for an answer why.
+                scope._items = angular.isArray(scope.items) ? angular.copy(scope.items) : [];
+                scope.previousSelectedItem = scope.previousSelectedItem || null;
+                scope.isAddMode = false;
+                scope.isTextFocused = false;
+                scope.isValid = true;
+                scope.isTouched = false;
+                scope.hasAjax = angular.isObject(scope.ajax);
+
+                // A custom 'IsNotEmpty' validator, which also checks that
+                // a selected item is in the list.
+                var isNotEmptyAndInListValidator = {
+                    name: 'IsNotEmpty',
+                    validate: function (value) {
+                        if (scope.isMultiple && angular.isArray(value)) {
+                            return value.length > 0;
+                        }
+
+                        if (MaHelper.isNullOrWhiteSpace(value)) {
+                            return false;
+                        }
+
+                        // For array of numbers.
+                        if (!isObjectArray && !MaHelper.isNullOrWhiteSpace(value)) {
+                            return true;
+                        }
+
+                        // In select mode check that a selected item is in the list.
+                        // In AJAX mode there is no items array and we cannot check it.
+                        if (!scope.hasAjax && !scope.isAddMode && !isExistingItem(value)) {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                };
+
+                var setValidators = function () {
+                    var emptyValidatorIndex = null;
+
+                    for (var i = 0; i < validators.length; i++) {
+                        if (validators[i].name === 'IsNotEmpty') {
+                            emptyValidatorIndex = i;
+                            validators[i] = isNotEmptyAndInListValidator;
+                            break;
+                        }
+                    }
+
+                    if (emptyValidatorIndex === null && scope.isRequired) {
+                        validators.unshift(isNotEmptyAndInListValidator);
+                    } else if (emptyValidatorIndex !== null && !scope.isRequired) {
+                        validators.splice(emptyValidatorIndex, 1);
+                    }
+                };
+
+                var isExistingItem = function (item) {
+                    if (!angular.isArray(scope._items)) {
+                        return false;
+                    }
+
+                    var isItemObject = scope.getItemValue(item) !== null;
+
+                    for (var i = 0; i < scope._items.length; i++) {
+                        if (isItemObject) {
+                            // Search by value field.
+                            if (scope.getItemValue(scope._items[i]) === scope.getItemValue(item)) {
+                                return true;
+                            }
+                        } else {
+                            // Search by item itself as text.
+                            if (scope._items[i] === item) {
+                                return true;
+                            }
+                        }
+                    }
+
+                    return false;
+                };
+
+                var getItemByValue = function (itemValue) {
+                    if (MaHelper.isNullOrWhiteSpace(itemValue)) {
+                        return null;
+                    }
+
+                    // The list is an array of strings, so value is item itself.
+                    if (!isObjectArray) {
+                        return itemValue;
+                    }
+
+                    if (angular.isArray(scope._items)) {
+                        for (var i = 0; i < scope._items.length; i++) {
+                            if (scope.getItemValue(scope._items[i]) === itemValue.toString()) {
+                                return scope._items[i];
+                            }
+                        }
+                    }
+
+                    return null;
+                };
+
+                var getNewItem = function (itemText) {
+                    // The list is an array of strings, so item should be a simple string.
+                    if (!isObjectArray) {
+                        return itemText;
+                    }
+
+                    // The list is an array of objects, so item should be an object.
+                    if (itemText) {
+                        var item = {};
+                        item[scope.itemTextField] = itemText;
+                        return item;
+                    }
+
+                    return null;
+                };
+
+                var setInternalValue = function (item) {
+                    if (scope.isMultiple) {
+                        var items = [],
+                            i;
+
+                        // Set Select2 value.
+                        if (!scope.hasAjax) {
+                            if (item && item.length) {
+                                for (i = 0; i < item.length; i++) {
+                                    items.push(scope.getItemValue(item[i]));
+                                }
+                            }
+                        } else {
+                            if (item && item.length) {
+                                for (i = 0; i < item.length; i++) {
+                                    items.push(item[i]);
+                                }
+                            }
+
+                            items = JSON.stringify(items);
+                        }
+
+                        scope.selectedItem = items;
+                        validate(item);
+                    } else {
+                        if (scope.canAddItem && item) {
+                            // Switch mode depending on whether provided item exists in the list.
+                            // This allows the component to be displayed in correct mode, let's say, in add mode,
+                            // when scope.value is initially a custom value not presented in the list.
+                            scope.isAddMode = !isExistingItem(item);
+                        }
+
+                        validate(item);
+
+                        if (scope.isAddMode) {
+                            if (!item) {
+                                scope.text = null;
+                            } else {
+                                if (scope.itemTextField && item[scope.itemTextField]) {
+                                    // Item is an object.
+                                    scope.text = item[scope.itemTextField].toString();
+                                } else {
+                                    // Item is a string.
+                                    scope.text = item;
+                                }
+                            }
+
+                            previousAddedItem = item;
+                            scope.toggleMode('add');
+                        } else {
+                            if (MaHelper.isNullOrWhiteSpace(item)) {
+                                scope.selectedItem = null;
+                            } else if (!scope.hasAjax) {
+                                // Set Select2 value. In AJAX mode Select2 sets values by itself.
+                                if (scope.getItemValue(item) !== null) {
+                                    // Item is an object.
+                                    scope.selectedItem = scope.getItemValue(item);
+                                } else if (!isObjectArray && (typeof item === 'string' || typeof item === 'number')) {
+                                    // Item is a primitive type.
+                                    scope.selectedItem = item;
+                                }
+                            }
+
+                            scope.previousSelectedItem = item;
+                            scope.toggleMode('select');
+                        }
+                    }
+                };
+
+                var onFocusout = function (event, elementName) {
+                    var elementTo = angular.element(event.relatedTarget);
+                    scope.isTextFocused = false;
+
+                    // Trigger change event for text element.
+                    if (elementName === 'text') {
+                        isFocusInside = false;
+
+                        // Need to apply changes because onFocusout is triggered using jQuery
+                        // (AngularJS does not have ng-focusout event directive).
+                        scope.$apply(function () {
+                            scope.isTouched = true;
+                            var value;
+
+                            if (scope.itemTextField) {
+                                if (scope.value && scope.value[scope.itemTextField] === scope.text) {
+                                    return;
+                                }
+
+                                value = getNewItem(scope.text);
+                            } else {
+                                if (scope.value === scope.text) {
+                                    return;
+                                }
+
+                                value = scope.text;
+                            }
+
+                            validate(value);
+
+                            if (!scope.isValid) {
+                                return;
+                            }
+
+                            previousValue = scope.value || null;
+                            scope.value = value;
+                            previousAddedItem = scope.value;
+
+                            if (scope.isValid) {
+                                // Postpone change event for scope value to be updated before.
+                                $timeout(function () {
+                                    scope.change({
+                                        maValue: scope.value,
+                                        maOldValue: previousValue
+                                    });
+                                });
+                            }
+                        });
+                    } else if (elementName === 'select') {
+                        scope.$apply(function () {
+                            scope.isTouched = true;
+                        });
+                    }
+
+                    // Trigger blur event when focus goes to an element outside the component.
+                    isFocusLost = !isFocusInside &&
+                        elementTo[0] !== switchButtonElement[0] &&
+                        elementTo[0] !== resetButtonElement[0] &&
+                        elementTo[0] !== textElement[0] &&
+                        elementTo[0] !== selectData.search[0];
+
+                    if (scope.isMultiple) {
+                        if (isSelectHovered) {
+                            isFocusLost = false;
+                        }
+                    } else {
+                        // There is no focussser in multiple mode.
+                        if (!isFocusInside && elementTo[0] === selectData.focusser[0]) {
+                            isFocusLost = false;
+                        }
+                    }
+
+                    if (isFocusLost) {
+                        element.removeClass('ma-select-box-is-select-focused');
+
+                        scope.blur({
+                            maValue: scope.storeItemValueOnly ? getItemByValue(scope.value) : scope.value
+                        });
+                    }
+
+                    isFocusInside = false;
+                };
+
+                var validate = function (value) {
+                    scope.isValid = true;
+
+                    if (validators && validators.length) {
+                        for (var i = 0; i < validators.length; i++) {
+                            if (!validators[i].validate(value)) {
+                                scope.isValid = false;
+                                break;
+                            }
+                        }
+                    }
+                };
+
+                var setFocus = function () {
+                    // Focus the right element.
+                    if (scope.isAddMode) {
+                        textElement.focus();
+                        scope.isTextFocused = true;
+                    } else {
+                        selectElement.select2('focus');
+                    }
+                };
+
+                scope.hasValue = function () {
+                    if (scope.isMultiple) {
+                        return !MaHelper.isNullOrUndefined(scope.value) && scope.value.length;
+                    }
+
+                    if (scope.isAddMode) {
+                        return !MaHelper.isNullOrWhiteSpace(scope.text);
+                    }
+
+                    return !MaHelper.isNullOrUndefined(scope.value) && !scope.isLoading;
+                };
+
+                scope.isResetEnabled = function () {
+                    return !scope.isDisabled && scope.hasValue();
+                };
+
+                scope.reset = function () {
+                    previousValue = scope.value;
+                    scope.value = scope.isMultiple ? [] : null;
+                };
+
+                scope.onReset = function () {
+                    scope.isTouched = true;
+                    scope.reset();
+                    setFocus();
+
+                    $timeout(function () {
+                        scope.change({
+                            maValue: scope.value,
+                            maOldValue: previousValue
+                        });
+                    });
+                };
+
+                scope.onFocus = function (elementName) {
+                    if (elementName === 'text') {
+                        scope.isTextFocused = true;
+                    }
+
+                    if (elementName === 'reset') {
+                        element.removeClass('ma-select-box-is-select-focused');
+                    }
+
+                    if (isFocusLost) {
+                        scope.focus({
+                            maValue: scope.storeItemValueOnly ? getItemByValue(scope.value) : scope.value
+                        });
+                    }
+
+                    isFocusLost = false;
+                };
+
+                textElement.focusout(function (event) {
+                    onFocusout(event, 'text');
+                });
+
+                scope.getAddItemTooltip = function () {
+                    if (!showAddItemTooltip) {
+                        return '';
+                    }
+
+                    // \u00A0 Unicode character is used here like &nbsp;.
+                    if (scope.isAddMode) {
+                        return 'Back\u00A0to the\u00A0list';
+                    }
+
+                    return scope.addItemTooltip ? scope.addItemTooltip : 'Add new\u00A0item';
+                };
+
+                scope.getOptionValue = function (item) {
+                    return scope.itemValueField ? scope.getItemValue(item) : item;
+                };
+
+                scope.toggleMode = function (mode) {
+                    if (!scope.canAddItem) {
+                        return;
+                    }
+
+                    if (scope.isAddMode && mode === 'add' || !scope.isAddMode && mode === 'select') {
+                        return;
+                    }
+
+                    var isInternalCall = false;
+                    previousValue = scope.value || null;
+
+                    if (mode === 'select') {
+                        scope.isAddMode = false;
+                        isInternalCall = true;
+                    } else if (mode === 'add') {
+                        scope.isAddMode = true;
+                        isInternalCall = true;
+                    } else {
+                        scope.isAddMode = !scope.isAddMode;
+                    }
+
+                    // Restore previously selected or added item.
+                    if (scope.isAddMode) {
+                        // Sometimes select2 remains opened after it has lost focus.
+                        // Make sure that it is closed in add mode.
+                        if (selectElement) {
+                            // selectElement is undefined when scope.toggleMode method
+                            // is invoked from setInternalValue initially.
+                            selectElement.select2('close');
+                        }
+
+                        scope.previousSelectedItem = getItemByValue(scope.selectedItem);
+                        scope.value = previousAddedItem;
+
+                        if (scope.value) {
+                            scope.text = typeof scope.value === 'string' ? scope.value : scope.value[scope.itemTextField];
+                        }
+                    } else {
+                        previousAddedItem = getNewItem(scope.text);
+                        scope.value = scope.previousSelectedItem;
+                    }
+
+                    if (!isInternalCall) {
+                        $timeout(function () {
+                            // Trigger change event as user manually swithces between custom and selected item.
+                            scope.change({
+                                maValue: scope.value,
+                                maOldValue: previousValue
+                            });
+
+                            setFocus();
+                        });
+                    }
+                };
+
+                scope.onChange = function () {
+                    var item;
+
+                    if (scope.isMultiple) {
+                        var itemsValues = scope.selectedItem,
+                            items = [];
+
+                        if (scope.hasAjax) {
+                            // Get selected items directly from Select2 component,
+                            // because scope.selectedItem gives only an id of a currently selected item.
+                            items = selectData.data();
+
+                            // Value hasn't changed.
+                            if (angular.equals(items, scope.value)) {
+                                return;
+                            }
+
+                            previousValue = scope.value;
+                        } else {
+                            previousValue = scope.value;
+
+                            for (var j = 0; j < itemsValues.length; j++) {
+                                item = getItemByValue(itemsValues[j]);
+
+                                if (item) {
+                                    items.push(item);
+                                }
+                            }
+                        }
+
+                        scope.isTouched = true;
+                        scope.value = items;
+
+                        $timeout(function () {
+                            scope.change({
+                                maValue: items,
+                                maOldValue: previousValue
+                            });
+                        });
+
+                        // Invoke mouseleave on the list when it is closed for the next blur event to work properly.
+                        selectData.dropdown.mouseleave();
+                    } else {
+                        // Validation is required if the item is a simple text, not a JSON object.
+                        item = MaHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
+
+                        // In case if JSON.parse has parsed string to a number.
+                        // This can happen when items is an array of numbers.
+                        if (typeof item === 'number') {
+                            item = scope.selectedItem;
+                        }
+
+                        // The change event works differently in AJAX mode.
+                        if (scope.hasAjax) {
+                            // The change event fires first time even if scope.value has not changed.
+                            if (item === scope.previousSelectedItem) {
+                                return;
+                            }
+
+                            // When item is selected, change event fires multiple times.
+                            // The last time, when item is an object, is the correct one - all others must be ignored.
+                            if (!angular.isObject(item)) {
+                                return;
+                            }
+                        }
+
+                        // Get selected item from items by value field.
+                        // There is no items array in AJAX mode.
+                        if (!scope.hasAjax) {
+                            if (scope.itemValueField && !MaHelper.isNullOrWhiteSpace(item)) {
+                                for (var i = 0; i < scope._items.length; i++) {
+
+                                    if (scope.getItemValue(scope._items[i]) === item.toString()) {
+                                        item = scope._items[i];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!item && !scope.value) {
+                            return;
+                        }
+
+                        if (scope.itemValueField) {
+                            var value = scope.getItemValue(scope.value);
+
+                            if (value && value === scope.getItemValue(item)) {
+                                return;
+                            }
+                        } else if (item === scope.value) {
+                            return;
+                        }
+
+                        previousValue = scope.value;
+
+                        if (scope.storeItemValueOnly) {
+                            scope.value = scope.getItemValue(item);
+                            scope.previousSelectedItem = scope.value;
+                            previousValue = getItemByValue(previousValue);
+                        } else {
+                            scope.value = item;
+                            scope.previousSelectedItem = item;
+                        }
+
+                        $timeout(function () {
+                            scope.change({
+                                maValue: item,
+                                maOldValue: previousValue
+                            });
+                        });
+                    }
+                };
+
+                // Runs initSelection to force Select2 to refresh its displayed value.
+                // This is only required in AJAX mode.
+                var initializeSelect2Value = function functionName() {
+                    if (!scope.hasAjax || !selectData) {
+                        return;
+                    }
+
+                    // If placeholder is set Select2 initSelection will not work and thus value will not be set.
+                    // We need to add/remove placeholder accordingly.
+                    selectData.opts.placeholder = scope.value ? '' : scope.placeholder;
+
+                    scope.runInitSelection = true;
+                    selectData.initSelection();
+                };
+
+                scope.$watch('items', function (newItems, oldItems) {
+                    // When an array of items is completely replaced with a new array, ma-select2
+                    // triggers a watcher which sets the value to undefined, which we do not want.
+                    // So instead of replacing an array, we clear it and repopulate with new items.
+                    if (angular.equals(newItems, oldItems)) {
+                        return;
+                    }
+
+                    scope._items.splice(0, scope._items.length);
+
+                    // Push new items to the array.
+                    Array.prototype.push.apply(scope._items, newItems);
+
+                    // Set value to refresh displayed value and mode.
+                    // 1 scenario:
+                    // Initial value is 'Vladivostok' and items is an empty array, so mode is 'add'.
+                    // Then items is set to an array containing 'Vladivostok', so
+                    // mode should be switched to 'select', because 'Vladivostok' is now exists in the list.
+                    // 2 scenario:
+                    // Initial value is 'Vladivostok' and items is an empty array. Select2 displays empty value.
+                    // Then items are loaded asynchronously and Select2 value needs to be refreshed.
+                    setInternalValue(scope.value);
+
+                    // For some reason ma-select2 does not trigger change for selectedItem
+                    // in this case, so we need to set it manually.
+                    // See select-box/select2.js line 123.
+                    $timeout(function () {
+                        var itemValue,
+                            item;
+
+                        if (angular.isObject(scope.value)) {
+                            if (scope.isMultiple && angular.isArray(scope.value)) {
+                                var items = [];
+
+                                for (var i = 0; i < scope.value.length; i++) {
+                                    // An item might only contain value field, which might not be enough to format the item.
+                                    // So we need to get a full item from items.
+                                    itemValue = scope.getItemValue(scope.value[i]);
+                                    item = angular.copy(getItemByValue(itemValue) || scope.value[i]);
+                                    item.text = scope.formatItem(item);
+                                    item.id = itemValue;
+
+                                    if (item) {
+                                        items.push(item);
+                                    }
+                                }
+
+                                selectData.data(items);
+                            } else {
+                                itemValue = scope.getItemValue(scope.value);
+                                item = angular.copy(getItemByValue(itemValue) || scope.value);
+                                item.text = scope.formatItem(item);
+                                item.id = itemValue;
+                                selectData.data(item);
+                            }
+                        } else if (!scope.value) {
+                            selectData.data(null);
+                        } else {
+                            selectData.val(scope.value);
+                        }
+                    });
+                }, true);
+
+                scope.$watch('value', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    initializeSelect2Value();
+                    setInternalValue(newValue);
+                });
+
+                // Validate text while it is being typed.
+                scope.$watch('text', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    scope.isTouched = true;
+                    validate(newValue);
+                });
+
+                scope.$watch('isRequired', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    setValidators();
+                    validate(scope.isAddMode ? scope.text : scope.value);
+                });
+
+                // Prepare API instance.
+                if (scope.instance) {
+                    scope.instance.isInitialized = true;
+
+                    scope.instance.switchToSelectMode = function () {
+                        if (scope.isAddMode) {
+                            scope.toggleMode('select');
+                        }
+                    };
+
+                    scope.instance.switchToAddMode = function () {
+                        if (!scope.isAddMode) {
+                            scope.toggleMode('add');
+                        }
+                    };
+
+                    scope.instance.isValid = function () {
+                        return scope.isValid;
+                    };
+
+                    scope.instance.validate = function () {
+                        scope.isTouched = true;
+
+                        validate(scope.isAddMode ? scope.text : scope.value);
+                    };
+
+                    scope.instance.clear = function () {
+                        scope.reset();
+
+                        $timeout(function () {
+                            scope.isTouched = false;
+                        });
+                    };
+                }
+
+                setValidators();
+
+                $timeout(function () {
+                    // Add a search icon and spinner for Select2 input field.
+                    if (scope.hasAjax) {
+                        var elementForSpinner = angular.element(
+                            element[0].querySelector(scope.isMultiple ? '.select2-search-field' : '.select2-search')
+                        );
+
+                        elementForSpinner.append('<div class="pace"><div class="pace-activity"></div></div>');
+
+                        if (!scope.isMultiple) {
+                            elementForSpinner.append('<i class="ma-select-box-input-search-icon fa fa-search"></i>');
+                        }
+                    }
+
+                    // Set initial value.
+                    // Value is set inside timeout to ensure that we get the latest value.
+                    // If put outside timeout then there could be issues when value is set
+                    // from directive's link function, not from controller.
+                    setInternalValue(scope.value);
+
+                    selectElement = angular.element(element[0].querySelector('.select2-container'));
+                    selectData = selectElement.data().select2;
+                    labelElement = $('label[for="' + scope.id + '"]');
+                    switchButtonElement = angular.element(element[0].querySelector('.ma-button-switch'));
+                    resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset'));
+
+                    initializeSelect2Value();
+
+                    // Focus the component when label is clicked.
+                    if (labelElement.length > 0) {
+                        $($document).on('click', 'label[for="' + scope.id + '"]', function () {
+                            setFocus();
+                        });
+                    }
+
+                    if (scope.isMultiple) {
+                        selectData.search.on('focus', function () {
+                            element.addClass('ma-select-box-is-select-focused');
+                            scope.onFocus();
+                        });
+
+                        selectData.search.on('focusout', function (event) {
+                            onFocusout(event, 'select');
+                        });
+
+                        // Track that the select is hovered to prevent focus lost when a selected item
+                        // or selection is clicked.
+                        selectData.selection.on('mouseenter', function () {
+                            isSelectHovered = true;
+                        });
+
+                        selectData.selection.on('mouseleave', function () {
+                            isSelectHovered = false;
+                        });
+
+                        selectData.dropdown.on('mouseenter', function () {
+                            isSelectHovered = true;
+                        });
+
+                        selectData.dropdown.on('mouseleave', function () {
+                            isSelectHovered = false;
+                        });
+
+                        selectData.dropdown.on('click', function () {
+                            // Return focus to the input field for the next blur event to work properly.
+                            selectData.search.focus();
+                        });
+                    } else {
+                        // There is no focussser in multiple mode.
+                        selectData.focusser.on('focus', function () {
+                            scope.onFocus('select');
+                        });
+
+                        selectData.focusser.on('focusout', function (event) {
+                            onFocusout(event, 'select');
+                        });
+                    }
+
+                    selectData.dropdown.on('focus', '.select2-input', function () {
+                        // This is required for IE to keep focus when an item is selected
+                        // from the list using keyboard.
+                        isFocusInside = true;
+                        scope.onFocus();
+                    });
+
+                    selectData.dropdown.on('focusout', '.select2-input', function (event) {
+                        onFocusout(event, 'select');
+                    });
+
+                    switchButtonElement.focusout(function (event) {
+                        onFocusout(event);
+                    });
+
+                    resetButtonElement.focusout(function (event) {
+                        onFocusout(event);
+                    });
+
+                    // Detect if item in the list is hovered.
+                    // This is later used for triggering blur event correctly.
+                    selectData.dropdown.on('mouseenter', '.select2-result', function () {
+                        isFocusInside = true;
+                    });
+
+                    selectData.dropdown.on('mouseleave', '.select2-result', function () {
+                        isFocusInside = false;
+                    });
+
+                    // Detect if select2 mask is hovered.
+                    // This is later used for triggering blur event correctly in IE.
+                    $($document).on('mouseenter', '.select2-drop-mask', function () {
+                        if (!scope.isMultiple) {
+                            isFocusInside = true;
+                        }
+                    });
+
+                    scope.init({
+                        maInstance: scope.instance
+                    });
+                });
+            }
+        };
+    }]);})();
+(function(){/**
+ * This is a clone of https://www.npmjs.com/package/angular-ui-select2 package, which is no longer maintained.
+ * It was copied so we can maintain it ourselves.
+ *
+ * When AJAX mode is on, your value will be an object (or an array of objects) of the data used by Select2.
+ * This change is so that you do not have to do an additional query yourself on top of Select2 own query.
+ */
+angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('maSelect2', ['maSelect2Config', '$timeout', 'MaHelper', function (maSelect2Config, $timeout, MaHelper) {
+    // The configuration options passed to $.fn.select2(). See http://select2.github.io/select2/#documentation.
+    var options = {};
+
+    if (maSelect2Config) {
+        angular.extend(options, maSelect2Config);
+    }
+
+    return {
+        require: 'ngModel',
+        priority: 1,
+        compile: function (tElm, tAttrs) {
+            var watch,
+                repeatOption,
+                repeatAttr,
+                isSelect = tElm.is('select'),
+                isMultiple = angular.isDefined(tAttrs.multiple);
+
+            // Enable watching of the options dataset if in use
+            if (tElm.is('select')) {
+                repeatOption = tElm.find('optgroup[ng-repeat], optgroup[data-ng-repeat], option[ng-repeat], option[data-ng-repeat]');
+
+                if (repeatOption.length) {
+                    repeatAttr = repeatOption.attr('ng-repeat') || repeatOption.attr('data-ng-repeat');
+                    watch = $.trim(repeatAttr.split('|')[0]).split(' ').pop();
+                }
+            }
+
+            return function (scope, elm, attrs, controller) {
+                // instance-specific options
+                var opts = angular.extend({}, options, scope.$eval(attrs.maSelect2));
+
+                // Convert from Select2 view-model to Angular view-model.
+                var convertToAngularModel = function (select2_data) {
+                    var model;
+
+                    if (opts.simple_tags) {
+                        model = [];
+
+                        angular.forEach(select2_data, function (value, index) {
+                            model.push(value.id);
+                        });
+                    } else {
+                        model = select2_data;
+                    }
+
+                    return model;
+                };
+
+                // Convert from Angular view-model to Select2 view-model.
+                var convertToSelect2Model = function (angular_data) {
+                    var model = [];
+
+                    if (!angular_data) {
+                        return model;
+                    }
+
+                    if (opts.simple_tags) {
+                        model = [];
+
+                        angular.forEach(angular_data, function (value, index) {
+                            model.push({ 'id': value, 'text': value });
+                        });
+                    } else {
+                        model = angular_data;
+                    }
+
+                    return model;
+                };
+
+                if (isSelect) {
+                    // Use <select multiple> instead
+                    delete opts.multiple;
+                    delete opts.initSelection;
+                } else if (isMultiple) {
+                    opts.multiple = true;
+                }
+
+                if (controller) {
+                    // Watch the model for programmatic changes
+                    scope.$watch(tAttrs.ngModel, function (current, old) {
+                        if (!current) {
+                            return;
+                        }
+
+                        if (current === old) {
+                            return;
+                        }
+
+                        controller.$render();
+                    }, true);
+
+                    controller.$render = function () {
+                        if (isSelect) {
+                            elm.select2('val', controller.$viewValue);
+                        } else {
+                            if (opts.multiple) {
+                                controller.$isEmpty = function (value) {
+                                    return !value || value.length === 0;
+                                };
+
+                                var viewValue = controller.$viewValue;
+
+                                if (opts.ajax) {
+                                    viewValue = MaHelper.isJson(controller.$viewValue) ? JSON.parse(controller.$viewValue) : controller.$viewValue;
+
+                                    // It might be an id of the item first time, the next time it's a real item.
+                                    if (angular.isObject(viewValue)) {
+                                        elm.select2('data', viewValue);
+                                    }
+                                } else if (angular.isString(viewValue)) {
+                                    viewValue = viewValue.split(',');
+                                    elm.select2('data', convertToSelect2Model(viewValue));
+                                }
+                            } else {
+                                if (angular.isObject(controller.$viewValue)) {
+                                    elm.select2('data', controller.$viewValue);
+                                } else if (!controller.$viewValue) {
+                                    elm.select2('data', null);
+                                } else {
+                                    elm.select2('val', controller.$viewValue);
+                                }
+                            }
+                        }
+                    };
+
+                    // Watch the options dataset for changes
+                    if (watch) {
+                        scope.$watch(watch, function (newVal, oldVal, scope) {
+                            if (angular.equals(newVal, oldVal)) {
+                                return;
+                            }
+
+                            // Delayed so that the options have time to be rendered
+                            $timeout(function () {
+                                elm.select2('val', controller.$viewValue);
+
+                                // Refresh angular to remove the superfluous option
+                                controller.$render();
+
+                                if (newVal && !oldVal && controller.$setPristine) {
+                                    controller.$setPristine(true);
+                                }
+                            });
+                        });
+                    }
+
+                    // Update valid and dirty statuses
+                    controller.$parsers.push(function (value) {
+                        var div = elm.prev();
+                        div.toggleClass('ng-invalid', !controller.$valid)
+                            .toggleClass('ng-valid', controller.$valid)
+                            .toggleClass('ng-invalid-required', !controller.$valid)
+                            .toggleClass('ng-valid-required', controller.$valid)
+                            .toggleClass('ng-dirty', controller.$dirty)
+                            .toggleClass('ng-pristine', controller.$pristine);
+
+                        return value;
+                    });
+
+                    if (!isSelect) {
+                        // Set the view and model value and update the angular template manually for the ajax/multiple select2.
+                        elm.bind('change', function (e) {
+                            e.stopImmediatePropagation();
+
+                            if (scope.$$phase || scope.$root.$$phase) {
+                                return;
+                            }
+
+                            scope.$apply(function () {
+                                controller.$setViewValue(convertToAngularModel(elm.select2('data')));
+                            });
+                        });
+
+                        if (opts.initSelection) {
+                            var initSelection = opts.initSelection;
+
+                            opts.initSelection = function (element, callback) {
+                                initSelection(element, function (value) {
+                                    var isPristine = controller.$pristine;
+
+                                    // Don't set a value here for AJAX/multiple or it loops.
+                                    // Value setting for this case is handled in select-box.js.
+                                    if (!(opts.ajax && opts.multiple)) {
+                                        controller.$setViewValue(convertToAngularModel(value));
+                                    }
+
+                                    callback(value);
+
+                                    if (isPristine) {
+                                        controller.$setPristine();
+                                    }
+
+                                    elm.prev().toggleClass('ng-pristine', controller.$pristine);
+                                });
+                            };
+                        }
+                    }
+                }
+
+                elm.bind('$destroy', function () {
+                    elm.select2('destroy');
+                });
+
+                attrs.$observe('disabled', function (value) {
+                    elm.select2('enable', !value);
+                });
+
+                attrs.$observe('readonly', function (value) {
+                    elm.select2('readonly', !!value);
+                });
+
+                if (attrs.ngMultiple) {
+                    scope.$watch(attrs.ngMultiple, function (newVal) {
+                        attrs.$set('multiple', !!newVal);
+                        elm.select2(opts);
+                    });
+                }
+
+                // Initialize the plugin late so that the injected DOM does not disrupt the template compiler
+                $timeout(function () {
+                    elm.select2(opts);
+
+                    // Set initial value - I'm not sure about this but it seems to need to be there
+                    elm.select2('data', controller.$modelValue);
+
+                    // important!
+                    controller.$render();
+
+                    // Not sure if I should just check for !isSelect OR if I should check for 'tags' key
+                    if (!opts.initSelection && !isSelect) {
+                        var isPristine = controller.$pristine;
+                        controller.$pristine = false;
+                        controller.$setViewValue(convertToAngularModel(elm.select2('data')));
+
+                        if (isPristine) {
+                            controller.$setPristine();
+                        }
+
+                        elm.prev().toggleClass('ng-pristine', controller.$pristine);
+                    }
+                });
+            };
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function () {
     var months = [{
         language: 'en',
@@ -3503,1260 +5037,6 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components')
-    .filter('maSelectBoxOrderBy', ['orderByFilter', function (orderByFilter) {
-        return function (items, orderByExpression) {
-            if (orderByExpression) {
-                return orderByFilter(items, orderByExpression);
-            }
-
-            return items;
-        };
-    }])
-    .directive('maSelectBox', ['$document', '$timeout', 'MaHelper', function ($document, $timeout, MaHelper) {
-        return {
-            restrict: 'E',
-            scope: {
-                id: '@',
-                items: '=',
-                value: '=',
-                isLoading: '=',
-                change: '&',
-                blur: '&',
-                focus: '&',
-                init: '&',
-                itemTemplate: '=',
-                itemTextField: '@',
-                itemValueField: '@',
-                isDisabled: '=',
-                isRequired: '=',
-                validators: '=',
-                canAddItem: '=',
-                addItemTooltip: '@',
-                showAddItemTooltip: '=',
-                instance: '=',
-                orderBy: '=',
-                ajax: '=',
-                canReset: '=',
-                placeholder: '@',
-                textPlaceholder: '@',
-                isMultiple: '=',
-                storeItemValueOnly: '='
-            },
-            replace: true,
-            template: function (element, attributes) {
-                var hasAjax = !MaHelper.isNullOrWhiteSpace(attributes.ajax),
-                    isMultiple = attributes.isMultiple === 'true';
-
-                var html = '\
-                    <div class="ma-select-box"\
-                        ng-class="{\
-                            \'ma-select-box-can-add-item\': canAddItem,\
-                            \'ma-select-box-is-text-focused\': isTextFocused,\
-                            \'ma-select-box-is-disabled\': isDisabled,\
-                            \'ma-select-box-is-invalid\': !isValid,\
-                            \'ma-select-box-is-touched\': isTouched,\
-                            \'ma-select-box-mode-add\': isAddMode,\
-                            \'ma-select-box-mode-select\': !isAddMode,\
-                            \'ma-select-box-can-reset\': canReset,\
-                            \'ma-select-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
-                            \'ma-select-box-is-loading\': isLoading,\
-                            \'ma-select-box-has-value\': hasValue()\
-                        }">\
-                        <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
-                            <div class="pace">\
-                                <div class="pace-activity"></div>\
-                            </div>\
-                        </div>';
-
-                if (hasAjax) {
-                    html += '<input class="ma-select-box-input" ma-select2="options"' + (isMultiple ? ' multiple' : '') + '\
-                        ng-show="!isAddMode"\
-                        ng-disabled="isDisabled"\
-                        ng-change="onChange()"\
-                        ng-model="selectedItem"/>';
-                } else {
-                    // Add an empty option <option></option> as first item for the placeholder to work.
-                    // It's strange, but that's how Select2 works.
-                    html += '\
-                        <select ma-select2="options"' + (isMultiple ? ' multiple' : '') + '\
-                            ng-show="!isAddMode"\
-                            ng-disabled="isDisabled"\
-                            ng-model="selectedItem"\
-                            ng-change="onChange()"\
-                            placeholder="{{placeholder}}">\
-                            <option></option>\
-                            <option ng-repeat="item in _items | maSelectBoxOrderBy:orderBy" value="{{getOptionValue(item)}}">\
-                                {{formatItem(item)}}\
-                            </option>\
-                        </select>';
-                }
-
-                html += '\
-                    <input class="ma-select-box-text" type="text" ng-show="isAddMode"\
-                        ng-model="text"\
-                        ng-disabled="isDisabled"\
-                        ng-focus="onFocus(\'text\')"\
-                        placeholder="{{textPlaceholder}}"/>\
-                    <ma-button class="ma-button-switch"\
-                        ng-show="canAddItem" size="xs" modifier="simple"\
-                        ma-tooltip="{{getAddItemTooltip()}}"\
-                        right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
-                        click="toggleMode()"\
-                        ng-focus="onFocus()"\
-                        is-disabled="isDisabled">\
-                    </ma-button>\
-                    <ma-button class="ma-button-reset"\
-                        ng-show="canReset" size="xs" modifier="simple"\
-                        right-icon="times-circle"\
-                        click="onReset()"\
-                        ng-focus="onFocus(\'reset\')"\
-                        is-disabled="!isResetEnabled()">\
-                    </ma-button>\
-                </div>';
-
-                return html;
-            },
-            controller: ['$scope', function (scope) {
-                // Gets a value from itemValueField if an item is object.
-                scope.getItemValue = function (item) {
-                    if (MaHelper.isNullOrWhiteSpace(item) || !scope.itemValueField) {
-                        return null;
-                    }
-
-                    // Item is already a value (an object might be passed as well).
-                    if (scope.storeItemValueOnly) {
-                        return (angular.isObject(item) ? item[scope.itemValueField] : item).toString();
-                    }
-
-                    // In case of a nested property binding like 'company.port.id'.
-                    var parts = scope.itemValueField.split('.'),
-                        value = item[parts[0]];
-
-                    for (var i = 1; i < parts.length; i++) {
-                        value = value[parts[i]];
-                    }
-
-                    if (MaHelper.isNullOrUndefined(value)) {
-                        return null;
-                    }
-
-                    return value.toString();
-                };
-
-                scope.formatItem = function (item) {
-                    if (scope.itemTemplate) {
-                        return scope.itemTemplate(item);
-                    }
-
-                    if (!item) {
-                        return '';
-                    }
-
-                    return scope.itemTextField ? item[scope.itemTextField] : item.toString();
-                };
-
-                // Setting Select2 options does not work from link function, so they are set here.
-                scope.options = {};
-                scope.runInitSelection = true;
-
-                // AJAX options.
-                if (scope.ajax) {
-                    scope.options.ajax = scope.ajax;
-                    scope.options.minimumInputLength = 3;
-                    scope.options.escapeMarkup = function (markup) {
-                        return markup;
-                    };
-                    scope.options.initSelection = function initSelection(element, callback) {
-                        // Run init function only when it is required to update Select2 value.
-                        if (scope.runInitSelection && scope.getItemValue(scope.value)) {
-                            var item = angular.copy(scope.value);
-                            item.text = scope.formatItem(item);
-                            item.id = scope.getItemValue(item);
-                            scope.previousSelectedItem = item;
-                            callback(item);
-                        } else {
-                            callback();
-                        }
-
-                        scope.runInitSelection = false;
-                    };
-
-                    if (scope.isMultiple) {
-                        scope.options.formatSelection = function (item) {
-                            return scope.formatItem(item);
-                        };
-                    }
-                }
-            }],
-            link: function (scope, element) {
-                var textElement = angular.element(element[0].querySelector('.ma-select-box-text')),
-                    previousAddedItem = null,
-                    switchButtonElement,
-                    resetButtonElement,
-                    selectElement,
-                    selectData,
-                    labelElement,
-                    isFocusLost = true,
-                    isFocusInside = false,
-                    isSelectHovered = false,
-                    showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
-                    validators = scope.validators ? angular.copy(scope.validators) : [],
-                    previousValue,
-                    isObjectArray = scope.itemTextField || scope.itemValueField;
-
-                // We need a copy of items. See 'scope.$watch('items', ...)' for an answer why.
-                scope._items = angular.isArray(scope.items) ? angular.copy(scope.items) : [];
-                scope.previousSelectedItem = scope.previousSelectedItem || null;
-                scope.isAddMode = false;
-                scope.isTextFocused = false;
-                scope.isValid = true;
-                scope.isTouched = false;
-                scope.hasAjax = angular.isObject(scope.ajax);
-
-                // A custom 'IsNotEmpty' validator, which also checks that
-                // a selected item is in the list.
-                var isNotEmptyAndInListValidator = {
-                    name: 'IsNotEmpty',
-                    validate: function (value) {
-                        if (scope.isMultiple && angular.isArray(value)) {
-                            return value.length > 0;
-                        }
-
-                        if (MaHelper.isNullOrWhiteSpace(value)) {
-                            return false;
-                        }
-
-                        // For array of numbers.
-                        if (!isObjectArray && !MaHelper.isNullOrWhiteSpace(value)) {
-                            return true;
-                        }
-
-                        // In select mode check that a selected item is in the list.
-                        // In AJAX mode there is no items array and we cannot check it.
-                        if (!scope.hasAjax && !scope.isAddMode && !isExistingItem(value)) {
-                            return false;
-                        }
-
-                        return true;
-                    }
-                };
-
-                var setValidators = function () {
-                    var emptyValidatorIndex = null;
-
-                    for (var i = 0; i < validators.length; i++) {
-                        if (validators[i].name === 'IsNotEmpty') {
-                            emptyValidatorIndex = i;
-                            validators[i] = isNotEmptyAndInListValidator;
-                            break;
-                        }
-                    }
-
-                    if (emptyValidatorIndex === null && scope.isRequired) {
-                        validators.unshift(isNotEmptyAndInListValidator);
-                    } else if (emptyValidatorIndex !== null && !scope.isRequired) {
-                        validators.splice(emptyValidatorIndex, 1);
-                    }
-                };
-
-                var isExistingItem = function (item) {
-                    if (!angular.isArray(scope._items)) {
-                        return false;
-                    }
-
-                    var isItemObject = scope.getItemValue(item) !== null;
-
-                    for (var i = 0; i < scope._items.length; i++) {
-                        if (isItemObject) {
-                            // Search by value field.
-                            if (scope.getItemValue(scope._items[i]) === scope.getItemValue(item)) {
-                                return true;
-                            }
-                        } else {
-                            // Search by item itself as text.
-                            if (scope._items[i] === item) {
-                                return true;
-                            }
-                        }
-                    }
-
-                    return false;
-                };
-
-                var getItemByValue = function (itemValue) {
-                    if (MaHelper.isNullOrWhiteSpace(itemValue)) {
-                        return null;
-                    }
-
-                    // The list is an array of strings, so value is item itself.
-                    if (!isObjectArray) {
-                        return itemValue;
-                    }
-
-                    if (angular.isArray(scope._items)) {
-                        for (var i = 0; i < scope._items.length; i++) {
-                            if (scope.getItemValue(scope._items[i]) === itemValue.toString()) {
-                                return scope._items[i];
-                            }
-                        }
-                    }
-
-                    return null;
-                };
-
-                var getNewItem = function (itemText) {
-                    // The list is an array of strings, so item should be a simple string.
-                    if (!isObjectArray) {
-                        return itemText;
-                    }
-
-                    // The list is an array of objects, so item should be an object.
-                    if (itemText) {
-                        var item = {};
-                        item[scope.itemTextField] = itemText;
-                        return item;
-                    }
-
-                    return null;
-                };
-
-                var setInternalValue = function (item) {
-                    if (scope.isMultiple) {
-                        var items = [],
-                            i;
-
-                        // Set Select2 value.
-                        if (!scope.hasAjax) {
-                            if (item && item.length) {
-                                for (i = 0; i < item.length; i++) {
-                                    items.push(scope.getItemValue(item[i]));
-                                }
-                            }
-                        } else {
-                            if (item && item.length) {
-                                for (i = 0; i < item.length; i++) {
-                                    items.push(item[i]);
-                                }
-                            }
-
-                            items = JSON.stringify(items);
-                        }
-
-                        scope.selectedItem = items;
-                        validate(item);
-                    } else {
-                        if (scope.canAddItem && item) {
-                            // Switch mode depending on whether provided item exists in the list.
-                            // This allows the component to be displayed in correct mode, let's say, in add mode,
-                            // when scope.value is initially a custom value not presented in the list.
-                            scope.isAddMode = !isExistingItem(item);
-                        }
-
-                        validate(item);
-
-                        if (scope.isAddMode) {
-                            if (!item) {
-                                scope.text = null;
-                            } else {
-                                if (scope.itemTextField && item[scope.itemTextField]) {
-                                    // Item is an object.
-                                    scope.text = item[scope.itemTextField].toString();
-                                } else {
-                                    // Item is a string.
-                                    scope.text = item;
-                                }
-                            }
-
-                            previousAddedItem = item;
-                            scope.toggleMode('add');
-                        } else {
-                            if (MaHelper.isNullOrWhiteSpace(item)) {
-                                scope.selectedItem = null;
-                            } else if (!scope.hasAjax) {
-                                // Set Select2 value. In AJAX mode Select2 sets values by itself.
-                                if (scope.getItemValue(item) !== null) {
-                                    // Item is an object.
-                                    scope.selectedItem = scope.getItemValue(item);
-                                } else if (!isObjectArray && (typeof item === 'string' || typeof item === 'number')) {
-                                    // Item is a primitive type.
-                                    scope.selectedItem = item;
-                                }
-                            }
-
-                            scope.previousSelectedItem = item;
-                            scope.toggleMode('select');
-                        }
-                    }
-                };
-
-                var onFocusout = function (event, elementName) {
-                    var elementTo = angular.element(event.relatedTarget);
-                    scope.isTextFocused = false;
-
-                    // Trigger change event for text element.
-                    if (elementName === 'text') {
-                        isFocusInside = false;
-
-                        // Need to apply changes because onFocusout is triggered using jQuery
-                        // (AngularJS does not have ng-focusout event directive).
-                        scope.$apply(function () {
-                            scope.isTouched = true;
-                            var value;
-
-                            if (scope.itemTextField) {
-                                if (scope.value && scope.value[scope.itemTextField] === scope.text) {
-                                    return;
-                                }
-
-                                value = getNewItem(scope.text);
-                            } else {
-                                if (scope.value === scope.text) {
-                                    return;
-                                }
-
-                                value = scope.text;
-                            }
-
-                            validate(value);
-
-                            if (!scope.isValid) {
-                                return;
-                            }
-
-                            previousValue = scope.value || null;
-                            scope.value = value;
-                            previousAddedItem = scope.value;
-
-                            if (scope.isValid) {
-                                // Postpone change event for scope value to be updated before.
-                                $timeout(function () {
-                                    scope.change({
-                                        maValue: scope.value,
-                                        maOldValue: previousValue
-                                    });
-                                });
-                            }
-                        });
-                    } else if (elementName === 'select') {
-                        scope.$apply(function () {
-                            scope.isTouched = true;
-                        });
-                    }
-
-                    // Trigger blur event when focus goes to an element outside the component.
-                    isFocusLost = !isFocusInside &&
-                        elementTo[0] !== switchButtonElement[0] &&
-                        elementTo[0] !== resetButtonElement[0] &&
-                        elementTo[0] !== textElement[0] &&
-                        elementTo[0] !== selectData.search[0];
-
-                    if (scope.isMultiple) {
-                        if (isSelectHovered) {
-                            isFocusLost = false;
-                        }
-                    } else {
-                        // There is no focussser in multiple mode.
-                        if (!isFocusInside && elementTo[0] === selectData.focusser[0]) {
-                            isFocusLost = false;
-                        }
-                    }
-
-                    if (isFocusLost) {
-                        element.removeClass('ma-select-box-is-select-focused');
-
-                        scope.blur({
-                            maValue: scope.storeItemValueOnly ? getItemByValue(scope.value) : scope.value
-                        });
-                    }
-
-                    isFocusInside = false;
-                };
-
-                var validate = function (value) {
-                    scope.isValid = true;
-
-                    if (validators && validators.length) {
-                        for (var i = 0; i < validators.length; i++) {
-                            if (!validators[i].validate(value)) {
-                                scope.isValid = false;
-                                break;
-                            }
-                        }
-                    }
-                };
-
-                var setFocus = function () {
-                    // Focus the right element.
-                    if (scope.isAddMode) {
-                        textElement.focus();
-                        scope.isTextFocused = true;
-                    } else {
-                        selectElement.select2('focus');
-                    }
-                };
-
-                scope.hasValue = function () {
-                    if (scope.isMultiple) {
-                        return !MaHelper.isNullOrUndefined(scope.value) && scope.value.length;
-                    }
-
-                    if (scope.isAddMode) {
-                        return !MaHelper.isNullOrWhiteSpace(scope.text);
-                    }
-
-                    return !MaHelper.isNullOrUndefined(scope.value) && !scope.isLoading;
-                };
-
-                scope.isResetEnabled = function () {
-                    return !scope.isDisabled && scope.hasValue();
-                };
-
-                scope.reset = function () {
-                    previousValue = scope.value;
-                    scope.value = scope.isMultiple ? [] : null;
-                };
-
-                scope.onReset = function () {
-                    scope.isTouched = true;
-                    scope.reset();
-                    setFocus();
-
-                    $timeout(function () {
-                        scope.change({
-                            maValue: scope.value,
-                            maOldValue: previousValue
-                        });
-                    });
-                };
-
-                scope.onFocus = function (elementName) {
-                    if (elementName === 'text') {
-                        scope.isTextFocused = true;
-                    }
-
-                    if (elementName === 'reset') {
-                        element.removeClass('ma-select-box-is-select-focused');
-                    }
-
-                    if (isFocusLost) {
-                        scope.focus({
-                            maValue: scope.storeItemValueOnly ? getItemByValue(scope.value) : scope.value
-                        });
-                    }
-
-                    isFocusLost = false;
-                };
-
-                textElement.focusout(function (event) {
-                    onFocusout(event, 'text');
-                });
-
-                scope.getAddItemTooltip = function () {
-                    if (!showAddItemTooltip) {
-                        return '';
-                    }
-
-                    // \u00A0 Unicode character is used here like &nbsp;.
-                    if (scope.isAddMode) {
-                        return 'Back\u00A0to the\u00A0list';
-                    }
-
-                    return scope.addItemTooltip ? scope.addItemTooltip : 'Add new\u00A0item';
-                };
-
-                scope.getOptionValue = function (item) {
-                    return scope.itemValueField ? scope.getItemValue(item) : item;
-                };
-
-                scope.toggleMode = function (mode) {
-                    if (!scope.canAddItem) {
-                        return;
-                    }
-
-                    if (scope.isAddMode && mode === 'add' || !scope.isAddMode && mode === 'select') {
-                        return;
-                    }
-
-                    var isInternalCall = false;
-                    previousValue = scope.value || null;
-
-                    if (mode === 'select') {
-                        scope.isAddMode = false;
-                        isInternalCall = true;
-                    } else if (mode === 'add') {
-                        scope.isAddMode = true;
-                        isInternalCall = true;
-                    } else {
-                        scope.isAddMode = !scope.isAddMode;
-                    }
-
-                    // Restore previously selected or added item.
-                    if (scope.isAddMode) {
-                        // Sometimes select2 remains opened after it has lost focus.
-                        // Make sure that it is closed in add mode.
-                        if (selectElement) {
-                            // selectElement is undefined when scope.toggleMode method
-                            // is invoked from setInternalValue initially.
-                            selectElement.select2('close');
-                        }
-
-                        scope.previousSelectedItem = getItemByValue(scope.selectedItem);
-                        scope.value = previousAddedItem;
-
-                        if (scope.value) {
-                            scope.text = typeof scope.value === 'string' ? scope.value : scope.value[scope.itemTextField];
-                        }
-                    } else {
-                        previousAddedItem = getNewItem(scope.text);
-                        scope.value = scope.previousSelectedItem;
-                    }
-
-                    if (!isInternalCall) {
-                        $timeout(function () {
-                            // Trigger change event as user manually swithces between custom and selected item.
-                            scope.change({
-                                maValue: scope.value,
-                                maOldValue: previousValue
-                            });
-
-                            setFocus();
-                        });
-                    }
-                };
-
-                scope.onChange = function () {
-                    var item;
-
-                    if (scope.isMultiple) {
-                        var itemsValues = scope.selectedItem,
-                            items = [];
-
-                        if (scope.hasAjax) {
-                            // Get selected items directly from Select2 component,
-                            // because scope.selectedItem gives only an id of a currently selected item.
-                            items = selectData.data();
-
-                            // Value hasn't changed.
-                            if (angular.equals(items, scope.value)) {
-                                return;
-                            }
-
-                            previousValue = scope.value;
-                        } else {
-                            previousValue = scope.value;
-
-                            for (var j = 0; j < itemsValues.length; j++) {
-                                item = getItemByValue(itemsValues[j]);
-
-                                if (item) {
-                                    items.push(item);
-                                }
-                            }
-                        }
-
-                        scope.isTouched = true;
-                        scope.value = items;
-
-                        $timeout(function () {
-                            scope.change({
-                                maValue: items,
-                                maOldValue: previousValue
-                            });
-                        });
-
-                        // Invoke mouseleave on the list when it is closed for the next blur event to work properly.
-                        selectData.dropdown.mouseleave();
-                    } else {
-                        // Validation is required if the item is a simple text, not a JSON object.
-                        item = MaHelper.isJson(scope.selectedItem) ? JSON.parse(scope.selectedItem) : scope.selectedItem;
-
-                        // In case if JSON.parse has parsed string to a number.
-                        // This can happen when items is an array of numbers.
-                        if (typeof item === 'number') {
-                            item = scope.selectedItem;
-                        }
-
-                        // The change event works differently in AJAX mode.
-                        if (scope.hasAjax) {
-                            // The change event fires first time even if scope.value has not changed.
-                            if (item === scope.previousSelectedItem) {
-                                return;
-                            }
-
-                            // When item is selected, change event fires multiple times.
-                            // The last time, when item is an object, is the correct one - all others must be ignored.
-                            if (!angular.isObject(item)) {
-                                return;
-                            }
-                        }
-
-                        // Get selected item from items by value field.
-                        // There is no items array in AJAX mode.
-                        if (!scope.hasAjax) {
-                            if (scope.itemValueField && !MaHelper.isNullOrWhiteSpace(item)) {
-                                for (var i = 0; i < scope._items.length; i++) {
-
-                                    if (scope.getItemValue(scope._items[i]) === item.toString()) {
-                                        item = scope._items[i];
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (!item && !scope.value) {
-                            return;
-                        }
-
-                        if (scope.itemValueField) {
-                            var value = scope.getItemValue(scope.value);
-
-                            if (value && value === scope.getItemValue(item)) {
-                                return;
-                            }
-                        } else if (item === scope.value) {
-                            return;
-                        }
-
-                        previousValue = scope.value;
-
-                        if (scope.storeItemValueOnly) {
-                            scope.value = scope.getItemValue(item);
-                            scope.previousSelectedItem = scope.value;
-                            previousValue = getItemByValue(previousValue);
-                        } else {
-                            scope.value = item;
-                            scope.previousSelectedItem = item;
-                        }
-
-                        $timeout(function () {
-                            scope.change({
-                                maValue: item,
-                                maOldValue: previousValue
-                            });
-                        });
-                    }
-                };
-
-                // Runs initSelection to force Select2 to refresh its displayed value.
-                // This is only required in AJAX mode.
-                var initializeSelect2Value = function functionName() {
-                    if (!scope.hasAjax || !selectData) {
-                        return;
-                    }
-
-                    // If placeholder is set Select2 initSelection will not work and thus value will not be set.
-                    // We need to add/remove placeholder accordingly.
-                    selectData.opts.placeholder = scope.value ? '' : scope.placeholder;
-
-                    scope.runInitSelection = true;
-                    selectData.initSelection();
-                };
-
-                scope.$watch('items', function (newItems, oldItems) {
-                    // When an array of items is completely replaced with a new array, ma-select2
-                    // triggers a watcher which sets the value to undefined, which we do not want.
-                    // So instead of replacing an array, we clear it and repopulate with new items.
-                    if (angular.equals(newItems, oldItems)) {
-                        return;
-                    }
-
-                    scope._items.splice(0, scope._items.length);
-
-                    // Push new items to the array.
-                    Array.prototype.push.apply(scope._items, newItems);
-
-                    // Set value to refresh displayed value and mode.
-                    // 1 scenario:
-                    // Initial value is 'Vladivostok' and items is an empty array, so mode is 'add'.
-                    // Then items is set to an array containing 'Vladivostok', so
-                    // mode should be switched to 'select', because 'Vladivostok' is now exists in the list.
-                    // 2 scenario:
-                    // Initial value is 'Vladivostok' and items is an empty array. Select2 displays empty value.
-                    // Then items are loaded asynchronously and Select2 value needs to be refreshed.
-                    setInternalValue(scope.value);
-
-                    // For some reason ma-select2 does not trigger change for selectedItem
-                    // in this case, so we need to set it manually.
-                    // See select-box/select2.js line 123.
-                    $timeout(function () {
-                        var itemValue,
-                            item;
-
-                        if (angular.isObject(scope.value)) {
-                            if (scope.isMultiple && angular.isArray(scope.value)) {
-                                var items = [];
-
-                                for (var i = 0; i < scope.value.length; i++) {
-                                    // An item might only contain value field, which might not be enough to format the item.
-                                    // So we need to get a full item from items.
-                                    itemValue = scope.getItemValue(scope.value[i]);
-                                    item = angular.copy(getItemByValue(itemValue) || scope.value[i]);
-                                    item.text = scope.formatItem(item);
-                                    item.id = itemValue;
-
-                                    if (item) {
-                                        items.push(item);
-                                    }
-                                }
-
-                                selectData.data(items);
-                            } else {
-                                itemValue = scope.getItemValue(scope.value);
-                                item = angular.copy(getItemByValue(itemValue) || scope.value);
-                                item.text = scope.formatItem(item);
-                                item.id = itemValue;
-                                selectData.data(item);
-                            }
-                        } else if (!scope.value) {
-                            selectData.data(null);
-                        } else {
-                            selectData.val(scope.value);
-                        }
-                    });
-                }, true);
-
-                scope.$watch('value', function (newValue, oldValue) {
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    initializeSelect2Value();
-                    setInternalValue(newValue);
-                });
-
-                // Validate text while it is being typed.
-                scope.$watch('text', function (newValue, oldValue) {
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    scope.isTouched = true;
-                    validate(newValue);
-                });
-
-                scope.$watch('isRequired', function (newValue, oldValue) {
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    setValidators();
-                    validate(scope.isAddMode ? scope.text : scope.value);
-                });
-
-                // Prepare API instance.
-                if (scope.instance) {
-                    scope.instance.isInitialized = true;
-
-                    scope.instance.switchToSelectMode = function () {
-                        if (scope.isAddMode) {
-                            scope.toggleMode('select');
-                        }
-                    };
-
-                    scope.instance.switchToAddMode = function () {
-                        if (!scope.isAddMode) {
-                            scope.toggleMode('add');
-                        }
-                    };
-
-                    scope.instance.isValid = function () {
-                        return scope.isValid;
-                    };
-
-                    scope.instance.validate = function () {
-                        scope.isTouched = true;
-
-                        validate(scope.isAddMode ? scope.text : scope.value);
-                    };
-
-                    scope.instance.clear = function () {
-                        scope.reset();
-
-                        $timeout(function () {
-                            scope.isTouched = false;
-                        });
-                    };
-                }
-
-                setValidators();
-
-                $timeout(function () {
-                    // Add a search icon and spinner for Select2 input field.
-                    if (scope.hasAjax) {
-                        var elementForSpinner = angular.element(
-                            element[0].querySelector(scope.isMultiple ? '.select2-search-field' : '.select2-search')
-                        );
-
-                        elementForSpinner.append('<div class="pace"><div class="pace-activity"></div></div>');
-
-                        if (!scope.isMultiple) {
-                            elementForSpinner.append('<i class="ma-select-box-input-search-icon fa fa-search"></i>');
-                        }
-                    }
-
-                    // Set initial value.
-                    // Value is set inside timeout to ensure that we get the latest value.
-                    // If put outside timeout then there could be issues when value is set
-                    // from directive's link function, not from controller.
-                    setInternalValue(scope.value);
-
-                    selectElement = angular.element(element[0].querySelector('.select2-container'));
-                    selectData = selectElement.data().select2;
-                    labelElement = $('label[for="' + scope.id + '"]');
-                    switchButtonElement = angular.element(element[0].querySelector('.ma-button-switch'));
-                    resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset'));
-
-                    initializeSelect2Value();
-
-                    // Focus the component when label is clicked.
-                    if (labelElement.length > 0) {
-                        $($document).on('click', 'label[for="' + scope.id + '"]', function () {
-                            setFocus();
-                        });
-                    }
-
-                    if (scope.isMultiple) {
-                        selectData.search.on('focus', function () {
-                            element.addClass('ma-select-box-is-select-focused');
-                            scope.onFocus();
-                        });
-
-                        selectData.search.on('focusout', function (event) {
-                            onFocusout(event, 'select');
-                        });
-
-                        // Track that the select is hovered to prevent focus lost when a selected item
-                        // or selection is clicked.
-                        selectData.selection.on('mouseenter', function () {
-                            isSelectHovered = true;
-                        });
-
-                        selectData.selection.on('mouseleave', function () {
-                            isSelectHovered = false;
-                        });
-
-                        selectData.dropdown.on('mouseenter', function () {
-                            isSelectHovered = true;
-                        });
-
-                        selectData.dropdown.on('mouseleave', function () {
-                            isSelectHovered = false;
-                        });
-
-                        selectData.dropdown.on('click', function () {
-                            // Return focus to the input field for the next blur event to work properly.
-                            selectData.search.focus();
-                        });
-                    } else {
-                        // There is no focussser in multiple mode.
-                        selectData.focusser.on('focus', function () {
-                            scope.onFocus('select');
-                        });
-
-                        selectData.focusser.on('focusout', function (event) {
-                            onFocusout(event, 'select');
-                        });
-                    }
-
-                    selectData.dropdown.on('focus', '.select2-input', function () {
-                        // This is required for IE to keep focus when an item is selected
-                        // from the list using keyboard.
-                        isFocusInside = true;
-                        scope.onFocus();
-                    });
-
-                    selectData.dropdown.on('focusout', '.select2-input', function (event) {
-                        onFocusout(event, 'select');
-                    });
-
-                    switchButtonElement.focusout(function (event) {
-                        onFocusout(event);
-                    });
-
-                    resetButtonElement.focusout(function (event) {
-                        onFocusout(event);
-                    });
-
-                    // Detect if item in the list is hovered.
-                    // This is later used for triggering blur event correctly.
-                    selectData.dropdown.on('mouseenter', '.select2-result', function () {
-                        isFocusInside = true;
-                    });
-
-                    selectData.dropdown.on('mouseleave', '.select2-result', function () {
-                        isFocusInside = false;
-                    });
-
-                    // Detect if select2 mask is hovered.
-                    // This is later used for triggering blur event correctly in IE.
-                    $($document).on('mouseenter', '.select2-drop-mask', function () {
-                        if (!scope.isMultiple) {
-                            isFocusInside = true;
-                        }
-                    });
-
-                    scope.init({
-                        maInstance: scope.instance
-                    });
-                });
-            }
-        };
-    }]);})();
-(function(){/**
- * This is a clone of https://www.npmjs.com/package/angular-ui-select2 package, which is no longer maintained.
- * It was copied so we can maintain it ourselves.
- *
- * When AJAX mode is on, your value will be an object (or an array of objects) of the data used by Select2.
- * This change is so that you do not have to do an additional query yourself on top of Select2 own query.
- */
-angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('maSelect2', ['maSelect2Config', '$timeout', 'MaHelper', function (maSelect2Config, $timeout, MaHelper) {
-    // The configuration options passed to $.fn.select2(). See http://select2.github.io/select2/#documentation.
-    var options = {};
-
-    if (maSelect2Config) {
-        angular.extend(options, maSelect2Config);
-    }
-
-    return {
-        require: 'ngModel',
-        priority: 1,
-        compile: function (tElm, tAttrs) {
-            var watch,
-                repeatOption,
-                repeatAttr,
-                isSelect = tElm.is('select'),
-                isMultiple = angular.isDefined(tAttrs.multiple);
-
-            // Enable watching of the options dataset if in use
-            if (tElm.is('select')) {
-                repeatOption = tElm.find('optgroup[ng-repeat], optgroup[data-ng-repeat], option[ng-repeat], option[data-ng-repeat]');
-
-                if (repeatOption.length) {
-                    repeatAttr = repeatOption.attr('ng-repeat') || repeatOption.attr('data-ng-repeat');
-                    watch = $.trim(repeatAttr.split('|')[0]).split(' ').pop();
-                }
-            }
-
-            return function (scope, elm, attrs, controller) {
-                // instance-specific options
-                var opts = angular.extend({}, options, scope.$eval(attrs.maSelect2));
-
-                // Convert from Select2 view-model to Angular view-model.
-                var convertToAngularModel = function (select2_data) {
-                    var model;
-
-                    if (opts.simple_tags) {
-                        model = [];
-
-                        angular.forEach(select2_data, function (value, index) {
-                            model.push(value.id);
-                        });
-                    } else {
-                        model = select2_data;
-                    }
-
-                    return model;
-                };
-
-                // Convert from Angular view-model to Select2 view-model.
-                var convertToSelect2Model = function (angular_data) {
-                    var model = [];
-
-                    if (!angular_data) {
-                        return model;
-                    }
-
-                    if (opts.simple_tags) {
-                        model = [];
-
-                        angular.forEach(angular_data, function (value, index) {
-                            model.push({ 'id': value, 'text': value });
-                        });
-                    } else {
-                        model = angular_data;
-                    }
-
-                    return model;
-                };
-
-                if (isSelect) {
-                    // Use <select multiple> instead
-                    delete opts.multiple;
-                    delete opts.initSelection;
-                } else if (isMultiple) {
-                    opts.multiple = true;
-                }
-
-                if (controller) {
-                    // Watch the model for programmatic changes
-                    scope.$watch(tAttrs.ngModel, function (current, old) {
-                        if (!current) {
-                            return;
-                        }
-
-                        if (current === old) {
-                            return;
-                        }
-
-                        controller.$render();
-                    }, true);
-
-                    controller.$render = function () {
-                        if (isSelect) {
-                            elm.select2('val', controller.$viewValue);
-                        } else {
-                            if (opts.multiple) {
-                                controller.$isEmpty = function (value) {
-                                    return !value || value.length === 0;
-                                };
-
-                                var viewValue = controller.$viewValue;
-
-                                if (opts.ajax) {
-                                    viewValue = MaHelper.isJson(controller.$viewValue) ? JSON.parse(controller.$viewValue) : controller.$viewValue;
-
-                                    // It might be an id of the item first time, the next time it's a real item.
-                                    if (angular.isObject(viewValue)) {
-                                        elm.select2('data', viewValue);
-                                    }
-                                } else if (angular.isString(viewValue)) {
-                                    viewValue = viewValue.split(',');
-                                    elm.select2('data', convertToSelect2Model(viewValue));
-                                }
-                            } else {
-                                if (angular.isObject(controller.$viewValue)) {
-                                    elm.select2('data', controller.$viewValue);
-                                } else if (!controller.$viewValue) {
-                                    elm.select2('data', null);
-                                } else {
-                                    elm.select2('val', controller.$viewValue);
-                                }
-                            }
-                        }
-                    };
-
-                    // Watch the options dataset for changes
-                    if (watch) {
-                        scope.$watch(watch, function (newVal, oldVal, scope) {
-                            if (angular.equals(newVal, oldVal)) {
-                                return;
-                            }
-
-                            // Delayed so that the options have time to be rendered
-                            $timeout(function () {
-                                elm.select2('val', controller.$viewValue);
-
-                                // Refresh angular to remove the superfluous option
-                                controller.$render();
-
-                                if (newVal && !oldVal && controller.$setPristine) {
-                                    controller.$setPristine(true);
-                                }
-                            });
-                        });
-                    }
-
-                    // Update valid and dirty statuses
-                    controller.$parsers.push(function (value) {
-                        var div = elm.prev();
-                        div.toggleClass('ng-invalid', !controller.$valid)
-                            .toggleClass('ng-valid', controller.$valid)
-                            .toggleClass('ng-invalid-required', !controller.$valid)
-                            .toggleClass('ng-valid-required', controller.$valid)
-                            .toggleClass('ng-dirty', controller.$dirty)
-                            .toggleClass('ng-pristine', controller.$pristine);
-
-                        return value;
-                    });
-
-                    if (!isSelect) {
-                        // Set the view and model value and update the angular template manually for the ajax/multiple select2.
-                        elm.bind('change', function (e) {
-                            e.stopImmediatePropagation();
-
-                            if (scope.$$phase || scope.$root.$$phase) {
-                                return;
-                            }
-
-                            scope.$apply(function () {
-                                controller.$setViewValue(convertToAngularModel(elm.select2('data')));
-                            });
-                        });
-
-                        if (opts.initSelection) {
-                            var initSelection = opts.initSelection;
-
-                            opts.initSelection = function (element, callback) {
-                                initSelection(element, function (value) {
-                                    var isPristine = controller.$pristine;
-
-                                    // Don't set a value here for AJAX/multiple or it loops.
-                                    // Value setting for this case is handled in select-box.js.
-                                    if (!(opts.ajax && opts.multiple)) {
-                                        controller.$setViewValue(convertToAngularModel(value));
-                                    }
-
-                                    callback(value);
-
-                                    if (isPristine) {
-                                        controller.$setPristine();
-                                    }
-
-                                    elm.prev().toggleClass('ng-pristine', controller.$pristine);
-                                });
-                            };
-                        }
-                    }
-                }
-
-                elm.bind('$destroy', function () {
-                    elm.select2('destroy');
-                });
-
-                attrs.$observe('disabled', function (value) {
-                    elm.select2('enable', !value);
-                });
-
-                attrs.$observe('readonly', function (value) {
-                    elm.select2('readonly', !!value);
-                });
-
-                if (attrs.ngMultiple) {
-                    scope.$watch(attrs.ngMultiple, function (newVal) {
-                        attrs.$set('multiple', !!newVal);
-                        elm.select2(opts);
-                    });
-                }
-
-                // Initialize the plugin late so that the injected DOM does not disrupt the template compiler
-                $timeout(function () {
-                    elm.select2(opts);
-
-                    // Set initial value - I'm not sure about this but it seems to need to be there
-                    elm.select2('data', controller.$modelValue);
-
-                    // important!
-                    controller.$render();
-
-                    // Not sure if I should just check for !isSelect OR if I should check for 'tags' key
-                    if (!opts.initSelection && !isSelect) {
-                        var isPristine = controller.$pristine;
-                        controller.$pristine = false;
-                        controller.$setViewValue(convertToAngularModel(elm.select2('data')));
-
-                        if (isPristine) {
-                            controller.$setPristine();
-                        }
-
-                        elm.prev().toggleClass('ng-pristine', controller.$pristine);
-                    }
-                });
-            };
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
     return {
         restrict: 'E',
@@ -4885,64 +5165,108 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
+(function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'MaHelper', 'MaValidators', function ($timeout, $window, MaHelper, MaValidators) {
     return {
         restrict: 'E',
         scope: {
-            items: '=',
-            itemTemplate: '=',
-            itemTextField: '@',
-            itemValueField: '@',
+            id: '@',
             value: '=',
-            change: '&',
             isDisabled: '=',
+            fitContentHeight: '=',
+            isResizable: '=',
             isRequired: '=',
             validators: '=',
             instance: '=',
-            canUnselect: '='
+            change: '&',
+            blur: '&',
+            focus: '&'
         },
         replace: true,
         template: function () {
             var html = '\
-                <div class="ma-radio-button" ng-class="{\
-                        \'ma-radio-button-is-disabled\': isDisabled,\
-                        \'ma-radio-button-is-invalid\': !isValid,\
-                        \'ma-radio-button-is-touched\': isTouched,\
-                        \'ma-radio-button-can-unselect\': canUnselect\
-                    }">\
-                    <div class="ma-radio-button-item" ng-class="{\
-                            \'ma-radio-button-item-is-selected\': isItemSelected(item)\
-                        }" ng-style="{ width: (100 / items.length) + \'%\' }"\
-                        ng-repeat="item in items">\
-                        <ma-button\
-                            class="ma-button-radio"\
-                            text="{{getItemText(item)}}"\
-                            modifier="simple"\
-                            size="xs"\
-                            is-disabled="isDisabled"\
-                            click="onChange(item)">\
-                        </ma-button>\
-                    </div>\
-                </div>';
+            <div class="ma-text-area"\
+                ng-class="{\
+                    \'ma-text-area-is-disabled\': isDisabled,\
+                    \'ma-text-area-is-focused\': isFocused,\
+                    \'ma-text-area-fit-content-height\': fitContentHeight,\
+                    \'ma-text-area-is-invalid\': !isValid,\
+                    \'ma-text-area-is-touched\': isTouched\
+                }">\
+                <textarea class="ma-text-area-value"\
+                    type="text"\
+                    ng-focus="onFocus()"\
+                    ng-blur="onBlur()"\
+                    ng-keydown="onKeydown($event)"\
+                    ng-keyup="onKeyup($event)"\
+                    ng-disabled="isDisabled">\
+                </textarea>\
+            </div>';
 
             return html;
         },
         link: function (scope, element) {
-            var isObjectArray = scope.itemTextField || scope.itemValueField,
+            var valueElement = angular.element(element[0].querySelector('.ma-text-area-value')),
                 validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
-
+                hasIsNotEmptyValidator = false,
+                // Variables keydownValue and keyupValue help track touched state.
+                keydownValue,
+                keyupValue,
+                previousValue,
+                focusValue;
             scope.isFocused = false;
-            scope.isValid = true;
             scope.isTouched = false;
 
-            var validate = function (value) {
+            var getValueElementStyle = function () {
+                var style = $window.getComputedStyle(valueElement[0], null),
+                    properties = {},
+                    paddingHeight = parseInt(style.getPropertyValue('padding-top')) + parseInt(style.getPropertyValue('padding-bottom')),
+                    paddingWidth = parseInt(style.getPropertyValue('padding-left')) + parseInt(style.getPropertyValue('padding-right')),
+                    borderHeight = parseInt(style.getPropertyValue('border-top-width')) + parseInt(style.getPropertyValue('border-bottom-width')),
+                    borderWidth = parseInt(style.getPropertyValue('border-left-width')) + parseInt(style.getPropertyValue('border-right-width'));
+
+                properties.width = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('width')) - paddingWidth;
+                properties.height = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('height')) - paddingHeight;
+                properties.paddingHeight = paddingHeight;
+                properties.paddingWidth = paddingWidth;
+                properties.borderHeight = borderHeight;
+                properties.borderWidth = borderWidth;
+                properties.lineHeight = style.getPropertyValue('line-height');
+
+                // IE and Firefox do not support 'font' property, so we need to get it ourselves.
+                properties.font = style.getPropertyValue('font-style') + ' ' +
+                    style.getPropertyValue('font-variant') + ' ' +
+                    style.getPropertyValue('font-weight') + ' ' +
+                    style.getPropertyValue('font-size') + ' ' +
+                    style.getPropertyValue('font-height') + ' ' +
+                    style.getPropertyValue('font-family');
+
+                return properties;
+            };
+
+            var resize = function () {
+                if (!scope.fitContentHeight) {
+                    return;
+                }
+
+                var valueElementStyle = getValueElementStyle(),
+                    textHeight = MaHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
+                    height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
+
+                if (height < 40) {
+                    height = 30;
+                }
+
+                valueElement[0].style.height = height + 'px';
+                element[0].style.height = height + 'px';
+            };
+
+            var validate = function () {
                 scope.isValid = true;
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(value)) {
+                        if (!validators[i].validate(valueElement.val())) {
                             scope.isValid = false;
                             break;
                         }
@@ -4950,69 +5274,22 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 }
             };
 
-            scope.getItemText = function (item) {
-                if (scope.itemTemplate) {
-                    return scope.itemTemplate(item);
-                } else if (!isObjectArray) {
-                    return item;
-                } else if (scope.itemTextField) {
-                    return item[scope.itemTextField];
-                }
-            };
+            var changeValue = function () {
+                var value = valueElement.val();
 
-            scope.isItemSelected = function (item) {
-                if (!isObjectArray) {
-                    return item === scope.value;
-                } else if (scope.itemValueField) {
-                    return item && scope.value &&
-                        item[scope.itemValueField] === scope.value[scope.itemValueField];
-                }
-
-                return false;
-            };
-
-            scope.onChange = function (item) {
-                if (scope.isDisabled) {
+                if (previousValue === value) {
                     return;
                 }
 
-                var oldValue = scope.value,
-                    hasChanged = true;
-                scope.value = item;
+                previousValue = scope.value;
+                scope.value = value;
 
-                // Check that value has changed.
-                if (!isObjectArray) {
-                    hasChanged = oldValue !== item;
-                } else if (scope.itemValueField) {
-                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item[scope.itemValueField])) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
-                    }
-                } else {
-                    // Compare objects if itemValueField is not provided.
-                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item)) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
-                    }
-                }
-
-                // Remove selection if the same item is selected.
-                if (scope.canUnselect && !hasChanged) {
-                    scope.value = null;
-                }
-
-                if (hasChanged || (scope.canUnselect && !hasChanged)) {
-                    $timeout(function () {
-                        validate(scope.value);
-
-                        scope.change({
-                            maValue: scope.value,
-                            maOldValue: oldValue
-                        });
+                $timeout(function () {
+                    scope.change({
+                        maValue: scope.value,
+                        maOldValue: previousValue
                     });
-                }
+                });
             };
 
             // Set up validators.
@@ -5031,6 +5308,140 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 isRequired = true;
             }
 
+            scope.onFocus = function () {
+                scope.isFocused = true;
+                focusValue = scope.value;
+
+                scope.focus({
+                    maValue: scope.value
+                });
+            };
+
+            scope.onBlur = function () {
+                scope.isFocused = false;
+                scope.isTouched = true;
+                validate();
+
+                scope.blur({
+                    maValue: scope.value,
+                    maOldValue: focusValue,
+                    maHasValueChanged: focusValue !== scope.value
+                });
+            };
+
+            scope.onKeydown = function (event) {
+                // Ignore tab key.
+                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
+                    return;
+                }
+
+                keydownValue = angular.element(event.target).val();
+            };
+
+            scope.onKeyup = function (event) {
+                // Ignore tab key.
+                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
+                    return;
+                }
+
+                keyupValue = angular.element(event.target).val();
+
+                if (keydownValue !== keyupValue) {
+                    scope.isTouched = true;
+                }
+            };
+
+            // Use input event to support value change from Enter key, and contextual menu,
+            // e.g. mouse right click + Cut/Copy/Paste etc.
+            valueElement.on('input', function (event) {
+                var hasChanged = false;
+                keyupValue = angular.element(event.target).val();
+
+                if (keydownValue !== keyupValue) {
+                    hasChanged = true;
+                }
+
+                // Change value after a timeout while the user is typing.
+                if (!hasChanged) {
+                    return;
+                }
+
+                validate();
+                resize();
+
+                if (scope.isValid) {
+                    scope.$apply(function () {
+                        changeValue();
+                    });
+                }
+            });
+
+            angular.element($window).on('resize', function () {
+                resize();
+            });
+
+            $timeout(function () {
+                resize();
+
+                if (scope.isResizable === false) {
+                    valueElement.css('resize', 'none');
+                }
+
+                // Move id to input.
+                element.removeAttr('id');
+                valueElement.attr('id', scope.id);
+
+                // If TextArea is hidden initially with ng-show then after appearing
+                // it's height is calculated incorectly. This code fixes the issue.
+                if (scope.fitContentHeight) {
+                    var hiddenParent = $(element[0]).closest('.ng-hide[ng-show]');
+
+                    if (hiddenParent.length === 1) {
+                        var parentScope = hiddenParent.scope();
+
+                        parentScope.$watch(hiddenParent.attr('ng-show'), function (isVisible) {
+                            if (isVisible) {
+                                // Wait for the hidden element to appear first.
+                                $timeout(function () {
+                                    resize();
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+
+            scope.$watch('value', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                scope.isValid = true;
+                scope.isTouched = false;
+
+                // IE 11.0 version moves the caret at the end when textarea value is fully replaced.
+                // In IE 11.126+ the issue has been fixed.
+                var caretPosition = valueElement.prop('selectionStart');
+                valueElement.val(newValue);
+
+                // Restore caret position if text area is visible.
+                var isVisible = $(element).is(':visible');
+
+                if (isVisible) {
+                    valueElement.prop({
+                        selectionStart: caretPosition,
+                        selectionEnd: caretPosition
+                    });
+                }
+
+                resize();
+            });
+
+            // Set initial value.
+            valueElement.val(scope.value);
+            validate();
+            previousValue = scope.value;
+
             // Prepare API instance.
             if (scope.instance) {
                 scope.instance.isInitialized = true;
@@ -5039,8 +5450,10 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     return scope.isValid;
                 };
 
-                scope.instance.validate = function () {
-                    validate(scope.value);
+                scope.instance.focus = function () {
+                    if (!scope.isFocused) {
+                        valueElement.focus();
+                    }
                 };
             }
         }
@@ -5718,108 +6131,107 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
             }
         };
     }]);})();
-(function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'MaHelper', 'MaValidators', function ($timeout, $window, MaHelper, MaValidators) {
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
     return {
         restrict: 'E',
         scope: {
-            id: '@',
+            text: '@',
             value: '=',
             isDisabled: '=',
-            fitContentHeight: '=',
-            isResizable: '=',
+            change: '&',
+            size: '@',
+            rtl: '=',
             isRequired: '=',
             validators: '=',
             instance: '=',
-            change: '&',
-            blur: '&',
-            focus: '&'
         },
         replace: true,
         template: function () {
             var html = '\
-            <div class="ma-text-area"\
+            <div class="ma-check-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
+                ng-click="onChange()"\
                 ng-class="{\
-                    \'ma-text-area-is-disabled\': isDisabled,\
-                    \'ma-text-area-is-focused\': isFocused,\
-                    \'ma-text-area-fit-content-height\': fitContentHeight,\
-                    \'ma-text-area-is-invalid\': !isValid,\
-                    \'ma-text-area-is-touched\': isTouched\
+                    \'ma-check-box-is-checked\': value === true,\
+                    \'ma-check-box-is-disabled\': isDisabled,\
+                    \'ma-check-box-has-text\': hasText,\
+                    \'ma-check-box-rtl\': rtl,\
+                    \'ma-check-box-is-focused\': isFocused,\
+                    \'ma-check-box-is-invalid\': !isValid,\
+                    \'ma-check-box-is-touched\': isTouched\
                 }">\
-                <textarea class="ma-text-area-value"\
-                    type="text"\
-                    ng-focus="onFocus()"\
-                    ng-blur="onBlur()"\
-                    ng-keydown="onKeydown($event)"\
-                    ng-keyup="onKeyup($event)"\
-                    ng-disabled="isDisabled">\
-                </textarea>\
+                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
+                <div class="ma-check-box-inner"></div>\
+                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
             </div>';
 
             return html;
         },
-        link: function (scope, element) {
-            var valueElement = angular.element(element[0].querySelector('.ma-text-area-value')),
-                validators = scope.validators ? angular.copy(scope.validators) : [],
+        link: function (scope, element, attributes) {
+            var validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false,
-                // Variables keydownValue and keyupValue help track touched state.
-                keydownValue,
-                keyupValue,
-                previousValue,
-                focusValue;
+                hasIsNotEmptyValidator = false;
+
+            var setTabindex = function () {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
+            var setText = function () {
+                scope.hasText = scope.text ? true : false;
+            };
+
+            scope._size = scope.size ? scope.size : 'xs';
+            scope.cssClass = ' ma-check-box-' + scope._size;
             scope.isFocused = false;
+            scope.isValid = true;
             scope.isTouched = false;
 
-            var getValueElementStyle = function () {
-                var style = $window.getComputedStyle(valueElement[0], null),
-                    properties = {},
-                    paddingHeight = parseInt(style.getPropertyValue('padding-top')) + parseInt(style.getPropertyValue('padding-bottom')),
-                    paddingWidth = parseInt(style.getPropertyValue('padding-left')) + parseInt(style.getPropertyValue('padding-right')),
-                    borderHeight = parseInt(style.getPropertyValue('border-top-width')) + parseInt(style.getPropertyValue('border-bottom-width')),
-                    borderWidth = parseInt(style.getPropertyValue('border-left-width')) + parseInt(style.getPropertyValue('border-right-width'));
+            var getControllerScope = function () {
+                var valuePropertyParts = null,
+                    controllerScope = null,
+                    initialScope = scope.$parent,
+                    property = attributes.value;
 
-                properties.width = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('width')) - paddingWidth;
-                properties.height = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('height')) - paddingHeight;
-                properties.paddingHeight = paddingHeight;
-                properties.paddingWidth = paddingWidth;
-                properties.borderHeight = borderHeight;
-                properties.borderWidth = borderWidth;
-                properties.lineHeight = style.getPropertyValue('line-height');
-
-                // IE and Firefox do not support 'font' property, so we need to get it ourselves.
-                properties.font = style.getPropertyValue('font-style') + ' ' +
-                    style.getPropertyValue('font-variant') + ' ' +
-                    style.getPropertyValue('font-weight') + ' ' +
-                    style.getPropertyValue('font-size') + ' ' +
-                    style.getPropertyValue('font-height') + ' ' +
-                    style.getPropertyValue('font-family');
-
-                return properties;
-            };
-
-            var resize = function () {
-                if (!scope.fitContentHeight) {
-                    return;
+                // In case of a nested property binding like 'company.port.id'.
+                if (property.indexOf('.') !== -1) {
+                    valuePropertyParts = property.split('.');
+                    property = valuePropertyParts[0];
                 }
 
-                var valueElementStyle = getValueElementStyle(),
-                    textHeight = MaHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
-                    height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
-
-                if (height < 40) {
-                    height = 30;
+                while (initialScope && !controllerScope) {
+                    if (initialScope.hasOwnProperty(property)) {
+                        controllerScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
                 }
 
-                valueElement[0].style.height = height + 'px';
-                element[0].style.height = height + 'px';
+                // Use parent scope by default if search is unsuccessful.
+                return controllerScope || scope.$parent;
             };
+
+            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
+            // as the value will be stored by Angular on ng-if scope.
+            var controllerScope = getControllerScope();
 
             var validate = function () {
                 scope.isValid = true;
+                scope.isTouched = true;
+
+                // Remove 'false' value for 'IsNotEmpty' to work correctly.
+                var value = scope.value === false ? null : scope.value;
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(valueElement.val())) {
+                        var validator = validators[i];
+
+                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
                             scope.isValid = false;
                             break;
                         }
@@ -5827,23 +6239,74 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 }
             };
 
-            var changeValue = function () {
-                var value = valueElement.val();
-
-                if (previousValue === value) {
+            scope.onChange = function () {
+                if (scope.isDisabled) {
                     return;
                 }
 
-                previousValue = scope.value;
+                // Handle nested properties or function calls with $parse service.
+                // This is related to a case when the component is located inside ng-if,
+                // but it works for other cases as well.
+                var valueGetter = $parse(attributes.value),
+                    valueSetter = valueGetter.assign,
+                    value = !valueGetter(controllerScope);
+
                 scope.value = value;
+                valueSetter(controllerScope, value);
+                validate();
 
                 $timeout(function () {
                     scope.change({
-                        maValue: scope.value,
-                        maOldValue: previousValue
+                        maValue: scope.value
                     });
                 });
             };
+
+            scope.onFocus = function () {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                scope.isFocused = false;
+                validate();
+            };
+
+            scope.onKeypress = function (event) {
+                if (event.keyCode === MaHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (!scope.isDisabled) {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            scope.$watch('isDisabled', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            scope.$watch('text', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setText();
+            });
 
             // Set up validators.
             for (var i = 0; i < validators.length; i++) {
@@ -5861,140 +6324,6 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                 isRequired = true;
             }
 
-            scope.onFocus = function () {
-                scope.isFocused = true;
-                focusValue = scope.value;
-
-                scope.focus({
-                    maValue: scope.value
-                });
-            };
-
-            scope.onBlur = function () {
-                scope.isFocused = false;
-                scope.isTouched = true;
-                validate();
-
-                scope.blur({
-                    maValue: scope.value,
-                    maOldValue: focusValue,
-                    maHasValueChanged: focusValue !== scope.value
-                });
-            };
-
-            scope.onKeydown = function (event) {
-                // Ignore tab key.
-                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
-                    return;
-                }
-
-                keydownValue = angular.element(event.target).val();
-            };
-
-            scope.onKeyup = function (event) {
-                // Ignore tab key.
-                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
-                    return;
-                }
-
-                keyupValue = angular.element(event.target).val();
-
-                if (keydownValue !== keyupValue) {
-                    scope.isTouched = true;
-                }
-            };
-
-            // Use input event to support value change from Enter key, and contextual menu,
-            // e.g. mouse right click + Cut/Copy/Paste etc.
-            valueElement.on('input', function (event) {
-                var hasChanged = false;
-                keyupValue = angular.element(event.target).val();
-
-                if (keydownValue !== keyupValue) {
-                    hasChanged = true;
-                }
-
-                // Change value after a timeout while the user is typing.
-                if (!hasChanged) {
-                    return;
-                }
-
-                validate();
-                resize();
-
-                if (scope.isValid) {
-                    scope.$apply(function () {
-                        changeValue();
-                    });
-                }
-            });
-
-            angular.element($window).on('resize', function () {
-                resize();
-            });
-
-            $timeout(function () {
-                resize();
-
-                if (scope.isResizable === false) {
-                    valueElement.css('resize', 'none');
-                }
-
-                // Move id to input.
-                element.removeAttr('id');
-                valueElement.attr('id', scope.id);
-
-                // If TextArea is hidden initially with ng-show then after appearing
-                // it's height is calculated incorectly. This code fixes the issue.
-                if (scope.fitContentHeight) {
-                    var hiddenParent = $(element[0]).closest('.ng-hide[ng-show]');
-
-                    if (hiddenParent.length === 1) {
-                        var parentScope = hiddenParent.scope();
-
-                        parentScope.$watch(hiddenParent.attr('ng-show'), function (isVisible) {
-                            if (isVisible) {
-                                // Wait for the hidden element to appear first.
-                                $timeout(function () {
-                                    resize();
-                                });
-                            }
-                        });
-                    }
-                }
-            });
-
-            scope.$watch('value', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                scope.isValid = true;
-                scope.isTouched = false;
-
-                // IE 11.0 version moves the caret at the end when textarea value is fully replaced.
-                // In IE 11.126+ the issue has been fixed.
-                var caretPosition = valueElement.prop('selectionStart');
-                valueElement.val(newValue);
-
-                // Restore caret position if text area is visible.
-                var isVisible = $(element).is(':visible');
-
-                if (isVisible) {
-                    valueElement.prop({
-                        selectionStart: caretPosition,
-                        selectionEnd: caretPosition
-                    });
-                }
-
-                resize();
-            });
-
-            // Set initial value.
-            valueElement.val(scope.value);
-            validate();
-            previousValue = scope.value;
-
             // Prepare API instance.
             if (scope.instance) {
                 scope.instance.isInitialized = true;
@@ -6003,12 +6332,13 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     return scope.isValid;
                 };
 
-                scope.instance.focus = function () {
-                    if (!scope.isFocused) {
-                        valueElement.focus();
-                    }
+                scope.instance.validate = function () {
+                    validate();
                 };
             }
+
+            setTabindex();
+            setText();
         }
     };
 }]);})();
@@ -6498,333 +6828,3 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
     //     });
     // }]);
 })();
-(function(){angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$timeout', '$sce', 'MaValidators', function (MaHelper, $timeout, $sce, MaValidators) {
-    var radioBoxes = {};
-
-    return {
-        restrict: 'E',
-        scope: {
-            item: '=',
-            itemTemplate: '=',
-            itemTextField: '@',
-            itemValueField: '@',
-            value: '=',
-            isDisabled: '=',
-            hideText: '=',
-            change: '&',
-            size: '@',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
-            id: '@',
-            modifier: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-radio-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-radio-box-is-checked\': isChecked(),\
-                    \'ma-radio-box-is-disabled\': isDisabled,\
-                    \'ma-radio-box-has-text\': hasText(),\
-                    \'ma-radio-box-is-focused\': isFocused,\
-                    \'ma-radio-box-is-invalid\': !isValid,\
-                    \'ma-radio-box-is-touched\': isTouched\
-                }">\
-                <span class="ma-radio-box-text" ng-bind-html="getItemText()"></span>\
-                <div class="ma-radio-box-inner"></div>\
-                <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            var valuePropertyParts = null,
-                isStringArray = !scope.itemTextField && !scope.itemValueField,
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
-
-            var setModifiers = function (oldModifiers) {
-                // Remove previous modifiers first.
-                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
-                    oldModifiers = oldModifiers.split(' ');
-
-                    for (var i = 0; i < oldModifiers.length; i++) {
-                        element.removeClass('ma-radio-box-' + oldModifiers[i]);
-                    }
-                }
-
-                var modifiers = '';
-
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
-                    modifiers = scope.modifier.split(' ');
-                }
-
-                for (var j = 0; j < modifiers.length; j++) {
-                    element.addClass('ma-radio-box-' + modifiers[j]);
-                }
-            };
-
-            var setTabindex = function () {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
-
-            var getControllerScope = function () {
-                var controllerScope = null,
-                    initialScope = scope.$parent,
-                    property = attributes.value;
-
-                // In case of a nested property binding like 'company.port.id'.
-                if (property.indexOf('.') !== -1) {
-                    valuePropertyParts = property.split('.');
-                    property = valuePropertyParts[0];
-                }
-
-                while (initialScope && !controllerScope) {
-                    if (initialScope.hasOwnProperty(property)) {
-                        controllerScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                return controllerScope;
-            };
-
-            var controllerScope = getControllerScope();
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-radio-box-' + scope._size;
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            if (scope.id) {
-                if (!radioBoxes[scope.id]) {
-                    radioBoxes[scope.id] = [];
-                }
-
-                radioBoxes[scope.id].push(scope);
-            }
-
-            var validate = function (value) {
-                if (radioBoxes[scope.id]) {
-                    // Validate a group of components.
-                    for (var i = 0; i < radioBoxes[scope.id].length; i++) {
-                        var radioBox = radioBoxes[scope.id][i];
-                        radioBox.isTouched = true;
-                        radioBox.validateThis(radioBox.value);
-                    }
-                } else {
-                    // Validate only the current component.
-                    scope.isTouched = true;
-                    scope.validateThis(value);
-                }
-            };
-
-            scope.validateThis = function (value) {
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.getItemText = function () {
-                if (scope.hideText) {
-                    return MaHelper.html.nbsp;
-                }
-
-                var text;
-
-                if (scope.itemTemplate) {
-                    text = scope.itemTemplate(scope.item);
-                } else if (isStringArray) {
-                    text = scope.item;
-                } else if (scope.itemTextField) {
-                    text = scope.item[scope.itemTextField];
-                }
-
-                if (!angular.isString(text) || !text) {
-                    text = MaHelper.html.nbsp;
-                }
-
-                return $sce.trustAsHtml(text);
-            };
-
-            scope.hasText = function () {
-                return scope.getItemText() !== MaHelper.html.nbsp;
-            };
-
-            scope.isChecked = function () {
-                if (isStringArray) {
-                    return scope.item === scope.value;
-                } else if (scope.itemValueField) {
-                    return scope.item && scope.value &&
-                        scope.item[scope.itemValueField] === scope.value[scope.itemValueField];
-                }
-
-                return false;
-            };
-
-            scope.onChange = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                var valueProperty,
-                    oldValue = scope.value;
-                scope.value = scope.item;
-
-                if (controllerScope && valuePropertyParts) {
-                    // When the component is inside ng-repeat normal binding like
-                    // value="port" won't work.
-                    // This is to workaround the problem.
-                    valueProperty = controllerScope;
-
-                    // Handle nested property binding.
-                    for (var i = 0; i < valuePropertyParts.length; i++) {
-                        valueProperty = valueProperty[valuePropertyParts[i]];
-                    }
-
-                    valueProperty = scope.item;
-                } else {
-                    valueProperty = controllerScope[attributes.value];
-                    controllerScope[attributes.value] = scope.item;
-                }
-
-                // Check that value has changed.
-                var hasChanged = true;
-
-                if (isStringArray) {
-                    hasChanged = oldValue !== scope.item;
-                } else if (scope.itemValueField) {
-                    if (!oldValue && scope.item[scope.itemValueField]) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = oldValue[scope.itemValueField] !== scope.item[scope.itemValueField];
-                    }
-                } else {
-                    // Compare objects if itemValueField is not provided.
-                    if (!oldValue && scope.item) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(scope.item);
-                    }
-                }
-
-                if (hasChanged) {
-                    $timeout(function () {
-                        validate(scope.value);
-
-                        scope.change({
-                            maValue: scope.item,
-                            maOldValue: oldValue
-                        });
-                    });
-                }
-            };
-
-            scope.onFocus = function () {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                scope.isFocused = false;
-
-                validate(scope.value);
-            };
-
-            scope.onKeypress = function (event) {
-                if (event.keyCode === MaHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (!scope.isDisabled && !scope.isChecked()) {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            scope.$watch('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            scope.$watch('modifier', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setModifiers(oldValue);
-            });
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate(scope.value);
-                };
-            }
-
-            $timeout(function () {
-                // Now id is used only for grouping radioBoxes, so remove it from the element.
-                if (scope.id) {
-                    element.removeAttr('id');
-                }
-
-                setModifiers();
-            });
-
-            setTabindex();
-        }
-    };
-}]);})();

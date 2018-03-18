@@ -213,7 +213,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$ti
                 if (isStringArray) {
                     hasChanged = oldValue !== scope.item;
                 } else if (scope.itemValueField) {
-                    if (!oldValue && scope.item[scope.itemValueField]) {
+                    if (!oldValue && !MaHelper.isNullOrWhiteSpace(scope.item[scope.itemValueField])) {
                         hasChanged = true;
                     } else {
                         hasChanged = oldValue[scope.itemValueField] !== scope.item[scope.itemValueField];

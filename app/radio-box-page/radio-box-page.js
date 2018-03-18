@@ -12,7 +12,7 @@ function radioBoxPageController($scope, $timeout, helper) {
     $scope.port2 = $scope.ports2[1];
     $scope.port3 = $scope.ports1[1];
     $scope.port4 = $scope.ports1[1];
-    $scope.port5 = $scope.ports2[1];
+    $scope.port5 = null; // $scope.ports2[1];
     $scope.port6 = $scope.ports1[1];
     $scope.port7 = $scope.ports2[1];
     $scope.port7ItemTemplate = function (port) {
