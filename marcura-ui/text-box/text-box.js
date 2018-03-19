@@ -27,6 +27,7 @@ angular.module('marcuraUI.components')
                 max: '=',
                 min: '=',
                 decimals: '=',
+                useFormat: '=',
                 reset: '&',
                 defaultValue: '='
             },
@@ -107,7 +108,8 @@ angular.module('marcuraUI.components')
                     hasDefaultValue = attributes.defaultValue !== undefined,
                     defaultValue = MaHelper.isNullOrUndefined(scope.defaultValue) ? '' : scope.defaultValue,
                     hasMin = typeof scope.min === 'number',
-                    hasMax = typeof scope.max === 'number';
+                    hasMax = typeof scope.max === 'number',
+                    useFormat = scope.useFormat === undefined ? true : scope.useFormat;
 
                 if (scope.type === 'number') {
                     defaultValue = typeof scope.defaultValue === 'number' ? scope.defaultValue : null;
@@ -259,7 +261,13 @@ angular.module('marcuraUI.components')
 
                     if (scope.type === 'number') {
                         value = typeof value === 'number' ? value : Number(value);
-                        formattedValue = addCommasToNumber(value.toFixed(decimals));
+
+                        if (useFormat) {
+                            formattedValue = addCommasToNumber(value.toFixed(decimals));
+                        } else {
+                            // Remove leading 0.
+                            formattedValue = value.toFixed(0);
+                        }
                     }
 
                     return formattedValue;
@@ -375,7 +383,8 @@ angular.module('marcuraUI.components')
 
                         if (scope.type === 'number' && !MaHelper.isNullOrUndefined(scope.value) && scope.isValid) {
                             // Remove commas from the number.
-                            valueElement.val(scope.value.toFixed(decimals));
+                            var value = scope.value.toFixed(useFormat ? decimals : 0);
+                            valueElement.val(value);
                         }
                     }
 

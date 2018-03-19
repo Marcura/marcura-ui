@@ -12,6 +12,7 @@ function textBoxPageController($scope) {
     $scope.number2 = 2500.47;
     $scope.number2Min = 1000.50;
     $scope.number2Max = 5000.50;
+    $scope.number4 = 8902732;
 
     $scope.change = function (value, oldValue, property) {
         console.log('change');
