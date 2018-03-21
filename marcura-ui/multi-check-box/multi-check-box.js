@@ -160,6 +160,10 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
             if (scope.instance) {
                 scope.instance.isInitialized = true;
 
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
                 scope.instance.isValid = function () {
                     return scope.isValid;
                 };

@@ -783,6 +783,10 @@ angular.module('marcuraUI.components')
                 if (scope.instance) {
                     scope.instance.isInitialized = true;
 
+                    scope.instance.isEditor = function () {
+                        return true;
+                    };
+
                     scope.instance.validate = function () {
                         scope.isTouched = true;
 

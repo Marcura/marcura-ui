@@ -844,6 +844,10 @@ angular.module('marcuraUI.components')
                 if (scope.instance) {
                     scope.instance.isInitialized = true;
 
+                    scope.instance.isEditor = function () {
+                        return true;
+                    };
+
                     scope.instance.switchToSelectMode = function () {
                         if (scope.isAddMode) {
                             scope.toggleMode('select');
