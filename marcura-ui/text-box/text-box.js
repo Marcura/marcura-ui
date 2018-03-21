@@ -19,6 +19,7 @@ angular.module('marcuraUI.components')
                 changeWhenIsInvalid: '=',
                 blur: '&',
                 focus: '&',
+                validate: '&',
                 changeTimeout: '=',
                 canReset: '=',
                 placeholder: '@',
@@ -130,9 +131,10 @@ angular.module('marcuraUI.components')
                     return scope.type === 'number' ? parseNumber(value) : value;
                 };
 
-                var validate = function () {
+                var validate = function (triggerEvent) {
                     scope.isValid = true;
                     failedValidator = null;
+                    triggerEvent = triggerEvent !== undefined ? triggerEvent : true;
                     // Use raw value for validators.
                     var value = valueElement.val();
 
@@ -148,6 +150,10 @@ angular.module('marcuraUI.components')
                                 break;
                             }
                         }
+                    }
+
+                    if (triggerEvent !== false) {
+                        triggerValidate(value);
                     }
                 };
 
@@ -181,6 +187,16 @@ angular.module('marcuraUI.components')
                         scope.change({
                             maValue: value,
                             maOldValue: oldValue
+                        });
+                    });
+                };
+
+                var triggerValidate = function (value) {
+                    // Postpone the event to allow scope.value to be updated, so
+                    // the event can operate relevant value.
+                    $timeout(function () {
+                        scope.validate({
+                            maValue: value
                         });
                     });
                 };
@@ -564,7 +580,9 @@ angular.module('marcuraUI.components')
                     var caretPosition = valueElement.prop('selectionStart');
                     setPreviousValue(newValue);
                     valueElement.val(formatValue(newValue));
-                    validate();
+
+                    // Pass false as first parameter to avoid loop from triggering validate event.
+                    validate(false);
 
                     // Restore caret position.
                     if (scope.isValueFocused) {
@@ -651,7 +669,10 @@ angular.module('marcuraUI.components')
 
                     scope.instance.validate = function () {
                         scope.isTouched = true;
-                        validate();
+
+                        // Prevent loop that might occur if validate method is invoked
+                        // from validate event from outside.
+                        validate(false);
                     };
 
                     scope.instance.isValid = function () {

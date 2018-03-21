@@ -28,4 +28,8 @@ function textBoxPageController($scope) {
     $scope.focus = function (value, property) {
         console.log('focus: event:', value, ' scope: ', $scope[property]);
     };
+
+    $scope.validate = function (value, property) {
+        console.log('validate: event:', value, ' scope: ', $scope[property]);
+    };
 }
