@@ -696,6 +696,10 @@ angular.module('marcuraUI.components')
                             scope.isTouched = false;
                         });
                     };
+
+                    scope.instance.isTouched = function () {
+                        return scope.isTouched;
+                    };
                 }
             }
         };
