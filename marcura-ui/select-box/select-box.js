@@ -184,7 +184,7 @@ angular.module('marcuraUI.components')
                     }
                 }
             }],
-            link: function (scope, element) {
+            link: function (scope, element, attrs) {
                 var textElement = angular.element(element[0].querySelector('.ma-select-box-text')),
                     previousAddedItem = null,
                     switchButtonElement,
@@ -373,9 +373,16 @@ angular.module('marcuraUI.components')
                                 if (scope.getItemValue(item) !== null) {
                                     // Item is an object.
                                     scope.selectedItem = scope.getItemValue(item);
-                                } else if (!isObjectArray && (typeof item === 'string' || typeof item === 'number')) {
+                                } else if (!isObjectArray &&
+                                    (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean')
+                                ) {
                                     // Item is a primitive type.
-                                    scope.selectedItem = item;
+                                    if (typeof item === 'boolean') {
+                                        // Select2 expects string.
+                                        scope.selectedItem = item.toString();
+                                    } else {
+                                        scope.selectedItem = item;
+                                    }
                                 }
                             }
 
@@ -700,7 +707,7 @@ angular.module('marcuraUI.components')
                             }
                         }
 
-                        if (!item && !scope.value) {
+                        if (MaHelper.isNullOrWhiteSpace(item) && !scope.value) {
                             return;
                         }
 

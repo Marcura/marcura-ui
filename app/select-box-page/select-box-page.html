@@ -30,6 +30,17 @@
         <pre>{{year || 'null'}}</pre>
     </div>
     <div class="nodes-item">
+        <h2>Items as booleans</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box items="[true, false]" value="port18" item-template="yesNoItemTemplate"
+            change="change(maValue, maOldValue, 'port18')" can-reset="true">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{port18}}</pre>
+    </div>
+    <div class="nodes-item">
         <h2>Items as objects</h2>
     </div>
     <div class="nodes-item">

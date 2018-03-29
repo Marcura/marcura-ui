@@ -68,6 +68,10 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
             };
         }
     };
+    $scope.yesNoItemTemplate = function (item) {
+        return item ? 'Yes' : 'No';
+    };
+    $scope.port18 = false;
 
     $scope.change = function (value, oldValue, property) {
         console.log('change');
