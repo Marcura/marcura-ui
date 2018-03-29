@@ -7,7 +7,8 @@
 
 .ma-tooltip {
     position: absolute;
-    z-index: 1070;
+    /*Use a lower z-index, so that tooltip doesn't overlap modal that has 1050 z-index.*/
+    z-index: 1049;
     display: block;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-style: normal;
