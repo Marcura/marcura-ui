@@ -68,8 +68,33 @@ function helper($window) {
             }];
         },
 
-        getPorts: function () {
-            return $window.marcuraApp.ports;
+        getPorts: function (portsNumber) {
+            var ports = [];
+
+            if (portsNumber > 0) {
+                var i = 0;
+
+                while (i < portsNumber) {
+                    for (var j = 0; j < $window.marcuraApp.ports.length; j++) {
+                        if (i < portsNumber) {
+                            var port = angular.copy($window.marcuraApp.ports[j]);
+
+                            if (i >= $window.marcuraApp.ports.length) {
+                                port.id += i;
+                                port.name += ' (' + port.id + ')';
+                            }
+
+                            ports.push(port);
+                        }
+
+                        i++;
+                    }
+                }
+            } else {
+                ports = $window.marcuraApp.ports;
+            }
+
+            return ports;
         },
 
         getYears: function (startYear) {

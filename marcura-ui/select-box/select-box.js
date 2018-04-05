@@ -1,13 +1,4 @@
 angular.module('marcuraUI.components')
-    .filter('maSelectBoxOrderBy', ['orderByFilter', function (orderByFilter) {
-        return function (items, orderByExpression) {
-            if (orderByExpression) {
-                return orderByFilter(items, orderByExpression);
-            }
-
-            return items;
-        };
-    }])
     .directive('maSelectBox', ['$document', '$timeout', 'MaHelper', function ($document, $timeout, MaHelper) {
         return {
             restrict: 'E',
@@ -30,13 +21,12 @@ angular.module('marcuraUI.components')
                 addItemTooltip: '@',
                 showAddItemTooltip: '=',
                 instance: '=',
-                orderBy: '=',
                 ajax: '=',
                 canReset: '=',
                 placeholder: '@',
                 textPlaceholder: '@',
                 isMultiple: '=',
-                storeItemValueOnly: '='
+                type: '@'
             },
             replace: true,
             template: function (element, attributes) {
@@ -54,9 +44,9 @@ angular.module('marcuraUI.components')
                             \'ma-select-box-mode-add\': isAddMode,\
                             \'ma-select-box-mode-select\': !isAddMode,\
                             \'ma-select-box-can-reset\': canReset,\
-                            \'ma-select-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
+                            \'ma-select-box-is-reset-disabled\': canReset && !isDisabled && !_hasValue,\
                             \'ma-select-box-is-loading\': isLoading,\
-                            \'ma-select-box-has-value\': hasValue()\
+                            \'ma-select-box-has-value\': _hasValue\
                         }">\
                         <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
                             <div class="pace">\
@@ -81,8 +71,8 @@ angular.module('marcuraUI.components')
                             ng-change="onChange()"\
                             placeholder="{{placeholder}}">\
                             <option></option>\
-                            <option ng-repeat="item in _items | maSelectBoxOrderBy:orderBy" value="{{getOptionValue(item)}}">\
-                                {{formatItem(item)}}\
+                            <option ng-repeat="item in _items" value="{{item[_itemValueField]}}">\
+                                {{item.text}}\
                             </option>\
                         </select>';
                 }
@@ -95,7 +85,8 @@ angular.module('marcuraUI.components')
                         placeholder="{{textPlaceholder}}"/>\
                     <ma-button class="ma-button-switch"\
                         ng-show="canAddItem" size="xs" modifier="simple"\
-                        ma-tooltip="{{getAddItemTooltip()}}"\
+                        ma-tooltip="{{_addItemTooltip}}"\
+                        ma-tooltip-is-disabled="!canAddItem"\
                         right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
                         click="toggleMode()"\
                         ng-focus="onFocus()"\
@@ -106,26 +97,30 @@ angular.module('marcuraUI.components')
                         right-icon="times-circle"\
                         click="onReset()"\
                         ng-focus="onFocus(\'reset\')"\
-                        is-disabled="!isResetEnabled()">\
+                        is-disabled="isDisabled || !_hasValue">\
                     </ma-button>\
                 </div>';
 
                 return html;
             },
             controller: ['$scope', function (scope) {
-                // Gets a value from itemValueField if an item is object.
+                scope._type = scope.type ? scope.type : 'object';
+                scope._itemValueField = scope.itemValueField ? scope.itemValueField : 'id';
+
+                // Always return string value for compatibility reasons with select2,
+                // as it only supports string identifiers.
                 scope.getItemValue = function (item) {
-                    if (MaHelper.isNullOrWhiteSpace(item) || !scope.itemValueField) {
+                    if (MaHelper.isNullOrWhiteSpace(item)) {
                         return null;
                     }
 
-                    // Item is already a value (an object might be passed as well).
-                    if (scope.storeItemValueOnly) {
-                        return (angular.isObject(item) ? item[scope.itemValueField] : item).toString();
+                    // Item value is item itself.
+                    if (typeof item !== 'object') {
+                        return item.toString();
                     }
 
                     // In case of a nested property binding like 'company.port.id'.
-                    var parts = scope.itemValueField.split('.'),
+                    var parts = scope._itemValueField.split('.'),
                         value = item[parts[0]];
 
                     for (var i = 1; i < parts.length; i++) {
@@ -139,13 +134,36 @@ angular.module('marcuraUI.components')
                     return value.toString();
                 };
 
-                scope.formatItem = function (item) {
+                scope.convertItemValue = function (item) {
+                    if (MaHelper.isNullOrUndefined(item)) {
+                        return null;
+                    }
+
+                    if (scope._type === 'object') {
+                        return item;
+                    } else if (scope._type === 'string') {
+                        return item[scope._itemValueField];
+                    } else if (scope._type === 'boolean') {
+                        return item[scope._itemValueField] === 'true';
+                    } else if (scope._type === 'number') {
+                        return Number(item[scope._itemValueField]);
+                    }
+
+                    return item;
+                };
+
+                scope.getItemText = function (item) {
                     if (scope.itemTemplate) {
-                        return scope.itemTemplate(item);
+                        return scope.itemTemplate(scope.convertItemValue(item));
                     }
 
                     if (!item) {
                         return '';
+                    }
+
+                    if (scope._type !== 'object') {
+                        // Primitive types are converted to an object where id becomes item itself.
+                        return item[scope._itemValueField];
                     }
 
                     return scope.itemTextField ? item[scope.itemTextField] : item.toString();
@@ -166,8 +184,8 @@ angular.module('marcuraUI.components')
                         // Run init function only when it is required to update Select2 value.
                         if (scope.runInitSelection && scope.getItemValue(scope.value)) {
                             var item = angular.copy(scope.value);
-                            item.text = scope.formatItem(item);
-                            item.id = scope.getItemValue(item);
+                            item.text = scope.getItemText(item);
+                            item[scope._itemValueField] = scope.getItemValue(item);
                             scope.previousSelectedItem = item;
                             callback(item);
                         } else {
@@ -179,7 +197,7 @@ angular.module('marcuraUI.components')
 
                     if (scope.isMultiple) {
                         scope.options.formatSelection = function (item) {
-                            return scope.formatItem(item);
+                            return scope.getItemText(item);
                         };
                     }
                 }
@@ -197,17 +215,55 @@ angular.module('marcuraUI.components')
                     isSelectHovered = false,
                     showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
                     validators = scope.validators ? angular.copy(scope.validators) : [],
-                    previousValue,
-                    isObjectArray = scope.itemTextField || scope.itemValueField;
+                    previousValue;
 
-                // We need a copy of items. See 'scope.$watch('items', ...)' for an answer why.
-                scope._items = angular.isArray(scope.items) ? angular.copy(scope.items) : [];
                 scope.previousSelectedItem = scope.previousSelectedItem || null;
                 scope.isAddMode = false;
                 scope.isTextFocused = false;
                 scope.isValid = true;
                 scope.isTouched = false;
                 scope.hasAjax = angular.isObject(scope.ajax);
+                scope._hasValue = false;
+                scope._items = [];
+
+                var setItems = function (items) {
+                    if (scope.hasAjax || !angular.isArray(items)) {
+                        return;
+                    }
+
+                    // When an array of items is completely replaced with a new array, ma-select2
+                    // triggers a watcher which sets the value to undefined, which we do not want.
+                    // So instead of replacing an array, we clear it and repopulate with new items.
+                    scope._items.splice(0, scope._items.length);
+
+                    // We need a copy of items. See 'scope.$watch('items', ...)' for an answer why.
+                    var newItems = [],
+                        i;
+
+                    if (scope._type === 'object') {
+                        newItems = angular.copy(items);
+                    } else {
+                        // Performance improvement:
+                        // Convert primitive type arrays to object, to be able use item.id and item.text
+                        // in view, instead of functions like getItemText.
+                        for (i = 0; i < items.length; i++) {
+                            if (!MaHelper.isNullOrUndefined(items[i])) {
+                                var newItem = {};
+                                newItem[scope._itemValueField] = items[i].toString();
+                                newItems.push(newItem);
+                            }
+                        }
+                    }
+
+                    for (i = 0; i < newItems.length; i++) {
+                        newItems[i].text = scope.getItemText(newItems[i]);
+                    }
+
+                    // Push new items to the array.
+                    Array.prototype.push.apply(scope._items, newItems);
+                };
+
+                setItems(scope.items);
 
                 // A custom 'IsNotEmpty' validator, which also checks that
                 // a selected item is in the list.
@@ -222,8 +278,8 @@ angular.module('marcuraUI.components')
                             return false;
                         }
 
-                        // For array of numbers.
-                        if (!isObjectArray && !MaHelper.isNullOrWhiteSpace(value)) {
+                        // For array of primitives.
+                        if (scope._type !== 'object' && !MaHelper.isNullOrWhiteSpace(value)) {
                             return true;
                         }
 
@@ -256,23 +312,12 @@ angular.module('marcuraUI.components')
                 };
 
                 var isExistingItem = function (item) {
-                    if (!angular.isArray(scope._items)) {
-                        return false;
-                    }
-
                     var isItemObject = scope.getItemValue(item) !== null;
 
                     for (var i = 0; i < scope._items.length; i++) {
-                        if (isItemObject) {
-                            // Search by value field.
-                            if (scope.getItemValue(scope._items[i]) === scope.getItemValue(item)) {
-                                return true;
-                            }
-                        } else {
-                            // Search by item itself as text.
-                            if (scope._items[i] === item) {
-                                return true;
-                            }
+                        // Search by value field.
+                        if (scope.getItemValue(scope._items[i]) === scope.getItemValue(item)) {
+                            return true;
                         }
                     }
 
@@ -284,16 +329,13 @@ angular.module('marcuraUI.components')
                         return null;
                     }
 
-                    // The list is an array of strings, so value is item itself.
-                    if (!isObjectArray) {
+                    if (scope._type !== 'object') {
                         return itemValue;
                     }
 
-                    if (angular.isArray(scope._items)) {
-                        for (var i = 0; i < scope._items.length; i++) {
-                            if (scope.getItemValue(scope._items[i]) === itemValue.toString()) {
-                                return scope._items[i];
-                            }
+                    for (var i = 0; i < scope._items.length; i++) {
+                        if (scope.getItemValue(scope._items[i]) === itemValue.toString()) {
+                            return scope._items[i];
                         }
                     }
 
@@ -301,19 +343,19 @@ angular.module('marcuraUI.components')
                 };
 
                 var getNewItem = function (itemText) {
-                    // The list is an array of strings, so item should be a simple string.
-                    if (!isObjectArray) {
-                        return itemText;
+                    if (MaHelper.isNullOrUndefined(itemText)) {
+                        return null;
                     }
 
-                    // The list is an array of objects, so item should be an object.
-                    if (itemText) {
-                        var item = {};
+                    var item = {};
+
+                    if (scope._type === 'object') {
                         item[scope.itemTextField] = itemText;
-                        return item;
+                    } else if (itemText) {
+                        item[scope._itemValueField] = itemText;
                     }
 
-                    return null;
+                    return item;
                 };
 
                 var setInternalValue = function (item) {
@@ -346,6 +388,7 @@ angular.module('marcuraUI.components')
                             // This allows the component to be displayed in correct mode, let's say, in add mode,
                             // when scope.value is initially a custom value not presented in the list.
                             scope.isAddMode = !isExistingItem(item);
+                            setAddItemTooltip();
                         }
 
                         validate(item);
@@ -373,23 +416,42 @@ angular.module('marcuraUI.components')
                                 if (scope.getItemValue(item) !== null) {
                                     // Item is an object.
                                     scope.selectedItem = scope.getItemValue(item);
-                                } else if (!isObjectArray &&
-                                    (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean')
-                                ) {
-                                    // Item is a primitive type.
-                                    if (typeof item === 'boolean') {
-                                        // Select2 expects string.
-                                        scope.selectedItem = item.toString();
-                                    } else {
-                                        scope.selectedItem = item;
-                                    }
+                                } else if (scope._type !== 'object') {
+                                    // Select2 expects string.
+                                    scope.selectedItem = item.toString();
                                 }
                             }
 
                             scope.previousSelectedItem = item;
                             scope.toggleMode('select');
                         }
+
+                        setAddItemTooltip();
                     }
+
+                    setHasValue();
+                };
+
+                var cleanItemValue = function (item) {
+                    if (MaHelper.isNullOrWhiteSpace(item)) {
+                        return null;
+                    }
+
+                    // Make a copy so deleting item.text doesn't affect item in the list.
+                    // Otherwise list item will become blank.
+                    var cleanItem = angular.copy(item);
+
+                    if (scope._type === 'object') {
+                        if (scope.isMultiple) {
+                            for (var i = 0; i < cleanItem.length; i++) {
+                                delete cleanItem[i].text;
+                            }
+                        } else {
+                            delete cleanItem.text;
+                        }
+                    }
+
+                    return cleanItem;
                 };
 
                 var onFocusout = function (event, elementName) {
@@ -411,7 +473,7 @@ angular.module('marcuraUI.components')
                                     return;
                                 }
 
-                                value = getNewItem(scope.text);
+                                value = scope.convertItemValue(getNewItem(scope.text));
                             } else {
                                 if (scope.value === scope.text) {
                                     return;
@@ -426,9 +488,11 @@ angular.module('marcuraUI.components')
                                 return;
                             }
 
-                            previousValue = scope.value || null;
+                            value = cleanItemValue(value);
+                            previousValue = cleanItemValue(scope.value) || null;
                             scope.value = value;
                             previousAddedItem = scope.value;
+                            setHasValue();
 
                             if (scope.isValid) {
                                 // Postpone change event for scope value to be updated before.
@@ -468,7 +532,7 @@ angular.module('marcuraUI.components')
                         element.removeClass('ma-select-box-is-select-focused');
 
                         scope.blur({
-                            maValue: scope.storeItemValueOnly ? getItemByValue(scope.value) : scope.value
+                            maValue: scope.value
                         });
                     }
 
@@ -498,25 +562,61 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                scope.hasValue = function () {
+                var setHasValue = function () {
                     if (scope.isMultiple) {
-                        return !MaHelper.isNullOrUndefined(scope.value) && scope.value.length;
+                        scope._hasValue = !MaHelper.isNullOrUndefined(scope.value) && scope.value.length;
+                    } else if (scope.isAddMode) {
+                        scope._hasValue = !MaHelper.isNullOrWhiteSpace(scope.text);
+                    } else {
+                        scope._hasValue = !MaHelper.isNullOrUndefined(scope.value) && !scope.isLoading;
                     }
-
-                    if (scope.isAddMode) {
-                        return !MaHelper.isNullOrWhiteSpace(scope.text);
-                    }
-
-                    return !MaHelper.isNullOrUndefined(scope.value) && !scope.isLoading;
                 };
 
-                scope.isResetEnabled = function () {
-                    return !scope.isDisabled && scope.hasValue();
+                var setAddItemTooltip = function () {
+                    if (!showAddItemTooltip || !scope.canAddItem) {
+                        scope._addItemTooltip = '';
+                    } else if (scope.isAddMode) {
+                        // \u00A0 Unicode character is used here for &nbsp;.
+                        scope._addItemTooltip = 'Back\u00A0to the\u00A0list';
+                    } else {
+                        scope._addItemTooltip = scope.addItemTooltip ? scope.addItemTooltip : 'Add new\u00A0item';
+                    }
+                };
+
+                // Compares two array of items by value field.
+                // Can't use angular.equals() because internal _items are amended to have text property for each item.
+                var areItemsEqual = function (items1, items2) {
+                    if (!items1 && !items2) {
+                        return true;
+                    }
+
+                    if (items1 && !items2 || !items1 && items2 || items1.length !== items2.length) {
+                        return false;
+                    }
+
+                    var areEqual = true;
+
+                    for (var i = 0; i < items1.length; i++) {
+                        if (scope._type === 'object') {
+                            if (items1[i][scope._itemValueField] !== items2[i][scope._itemValueField]) {
+                                areEqual = false;
+                                break;
+                            }
+                        } else {
+                            if (items1[i] !== items2[i]) {
+                                areEqual = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    return areEqual;
                 };
 
                 scope.reset = function () {
                     previousValue = scope.value;
                     scope.value = scope.isMultiple ? [] : null;
+                    setHasValue();
                 };
 
                 scope.onReset = function () {
@@ -543,7 +643,7 @@ angular.module('marcuraUI.components')
 
                     if (isFocusLost) {
                         scope.focus({
-                            maValue: scope.storeItemValueOnly ? getItemByValue(scope.value) : scope.value
+                            maValue: scope.value
                         });
                     }
 
@@ -553,23 +653,6 @@ angular.module('marcuraUI.components')
                 textElement.focusout(function (event) {
                     onFocusout(event, 'text');
                 });
-
-                scope.getAddItemTooltip = function () {
-                    if (!showAddItemTooltip) {
-                        return '';
-                    }
-
-                    // \u00A0 Unicode character is used here like &nbsp;.
-                    if (scope.isAddMode) {
-                        return 'Back\u00A0to the\u00A0list';
-                    }
-
-                    return scope.addItemTooltip ? scope.addItemTooltip : 'Add new\u00A0item';
-                };
-
-                scope.getOptionValue = function (item) {
-                    return scope.itemValueField ? scope.getItemValue(item) : item;
-                };
 
                 scope.toggleMode = function (mode) {
                     if (!scope.canAddItem) {
@@ -593,6 +676,8 @@ angular.module('marcuraUI.components')
                         scope.isAddMode = !scope.isAddMode;
                     }
 
+                    setAddItemTooltip();
+
                     // Restore previously selected or added item.
                     if (scope.isAddMode) {
                         // Sometimes select2 remains opened after it has lost focus.
@@ -604,15 +689,17 @@ angular.module('marcuraUI.components')
                         }
 
                         scope.previousSelectedItem = getItemByValue(scope.selectedItem);
-                        scope.value = previousAddedItem;
+                        scope.value = cleanItemValue(previousAddedItem);
 
                         if (scope.value) {
-                            scope.text = typeof scope.value === 'string' ? scope.value : scope.value[scope.itemTextField];
+                            scope.text = scope._type === 'string' ? scope.value : scope.value[scope.itemTextField];
                         }
                     } else {
-                        previousAddedItem = getNewItem(scope.text);
-                        scope.value = scope.previousSelectedItem;
+                        previousAddedItem = scope.convertItemValue(getNewItem(scope.text));
+                        scope.value = cleanItemValue(scope.previousSelectedItem);
                     }
+
+                    setHasValue();
 
                     if (!isInternalCall) {
                         $timeout(function () {
@@ -644,9 +731,9 @@ angular.module('marcuraUI.components')
                                 return;
                             }
 
-                            previousValue = scope.value;
+                            previousValue = cleanItemValue(scope.value);
                         } else {
-                            previousValue = scope.value;
+                            previousValue = cleanItemValue(scope.value);
 
                             for (var j = 0; j < itemsValues.length; j++) {
                                 item = getItemByValue(itemsValues[j]);
@@ -658,11 +745,13 @@ angular.module('marcuraUI.components')
                         }
 
                         scope.isTouched = true;
-                        scope.value = items;
+                        scope.value = cleanItemValue(scope.convertItemValue(items));
+
+                        setHasValue();
 
                         $timeout(function () {
                             scope.change({
-                                maValue: items,
+                                maValue: scope.value,
                                 maOldValue: previousValue
                             });
                         });
@@ -675,7 +764,7 @@ angular.module('marcuraUI.components')
 
                         // In case if JSON.parse has parsed string to a number.
                         // This can happen when items is an array of numbers.
-                        if (typeof item === 'number') {
+                        if (scope._type === 'number') {
                             item = scope.selectedItem;
                         }
 
@@ -696,9 +785,8 @@ angular.module('marcuraUI.components')
                         // Get selected item from items by value field.
                         // There is no items array in AJAX mode.
                         if (!scope.hasAjax) {
-                            if (scope.itemValueField && !MaHelper.isNullOrWhiteSpace(item)) {
+                            if (scope._itemValueField && !MaHelper.isNullOrWhiteSpace(item)) {
                                 for (var i = 0; i < scope._items.length; i++) {
-
                                     if (scope.getItemValue(scope._items[i]) === item.toString()) {
                                         item = scope._items[i];
                                         break;
@@ -711,7 +799,7 @@ angular.module('marcuraUI.components')
                             return;
                         }
 
-                        if (scope.itemValueField) {
+                        if (scope._itemValueField) {
                             var value = scope.getItemValue(scope.value);
 
                             if (value && value === scope.getItemValue(item)) {
@@ -721,20 +809,14 @@ angular.module('marcuraUI.components')
                             return;
                         }
 
-                        previousValue = scope.value;
+                        previousValue = cleanItemValue(scope.value);
+                        scope.value = cleanItemValue(scope.convertItemValue(item));
+                        scope.previousSelectedItem = item;
 
-                        if (scope.storeItemValueOnly) {
-                            scope.value = scope.getItemValue(item);
-                            scope.previousSelectedItem = scope.value;
-                            previousValue = getItemByValue(previousValue);
-                        } else {
-                            scope.value = item;
-                            scope.previousSelectedItem = item;
-                        }
-
+                        setHasValue();
                         $timeout(function () {
                             scope.change({
-                                maValue: item,
+                                maValue: scope.value,
                                 maOldValue: previousValue
                             });
                         });
@@ -756,68 +838,64 @@ angular.module('marcuraUI.components')
                     selectData.initSelection();
                 };
 
-                scope.$watch('items', function (newItems, oldItems) {
-                    // When an array of items is completely replaced with a new array, ma-select2
-                    // triggers a watcher which sets the value to undefined, which we do not want.
-                    // So instead of replacing an array, we clear it and repopulate with new items.
-                    if (angular.equals(newItems, oldItems)) {
-                        return;
-                    }
-
-                    scope._items.splice(0, scope._items.length);
-
-                    // Push new items to the array.
-                    Array.prototype.push.apply(scope._items, newItems);
-
-                    // Set value to refresh displayed value and mode.
-                    // 1 scenario:
-                    // Initial value is 'Vladivostok' and items is an empty array, so mode is 'add'.
-                    // Then items is set to an array containing 'Vladivostok', so
-                    // mode should be switched to 'select', because 'Vladivostok' is now exists in the list.
-                    // 2 scenario:
-                    // Initial value is 'Vladivostok' and items is an empty array. Select2 displays empty value.
-                    // Then items are loaded asynchronously and Select2 value needs to be refreshed.
-                    setInternalValue(scope.value);
-
-                    // For some reason ma-select2 does not trigger change for selectedItem
-                    // in this case, so we need to set it manually.
-                    // See select-box/select2.js line 123.
-                    $timeout(function () {
-                        var itemValue,
-                            item;
-
-                        if (angular.isObject(scope.value)) {
-                            if (scope.isMultiple && angular.isArray(scope.value)) {
-                                var items = [];
-
-                                for (var i = 0; i < scope.value.length; i++) {
-                                    // An item might only contain value field, which might not be enough to format the item.
-                                    // So we need to get a full item from items.
-                                    itemValue = scope.getItemValue(scope.value[i]);
-                                    item = angular.copy(getItemByValue(itemValue) || scope.value[i]);
-                                    item.text = scope.formatItem(item);
-                                    item.id = itemValue;
-
-                                    if (item) {
-                                        items.push(item);
-                                    }
-                                }
-
-                                selectData.data(items);
-                            } else {
-                                itemValue = scope.getItemValue(scope.value);
-                                item = angular.copy(getItemByValue(itemValue) || scope.value);
-                                item.text = scope.formatItem(item);
-                                item.id = itemValue;
-                                selectData.data(item);
-                            }
-                        } else if (!scope.value) {
-                            selectData.data(null);
-                        } else {
-                            selectData.val(scope.value);
+                if (!scope.hasAjax) {
+                    scope.$watch('items', function (newItems, oldItems) {
+                        if (areItemsEqual(newItems, oldItems)) {
+                            return;
                         }
-                    });
-                }, true);
+
+                        setItems(newItems);
+
+                        // Set value to refresh displayed value and mode.
+                        // 1 scenario:
+                        // Initial value is 'Vladivostok' and items is an empty array, so mode is 'add'.
+                        // Then items is set to an array containing 'Vladivostok', so
+                        // mode should be switched to 'select', because 'Vladivostok' is now exists in the list.
+                        // 2 scenario:
+                        // Initial value is 'Vladivostok' and items is an empty array. Select2 displays empty value.
+                        // Then items are loaded asynchronously and Select2 value needs to be refreshed.
+                        setInternalValue(scope.value);
+
+                        // For some reason ma-select2 does not trigger change for selectedItem
+                        // in this case, so we need to set it manually.
+                        // See select-box/select2.js line 123.
+                        $timeout(function () {
+                            var itemValue,
+                                item;
+
+                            if (angular.isObject(scope.value)) {
+                                if (scope.isMultiple && angular.isArray(scope.value)) {
+                                    var items = [];
+
+                                    for (var i = 0; i < scope.value.length; i++) {
+                                        // An item might only contain value field, which might not be enough to format the item.
+                                        // So we need to get a full item from items.
+                                        itemValue = scope.getItemValue(scope.value[i]);
+                                        item = angular.copy(getItemByValue(itemValue) || scope.value[i]);
+                                        item.text = scope.getItemText(item);
+                                        item[scope._itemValueField] = itemValue;
+
+                                        if (item) {
+                                            items.push(item);
+                                        }
+                                    }
+
+                                    selectData.data(items);
+                                } else {
+                                    itemValue = scope.getItemValue(scope.value);
+                                    item = angular.copy(getItemByValue(itemValue) || scope.value);
+                                    item.text = scope.getItemText(item);
+                                    item[scope._itemValueField] = itemValue;
+                                    selectData.data(item);
+                                }
+                            } else if (!scope.value) {
+                                selectData.data(null);
+                            } else {
+                                selectData.val(scope.value);
+                            }
+                        });
+                    }, true);
+                }
 
                 scope.$watch('value', function (newValue, oldValue) {
                     if (newValue === oldValue) {
@@ -835,6 +913,7 @@ angular.module('marcuraUI.components')
                     }
 
                     scope.isTouched = true;
+                    setHasValue();
                     validate(newValue);
                 });
 

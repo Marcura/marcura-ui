@@ -27,12 +27,12 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
     };
     $scope.port8SelectBox = {};
     // $scope.port8 = 'Moscow';
-    $scope.port8 = $scope.ports2[1];
+    // $scope.port8 = $scope.ports2[1];
     $scope.port9 = {
         name: 'Moscow'
     };
     $scope.port9SelectBox = {};
-    $scope.port10 = $scope.ports2[2];
+    $scope.port10 = angular.copy($scope.ports2[2]);
     $scope.port10Ajax = {
         url: '/api/ports',
         results: function (ports, page) {
@@ -54,7 +54,6 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
     $scope.ports14 = angular.copy($scope.ports2);
     $scope.ports15 = angular.copy($scope.ports2);
     $scope.port15 = [$scope.ports2[1]];
-    $scope.port16 = $scope.ports2[1].id;
     // $scope.port17 = [$scope.ports2[2]];
     $scope.port17Ajax = {
         url: '/api/ports',
@@ -71,7 +70,7 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
     $scope.yesNoItemTemplate = function (item) {
         return item ? 'Yes' : 'No';
     };
-    $scope.port18 = false;
+    $scope.yesNo = false;
 
     $scope.change = function (value, oldValue, property) {
         console.log('change');
@@ -94,10 +93,6 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
         console.log('scope:', $scope[property]);
         console.log('---');
     };
-
-    $timeout(function () {
-        $scope.port16 = 0;
-    }, 3000);
 
     // Test placeholder in AJAX mode.
     // $timeout(function () {

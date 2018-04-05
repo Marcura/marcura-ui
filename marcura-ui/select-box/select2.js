@@ -153,17 +153,17 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                     }
 
                     // Update valid and dirty statuses
-                    controller.$parsers.push(function (value) {
-                        var div = elm.prev();
-                        div.toggleClass('ng-invalid', !controller.$valid)
-                            .toggleClass('ng-valid', controller.$valid)
-                            .toggleClass('ng-invalid-required', !controller.$valid)
-                            .toggleClass('ng-valid-required', controller.$valid)
-                            .toggleClass('ng-dirty', controller.$dirty)
-                            .toggleClass('ng-pristine', controller.$pristine);
+                    // controller.$parsers.push(function (value) {
+                    //     var div = elm.prev();
+                    //     div.toggleClass('ng-invalid', !controller.$valid)
+                    //         .toggleClass('ng-valid', controller.$valid)
+                    //         .toggleClass('ng-invalid-required', !controller.$valid)
+                    //         .toggleClass('ng-valid-required', controller.$valid)
+                    //         .toggleClass('ng-dirty', controller.$dirty)
+                    //         .toggleClass('ng-pristine', controller.$pristine);
 
-                        return value;
-                    });
+                    //     return value;
+                    // });
 
                     if (!isSelect) {
                         // Set the view and model value and update the angular template manually for the ajax/multiple select2.
@@ -174,9 +174,11 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                                 return;
                             }
 
-                            scope.$apply(function () {
-                                controller.$setViewValue(convertToAngularModel(elm.select2('data')));
-                            });
+                            // Apply was removed because it's no longer needed.
+                            // It also caused watcher for 'items' in select-box.js to fire.
+                            // scope.$apply(function () {
+                            controller.$setViewValue(convertToAngularModel(elm.select2('data')));
+                            // });
                         });
 
                         if (opts.initSelection) {
@@ -198,7 +200,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                                         controller.$setPristine();
                                     }
 
-                                    elm.prev().toggleClass('ng-pristine', controller.$pristine);
+                                    // elm.prev().toggleClass('ng-pristine', controller.$pristine);
                                 });
                             };
                         }
@@ -244,7 +246,7 @@ angular.module('marcuraUI.components').value('maSelect2Config', {}).directive('m
                             controller.$setPristine();
                         }
 
-                        elm.prev().toggleClass('ng-pristine', controller.$pristine);
+                        // elm.prev().toggleClass('ng-pristine', controller.$pristine);
                     }
                 });
             };

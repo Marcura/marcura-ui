@@ -12,7 +12,8 @@
         <h2>Items as strings</h2>
     </div>
     <div class="nodes-item">
-        <ma-select-box items="ports1" value="port1" is-loading="isLoading" change="change(maValue, maOldValue, 'port1')">
+        <ma-select-box type="string" items="ports1" value="port1" is-loading="isLoading"
+            focus="focus(maValue, 'port1')" blur="blur(maValue, 'port1')" change="change(maValue, maOldValue, 'port1')">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -22,7 +23,8 @@
         <h2>Items as numbers</h2>
     </div>
     <div class="nodes-item">
-        <ma-select-box items="years" value="year" change="change(maValue, maOldValue, 'year')"
+        <ma-select-box type="number" items="years" value="year" focus="focus(maValue, 'year')"
+            blur="blur(maValue, 'year')" change="change(maValue, maOldValue, 'year')"
             is-required="true">
         </ma-select-box>
     </div>
@@ -33,19 +35,20 @@
         <h2>Items as booleans</h2>
     </div>
     <div class="nodes-item">
-        <ma-select-box items="[true, false]" value="port18" item-template="yesNoItemTemplate"
-            change="change(maValue, maOldValue, 'port18')" can-reset="true">
+        <ma-select-box type="boolean" items="[true, false]" value="yesNo" item-template="yesNoItemTemplate"
+            focus="focus(maValue, 'yesNo')" blur="blur(maValue, 'yesNo')" change="change(maValue, maOldValue, 'yesNo')"
+            can-reset="true">
         </ma-select-box>
     </div>
     <div class="nodes-item">
-        <pre>{{port18}}</pre>
+        <pre>{{yesNo}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Items as objects</h2>
     </div>
     <div class="nodes-item">
         <ma-select-box items="ports2" value="port2" item-text-field="name" item-value-field="id"
-            order-by="'name'" change="change(maValue, maOldValue, 'port2')">
+            focus="focus(maValue, 'port2')" blur="blur(maValue, 'port2')" change="change(maValue, maOldValue, 'port2')">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -55,7 +58,8 @@
         <h2>Adding a custom item as string</h2>
     </div>
     <div class="nodes-item">
-        <ma-select-box items="ports1" value="port5" can-add-item="true" change="change(maValue, maOldValue, 'port5')">
+        <ma-select-box type="string" items="ports1" value="port5" can-add-item="true" focus="focus(maValue, 'port5')"
+            blur="blur(maValue, 'port5')" change="change(maValue, maOldValue, 'port5')">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -66,7 +70,8 @@
     </div>
     <div class="nodes-item">
         <ma-select-box items="ports2" value="port3" item-text-field="name" item-value-field="id"
-            can-add-item="true" change="change(maValue, maOldValue, 'port3')" instance="port3SelectBox">
+            can-add-item="true" focus="focus(maValue, 'port3')" blur="blur(maValue, 'port3')"
+            change="change(maValue, maOldValue, 'port3')" instance="port3SelectBox">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -208,17 +213,5 @@
     </div>
     <div class="nodes-item">
         <pre>{{(port15 || null) | json}}</pre>
-    </div>
-    <div class="nodes-item">
-        <h2>Store only item value</h2>
-    </div>
-    <div class="nodes-item">
-        <ma-select-box items="ports2" value="port16" item-text-field="name" item-value-field="id"
-            store-item-value-only="true" focus="focus(maValue, 'port16')" blur="blur(maValue, 'port16')"
-            change="change(maValue, maOldValue, 'port16')" can-reset="true">
-        </ma-select-box>
-    </div>
-    <div class="nodes-item">
-        <pre>{{!MaHelper.isNullOrWhiteSpace(port16) ? port16 : 'null'}}</pre>
     </div>
 </div>
