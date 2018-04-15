@@ -1,3 +1,9 @@
+/**
+ * TODO:
+ * - 'change' event fires twice. Scenario for 'Adding a custom item as object':
+ * 1. Click '+'.
+ * 2. Switch back to select mode. Change event fires twice. Wny?
+ */
 angular.module('marcuraUI.components')
     .directive('maSelectBox', ['$document', '$timeout', 'MaHelper', function ($document, $timeout, MaHelper) {
         return {
