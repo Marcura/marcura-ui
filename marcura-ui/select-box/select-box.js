@@ -351,7 +351,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var getNewItem = function (itemText) {
-                    if (MaHelper.isNullOrUndefined(itemText)) {
+                    if (MaHelper.isNullOrWhiteSpace(itemText)) {
                         return null;
                     }
 
