@@ -62,7 +62,7 @@ angular.module('marcuraUI.components')
                         </div>';
 
                 if (hasAjax) {
-                    html += '<input class="ma-select-box-input" ma-select2="options"' + (isMultiple ? ' multiple' : '') + '\
+                    html += '<input class="ma-select-box-input" ma-select-box-wrapper="options"' + (isMultiple ? ' multiple' : '') + '\
                         ng-show="!isAddMode"\
                         ng-disabled="isDisabled"\
                         ng-change="onChange()"\
@@ -71,7 +71,7 @@ angular.module('marcuraUI.components')
                     // Add an empty option <option></option> as first item for the placeholder to work.
                     // It's strange, but that's how Select2 works.
                     html += '\
-                        <select ma-select2="options"' + (isMultiple ? ' multiple' : '') + '\
+                        <select ma-select-box-wrapper="options"' + (isMultiple ? ' multiple' : '') + '\
                             ng-show="!isAddMode"\
                             ng-disabled="isDisabled"\
                             ng-model="selectedItem"\
@@ -239,7 +239,7 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
-                    // When an array of items is completely replaced with a new array, ma-select2
+                    // When an array of items is completely replaced with a new array, ma-select-box-wrapper
                     // triggers a watcher which sets the value to undefined, which we do not want.
                     // So instead of replacing an array, we clear it and repopulate with new items.
                     scope._items.splice(0, scope._items.length);
@@ -864,9 +864,9 @@ angular.module('marcuraUI.components')
                         // Then items are loaded asynchronously and Select2 value needs to be refreshed.
                         setInternalValue(scope.value);
 
-                        // For some reason ma-select2 does not trigger change for selectedItem
+                        // For some reason ma-select-box-wrapper does not trigger change for selectedItem
                         // in this case, so we need to set it manually.
-                        // See select-box/select2.js line 123.
+                        // See select-box/select-box-wrapper.js line 123.
                         $timeout(function () {
                             var itemValue,
                                 item;

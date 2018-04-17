@@ -23,7 +23,30 @@ var paths = {
     },
     source: {
         js: 'marcura-ui/**/*.js',
-        css: 'marcura-ui/**/*.less'
+        // Order of the files is important.
+        css: [
+            'marcura-ui/less.less',
+            'marcura-ui/button/button.less',
+            'marcura-ui/check-box/check-box.less',
+            'marcura-ui/date-box/date-box.less',
+            'marcura-ui/form/form.less',
+            'marcura-ui/grid/grid.less',
+            'marcura-ui/label/label.less',
+            'marcura-ui/message/message.less',
+            'marcura-ui/modal/modal.less',
+            'marcura-ui/multi-check-box/multi-check-box.less',
+            'marcura-ui/pager/pager.less',
+            'marcura-ui/progress/progress.less',
+            'marcura-ui/radio-box/radio-box.less',
+            'marcura-ui/radio-button/radio-button.less',
+            'marcura-ui/select-box/select2.less',
+            'marcura-ui/select-box/select-box.less',
+            'marcura-ui/spinner/spinner.less',
+            'marcura-ui/tabs/tabs.less',
+            'marcura-ui/text-area/text-area.less',
+            'marcura-ui/text-box/text-box.less',
+            'marcura-ui/tooltip/tooltip.less'
+        ]
     }
 };
 

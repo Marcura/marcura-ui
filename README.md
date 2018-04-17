@@ -19,8 +19,6 @@ Required for [RadioBox](../../wiki/radiobox).
 * [Bootstrap](http://getbootstrap.com/) (3.3.4 or higher)
 * [Pikaday](https://github.com/dbushell/Pikaday) (1.3.2 or higher)  
 Required for [DateBox](../../wiki/datebox).
-* [Select2](https://www.npmjs.com/package/select2) (3.5.1)  
-Required for [SelectBox](../../wiki/selectbox).
 
 ## Download
 Download it using npm:
@@ -34,13 +32,11 @@ Include third-party dependencies:
 `<link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">`  
 `<link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">`  
 `<link href="node_modules/pikaday/css/pikaday.css" rel="stylesheet">`  
-`<link href="node_modules/select2/select2.css" rel="stylesheet">`
 
 `<script src="node_modules/jquery/dist/jquery.min.js"></script>`  
 `<script src="node_modules/angular/angular.min.js"></script>`  
 `<script src="node_modules/angular-sanitize/angular-sanitize.min.js"></script>`  
 `<script src="node_modules/pikaday/pikaday.js"></script>`  
-`<script src="node_modules/select2/select2.js"></script>`  
 
 Include Marcura UI assets:
 

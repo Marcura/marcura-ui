@@ -61,18 +61,6 @@ h5,
     line-height: 20px;
 }
 
-a:link,
-a:visited,
-a:active {
-    color: #1364C4;
-    text-decoration: none;
-    font: inherit;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
 .app {
     color: #2A2A2A;
 }

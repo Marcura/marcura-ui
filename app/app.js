@@ -88,12 +88,6 @@ app.config(function ($stateProvider, $urlRouterProvider, maDateBoxConfigurationP
         controller: 'selectBoxPageController'
     });
 
-    $stateProvider.state('costs-grid', {
-        url: '/costs-grid',
-        templateUrl: 'costs-grid-page/costs-grid-page.html',
-        controller: 'costsGridPageController'
-    });
-
     $stateProvider.state('check-box', {
         url: '/check-box',
         templateUrl: 'check-box-page/check-box-page.html',
