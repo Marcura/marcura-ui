@@ -55,7 +55,7 @@
         <pre>{{(port2 || null) | json}}</pre>
     </div>
     <div class="nodes-item">
-        <h2>Adding a custom item as string</h2>
+        <h2>Adding item as string</h2>
     </div>
     <div class="nodes-item">
         <ma-select-box type="string" items="ports1" value="port5" can-add-item="true" focus="focus(maValue, 'port5')"
@@ -66,7 +66,7 @@
         <pre>{{port5 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
-        <h2>Adding a custom item as object</h2>
+        <h2>Adding item as object</h2>
     </div>
     <div class="nodes-item">
         <ma-select-box items="ports2" value="port3" item-text-field="name" item-value-field="id"
@@ -143,13 +143,25 @@
         <h2>AJAX</h2>
     </div>
     <div class="nodes-item">
-        <ma-select-box ajax="port10Ajax" value="port10" item-text-field="name" item-value-field="id"
+        <ma-select-box ajax="portsRequest" value="port10" item-text-field="name" item-value-field="id"
             item-template="portItemTemplate" focus="focus(maValue, 'port10')" blur="blur(maValue, 'port10')"
             change="change(maValue, maOldValue, 'port10')" can-reset="true">
         </ma-select-box>
     </div>
     <div class="nodes-item">
         <pre>{{(port10 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>AJAX - adding item as object</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box ajax="portsRequest" value="port18" item-text-field="name" item-value-field="id"
+            item-template="portItemTemplate" focus="focus(maValue, 'port18')" blur="blur(maValue, 'port18')"
+            change="change(maValue, maOldValue, 'port18')" can-reset="true">
+        </ma-select-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(port18 || null) | json}}</pre>
     </div>
     <div class="nodes-item">
         <h2>AJAX multiple</h2>

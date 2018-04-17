@@ -13,6 +13,21 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
         return port.name + ' (' + port.country.name + ')';
     };
 
+    var getPortsRequest = function () {
+        return {
+            url: '/api/ports',
+            results: function (ports, page) {
+                for (var i = 0; i < ports.length; i++) {
+                    ports[i].text = $scope.portItemTemplate(ports[i]);
+                }
+
+                return {
+                    results: ports
+                };
+            }
+        }
+    };
+
     $scope.years = helper.getYears(1950);
     $scope.year = 1958;
     $scope.port1 = $scope.ports1[1];
@@ -33,18 +48,9 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
     };
     $scope.port9SelectBox = {};
     $scope.port10 = angular.copy($scope.ports2[2]);
-    $scope.port10Ajax = {
-        url: '/api/ports',
-        results: function (ports, page) {
-            for (var i = 0; i < ports.length; i++) {
-                ports[i].text = $scope.portItemTemplate(ports[i]);
-            }
-
-            return {
-                results: ports
-            };
-        }
-    };
+    $scope.portsRequest = getPortsRequest();
+    $scope.port18 = angular.copy($scope.ports2[3]);
+    $scope.portsRequest = getPortsRequest();
     $scope.port11 = $scope.ports2[1];
     $scope.port12 = null;
     $scope.port13 = $scope.ports2[1];
