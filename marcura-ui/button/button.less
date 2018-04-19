@@ -117,6 +117,12 @@
         display: block;
     }
 
+    &-text {
+        // Pass clicks to button itself.
+        // This is required for ma-select-box to work correctly, when it uses event.target.
+        pointer-events: none;
+    }
+
     .pace .pace-activity {
         position: absolute;
         left: 0;
@@ -168,6 +174,14 @@
         margin-top: -10px;
         position: absolute;
         top: 50%;
+
+        // Pass clicks to button itself.
+        // This is required for ma-select-box to work correctly, when it uses event.target.
+        pointer-events: none;
+
+        .fa {
+            pointer-events: none;
+        }
     }
 
     &-icon-left {

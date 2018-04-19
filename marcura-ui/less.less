@@ -37,7 +37,6 @@ sans-serif;
 @screen-sm-max: (@screen-md-min - 1);
 @screen-md-max: (@screen-lg-min - 1);
 @component-height: 30px;
-
 .cut-overflow {
     white-space: nowrap;
     overflow: hidden;
@@ -120,10 +119,10 @@ sans-serif;
     }
     .ma-button-reset.ma-button-is-disabled {
         background-color: @color-disabled;
-    }
-    .ma-button-reset.ma-button-is-disabled .ma-button-icon {
-        color: inherit;
-        opacity: 0.45;
+        .ma-button-icon {
+            color: inherit;
+            opacity: 0.45;
+        }
     }
 }
 

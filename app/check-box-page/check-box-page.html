@@ -12,102 +12,67 @@
         <h2>Basic</h2>
     </div>
     <div class="nodes-item">
-        <ma-check-box
-            text="Tokai"
-            value="value2"
-            change="change(maValue)">
-        </ma-check-box><!--
-        --><ma-check-box
-            text="Vladivostok"
-            value="value3"
-            change="change(maValue)">
-        </ma-check-box><!--
-        --><ma-check-box
-            text="Navlakhi"
-            value="value4"
-            change="change(maValue)">
+        <ma-check-box text="Tokai" value="value2" change="change(maValue)">
+        </ma-check-box>
+        <!--
+        -->
+        <ma-check-box text="Vladivostok" value="value3" change="change(maValue)">
+        </ma-check-box>
+        <!--
+        -->
+        <ma-check-box text="Navlakhi" value="value4" change="change(maValue)">
         </ma-check-box>
     </div>
     <div class="nodes-item">
         <h2>Large size</h2>
     </div>
     <div class="nodes-item">
-        <ma-check-box
-            size="sm"
-            text="Tokai"
-            value="value5"
-            change="change(maValue)">
-        </ma-check-box><!--
-        --><ma-check-box
-            size="sm"
-            text="Vladivostok"
-            value="value6"
-            change="change(maValue)">
-        </ma-check-box><!--
-        --><ma-check-box
-            size="sm"
-            text="Navlakhi"
-            value="value7"
-            change="change(maValue)">
+        <ma-check-box size="sm" text="Tokai" value="value5" change="change(maValue)">
+        </ma-check-box>
+        <!--
+        -->
+        <ma-check-box size="sm" text="Vladivostok" value="value6" change="change(maValue)">
+        </ma-check-box>
+        <!--
+        -->
+        <ma-check-box size="sm" text="Navlakhi" value="value7" change="change(maValue)">
         </ma-check-box>
     </div>
     <div class="nodes-item">
         <h2>Disabled</h2>
     </div>
     <div class="nodes-item">
-        <ma-check-box
-            is-disabled="true"
-            text="Tokai"
-            value="value8"
-            change="change(maValue)">
-        </ma-check-box><!--
-        --><ma-check-box
-            is-disabled="true"
-            text="Vladivostok"
-            value="value9"
-            change="change(maValue)">
-        </ma-check-box><!--
-        --><ma-check-box
-            is-disabled="isDisabled"
-            text="Navlakhi"
-            value="value10"
-            change="change(maValue)">
+        <ma-check-box is-disabled="true" text="Tokai" value="value8" change="change(maValue)">
+        </ma-check-box>
+        <!--
+        -->
+        <ma-check-box is-disabled="true" text="Vladivostok" value="value9" change="change(maValue)">
+        </ma-check-box>
+        <!--
+        -->
+        <ma-check-box is-disabled="isDisabled" text="Navlakhi" value="value10" change="change(maValue)">
         </ma-check-box>
     </div>
     <div class="nodes-item">
         <h2>Required</h2>
     </div>
     <div class="nodes-item">
-        <ma-check-box
-            is-required="true"
-            text="Tokai"
-            value="value11"
-            change="change(maValue)">
-        </ma-check-box><!--
-        --><ma-check-box
-            is-required="true"
-            text="Vladivostok"
-            value="value12"
-            change="change(maValue)">
-        </ma-check-box><!--
-        --><ma-check-box
-            is-required="true"
-            text="Navlakhi"
-            value="value13"
-            change="change(maValue)">
+        <ma-check-box is-required="true" text="Tokai" value="value11" change="change(maValue)">
+        </ma-check-box>
+        <ma-check-box is-required="true" text="Vladivostok" value="value12" change="change(maValue)">
+        </ma-check-box>
+        <ma-check-box is-required="true" text="Navlakhi" value="value13" change="change(maValue)">
         </ma-check-box>
     </div>
     <div class="nodes-item">
         <h2>Inside ng-if</h2>
     </div>
     <div class="nodes-item">
-        <ma-button size="xs" text="{{checkBox1Enabled ? 'Hide' : 'Show'}}" modifier="default" click="toggleCheckBox1()"></ma-button>
+        <ma-button size="xs" text="{{checkBox1Enabled ? 'Hide' : 'Show'}}" modifier="default"
+            click="toggleCheckBox1()"></ma-button>
     </div>
     <div class="nodes-item" ng-if="checkBox1Enabled">
-        <ma-check-box
-            value="value1"
-            change="change1(maValue)"
-            is-required="true">
+        <ma-check-box value="value1" change="change1(maValue)" is-required="true">
         </ma-check-box>
     </div>
     <div class="nodes-item">
@@ -115,10 +80,7 @@
     </div>
     <div class="nodes-item nodes-item-ports">
         <div ng-repeat="port in ports">
-            <ma-check-box
-                text="{{port.name}}"
-                value="port.isEnabled"
-                change="portChange(port)">
+            <ma-check-box text="{{port.name}}" value="port.isEnabled" change="portChange(port)">
             </ma-check-box>
         </div>
     </div>

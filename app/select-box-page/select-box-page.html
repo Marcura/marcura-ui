@@ -41,7 +41,7 @@
         </ma-select-box>
     </div>
     <div class="nodes-item">
-        <pre>{{yesNo}}</pre>
+        <pre>{{(yesNo === true || yesNo === false ? yesNo : null) | json}}</pre>
     </div>
     <div class="nodes-item">
         <h2>Items as objects</h2>
@@ -99,7 +99,7 @@
         <h2>Labeled</h2>
     </div>
     <div>
-        <label for="port6">Port:</label>
+        <ma-label for="port6">Port:</ma-label>
     </div>
     <div class="nodes-item">
         <ma-select-box id="port6" items="ports2" value="port6" item-text-field="name" item-value-field="id"
@@ -157,7 +157,7 @@
     <div class="nodes-item">
         <ma-select-box ajax="portsRequest" value="port18" item-text-field="name" item-value-field="id"
             item-template="portItemTemplate" focus="focus(maValue, 'port18')" blur="blur(maValue, 'port18')"
-            change="change(maValue, maOldValue, 'port18')" can-reset="true">
+            change="change(maValue, maOldValue, 'port18')" can-reset="true" can-add-item="true">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -193,7 +193,8 @@
     </div>
     <div class="nodes-item">
         <ma-select-box items="ports2" value="port12" item-text-field="name" item-value-field="id"
-            can-add-item="true" can-reset="true" placeholder="Select port" text-placeholder="Enter port">
+            can-add-item="true" can-reset="true" placeholder="Select port" text-placeholder="Enter port"
+            focus="focus(maValue, 'port12')" blur="blur(maValue, 'port12')" change="change(maValue, maOldValue, 'port12')">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -202,7 +203,8 @@
     <div class="nodes-item">
         <ma-select-box items="ports14" value="port14" item-text-field="name" item-value-field="id"
             placeholder="Select port" is-multiple="true" focus="focus(maValue, 'port14')"
-            blur="blur(maValue, 'port14')" change="change(maValue, maOldValue, 'port14')">
+            blur="blur(maValue, 'port14')" change="change(maValue, maOldValue, 'port14')"
+            can-reset="true">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -219,5 +221,12 @@
     </div>
     <div class="nodes-item">
         <pre>{{(port15 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
+        <h2>Inside modal</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-button size="xs" text="Open" modifier="default" click="openModal()">
+        </ma-button>
     </div>
 </div>

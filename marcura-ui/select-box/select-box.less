@@ -19,11 +19,6 @@
         border-color: @color-primary;
     }
 
-    &-is-select-focused .select2-container-multi .select2-choices {
-        border-color: @color-primary;
-        .box-shadow(@input-shadow-focused);
-    }
-
     &-is-disabled &-text {
         .box-shadow(none);
         background-color: @color-disabled;
@@ -32,7 +27,6 @@
     }
 
      :not( &-is-loading):not( &-is-disabled)&-is-invalid&-is-touched {
-        &.ma-select-box-is-select-focused .select2-container:not(.select2-dropdown-open) .select2-choices,
         &.ma-select-box-is-text-focused .ma-select-box-text,
         .select2-container-active:not(.select2-dropdown-open) .select2-choice,
         .select2-container-active:not(.select2-dropdown-open) .select2-choices {
@@ -46,7 +40,7 @@
         }
     }
 
-    .ma-button-switch {
+    .ma-button-toggle {
         position: absolute;
         top: 0;
         right: 0;
@@ -55,23 +49,29 @@
     }
 
     &-can-add-item&-can-reset {
-        .ma-button-switch {
+        .ma-button-toggle {
             right: 29px;
         }
     }
 
-    .ma-button-switch .ma-button-icon {
+    .ma-button-toggle .ma-button-icon {
         font-size: 14px;
         text-shadow: none;
     }
 
-    .ma-button-switch.ma-button-is-disabled {
+    .ma-button-toggle.ma-button-is-disabled {
         background-color: @color-disabled;
+
+        .ma-button-icon {
+            color: inherit;
+            opacity: 0.65;
+        }
     }
 
-    .ma-button-switch.ma-button-is-disabled .ma-button-icon {
-        color: inherit;
-        opacity: 0.65;
+    .ma-button-toggle:not(.ma-button-is-disabled) {
+        &:hover {
+            background-color: @background-color-darker-light;
+        }
     }
 
     &-is-reset-disabled {
@@ -112,23 +112,7 @@
         top: 0;
         margin: auto;
     }
-
-    &-input-search-icon {
-        position: absolute;
-        right: 5px;
-        top: 1px;
-        height: 28px;
-        width: 29px;
-        border-left: 1px solid @border-color;
-        color: @text-color;
-
-        &:before {
-            position: relative;
-            top: 6px;
-            left: 7px;
-        }
-    }
-    
+   
     /*
     Hide the underlying select as it spoils the appearence for a moment before the component is initialized.
     It also takes up some width which makes horizontal scroll to appear in some layouts.
@@ -143,6 +127,92 @@
 }
 
 .select2 {
+    &-drop {
+        padding-top: 3px;
+        z-index: 10000;
+        border-radius: 0;
+
+        &-can-add-item {
+            .select2-drop-search-icon {
+                right: 33px;
+            }
+
+            .select2-search {
+                input {
+                    padding-right: 62px;
+                }
+                
+                input+.pace {
+                    .pace-activity {
+                        right: 66px;
+                    }
+                }
+            }
+        }
+
+        input.select2-active+.pace {
+            display: block;
+        }
+
+        &-active {
+            border-color: @color-primary;
+        }
+
+        &-above {
+            border-radius: 0 !important;
+
+            .select2-drop-search-icon {
+                top: 5px;
+            }
+
+            .select2-drop-add-item-button {
+                top: 5px;
+            }
+
+            input.select2-active+.pace .pace-activity {
+                top: 12px;
+            }
+        }
+
+        &-search-icon {
+            position: absolute;
+            right: 5px;
+            top: 1px;
+            height: 28px;
+            width: 23px;
+            color: @text-color;
+    
+            &:before {
+                position: relative;
+                top: 6px;
+                left: 0;
+            }
+        }
+
+        &-add-item-button {
+            position: absolute;
+            color: @text-color;
+            display: block;
+            width: 28px;
+            height: 28px;
+            position: absolute;
+            top: 1px;
+            right: 5px;
+            border-left: 1px solid @border-color;
+
+            .fa {
+                position: absolute;
+                top: 7px;
+                right: 8px;
+            }
+
+            &:hover {
+                cursor: pointer;
+                background-color: @background-color-darker-light;
+            }
+        }
+    }
+
     &-container {
         min-width: 60px;
         width: 100%;
@@ -296,13 +366,14 @@
 
     &-search {
         input {
-            border-color: @border-color;
+            .input;
+            border: 1px solid @border-color;
             font-size: 14px;
             background: none !important;
             border-radius: 0;
             .box-shadow(inset 0 1px 1px rgba(0, 0, 0, .075));
             height: @component-height !important;
-            padding: 5px 39px 5px 10px;
+            padding: 5px 33px 5px 10px;
             line-height: 1.5;
 
             &.select2-active {
@@ -316,7 +387,7 @@
             .pace-activity {
                 position: absolute;
                 top: 8px;
-                right: 40px;
+                right: 38px;
             }
         }
     }
@@ -332,32 +403,6 @@
             border-color: @color-primary;
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
-        }
-    }
-
-    &-drop {
-        padding-top: 3px;
-        z-index: 10000;
-        border-radius: 0;
-
-        input.select2-active+.pace {
-            display: block;
-        }
-
-        &-active {
-            border-color: @color-primary;
-        }
-
-        &-above {
-            border-radius: 0 !important;
-
-            .ma-select-box-input-search-icon {
-                top: 5px;
-            }
-
-            input.select2-active+.pace .pace-activity {
-                top: 12px;
-            }
         }
     }
 

@@ -1,6 +1,6 @@
 angular.module('app.controllers').controller('selectBoxPageController', selectBoxPageController);
 
-function selectBoxPageController($scope, $timeout, helper, MaHelper) {
+function selectBoxPageController($scope, $timeout, $modal, helper, MaHelper) {
     $scope.MaHelper = MaHelper;
     $scope.ports2 = helper.getPorts();
     $scope.ports1 = [];
@@ -78,26 +78,39 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
     };
     $scope.yesNo = false;
 
+    $scope.openModal = function () {
+        $modal.open({
+            templateUrl: 'select-box-page/modal/modal.html',
+            controller: 'selectBoxPageModalController',
+            size: 'md',
+            resolve: {
+                ports: function () {
+                    return $scope.ports2;
+                }
+            }
+        });
+    };
+
     $scope.change = function (value, oldValue, property) {
         console.log('change');
-        console.log('event:', value);
-        console.log('scope:', $scope[property]);
-        console.log('old:  ', oldValue);
-        console.log('---');
+        // console.log('event:', value);
+        // console.log('scope:', $scope[property]);
+        // console.log('old:  ', oldValue);
+        // console.log('---');
     };
 
     $scope.blur = function (value, property) {
         console.log('blur');
-        console.log('event:', value);
-        console.log('scope:', $scope[property]);
-        console.log('---');
+        // console.log('event:', value);
+        // console.log('scope:', $scope[property]);
+        // console.log('---');
     };
 
     $scope.focus = function (value, property) {
         console.log('focus');
-        console.log('event:', value);
-        console.log('scope:', $scope[property]);
-        console.log('---');
+        // console.log('event:', value);
+        // console.log('scope:', $scope[property]);
+        // console.log('---');
     };
 
     // Test placeholder in AJAX mode.
@@ -119,15 +132,15 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
 
     // API: Mode.
     // $timeout(function() {
-    //     $scope.port8SelectBox.switchToAddMode();
+    //     $scope.port8SelectBox.toggleToAddMode();
     // }, 5000);
     //
     // $timeout(function() {
-    //     $scope.port8SelectBox.switchToSelectMode();
+    //     $scope.port8SelectBox.toggleToSelectMode();
     // }, 10000);
     //
     // $timeout(function() {
-    //     $scope.port8SelectBox.switchToAddMode();
+    //     $scope.port8SelectBox.toggleToAddMode();
     // }, 15000);
 
     // Setting value changes mode.
