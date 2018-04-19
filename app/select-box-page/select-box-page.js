@@ -93,24 +93,24 @@ function selectBoxPageController($scope, $timeout, $modal, helper, MaHelper) {
 
     $scope.change = function (value, oldValue, property) {
         console.log('change');
-        // console.log('event:', value);
-        // console.log('scope:', $scope[property]);
-        // console.log('old:  ', oldValue);
-        // console.log('---');
+        console.log('event:', value);
+        console.log('scope:', $scope[property]);
+        console.log('old:  ', oldValue);
+        console.log('---');
     };
 
     $scope.blur = function (value, property) {
         console.log('blur');
-        // console.log('event:', value);
-        // console.log('scope:', $scope[property]);
-        // console.log('---');
+        console.log('event:', value);
+        console.log('scope:', $scope[property]);
+        console.log('---');
     };
 
     $scope.focus = function (value, property) {
         console.log('focus');
-        // console.log('event:', value);
-        // console.log('scope:', $scope[property]);
-        // console.log('---');
+        console.log('event:', value);
+        console.log('scope:', $scope[property]);
+        console.log('---');
     };
 
     // Test placeholder in AJAX mode.

@@ -324,12 +324,16 @@ angular.module('marcuraUI.components')
                 };
 
                 var isExistingItem = function (item) {
-                    var isItemObject = scope.getItemValue(item) !== null;
-
-                    for (var i = 0; i < scope._items.length; i++) {
-                        // Search by value field.
-                        if (scope.getItemValue(scope._items[i]) === scope.getItemValue(item)) {
-                            return true;
+                    // In AJAX mode existing items can be detect the presence of id field,
+                    // thus only object types are supported for now.
+                    if (scope.hasAjax) {
+                        return item && !MaHelper.isNullOrWhiteSpace(item[scope.itemValueField]);
+                    } else {
+                        for (var i = 0; i < scope._items.length; i++) {
+                            // Search by value field.
+                            if (scope.getItemValue(scope._items[i]) === scope.getItemValue(item)) {
+                                return true;
+                            }
                         }
                     }
 
@@ -721,7 +725,11 @@ angular.module('marcuraUI.components')
                             selectElement.select2('close');
                         }
 
-                        scope.previousSelectedItem = getItemByValue(scope.selectedItem);
+                        if (scope.hasAjax) {
+                            scope.previousSelectedItem = scope.selectedItem;
+                        } else {
+                            scope.previousSelectedItem = getItemByValue(scope.selectedItem);
+                        }
 
                         if (searchText()) {
                             // Toggling to add mode when search text is entered.
@@ -739,6 +747,7 @@ angular.module('marcuraUI.components')
                     } else {
                         previousAddedItem = scope.convertItemValue(getNewItem(scope.text));
                         scope.value = cleanItemValue(scope.previousSelectedItem);
+                        
                     }
 
                     setHasValue();
