@@ -1382,7 +1382,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 lastMousePosition.y = e.pageY;
             });
 
-            $document.on("mousedown touchstart click", function (e) {
+            $document.on("mousedown.select2Event touchstart.select2Event click.select2Event", function (e) {
                 var dropdown = $("#select2-drop"),
                     self;
 
@@ -1465,7 +1465,7 @@ the specific language governing permissions and limitations under the Apache Lic
 
             // Now that the dropdown is closed, unbind the global document mousemove event
             $document.off("mousemove.select2Event");
-            $document.off("mousedown touchstart click");
+            $document.off("mousedown.select2Event touchstart.select2Event click.select2Event");
 
             this.clearSearch();
             this.search.removeClass("select2-active");
@@ -1993,7 +1993,6 @@ the specific language governing permissions and limitations under the Apache Lic
             }
 
             if (this.opts.shouldFocusInput(this)) {
-                // this.opts.instance.focus();
                 this.search.focus();
                 // move the cursor to the end after focussing, otherwise it will be at the beginning and
                 // new text will appear *before* focusser.val()
@@ -2264,7 +2263,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 }
 
                 this.container.addClass("select2-container-active");
-            })).on("blur", this.bind(function (e) {
+            })).on("focusout", this.bind(function (e) {
                 if (!this.opened()) {
                     this.container.removeClass("select2-container-active");
                     this.opts.element.trigger($.Event("select2-blur"));
@@ -2844,7 +2843,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 this.resizeSearch();
             }));
 
-            this.search.on("blur", this.bind(function (e) {
+            this.search.on("focusout", this.bind(function (e) {
                 this.container.removeClass("select2-container-active");
                 this.search.removeClass("select2-focused");
                 this.selectChoice(null);

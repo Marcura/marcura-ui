@@ -22,15 +22,21 @@ var paths = {
         root: 'dist/'
     },
     source: {
-        js: 'marcura-ui/**/*.js',
         // Order of the files is important.
+        js: [
+            'marcura-ui/select-box/select2.js',
+            'marcura-ui/**/*.js'
+        ],
         css: [
             'marcura-ui/less.less',
+            'marcura-ui/button/button-variables.less',
+            'marcura-ui/pager/pager-variables.less',
             'marcura-ui/button/button.less',
             'marcura-ui/check-box/check-box.less',
             'marcura-ui/date-box/date-box.less',
             'marcura-ui/form/form.less',
             'marcura-ui/grid/grid.less',
+            'marcura-ui/grid/grid-order.less',
             'marcura-ui/label/label.less',
             'marcura-ui/message/message.less',
             'marcura-ui/modal/modal.less',

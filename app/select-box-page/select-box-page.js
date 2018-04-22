@@ -116,7 +116,7 @@ function selectBoxPageController($scope, $timeout, $modal, helper, MaHelper) {
     // Test placeholder in AJAX mode.
     // $timeout(function () {
     //     $scope.port10 = null;
-    // }, 3000);
+    // }, 2000);
     //
     // $timeout(function () {
     //     $scope.port10 = $scope.ports2[1];
