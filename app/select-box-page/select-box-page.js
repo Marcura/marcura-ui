@@ -138,15 +138,15 @@ function selectBoxPageController($scope, $timeout, $modal, helper, MaHelper) {
 
     // API: Mode.
     // $timeout(function() {
-    //     $scope.port8SelectBox.toggleToAddMode();
+    //     $scope.port8SelectBox.mode('add');
     // }, 5000);
     //
     // $timeout(function() {
-    //     $scope.port8SelectBox.toggleToSelectMode();
+    //     $scope.port8SelectBox.mode('select');
     // }, 10000);
     //
     // $timeout(function() {
-    //     $scope.port8SelectBox.toggleToAddMode();
+    //     $scope.port8SelectBox.mode('add');
     // }, 15000);
 
     // Setting value changes mode.

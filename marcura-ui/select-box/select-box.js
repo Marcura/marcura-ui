@@ -1,5 +1,7 @@
 /*
     TODO:
+    - Tabbing out in 'add' mode when list is open doesn't trigger blur. Focus goes to browser navigation bar.
+      However, if mouse hovers container, then it works fine.
     - Mousedown triggers focus, but shouldn't.
     - Multiple: Second click on container doesn't close dropdown.
     - IE Multiple: Selecting value with Enter triggers focus.
@@ -241,7 +243,8 @@ angular.module('marcuraUI.components')
                     showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
                     validators = scope.validators ? angular.copy(scope.validators) : [],
                     previousValue,
-                    unicodeNbsp = '\u00A0';
+                    unicodeNbsp = '\u00A0',
+                    failedValidator = null;
 
                 scope.previousSelectedItem = scope.previousSelectedItem || null;
                 scope.isAddMode = false;
@@ -570,11 +573,13 @@ angular.module('marcuraUI.components')
 
                 var validate = function (value) {
                     scope.isValid = true;
+                    failedValidator = null;
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
                             if (!validators[i].validate(value)) {
                                 scope.isValid = false;
+                                failedValidator = validators[i];
                                 break;
                             }
                         }
@@ -1009,15 +1014,15 @@ angular.module('marcuraUI.components')
                         return true;
                     };
 
-                    scope.instance.toggleToSelectMode = function () {
-                        if (scope.isAddMode) {
-                            scope.toggleMode('select');
-                        }
-                    };
-
-                    scope.instance.toggleToAddMode = function () {
-                        if (!scope.isAddMode) {
-                            scope.toggleMode('add');
+                    scope.instance.mode = function (mode) {
+                        if (arguments.length === 1) {
+                            if (mode === 'select' && scope.isAddMode) {
+                                scope.toggleMode('select');
+                            } else if (mode === 'add' && !scope.isAddMode) {
+                                scope.toggleMode('add');
+                            }
+                        } else {
+                            return scope.isAddMode ? 'add' : 'select';
                         }
                     };
 
@@ -1029,6 +1034,10 @@ angular.module('marcuraUI.components')
                         scope.isTouched = true;
 
                         validate(scope.isAddMode ? scope.text : scope.value);
+                    };
+
+                    scope.instance.failedValidator = function () {
+                        return failedValidator;
                     };
 
                     scope.instance.clear = function () {
