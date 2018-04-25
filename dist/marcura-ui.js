@@ -45,6 +45,9 @@ the specific language governing permissions and limitations under the Apache Lic
         return;
     }
 
+    var isIE = window.navigator.userAgent.indexOf('MSIE') !== -1 || window.navigator.appVersion.indexOf('Trident/') > 0,
+        isEdge = window.navigator.appVersion.indexOf('Edge/') > 0;
+
     var AbstractSelect2,
         SingleSelect2,
         MultiSelect2,
@@ -676,6 +679,7 @@ the specific language governing permissions and limitations under the Apache Lic
 
     AbstractSelect2 = clazz(Object, {
         isMultiple: false,
+        preventBlur: false,
 
         // abstract
         bind: function (func) {
@@ -742,7 +746,9 @@ the specific language governing permissions and limitations under the Apache Lic
 
             this.dropdown.addClass(evaluate(opts.dropdownCssClass, this.opts.element));
             this.dropdown.data("select2", this);
-            this.dropdown.on("click", killEvent);
+            this.dropdown.on("click", function (e) {
+                killEvent(e);
+            });
 
             this.results = results = this.container.find(resultsSelector);
             this.search = search = this.container.find("input.select2-input");
@@ -756,15 +762,29 @@ the specific language governing permissions and limitations under the Apache Lic
 
             this.container.on("click", killEvent);
 
+            this.container.on('mouseenter', this.bind(function () {
+                this.isContainerHovered = true;
+            }));
+
+            this.container.on('mouseleave', this.bind(function () {
+                this.isContainerHovered = false;
+            }));
+
             installFilteredMouseMove(this.results);
 
-            this.dropdown.on("mousemove-filtered", resultsSelector, this.bind(this.highlightUnderEvent));
+            this.dropdown.on("mousemove-filtered", resultsSelector, this.bind(function (event) {
+                this.highlightUnderEvent(event);
+            }));
             this.dropdown.on("touchstart touchmove touchend", resultsSelector, this.bind(function (event) {
                 this._touchEvent = true;
                 this.highlightUnderEvent(event);
             }));
-            this.dropdown.on("touchmove", resultsSelector, this.bind(this.touchMoved));
-            this.dropdown.on("touchstart touchend", resultsSelector, this.bind(this.clearTouchMoved));
+            this.dropdown.on("touchmove", resultsSelector, this.bind(function (event) {
+                this.touchMoved(event);
+            }));
+            this.dropdown.on("touchstart touchend", resultsSelector, this.bind(function (event) {
+                this.clearTouchMoved(event);
+            }));
 
             // Waiting for a click event on touch devices to select option and hide dropdown
             // otherwise click will be triggered on an underlying element
@@ -776,11 +796,17 @@ the specific language governing permissions and limitations under the Apache Lic
             }));
 
             installDebouncedScroll(80, this.results);
-            this.dropdown.on("scroll-debounced", resultsSelector, this.bind(this.loadMoreIfNeeded));
+            this.dropdown.on("scroll-debounced", resultsSelector, this.bind(function (event) {
+                this.loadMoreIfNeeded(event);
+            }));
 
             // do not propagate change event from the search field out of the component
-            $(this.container).on("change", ".select2-input", function (e) { e.stopPropagation(); });
-            $(this.dropdown).on("change", ".select2-input", function (e) { e.stopPropagation(); });
+            $(this.container).on("change", ".select2-input", function (e) {
+                e.stopPropagation();
+            });
+            $(this.dropdown).on("change", ".select2-input", function (e) {
+                e.stopPropagation();
+            });
 
             // if jquery.mousewheel plugin is installed we can prevent out-of-bounds scrolling of results via mousewheel
             if ($.fn.mousewheel) {
@@ -798,8 +824,12 @@ the specific language governing permissions and limitations under the Apache Lic
 
             installKeyUpChangeEvent(search);
             search.on("keyup-change input paste", this.bind(this.updateResults));
-            search.on("focus", function () { search.addClass("select2-focused"); });
-            search.on("blur", function () { search.removeClass("select2-focused"); });
+            search.on("focus", function () {
+                search.addClass("select2-focused");
+            });
+            search.on("blur", function () {
+                search.removeClass("select2-focused");
+            });
 
             this.dropdown.on("mouseup", resultsSelector, this.bind(function (e) {
                 if ($(e.target).closest(".select2-result-selectable").length > 0) {
@@ -812,7 +842,9 @@ the specific language governing permissions and limitations under the Apache Lic
             // for mouse events outside of itself so it can close itself. since the dropdown is now outside the select2's
             // dom it will trigger the popup close, which is not what we want
             // focusin can cause focus wars between modals and select2 since the dropdown is outside the modal.
-            this.dropdown.on("click mouseup mousedown touchstart touchend focusin", function (e) { e.stopPropagation(); });
+            this.dropdown.on("click mouseup mousedown touchstart touchend focusin", function (e) {
+                e.stopPropagation();
+            });
 
             this.nextSearchTerm = undefined;
 
@@ -842,7 +874,10 @@ the specific language governing permissions and limitations under the Apache Lic
 
             this.autofocus = opts.element.prop("autofocus");
             opts.element.prop("autofocus", false);
-            if (this.autofocus) this.focus();
+
+            if (this.autofocus) {
+                this.focus();
+            }
 
             this.search.attr("placeholder", opts.searchInputPlaceholder);
         },
@@ -1370,6 +1405,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 var selectData = $(selectElement).data().select2;
 
                 if (this.containerId !== selectData.containerId && selectData.opened()) {
+                    selectData.preventBlur = true;
                     selectData.close();
                 }
             });
@@ -1382,27 +1418,21 @@ the specific language governing permissions and limitations under the Apache Lic
                 lastMousePosition.y = e.pageY;
             });
 
-            $document.on("mousedown.select2Event touchstart.select2Event click.select2Event", function (e) {
-                var dropdown = $("#select2-drop"),
-                    self;
-
-                if (dropdown.length > 0) {
-                    self = dropdown.data("select2");
-
-                    if (self.opts.selectOnBlur) {
-                        self.selectHighlighted({ noFocus: true });
-                    }
-
-                    self.close();
-
-                    if (!self.isMultiple) {
-                        self.opts.instance.blur(e);
-                    }
-
-                    e.preventDefault();
-                    e.stopPropagation();
+            $document.on("mousedown.select2Event touchstart.select2Event click.select2Event", this.bind(function (e) {
+                if (this.opts.selectOnBlur) {
+                    this.selectHighlighted({ noFocus: true });
                 }
-            });
+
+                if (!this.isContainerHovered) {
+                    this.close(e);
+                }
+
+                if (!this.isMultiple) {
+                    if (!this.isContainerHovered) {
+                        this.opts.instance.blur(e);
+                    }
+                }
+            }));
 
             return true;
         },
@@ -1443,7 +1473,7 @@ the specific language governing permissions and limitations under the Apache Lic
         },
 
         // abstract
-        close: function () {
+        close: function (e) {
             if (!this.opened()) {
                 return;
             }
@@ -1459,9 +1489,25 @@ the specific language governing permissions and limitations under the Apache Lic
             });
             this.clearDropdownAlignmentPreference();
             this.dropdown.removeAttr("id"); // only the active dropdown has the select2-drop id
+
             this.dropdown.hide();
             this.container.removeClass("select2-dropdown-open").removeClass("select2-container-active");
             this.results.empty();
+
+            if ((isIE || isEdge) && e && e.target.className === 'ma-text-box-value') {
+                // IE Bug: Clicking ma-text-box while dropdown is open doesn't trigger focus ma-text-box.
+                // The problem is caused by hiding `this.search` input with this line of code: `this.dropdown.hide();`.
+                // I've no clue why it's happening.
+                // Dirty fix is just to detect and focus ma-text-box.
+                if (isEdge) {
+                    // Correct events order in EDGE. It should be blur then focus.
+                    window.setTimeout(function () {
+                        e.target.focus();
+                    }, 0);
+                } else {
+                    e.target.focus();
+                }
+            }
 
             // Now that the dropdown is closed, unbind the global document mousemove event
             $document.off("mousemove.select2Event");
@@ -1942,6 +1988,7 @@ the specific language governing permissions and limitations under the Apache Lic
     });
 
     SingleSelect2 = clazz(AbstractSelect2, {
+        preventBlur: false,
 
         // single
         createContainer: function () {
@@ -2152,28 +2199,8 @@ the specific language governing permissions and limitations under the Apache Lic
                 }
             }));
 
-            this.search.on("blur", this.bind(function (e) {
-                // a workaround for chrome to keep the search field focussed when the scroll bar is used to scroll the dropdown.
-                // without this the search field loses focus which is annoying
-                if (document.activeElement === this.body.get(0)) {
-                    window.setTimeout(this.bind(function () {
-                        if (this.opened()) {
-                            this.search.focus();
-                        }
-                    }), 0);
-                }
-            }));
-
             this.search.on("input", this.bind(function (e) {
                 this.searchText = (this.search.val() || '').trim();
-            }));
-
-            this.container.on('mouseenter', this.bind(function () {
-                this.isContainerHovered = true;
-            }));
-
-            this.container.on('mouseleave', this.bind(function () {
-                this.isContainerHovered = false;
             }));
 
             this.focusser.on("keydown", this.bind(function (e) {
@@ -2205,7 +2232,6 @@ the specific language governing permissions and limitations under the Apache Lic
                 }
             }));
 
-
             installKeyUpChangeEvent(this.focusser);
             this.focusser.on("keyup-change input", this.bind(function (e) {
                 if (this.opts.minimumResultsForSearch >= 0) {
@@ -2223,21 +2249,22 @@ the specific language governing permissions and limitations under the Apache Lic
                 this.selection.focus();
             }));
 
-            selection.on("mousedown touchstart", this.bind(function (e) {
+            selection.on("click", this.bind(function (e) {
                 // Prevent IE from generating a click event on the body
                 reinsertElement(selection);
 
-                if (!this.container.hasClass("select2-container-active")) {
-                    this.opts.element.trigger($.Event("select2-focus"));
-                    this.opts.instance.focus();
-                }
-
                 if (this.opened()) {
                     this.close();
+                    killEvent(e);
                 } else if (this.isInterfaceEnabled()) {
+                    // IE: Focus event isn't triggered somehow, so we need to do it manually.
+                    this.selection.focus();
                     this.open();
                 }
+            }));
 
+            selection.on("focus", this.bind(function (e) {
+                this.opts.instance.focus();
                 killEvent(e);
             }));
 
@@ -2245,10 +2272,6 @@ the specific language governing permissions and limitations under the Apache Lic
                 if (this.opts.shouldFocusInput(this)) {
                     this.search.focus();
                 }
-            }));
-
-            selection.on("focus", this.bind(function (e) {
-                killEvent(e);
             }));
 
             this.focusser.on("focus", this.bind(function (event) {
@@ -2267,15 +2290,15 @@ the specific language governing permissions and limitations under the Apache Lic
                 if (!this.opened()) {
                     this.container.removeClass("select2-container-active");
                     this.opts.element.trigger($.Event("select2-blur"));
-                    this.opts.instance.blur(e);
+
+                    if (!this.isContainerHovered) {
+                        this.opts.instance.blur(e);
+                    }
                 }
             }));
 
             this.search.on("focus", this.bind(function () {
-                if (!this.container.hasClass("select2-container-active")) {
-                    this.opts.element.trigger($.Event("select2-focus"));
-                    this.opts.instance.focus();
-                }
+                this.opts.instance.focus();
                 this.container.addClass("select2-container-active");
             }));
 
@@ -2592,6 +2615,7 @@ the specific language governing permissions and limitations under the Apache Lic
 
     MultiSelect2 = clazz(AbstractSelect2, {
         isMultiple: true,
+        preventBlur: false,
 
         // multi
         createContainer: function () {
@@ -2618,7 +2642,6 @@ the specific language governing permissions and limitations under the Apache Lic
                 self = this;
 
             // TODO validate placeholder is a string if specified
-
             if (opts.element.get(0).tagName.toLowerCase() === "select") {
                 // install the selection initializer
                 opts.initSelection = function (element, callback) {
@@ -2705,7 +2728,6 @@ the specific language governing permissions and limitations under the Apache Lic
 
         // multi
         initContainer: function () {
-
             var selector = ".select2-choices", selection;
 
             this.searchContainer = this.container.find(".select2-search-field");
@@ -2713,7 +2735,6 @@ the specific language governing permissions and limitations under the Apache Lic
 
             var _this = this;
             this.selection.on("click", ".select2-search-choice:not(.select2-locked)", function (e) {
-                //killEvent(e);
                 _this.search[0].focus();
                 _this.selectChoice($(this));
             });
@@ -2854,7 +2875,12 @@ the specific language governing permissions and limitations under the Apache Lic
 
                 e.stopImmediatePropagation();
                 this.opts.element.trigger($.Event("select2-blur"));
-                this.opts.instance.blur(e);
+
+                if (!this.preventBlur) {
+                    this.opts.instance.blur(e);
+                } else {
+                    this.preventBlur = false;
+                }
             }));
 
             this.container.on("click", selector, this.bind(function (e) {
@@ -2893,14 +2919,6 @@ the specific language governing permissions and limitations under the Apache Lic
                 this.container.addClass("select2-container-active");
                 this.dropdown.addClass("select2-drop-active");
                 this.clearPlaceholder();
-            }));
-
-            this.container.on('mouseenter', this.bind(function () {
-                this.isContainerHovered = true;
-            }));
-
-            this.container.on('mouseleave', this.bind(function () {
-                this.isContainerHovered = false;
             }));
 
             this.initContainerWidth();
@@ -3739,6 +3757,221 @@ if (!String.prototype.endsWith) {
             });
 
             setModifiers();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            value: '=',
+            isDisabled: '=',
+            change: '&',
+            size: '@',
+            rtl: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-check-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
+                ng-click="onChange()"\
+                ng-class="{\
+                    \'ma-check-box-is-checked\': value === true,\
+                    \'ma-check-box-is-disabled\': isDisabled,\
+                    \'ma-check-box-has-text\': hasText,\
+                    \'ma-check-box-rtl\': rtl,\
+                    \'ma-check-box-is-focused\': isFocused,\
+                    \'ma-check-box-is-invalid\': !isValid,\
+                    \'ma-check-box-is-touched\': isTouched\
+                }">\
+                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
+                <div class="ma-check-box-inner"></div>\
+                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            var validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
+            var setTabindex = function () {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
+            var setText = function () {
+                scope.hasText = scope.text ? true : false;
+            };
+
+            scope._size = scope.size ? scope.size : 'xs';
+            scope.cssClass = ' ma-check-box-' + scope._size;
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var getControllerScope = function () {
+                var valuePropertyParts = null,
+                    controllerScope = null,
+                    initialScope = scope.$parent,
+                    property = attributes.value;
+
+                // In case of a nested property binding like 'company.port.id'.
+                if (property.indexOf('.') !== -1) {
+                    valuePropertyParts = property.split('.');
+                    property = valuePropertyParts[0];
+                }
+
+                while (initialScope && !controllerScope) {
+                    if (initialScope.hasOwnProperty(property)) {
+                        controllerScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                // Use parent scope by default if search is unsuccessful.
+                return controllerScope || scope.$parent;
+            };
+
+            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
+            // as the value will be stored by Angular on ng-if scope.
+            var controllerScope = getControllerScope();
+
+            var validate = function () {
+                scope.isValid = true;
+                scope.isTouched = true;
+
+                // Remove 'false' value for 'IsNotEmpty' to work correctly.
+                var value = scope.value === false ? null : scope.value;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        var validator = validators[i];
+
+                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            scope.onChange = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                // Handle nested properties or function calls with $parse service.
+                // This is related to a case when the component is located inside ng-if,
+                // but it works for other cases as well.
+                var valueGetter = $parse(attributes.value),
+                    valueSetter = valueGetter.assign,
+                    value = !valueGetter(controllerScope);
+
+                scope.value = value;
+                valueSetter(controllerScope, value);
+                validate();
+
+                $timeout(function () {
+                    scope.change({
+                        maValue: scope.value
+                    });
+                });
+            };
+
+            scope.onFocus = function () {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                scope.isFocused = false;
+                validate();
+            };
+
+            scope.onKeypress = function (event) {
+                if (event.keyCode === MaHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (!scope.isDisabled) {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            scope.$watch('isDisabled', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            scope.$watch('text', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setText();
+            });
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate();
+                };
+            }
+
+            setTabindex();
+            setText();
         }
     };
 }]);})();
@@ -4749,218 +4982,37 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
+(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
     return {
         restrict: 'E',
+        transclude: true,
         scope: {
-            text: '@',
-            value: '=',
-            isDisabled: '=',
-            change: '&',
-            size: '@',
-            rtl: '=',
+            cutOverflow: '=',
+            for: '@',
             isRequired: '=',
-            validators: '=',
-            instance: '=',
+            hasWarning: '=',
+            hasHint: '='
         },
         replace: true,
         template: function () {
             var html = '\
-            <div class="ma-check-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-check-box-is-checked\': value === true,\
-                    \'ma-check-box-is-disabled\': isDisabled,\
-                    \'ma-check-box-has-text\': hasText,\
-                    \'ma-check-box-rtl\': rtl,\
-                    \'ma-check-box-is-focused\': isFocused,\
-                    \'ma-check-box-is-invalid\': !isValid,\
-                    \'ma-check-box-is-touched\': isTouched\
+                <div class="ma-label" ng-class="{\
+                    \'ma-label-is-required\': isRequired,\
+                    \'ma-label-has-content\': hasContent,\
+                    \'ma-label-has-warning\': hasWarning,\
+                    \'ma-label-has-hint\': hasHint,\
+                    \'ma-label-cut-overflow\': cutOverflow\
                 }">\
-                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
-                <div class="ma-check-box-inner"></div>\
-                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
-            </div>';
+                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div><!--\
+                    --><div class="ma-label-warning" ng-if="hasWarning">&nbsp;\
+                    <i class="fa fa-exclamation-triangle"></i></div><div class="ma-label-hint" ng-if="hasHint">&nbsp;<div class="ma-label-hint-inner"><i class="fa fa-question"></i><div></div>\
+                </div>';
 
             return html;
         },
-        link: function (scope, element, attributes) {
-            var validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
-
-            var setTabindex = function () {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
-
-            var setText = function () {
-                scope.hasText = scope.text ? true : false;
-            };
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-check-box-' + scope._size;
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var getControllerScope = function () {
-                var valuePropertyParts = null,
-                    controllerScope = null,
-                    initialScope = scope.$parent,
-                    property = attributes.value;
-
-                // In case of a nested property binding like 'company.port.id'.
-                if (property.indexOf('.') !== -1) {
-                    valuePropertyParts = property.split('.');
-                    property = valuePropertyParts[0];
-                }
-
-                while (initialScope && !controllerScope) {
-                    if (initialScope.hasOwnProperty(property)) {
-                        controllerScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                // Use parent scope by default if search is unsuccessful.
-                return controllerScope || scope.$parent;
-            };
-
-            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
-            // as the value will be stored by Angular on ng-if scope.
-            var controllerScope = getControllerScope();
-
-            var validate = function () {
-                scope.isValid = true;
-                scope.isTouched = true;
-
-                // Remove 'false' value for 'IsNotEmpty' to work correctly.
-                var value = scope.value === false ? null : scope.value;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        var validator = validators[i];
-
-                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.onChange = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                // Handle nested properties or function calls with $parse service.
-                // This is related to a case when the component is located inside ng-if,
-                // but it works for other cases as well.
-                var valueGetter = $parse(attributes.value),
-                    valueSetter = valueGetter.assign,
-                    value = !valueGetter(controllerScope);
-
-                scope.value = value;
-                valueSetter(controllerScope, value);
-                validate();
-
-                $timeout(function () {
-                    scope.change({
-                        maValue: scope.value
-                    });
-                });
-            };
-
-            scope.onFocus = function () {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                scope.isFocused = false;
-                validate();
-            };
-
-            scope.onKeypress = function (event) {
-                if (event.keyCode === MaHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (!scope.isDisabled) {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            scope.$watch('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            scope.$watch('text', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setText();
-            });
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate();
-                };
-            }
-
-            setTabindex();
-            setText();
+        link: function (scope, element) {
+            scope.hasContent = element.find('span').contents().length > 0;
         }
     };
 }]);})();
@@ -5201,6 +5253,69 @@ if (!String.prototype.endsWith) {
                     validate(scope.value);
                 };
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            scope.calculateLeft = function (stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function () {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function (stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
         }
     };
 }]);})();
@@ -5494,437 +5609,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            scope.calculateLeft = function (stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function () {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function (stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$timeout', '$sce', 'MaValidators', function (MaHelper, $timeout, $sce, MaValidators) {
-    var radioBoxes = {};
-
-    return {
-        restrict: 'E',
-        scope: {
-            item: '=',
-            itemTemplate: '=',
-            itemTextField: '@',
-            itemValueField: '@',
-            value: '=',
-            isDisabled: '=',
-            hideText: '=',
-            change: '&',
-            size: '@',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
-            id: '@',
-            modifier: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-radio-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-radio-box-is-checked\': isChecked(),\
-                    \'ma-radio-box-is-disabled\': isDisabled,\
-                    \'ma-radio-box-has-text\': hasText(),\
-                    \'ma-radio-box-is-focused\': isFocused,\
-                    \'ma-radio-box-is-invalid\': !isValid,\
-                    \'ma-radio-box-is-touched\': isTouched\
-                }">\
-                <span class="ma-radio-box-text" ng-bind-html="getItemText()"></span>\
-                <div class="ma-radio-box-inner"></div>\
-                <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            var valuePropertyParts = null,
-                isStringArray = !scope.itemTextField && !scope.itemValueField,
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
-
-            var setModifiers = function (oldModifiers) {
-                // Remove previous modifiers first.
-                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
-                    oldModifiers = oldModifiers.split(' ');
-
-                    for (var i = 0; i < oldModifiers.length; i++) {
-                        element.removeClass('ma-radio-box-' + oldModifiers[i]);
-                    }
-                }
-
-                var modifiers = '';
-
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
-                    modifiers = scope.modifier.split(' ');
-                }
-
-                for (var j = 0; j < modifiers.length; j++) {
-                    element.addClass('ma-radio-box-' + modifiers[j]);
-                }
-            };
-
-            var setTabindex = function () {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
-
-            var getControllerScope = function () {
-                var controllerScope = null,
-                    initialScope = scope.$parent,
-                    property = attributes.value;
-
-                // In case of a nested property binding like 'company.port.id'.
-                if (property.indexOf('.') !== -1) {
-                    valuePropertyParts = property.split('.');
-                    property = valuePropertyParts[0];
-                }
-
-                while (initialScope && !controllerScope) {
-                    if (initialScope.hasOwnProperty(property)) {
-                        controllerScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                return controllerScope;
-            };
-
-            var controllerScope = getControllerScope();
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-radio-box-' + scope._size;
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            if (scope.id) {
-                if (!radioBoxes[scope.id]) {
-                    radioBoxes[scope.id] = [];
-                }
-
-                radioBoxes[scope.id].push(scope);
-            }
-
-            var validate = function (value) {
-                if (radioBoxes[scope.id]) {
-                    // Validate a group of components.
-                    for (var i = 0; i < radioBoxes[scope.id].length; i++) {
-                        var radioBox = radioBoxes[scope.id][i];
-                        radioBox.isTouched = true;
-                        radioBox.validateThis(radioBox.value);
-                    }
-                } else {
-                    // Validate only the current component.
-                    scope.isTouched = true;
-                    scope.validateThis(value);
-                }
-            };
-
-            scope.validateThis = function (value) {
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.getItemText = function () {
-                if (scope.hideText) {
-                    return MaHelper.html.nbsp;
-                }
-
-                var text;
-
-                if (scope.itemTemplate) {
-                    text = scope.itemTemplate(scope.item);
-                } else if (isStringArray) {
-                    text = scope.item;
-                } else if (scope.itemTextField) {
-                    text = scope.item[scope.itemTextField];
-                }
-
-                if (!angular.isString(text) || !text) {
-                    text = MaHelper.html.nbsp;
-                }
-
-                return $sce.trustAsHtml(text);
-            };
-
-            scope.hasText = function () {
-                return scope.getItemText() !== MaHelper.html.nbsp;
-            };
-
-            scope.isChecked = function () {
-                if (isStringArray) {
-                    return scope.item === scope.value;
-                } else if (scope.itemValueField) {
-                    return scope.item && scope.value &&
-                        scope.item[scope.itemValueField] === scope.value[scope.itemValueField];
-                }
-
-                return false;
-            };
-
-            scope.onChange = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                var valueProperty,
-                    oldValue = scope.value;
-                scope.value = scope.item;
-
-                if (controllerScope && valuePropertyParts) {
-                    // When the component is inside ng-repeat normal binding like
-                    // value="port" won't work.
-                    // This is to workaround the problem.
-                    valueProperty = controllerScope;
-
-                    // Handle nested property binding.
-                    for (var i = 0; i < valuePropertyParts.length; i++) {
-                        valueProperty = valueProperty[valuePropertyParts[i]];
-                    }
-
-                    valueProperty = scope.item;
-                } else {
-                    valueProperty = controllerScope[attributes.value];
-                    controllerScope[attributes.value] = scope.item;
-                }
-
-                // Check that value has changed.
-                var hasChanged = true;
-
-                if (isStringArray) {
-                    hasChanged = oldValue !== scope.item;
-                } else if (scope.itemValueField) {
-                    if (!oldValue && !MaHelper.isNullOrWhiteSpace(scope.item[scope.itemValueField])) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = oldValue[scope.itemValueField] !== scope.item[scope.itemValueField];
-                    }
-                } else {
-                    // Compare objects if itemValueField is not provided.
-                    if (!oldValue && scope.item) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(scope.item);
-                    }
-                }
-
-                if (hasChanged) {
-                    $timeout(function () {
-                        validate(scope.value);
-
-                        scope.change({
-                            maValue: scope.item,
-                            maOldValue: oldValue
-                        });
-                    });
-                }
-            };
-
-            scope.onFocus = function () {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                scope.isFocused = false;
-
-                validate(scope.value);
-            };
-
-            scope.onKeypress = function (event) {
-                if (event.keyCode === MaHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (!scope.isDisabled && !scope.isChecked()) {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            scope.$watch('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            scope.$watch('modifier', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setModifiers(oldValue);
-            });
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate(scope.value);
-                };
-            }
-
-            $timeout(function () {
-                // Now id is used only for grouping radioBoxes, so remove it from the element.
-                if (scope.id) {
-                    element.removeAttr('id');
-                }
-
-                setModifiers();
-            });
-
-            setTabindex();
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            cutOverflow: '=',
-            for: '@',
-            isRequired: '=',
-            hasWarning: '=',
-            hasHint: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-label" ng-class="{\
-                    \'ma-label-is-required\': isRequired,\
-                    \'ma-label-has-content\': hasContent,\
-                    \'ma-label-has-warning\': hasWarning,\
-                    \'ma-label-has-hint\': hasHint,\
-                    \'ma-label-cut-overflow\': cutOverflow\
-                }">\
-                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div><!--\
-                    --><div class="ma-label-warning" ng-if="hasWarning">&nbsp;\
-                    <i class="fa fa-exclamation-triangle"></i></div><div class="ma-label-hint" ng-if="hasHint">&nbsp;<div class="ma-label-hint-inner"><i class="fa fa-question"></i><div></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            scope.hasContent = element.find('span').contents().length > 0;
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
     return {
         restrict: 'E',
@@ -6085,432 +5769,6 @@ if (!String.prototype.endsWith) {
 
                 scope.instance.validate = function () {
                     validate(scope.value);
-                };
-            }
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            isVisible: '=',
-            size: '@',
-            position: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
-                    <div class="pace">\
-                        <div class="pace-activity"></div>\
-                    </div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            var size = scope.size ? scope.size : 'xs',
-                position = scope.position ? scope.position : 'center';
-            scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function ($state, MaHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-tabs">\
-                <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item{{item.modifier ? (\' ma-tabs-item-\' + item.modifier) : \'\'}}" ng-repeat="item in items"\
-                        ng-focus="onFocus(item)"\
-                        ng-blur="onBlur(item)"\
-                        ng-keypress="onKeypress($event, item)"\
-                        ng-class="{\
-                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
-                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
-                            \'ma-tabs-item-is-focused\': item.isFocused\
-                        }"\
-                        ng-click="onSelect(item)">\
-                        <a class="ma-tabs-link" href="" tabindex="-1">\
-                            <span class="ma-tabs-text">{{item.text}}</span>\
-                        </a>\
-                    </li>\
-                </ul>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function (item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function (item) {
-                if (item.isDisabled || item.isSelected) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function (item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        maItem: item
-                    });
-                }
-            };
-
-            scope.onKeypress = function (event, item) {
-                if (event.keyCode === MaHelper.keyCode.enter) {
-                    scope.onSelect(item);
-                }
-            };
-
-            scope.onFocus = function (item) {
-                item.isFocused = true;
-            };
-
-            scope.onBlur = function (item) {
-                item.isFocused = false;
-            };
-
-            $timeout(function () {
-                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
-
-                itemElements.each(function (itemIndex, itemElement) {
-                    var item = scope.items[itemIndex];
-
-                    if (!item.isDisabled) {
-                        angular.element(itemElement).attr('tabindex', '0');
-                    }
-                });
-            });
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'MaHelper', 'MaValidators', function ($timeout, $window, MaHelper, MaValidators) {
-    return {
-        restrict: 'E',
-        scope: {
-            id: '@',
-            value: '=',
-            isDisabled: '=',
-            fitContentHeight: '=',
-            isResizable: '=',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
-            change: '&',
-            blur: '&',
-            focus: '&'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-text-area"\
-                ng-class="{\
-                    \'ma-text-area-is-disabled\': isDisabled,\
-                    \'ma-text-area-is-focused\': isFocused,\
-                    \'ma-text-area-fit-content-height\': fitContentHeight,\
-                    \'ma-text-area-is-invalid\': !isValid,\
-                    \'ma-text-area-is-touched\': isTouched\
-                }">\
-                <textarea class="ma-text-area-value"\
-                    type="text"\
-                    ng-focus="onFocus()"\
-                    ng-blur="onBlur()"\
-                    ng-keydown="onKeydown($event)"\
-                    ng-keyup="onKeyup($event)"\
-                    ng-disabled="isDisabled">\
-                </textarea>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            var valueElement = angular.element(element[0].querySelector('.ma-text-area-value')),
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false,
-                // Variables keydownValue and keyupValue help track touched state.
-                keydownValue,
-                keyupValue,
-                previousValue,
-                focusValue;
-            scope.isFocused = false;
-            scope.isTouched = false;
-
-            var getValueElementStyle = function () {
-                var style = $window.getComputedStyle(valueElement[0], null),
-                    properties = {},
-                    paddingHeight = parseInt(style.getPropertyValue('padding-top')) + parseInt(style.getPropertyValue('padding-bottom')),
-                    paddingWidth = parseInt(style.getPropertyValue('padding-left')) + parseInt(style.getPropertyValue('padding-right')),
-                    borderHeight = parseInt(style.getPropertyValue('border-top-width')) + parseInt(style.getPropertyValue('border-bottom-width')),
-                    borderWidth = parseInt(style.getPropertyValue('border-left-width')) + parseInt(style.getPropertyValue('border-right-width'));
-
-                properties.width = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('width')) - paddingWidth;
-                properties.height = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('height')) - paddingHeight;
-                properties.paddingHeight = paddingHeight;
-                properties.paddingWidth = paddingWidth;
-                properties.borderHeight = borderHeight;
-                properties.borderWidth = borderWidth;
-                properties.lineHeight = style.getPropertyValue('line-height');
-
-                // IE and Firefox do not support 'font' property, so we need to get it ourselves.
-                properties.font = style.getPropertyValue('font-style') + ' ' +
-                    style.getPropertyValue('font-variant') + ' ' +
-                    style.getPropertyValue('font-weight') + ' ' +
-                    style.getPropertyValue('font-size') + ' ' +
-                    style.getPropertyValue('font-height') + ' ' +
-                    style.getPropertyValue('font-family');
-
-                return properties;
-            };
-
-            var resize = function () {
-                if (!scope.fitContentHeight) {
-                    return;
-                }
-
-                var valueElementStyle = getValueElementStyle(),
-                    textHeight = MaHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
-                    height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
-
-                if (height < 40) {
-                    height = 30;
-                }
-
-                valueElement[0].style.height = height + 'px';
-                element[0].style.height = height + 'px';
-            };
-
-            var validate = function () {
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(valueElement.val())) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            var changeValue = function () {
-                var value = valueElement.val();
-
-                if (previousValue === value) {
-                    return;
-                }
-
-                previousValue = scope.value;
-                scope.value = value;
-
-                $timeout(function () {
-                    scope.change({
-                        maValue: scope.value,
-                        maOldValue: previousValue
-                    });
-                });
-            };
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            scope.onFocus = function () {
-                scope.isFocused = true;
-                focusValue = scope.value;
-
-                scope.focus({
-                    maValue: scope.value
-                });
-            };
-
-            scope.onBlur = function () {
-                scope.isFocused = false;
-                scope.isTouched = true;
-                validate();
-
-                scope.blur({
-                    maValue: scope.value,
-                    maOldValue: focusValue,
-                    maHasValueChanged: focusValue !== scope.value
-                });
-            };
-
-            scope.onKeydown = function (event) {
-                // Ignore tab key.
-                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
-                    return;
-                }
-
-                keydownValue = angular.element(event.target).val();
-            };
-
-            scope.onKeyup = function (event) {
-                // Ignore tab key.
-                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
-                    return;
-                }
-
-                keyupValue = angular.element(event.target).val();
-
-                if (keydownValue !== keyupValue) {
-                    scope.isTouched = true;
-                }
-            };
-
-            // Use input event to support value change from Enter key, and contextual menu,
-            // e.g. mouse right click + Cut/Copy/Paste etc.
-            valueElement.on('input', function (event) {
-                var hasChanged = false;
-                keyupValue = angular.element(event.target).val();
-
-                if (keydownValue !== keyupValue) {
-                    hasChanged = true;
-                }
-
-                // Change value after a timeout while the user is typing.
-                if (!hasChanged) {
-                    return;
-                }
-
-                validate();
-                resize();
-
-                if (scope.isValid) {
-                    scope.$apply(function () {
-                        changeValue();
-                    });
-                }
-            });
-
-            angular.element($window).on('resize', function () {
-                resize();
-            });
-
-            $timeout(function () {
-                resize();
-
-                if (scope.isResizable === false) {
-                    valueElement.css('resize', 'none');
-                }
-
-                // Move id to input.
-                element.removeAttr('id');
-                valueElement.attr('id', scope.id);
-
-                // If TextArea is hidden initially with ng-show then after appearing
-                // it's height is calculated incorectly. This code fixes the issue.
-                if (scope.fitContentHeight) {
-                    var hiddenParent = $(element[0]).closest('.ng-hide[ng-show]');
-
-                    if (hiddenParent.length === 1) {
-                        var parentScope = hiddenParent.scope();
-
-                        parentScope.$watch(hiddenParent.attr('ng-show'), function (isVisible) {
-                            if (isVisible) {
-                                // Wait for the hidden element to appear first.
-                                $timeout(function () {
-                                    resize();
-                                });
-                            }
-                        });
-                    }
-                }
-            });
-
-            scope.$watch('value', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                scope.isValid = true;
-                scope.isTouched = false;
-
-                // IE 11.0 version moves the caret at the end when textarea value is fully replaced.
-                // In IE 11.126+ the issue has been fixed.
-                var caretPosition = valueElement.prop('selectionStart');
-                valueElement.val(newValue);
-
-                // Restore caret position if text area is visible.
-                var isVisible = $(element).is(':visible');
-
-                if (isVisible) {
-                    valueElement.prop({
-                        selectionStart: caretPosition,
-                        selectionEnd: caretPosition
-                    });
-                }
-
-                resize();
-            });
-
-            // Set initial value.
-            valueElement.val(scope.value);
-            validate();
-            previousValue = scope.value;
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.focus = function () {
-                    if (!scope.isFocused) {
-                        valueElement.focus();
-                    }
                 };
             }
         }
@@ -6748,8 +6006,10 @@ angular.module('marcuraUI.components').directive('maSelectBoxWrapper', ['$timeou
 }]);})();
 (function(){/*
     TODO:
-    - IE Bug: "Adding item as object" - When clicking quickly twice on Toggle button selectedItem gets cleared.
-    - IE Bug: "Multiple" - 1) Add item 2) Remove item 3) Open list - triggers blur/focus, but shouldn't.
+    - Mousedown triggers focus, but shouldn't.
+    - Multiple: Second click on container doesn't close dropdown.
+    - IE Multiple: Selecting value with Enter triggers focus.
+    - IE Single: "Adding item as object" When clicking quickly twice on Toggle button selectedItem gets cleared.
 */
 angular.module('marcuraUI.components')
     .directive('maSelectBox', ['$document', '$timeout', 'MaHelper', function ($document, $timeout, MaHelper) {
@@ -7872,6 +7132,2238 @@ angular.module('marcuraUI.components')
             }
         };
     }]);})();
+(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            isVisible: '=',
+            size: '@',
+            position: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
+                    <div class="pace">\
+                        <div class="pace-activity"></div>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            var size = scope.size ? scope.size : 'xs',
+                position = scope.position ? scope.position : 'center';
+            scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$timeout', '$sce', 'MaValidators', function (MaHelper, $timeout, $sce, MaValidators) {
+    var radioBoxes = {};
+
+    return {
+        restrict: 'E',
+        scope: {
+            item: '=',
+            itemTemplate: '=',
+            itemTextField: '@',
+            itemValueField: '@',
+            value: '=',
+            isDisabled: '=',
+            hideText: '=',
+            change: '&',
+            size: '@',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+            id: '@',
+            modifier: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-radio-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
+                ng-click="onChange()"\
+                ng-class="{\
+                    \'ma-radio-box-is-checked\': isChecked(),\
+                    \'ma-radio-box-is-disabled\': isDisabled,\
+                    \'ma-radio-box-has-text\': hasText(),\
+                    \'ma-radio-box-is-focused\': isFocused,\
+                    \'ma-radio-box-is-invalid\': !isValid,\
+                    \'ma-radio-box-is-touched\': isTouched\
+                }">\
+                <span class="ma-radio-box-text" ng-bind-html="getItemText()"></span>\
+                <div class="ma-radio-box-inner"></div>\
+                <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            var valuePropertyParts = null,
+                isStringArray = !scope.itemTextField && !scope.itemValueField,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
+            var setModifiers = function (oldModifiers) {
+                // Remove previous modifiers first.
+                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
+                    oldModifiers = oldModifiers.split(' ');
+
+                    for (var i = 0; i < oldModifiers.length; i++) {
+                        element.removeClass('ma-radio-box-' + oldModifiers[i]);
+                    }
+                }
+
+                var modifiers = '';
+
+                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
+                    modifiers = scope.modifier.split(' ');
+                }
+
+                for (var j = 0; j < modifiers.length; j++) {
+                    element.addClass('ma-radio-box-' + modifiers[j]);
+                }
+            };
+
+            var setTabindex = function () {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
+            var getControllerScope = function () {
+                var controllerScope = null,
+                    initialScope = scope.$parent,
+                    property = attributes.value;
+
+                // In case of a nested property binding like 'company.port.id'.
+                if (property.indexOf('.') !== -1) {
+                    valuePropertyParts = property.split('.');
+                    property = valuePropertyParts[0];
+                }
+
+                while (initialScope && !controllerScope) {
+                    if (initialScope.hasOwnProperty(property)) {
+                        controllerScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                return controllerScope;
+            };
+
+            var controllerScope = getControllerScope();
+
+            scope._size = scope.size ? scope.size : 'xs';
+            scope.cssClass = ' ma-radio-box-' + scope._size;
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            if (scope.id) {
+                if (!radioBoxes[scope.id]) {
+                    radioBoxes[scope.id] = [];
+                }
+
+                radioBoxes[scope.id].push(scope);
+            }
+
+            var validate = function (value) {
+                if (radioBoxes[scope.id]) {
+                    // Validate a group of components.
+                    for (var i = 0; i < radioBoxes[scope.id].length; i++) {
+                        var radioBox = radioBoxes[scope.id][i];
+                        radioBox.isTouched = true;
+                        radioBox.validateThis(radioBox.value);
+                    }
+                } else {
+                    // Validate only the current component.
+                    scope.isTouched = true;
+                    scope.validateThis(value);
+                }
+            };
+
+            scope.validateThis = function (value) {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            scope.getItemText = function () {
+                if (scope.hideText) {
+                    return MaHelper.html.nbsp;
+                }
+
+                var text;
+
+                if (scope.itemTemplate) {
+                    text = scope.itemTemplate(scope.item);
+                } else if (isStringArray) {
+                    text = scope.item;
+                } else if (scope.itemTextField) {
+                    text = scope.item[scope.itemTextField];
+                }
+
+                if (!angular.isString(text) || !text) {
+                    text = MaHelper.html.nbsp;
+                }
+
+                return $sce.trustAsHtml(text);
+            };
+
+            scope.hasText = function () {
+                return scope.getItemText() !== MaHelper.html.nbsp;
+            };
+
+            scope.isChecked = function () {
+                if (isStringArray) {
+                    return scope.item === scope.value;
+                } else if (scope.itemValueField) {
+                    return scope.item && scope.value &&
+                        scope.item[scope.itemValueField] === scope.value[scope.itemValueField];
+                }
+
+                return false;
+            };
+
+            scope.onChange = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                var valueProperty,
+                    oldValue = scope.value;
+                scope.value = scope.item;
+
+                if (controllerScope && valuePropertyParts) {
+                    // When the component is inside ng-repeat normal binding like
+                    // value="port" won't work.
+                    // This is to workaround the problem.
+                    valueProperty = controllerScope;
+
+                    // Handle nested property binding.
+                    for (var i = 0; i < valuePropertyParts.length; i++) {
+                        valueProperty = valueProperty[valuePropertyParts[i]];
+                    }
+
+                    valueProperty = scope.item;
+                } else {
+                    valueProperty = controllerScope[attributes.value];
+                    controllerScope[attributes.value] = scope.item;
+                }
+
+                // Check that value has changed.
+                var hasChanged = true;
+
+                if (isStringArray) {
+                    hasChanged = oldValue !== scope.item;
+                } else if (scope.itemValueField) {
+                    if (!oldValue && !MaHelper.isNullOrWhiteSpace(scope.item[scope.itemValueField])) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = oldValue[scope.itemValueField] !== scope.item[scope.itemValueField];
+                    }
+                } else {
+                    // Compare objects if itemValueField is not provided.
+                    if (!oldValue && scope.item) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(scope.item);
+                    }
+                }
+
+                if (hasChanged) {
+                    $timeout(function () {
+                        validate(scope.value);
+
+                        scope.change({
+                            maValue: scope.item,
+                            maOldValue: oldValue
+                        });
+                    });
+                }
+            };
+
+            scope.onFocus = function () {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                scope.isFocused = false;
+
+                validate(scope.value);
+            };
+
+            scope.onKeypress = function (event) {
+                if (event.keyCode === MaHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (!scope.isDisabled && !scope.isChecked()) {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            scope.$watch('isDisabled', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            scope.$watch('modifier', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setModifiers(oldValue);
+            });
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate(scope.value);
+                };
+            }
+
+            $timeout(function () {
+                // Now id is used only for grouping radioBoxes, so remove it from the element.
+                if (scope.id) {
+                    element.removeAttr('id');
+                }
+
+                setModifiers();
+            });
+
+            setTabindex();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$window', 'MaHelper', 'MaValidators', function ($timeout, $window, MaHelper, MaValidators) {
+    return {
+        restrict: 'E',
+        scope: {
+            id: '@',
+            value: '=',
+            isDisabled: '=',
+            fitContentHeight: '=',
+            isResizable: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+            change: '&',
+            blur: '&',
+            focus: '&'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-text-area"\
+                ng-class="{\
+                    \'ma-text-area-is-disabled\': isDisabled,\
+                    \'ma-text-area-is-focused\': isFocused,\
+                    \'ma-text-area-fit-content-height\': fitContentHeight,\
+                    \'ma-text-area-is-invalid\': !isValid,\
+                    \'ma-text-area-is-touched\': isTouched\
+                }">\
+                <textarea class="ma-text-area-value"\
+                    type="text"\
+                    ng-focus="onFocus()"\
+                    ng-blur="onBlur()"\
+                    ng-keydown="onKeydown($event)"\
+                    ng-keyup="onKeyup($event)"\
+                    ng-disabled="isDisabled">\
+                </textarea>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            var valueElement = angular.element(element[0].querySelector('.ma-text-area-value')),
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false,
+                // Variables keydownValue and keyupValue help track touched state.
+                keydownValue,
+                keyupValue,
+                previousValue,
+                focusValue;
+            scope.isFocused = false;
+            scope.isTouched = false;
+
+            var getValueElementStyle = function () {
+                var style = $window.getComputedStyle(valueElement[0], null),
+                    properties = {},
+                    paddingHeight = parseInt(style.getPropertyValue('padding-top')) + parseInt(style.getPropertyValue('padding-bottom')),
+                    paddingWidth = parseInt(style.getPropertyValue('padding-left')) + parseInt(style.getPropertyValue('padding-right')),
+                    borderHeight = parseInt(style.getPropertyValue('border-top-width')) + parseInt(style.getPropertyValue('border-bottom-width')),
+                    borderWidth = parseInt(style.getPropertyValue('border-left-width')) + parseInt(style.getPropertyValue('border-right-width'));
+
+                properties.width = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('width')) - paddingWidth;
+                properties.height = parseInt($window.getComputedStyle(valueElement[0], null).getPropertyValue('height')) - paddingHeight;
+                properties.paddingHeight = paddingHeight;
+                properties.paddingWidth = paddingWidth;
+                properties.borderHeight = borderHeight;
+                properties.borderWidth = borderWidth;
+                properties.lineHeight = style.getPropertyValue('line-height');
+
+                // IE and Firefox do not support 'font' property, so we need to get it ourselves.
+                properties.font = style.getPropertyValue('font-style') + ' ' +
+                    style.getPropertyValue('font-variant') + ' ' +
+                    style.getPropertyValue('font-weight') + ' ' +
+                    style.getPropertyValue('font-size') + ' ' +
+                    style.getPropertyValue('font-height') + ' ' +
+                    style.getPropertyValue('font-family');
+
+                return properties;
+            };
+
+            var resize = function () {
+                if (!scope.fitContentHeight) {
+                    return;
+                }
+
+                var valueElementStyle = getValueElementStyle(),
+                    textHeight = MaHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
+                    height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
+
+                if (height < 40) {
+                    height = 30;
+                }
+
+                valueElement[0].style.height = height + 'px';
+                element[0].style.height = height + 'px';
+            };
+
+            var validate = function () {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(valueElement.val())) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            var changeValue = function () {
+                var value = valueElement.val();
+
+                if (previousValue === value) {
+                    return;
+                }
+
+                previousValue = scope.value;
+                scope.value = value;
+
+                $timeout(function () {
+                    scope.change({
+                        maValue: scope.value,
+                        maOldValue: previousValue
+                    });
+                });
+            };
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            scope.onFocus = function () {
+                scope.isFocused = true;
+                focusValue = scope.value;
+
+                scope.focus({
+                    maValue: scope.value
+                });
+            };
+
+            scope.onBlur = function () {
+                scope.isFocused = false;
+                scope.isTouched = true;
+                validate();
+
+                scope.blur({
+                    maValue: scope.value,
+                    maOldValue: focusValue,
+                    maHasValueChanged: focusValue !== scope.value
+                });
+            };
+
+            scope.onKeydown = function (event) {
+                // Ignore tab key.
+                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
+                    return;
+                }
+
+                keydownValue = angular.element(event.target).val();
+            };
+
+            scope.onKeyup = function (event) {
+                // Ignore tab key.
+                if (event.keyCode === MaHelper.keyCode.tab || event.keyCode === MaHelper.keyCode.shift) {
+                    return;
+                }
+
+                keyupValue = angular.element(event.target).val();
+
+                if (keydownValue !== keyupValue) {
+                    scope.isTouched = true;
+                }
+            };
+
+            // Use input event to support value change from Enter key, and contextual menu,
+            // e.g. mouse right click + Cut/Copy/Paste etc.
+            valueElement.on('input', function (event) {
+                var hasChanged = false;
+                keyupValue = angular.element(event.target).val();
+
+                if (keydownValue !== keyupValue) {
+                    hasChanged = true;
+                }
+
+                // Change value after a timeout while the user is typing.
+                if (!hasChanged) {
+                    return;
+                }
+
+                validate();
+                resize();
+
+                if (scope.isValid) {
+                    scope.$apply(function () {
+                        changeValue();
+                    });
+                }
+            });
+
+            angular.element($window).on('resize', function () {
+                resize();
+            });
+
+            $timeout(function () {
+                resize();
+
+                if (scope.isResizable === false) {
+                    valueElement.css('resize', 'none');
+                }
+
+                // Move id to input.
+                element.removeAttr('id');
+                valueElement.attr('id', scope.id);
+
+                // If TextArea is hidden initially with ng-show then after appearing
+                // it's height is calculated incorectly. This code fixes the issue.
+                if (scope.fitContentHeight) {
+                    var hiddenParent = $(element[0]).closest('.ng-hide[ng-show]');
+
+                    if (hiddenParent.length === 1) {
+                        var parentScope = hiddenParent.scope();
+
+                        parentScope.$watch(hiddenParent.attr('ng-show'), function (isVisible) {
+                            if (isVisible) {
+                                // Wait for the hidden element to appear first.
+                                $timeout(function () {
+                                    resize();
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+
+            scope.$watch('value', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                scope.isValid = true;
+                scope.isTouched = false;
+
+                // IE 11.0 version moves the caret at the end when textarea value is fully replaced.
+                // In IE 11.126+ the issue has been fixed.
+                var caretPosition = valueElement.prop('selectionStart');
+                valueElement.val(newValue);
+
+                // Restore caret position if text area is visible.
+                var isVisible = $(element).is(':visible');
+
+                if (isVisible) {
+                    valueElement.prop({
+                        selectionStart: caretPosition,
+                        selectionEnd: caretPosition
+                    });
+                }
+
+                resize();
+            });
+
+            // Set initial value.
+            valueElement.val(scope.value);
+            validate();
+            previousValue = scope.value;
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.focus = function () {
+                    if (!scope.isFocused) {
+                        valueElement.focus();
+                    }
+                };
+            }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.services').factory('MaDate', [function () {
+    var months = [{
+        language: 'en',
+        full: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    }],
+        weekDays = [{
+            language: 'en',
+            full: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            short: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        }],
+        daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    var isInteger = function (value) {
+        return value === parseInt(value, 10);
+    };
+
+    var isDate = function (value) {
+        if (!value) {
+            return false;
+        }
+
+        return Object.prototype.toString.call(value) === '[object Date]' && value.getTime && !isNaN(value.getTime());
+    };
+
+    var isMaDate = function (value) {
+        return value instanceof MaDate || (!!value && value._isMaDate);
+    };
+
+    var isMatch = function (date, substring) {
+        return date.match(new RegExp(substring, 'i'));
+    };
+
+    var getTotalDate = function (year, month, day, hours, minutes, seconds, milliseconds, offset) {
+        var finalMonth,
+            maDate = MaDate.createEmpty();
+        day = day.toString();
+        month = month.toString();
+        hours = Number(hours) || 0;
+        minutes = Number(minutes) || 0;
+        seconds = Number(seconds) || 0;
+        milliseconds = Number(milliseconds) || 0;
+        offset = offset || 0;
+
+        // Convert YY to YYYY.
+        if (year <= 99) {
+            if (year >= 0 && year < 30) {
+                year = '20' + year;
+            } else {
+                year = '19' + year;
+            }
+        }
+
+        // Detect leap year and change amount of days in daysPerMonth for February.
+        var isLeap = new Date(year, 1, 29).getMonth() === 1;
+
+        if (isLeap) {
+            daysPerMonth[1] = 29;
+        } else {
+            daysPerMonth[1] = 28;
+        }
+
+        // Convert month to number.
+        if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
+            for (var j = 0; j < months.length; j++) {
+                for (var i = 0; i < months[j].full.length; i++) {
+                    if (isMatch(month, months[j].full[i].slice(0, 3))) {
+                        finalMonth = i + 1;
+                        break;
+                    }
+                }
+            }
+
+            if (!finalMonth) {
+                return maDate;
+            }
+
+            month = finalMonth;
+        }
+
+        if (month > 12) {
+            return maDate;
+        }
+
+        if (day > daysPerMonth[month - 1]) {
+            return maDate;
+        }
+
+        var date = new Date(Number(year), Number(month - 1), Number(day), hours, minutes, seconds);
+        date.setMilliseconds(milliseconds);
+
+        maDate = new MaDate(date);
+        maDate.offset(offset);
+
+        return maDate;
+    };
+
+    var getDayAndMonth = function (day, month, culture) {
+        var dayAndMonth = {
+            day: day,
+            month: month,
+            isValid: true
+        };
+
+        // Handle difference between en-GB and en-US culture formats.
+        if (culture === 'en-GB' && month > 12) {
+            dayAndMonth.isValid = false;
+        }
+
+        if (culture === 'en-US') {
+            dayAndMonth.day = month;
+            dayAndMonth.month = day;
+
+            if (day > 12) {
+                dayAndMonth.isValid = false;
+            }
+        }
+
+        // Give priority to en-GB if culture is not set.
+        if (!culture && month > 12) {
+            dayAndMonth.day = month;
+            dayAndMonth.month = day;
+        }
+
+        return dayAndMonth;
+    };
+
+    var parse = function (value, culture) {
+        var pattern, parts, dayAndMonth,
+            date = MaDate.createEmpty();
+
+        // Check if a date requires parsing.
+        if (isDate(value) || isMaDate(value)) {
+            return value;
+        }
+
+        if (typeof value !== 'string') {
+            return date;
+        }
+
+        // Replace multiple whitespaces with a single one.
+        value = value.replace(/\s+/g, ' ');
+
+        // 21
+        pattern = /^\d{1,2}$/;
+
+        if (value.match(pattern) !== null) {
+            var currentDate = new Date();
+
+            return getTotalDate(currentDate.getFullYear(), currentDate.getMonth() + 1, value);
+        }
+
+        // 21-02
+        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+            dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
+
+            if (!dayAndMonth.isValid) {
+                return date;
+            }
+
+            return getTotalDate(new Date().getFullYear(), dayAndMonth.month, dayAndMonth.day);
+        }
+
+        // 21 Feb 15
+        // 21 February 2015
+        pattern = /^(\d{1,2})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{2,4}\b)/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[5], parts[3], parts[1]);
+        }
+
+        // Feb 21, 15
+        // Feb 21, 2015
+        pattern = /([^\u0000-\u0080]|[a-zA-Z]{3})(\s|)(\d{1,2})(,)(\s|)(\d{2,4})$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[6], parts[1], parts[3]);
+        }
+
+        // Feb 21 15
+        // February 21 2015
+        pattern = /^([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4}\b)/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[5], parts[1], parts[3]);
+        }
+
+        // 2015-02-21
+        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[1], parts[3], parts[5]);
+        }
+
+        // 21-02-15
+        // 21-02-2015
+        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4})$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+            dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
+
+            if (!dayAndMonth.isValid) {
+                return date;
+            }
+
+            return getTotalDate(parts[5], dayAndMonth.month, dayAndMonth.day);
+        }
+
+        // 2015-February-21
+        pattern = /^(\d{4})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+
+            return getTotalDate(parts[1], parts[3], parts[5]);
+        }
+
+        // 2015-02-21T10:00:00Z
+        // 2015-02-21T10:00:00.652+03:00
+        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)(\.(\d{3}))?(?:Z|([+-])(2[0-3]|[01][0-9]):([0-5][0-9]))$/;
+
+        if (value.match(pattern) !== null) {
+            parts = pattern.exec(value);
+            var offset = 0;
+
+            // Get time zone offset.
+            if (parts.length === 14) {
+                offset = (Number(parts[12]) || 0) * 60 + (Number(parts[13]) || 0);
+
+                if (parts[11] === '-' && offset !== 0) {
+                    offset = -offset;
+                }
+            }
+
+            return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], parts[10], offset);
+        }
+
+        return date;
+    };
+
+    var formatNumber = function (number, length) {
+        var string = '';
+
+        for (var i = 0; i < length; i++) {
+            string += '0';
+        }
+
+        return (string + number).slice(-length);
+    };
+
+    var isValidTimeZoneOffset = function (offset) {
+        return offset >= -720 && offset <= 840;
+    };
+
+    var offsetToTimeZone = function (offset) {
+        if (offset === 0) {
+            return 'Z';
+        }
+
+        if (!isInteger(offset)) {
+            return null;
+        }
+
+        // Time zones vary from -12:00 to 14:00.
+        if (offset < -720 || offset > 840) {
+            return null;
+        }
+
+        var sign = '+';
+
+        if (offset < 0) {
+            offset *= -1;
+            sign = '-';
+        }
+
+        var minutes = offset % 60,
+            hours = (offset - minutes) / 60;
+
+        return sign + formatNumber(hours, 2) + ':' + formatNumber(minutes, 2);
+    };
+
+    /*
+        Overloads:
+        - format(date)
+        - format(MaDate)
+        - format(date, format)
+        - format(MaDate, format)
+        - format(date, offset)
+        - format(MaDate, offset)
+        - format(date, format, offset)
+        - format(MaDate, format, offset)
+    */
+    var format = function (date) {
+        if (!isDate(date) && !isMaDate(date)) {
+            return null;
+        }
+
+        var parameters = arguments,
+            format,
+            offset = 0;
+
+        if (parameters.length === 2) {
+            if (typeof parameters[1] === 'string') {
+                format = parameters[1];
+            } else {
+                offset = parameters[1];
+
+                if (!isValidTimeZoneOffset(offset)) {
+                    return null;
+                }
+            }
+        } else if (parameters.length === 3) {
+            format = parameters[1];
+            offset = parameters[2];
+
+            if (!isValidTimeZoneOffset(offset)) {
+                return null;
+            }
+        }
+
+        format = format || 'yyyy-MM-ddTHH:mm:ssZ';
+
+        var languageIndex = 0,
+            timeZone = offsetToTimeZone(offset),
+            _date = isMaDate(date) ? date.toDate() : date,
+            // Possible formats of date parts (day, month, year).
+            datePartFormats = {
+                f: ['fff'],
+                s: ['ss'],
+                m: ['mm'],
+                H: ['HH'],
+                d: ['d', 'dd', 'ddd', 'dddd'],
+                M: ['M', 'MM', 'MMM', 'MMMM'],
+                y: ['yy', 'yyyy'],
+                Z: ['Z']
+            },
+            day = _date.getDate(),
+            dayOfWeek = _date.getDay(),
+            month = _date.getMonth(),
+            year = _date.getFullYear(),
+            hours = _date.getHours(),
+            minutes = _date.getMinutes(),
+            seconds = _date.getSeconds(),
+            milliseconds = _date.getMilliseconds();
+
+        // Checks format string parts on conformity with available date formats.
+        var checkDatePart = function (dateChar) {
+            var datePart = '';
+
+            // Try-catch construction because some sub-formats may be not listed.
+            try {
+                datePart = format.match(new RegExp(dateChar + '+', ''))[0];
+            } catch (error) { }
+
+            return datePartFormats[dateChar].indexOf(datePart);
+        };
+
+        // Formats date parts.
+        var formatDatePart = function (datePartFormat) {
+            var datePart = '';
+
+            switch (datePartFormat) {
+                case datePartFormats.d[0]:
+                    // d
+                    {
+                        datePart = day;
+                        break;
+                    }
+                case datePartFormats.d[1]:
+                    // dd
+                    {
+                        datePart = formatNumber(day, 2);
+                        break;
+                    }
+                case datePartFormats.d[2]:
+                    // ddd
+                    {
+                        datePart = weekDays[languageIndex].short[dayOfWeek];
+                        break;
+                    }
+                case datePartFormats.d[3]:
+                    // dddd
+                    {
+                        datePart = weekDays[languageIndex].full[dayOfWeek];
+                        break;
+                    }
+                case datePartFormats.M[0]:
+                    // M
+                    {
+                        datePart = month + 1;
+                        break;
+                    }
+                case datePartFormats.M[1]:
+                    // MM
+                    {
+                        datePart = formatNumber(month + 1, 2);
+                        break;
+                    }
+                case datePartFormats.M[2]:
+                    // MMM
+                    {
+                        datePart = months[languageIndex].short[month];
+                        break;
+                    }
+                case datePartFormats.M[3]:
+                    // MMMM
+                    {
+                        datePart = months[languageIndex].full[month];
+                        break;
+                    }
+                case datePartFormats.y[0]:
+                    // yy
+                    {
+                        datePart = formatNumber(year, 2);
+                        break;
+                    }
+                case datePartFormats.y[1]:
+                    // yyyy
+                    {
+                        datePart = year;
+                        break;
+                    }
+                case datePartFormats.H[0]:
+                    // HH
+                    {
+                        datePart = formatNumber(hours, 2);
+                        break;
+                    }
+                case datePartFormats.m[0]:
+                    // mm
+                    {
+                        datePart = formatNumber(minutes, 2);
+                        break;
+                    }
+                case datePartFormats.s[0]:
+                    // ss
+                    {
+                        datePart = formatNumber(seconds, 2);
+                        break;
+                    }
+                case datePartFormats.f[0]:
+                    // fff
+                    {
+                        datePart = formatNumber(milliseconds, 3);
+                        break;
+                    }
+                case datePartFormats.Z[0]:
+                    // Z
+                    {
+                        datePart = timeZone || 'Z';
+                        break;
+                    }
+                default:
+                    {
+                        return '';
+                    }
+            }
+
+            return datePart;
+        };
+
+        // Check format of each part of the obtained format.
+        var dateParts = {
+            days: formatDatePart(datePartFormats.d[checkDatePart('d')]),
+            months: formatDatePart(datePartFormats.M[checkDatePart('M')]),
+            years: formatDatePart(datePartFormats.y[checkDatePart('y')]),
+            hours: formatDatePart(datePartFormats.H[checkDatePart('H')]),
+            minutes: formatDatePart(datePartFormats.m[checkDatePart('m')]),
+            seconds: formatDatePart(datePartFormats.s[checkDatePart('s')]),
+            milliseconds: formatDatePart(datePartFormats.f[checkDatePart('f')]),
+            timeZone: formatDatePart(datePartFormats.Z[0]),
+            separator: /^\w+([^\w])/.exec(format)
+        };
+
+        // Return formatted date string.
+        return format
+            .replace(/d+/, dateParts.days)
+            .replace(/y+/, dateParts.years)
+            .replace(/M+/, dateParts.months)
+            .replace(/H+/, dateParts.hours)
+            .replace(/m+/, dateParts.minutes)
+            .replace(/s+/, dateParts.seconds)
+            .replace(/f+/, dateParts.milliseconds)
+            .replace(/Z+/, dateParts.timeZone);
+    };
+
+    var parseTimeZone = function (timeZone) {
+        if (!timeZone) {
+            return 0;
+        }
+
+        timeZone = timeZone.replace(/GMT/gi, '');
+
+        var parts = /^(?:Z|([+-]?)(2[0-3]|[01][0-9]):([0-5][0-9]))$/.exec(timeZone);
+
+        if (!parts || parts.length !== 4) {
+            return 0;
+        }
+
+        if (parts[0] === 'Z') {
+            return 0;
+        }
+
+        // Calculate time zone offset in minutes.
+        var offset = Number(parts[2]) * 60 + Number(parts[3]);
+
+        if (offset !== 0 && parts[1] === '-') {
+            offset *= -1;
+        }
+
+        return offset;
+    };
+
+    /*
+        Overloads:
+        - new MaDate()
+        - new MaDate(useLocalTimeZone)
+        - new MaDate(Date)
+        - new MaDate(MaDate)
+        - new MaDate(dateString)
+        - new MaDate(dateString, culture)
+        - new MaDate(year)
+        - new MaDate(year, month)
+        - new MaDate(year, month, date)
+        - new MaDate(year, month, date, hour)
+        - new MaDate(year, month, date, hour, minute)
+        - new MaDate(year, month, date, hour, minute, second)
+    */
+    function MaDate() {
+        var parameters = arguments,
+            date;
+        this._date = null;
+        this._offset = 0;
+        this._isMaDate = true;
+
+        if (parameters.length === 0) {
+            // Create a current date.
+            this._date = new Date();
+        } else if (parameters.length === 1) {
+            date = parameters[0];
+
+            if (isDate(date)) {
+                this._date = new Date(date.valueOf());
+            } else if (isMaDate(date)) {
+                // MaDate is provided - copy it.
+                if (!date.isEmpty()) {
+                    this._date = new Date(date.toDate().valueOf());
+                }
+
+                this._offset = date.offset();
+            } else if (typeof date === 'boolean') {
+                this._date = new Date();
+                this._offset = -this._date.getTimezoneOffset();
+            } else if (typeof date === 'string') {
+                // Parse date.
+                date = parse(date);
+                this._date = date.toDate();
+                this._offset = date.offset();
+            } else if (isInteger(date)) {
+                // Year.
+                this._date = new Date(date, 0, 1, 0, 0, 0);
+            }
+        } else if (parameters.length === 2) {
+            // Date string and culture.
+            if (typeof parameters[0] === 'string' && typeof parameters[1] === 'string') {
+                date = parse(parameters[0], parameters[1]);
+                this._date = date.toDate();
+                this._offset = date.offset();
+            } else if (isInteger(parameters[0]) && isInteger(parameters[1])) {
+                // Year and month.
+                this._date = new Date(parameters[0], parameters[1], 1, 0, 0, 0);
+            }
+        } else if (parameters.length === 3 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], 0, 0, 0);
+        } else if (parameters.length === 4 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], 0, 0);
+        } else if (parameters.length === 5 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
+            isInteger(parameters[4])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], 0);
+        } else if (parameters.length === 6 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
+            isInteger(parameters[4]) && isInteger(parameters[5])) {
+            // Year, month and date.
+            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5]);
+        }
+    }
+
+    MaDate.createEmpty = function () {
+        return new MaDate(null);
+    };
+
+    MaDate.createLocal = function () {
+        return new MaDate(true);
+    };
+
+    MaDate.prototype.copy = function () {
+        return new MaDate(this);
+    };
+
+    MaDate.prototype.toDate = function () {
+        return this._date;
+    };
+
+    MaDate.prototype.offset = function (offset) {
+        if (arguments.length === 0) {
+            return this._offset;
+        }
+
+        this._offset = offset;
+        return this;
+    };
+
+    MaDate.prototype.toUtc = function () {
+        if (this.isEmpty() || this._offset === 0) {
+            return this;
+        }
+
+        this.subtract(this._offset, 'minute');
+        this._offset = 0;
+
+        return this;
+    };
+
+    MaDate.prototype.isEmpty = function () {
+        return !this._date;
+    };
+
+    MaDate.prototype.isUtc = function () {
+        return !this.isEmpty() && this._offset === 0;
+    };
+
+    MaDate.prototype.isEqual = function (date) {
+        return this.difference(date) === 0;
+    };
+
+    MaDate.prototype.isLess = function (date) {
+        return this.difference(date) < 0;
+    };
+
+    MaDate.prototype.isLessOrEqual = function (date) {
+        return this.difference(date) <= 0;
+    };
+
+    MaDate.prototype.isGreater = function (date) {
+        return this.difference(date) > 0;
+    };
+
+    MaDate.prototype.isGreaterOrEqual = function (date) {
+        return this.difference(date) >= 0;
+    };
+
+    MaDate.prototype.isBetween = function (startDate, endDate, isInclusive) {
+        var _startDate = new MaDate(startDate),
+            _endDate = new MaDate(endDate);
+
+        if (this.isEmpty() || _startDate.isEmpty() || _endDate.isEmpty()) {
+            return false;
+        }
+
+        if (isInclusive) {
+            return this.isGreaterOrEqual(_startDate) && this.isLessOrEqual(_endDate);
+        }
+
+        return this.isGreater(_startDate) && this.isLess(_endDate);
+    };
+
+    MaDate.prototype.difference = function (date) {
+        return this.valueOf() - new MaDate(date).valueOf();
+    };
+
+    MaDate.prototype.valueOf = function () {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        var time = this._date.valueOf();
+
+        // Add offset which is in minutes, and thus should be converted to milliseconds.
+        if (this._offset !== 0) {
+            time -= this._offset * 60000;
+        }
+
+        return time;
+    };
+
+    MaDate.prototype.format = function (_format) {
+        if (this.isEmpty()) {
+            return null;
+        }
+
+        return format(this._date, _format, this._offset);
+    };
+
+    MaDate.prototype.add = function (number, unit) {
+        if (this.isEmpty() || !number) {
+            return this;
+        }
+
+        // Don't change original date.
+        var date = new Date(this._date);
+
+        switch (unit) {
+            case 'year':
+                date.setFullYear(date.getFullYear() + number);
+                break;
+            case 'quarter':
+                date.setMonth(date.getMonth() + 3 * number);
+                break;
+            case 'month':
+                date.setMonth(date.getMonth() + number);
+                break;
+            case 'week':
+                date.setDate(date.getDate() + 7 * number);
+                break;
+            case 'day':
+                date.setDate(date.getDate() + number);
+                break;
+            case 'hour':
+                date.setTime(date.getTime() + number * 3600000);
+                break;
+            case 'minute':
+                date.setTime(date.getTime() + number * 60000);
+                break;
+            case 'second':
+                date.setTime(date.getTime() + number * 1000);
+                break;
+            case 'millisecond':
+                date.setTime(date.getTime() + number);
+                break;
+        }
+
+        this._date = date;
+
+        return this;
+    };
+
+    MaDate.prototype.subtract = function (number, unit) {
+        return this.add(number * -1, unit);
+    };
+
+    MaDate.prototype.millisecond = function (millisecond) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getMilliseconds();
+        } else {
+            this._date.setMilliseconds(millisecond);
+            return this;
+        }
+    };
+
+    MaDate.prototype.second = function (second) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getSeconds();
+        } else {
+            this._date.setSeconds(second);
+            return this;
+        }
+    };
+
+    MaDate.prototype.minute = function (minute) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getMinutes();
+        } else {
+            this._date.setMinutes(minute);
+            return this;
+        }
+    };
+
+    MaDate.prototype.hour = function (hour) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getHours();
+        } else {
+            this._date.setHours(hour);
+            return this;
+        }
+    };
+
+    MaDate.prototype.date = function (date) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getDate();
+        } else {
+            this._date.setDate(date);
+            return this;
+        }
+    };
+
+    MaDate.prototype.month = function (month) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getMonth();
+        } else {
+            this._date.setMonth(month);
+            return this;
+        }
+    };
+
+    MaDate.prototype.year = function (year) {
+        if (this.isEmpty()) {
+            return 0;
+        }
+
+        if (arguments.length === 0) {
+            return this._date.getFullYear();
+        } else {
+            this._date.setFullYear(year);
+            return this;
+        }
+    };
+
+    MaDate.prototype.startOf = function (unit) {
+        switch (unit) {
+            case 'year':
+                this.month(0);
+            /* falls through */
+            case 'month':
+                this.date(1);
+            /* falls through */
+            case 'day':
+                this.hour(0);
+            /* falls through */
+            case 'hour':
+                this.minute(0);
+            /* falls through */
+            case 'minute':
+                this.second(0);
+            /* falls through */
+            case 'second':
+                this.millisecond(0);
+        }
+
+        return this;
+    };
+
+    MaDate.prototype.endOf = function (unit) {
+        if (!unit) {
+            return this;
+        }
+
+        return this.startOf(unit).add(1, unit).subtract(1, 'millisecond');
+    };
+
+    MaDate.parse = parse;
+    MaDate.parseTimeZone = parseTimeZone;
+    MaDate.offsetToTimeZone = offsetToTimeZone;
+    MaDate.isDate = isDate;
+    MaDate.isMaDate = isMaDate;
+
+    return MaDate;
+}]);})();
+(function(){angular.module('marcuraUI.services').factory('MaHelper', ['MaDate', '$rootScope', function (MaDate, $rootScope) {
+    return {
+        keyCode: {
+            backspace: 8,
+            comma: 188,
+            delete: 46,
+            down: 40,
+            end: 35,
+            enter: 13,
+            escape: 27,
+            home: 36,
+            left: 37,
+            pageDown: 34,
+            pageUp: 33,
+            period: 190,
+            right: 39,
+            shift: 16,
+            space: 32,
+            tab: 9,
+            up: 38,
+            dash: 109,
+            dash2: 189,
+            numLock: {
+                period: 110
+            }
+        },
+        html: {
+            nbsp: '&nbsp;'
+        },
+
+        isEmail: function (value) {
+            var pattern = /^([\+\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+            return pattern.test(value);
+        },
+
+        isNullOrWhiteSpace: function (value) {
+            if (value === null || value === undefined) {
+                return true;
+            }
+
+            if (angular.isArray(value)) {
+                return false;
+            }
+
+            // Convert value to string in case if it is not.
+            return value.toString().replace(/\s/g, '').length < 1;
+        },
+
+        isNullOrUndefined: function (value) {
+            return value === null || angular.isUndefined(value);
+        },
+
+        formatString: function (value) {
+            // Source: http://ajaxcontroltoolkit.codeplex.com/SourceControl/latest#Client/MicrosoftAjax/Extensions/String.js
+            var formattedString = '';
+
+            for (var i = 0; ;) {
+                // Search for curly bracers.
+                var open = value.indexOf('{', i);
+                var close = value.indexOf('}', i);
+
+                // Curly bracers are not found - copy rest of string and exit loop.
+                if (open < 0 && close < 0) {
+                    formattedString += value.slice(i);
+                    break;
+                }
+
+                if (close > 0 && (close < open || open < 0)) {
+                    // Closing brace before opening is error.
+                    if (value.charAt(close + 1) !== '}') {
+                        throw new Error('The format string contains an unmatched opening or closing brace.');
+                    }
+
+                    formattedString += value.slice(i, close + 1);
+                    i = close + 2;
+                    continue;
+                }
+
+                // Copy string before brace.
+                formattedString += value.slice(i, open);
+                i = open + 1;
+
+                // Check for double braces (which display as one and are not arguments).
+                if (value.charAt(i) === '{') {
+                    formattedString += '{';
+                    i++;
+                    continue;
+                }
+
+                // At this point we have valid opening brace, which should be matched by closing brace.
+                if (close < 0) {
+                    throw new Error('The format string contains an unmatched opening or closing brace.');
+                }
+
+                // This test is just done to break a potential infinite loop for invalid format strings.
+                // The code here is minimal because this is an error condition in debug mode anyway.
+                if (close < 0) {
+                    break;
+                }
+
+                // Find closing brace.
+                // Get string between braces, and split it around ':' (if any).
+                var brace = value.substring(i, close);
+                var colonIndex = brace.indexOf(':');
+                var argNumber = parseInt((colonIndex < 0) ? brace : brace.substring(0, colonIndex), 10) + 1;
+
+                if (isNaN(argNumber)) {
+                    throw new Error('The format string is invalid.');
+                }
+
+                var arg = arguments[argNumber];
+
+                if (typeof (arg) === 'undefined' || arg === null) {
+                    arg = '';
+                }
+
+                formattedString += arg.toString();
+                i = close + 1;
+            }
+
+            return formattedString;
+        },
+
+        getTextHeight: function (text, font, width, lineHeight) {
+            if (!font) {
+                return 0;
+            }
+
+            // Prepare textarea.
+            var textArea = document.createElement('TEXTAREA');
+            textArea.setAttribute('rows', 1);
+            textArea.style.font = font;
+            textArea.style.width = width || '0px';
+            textArea.style.border = '0';
+            textArea.style.overflow = 'hidden';
+            textArea.style.padding = '0';
+            textArea.style.outline = '0';
+            textArea.style.resize = 'none';
+            textArea.style.lineHeight = lineHeight || 'normal';
+            textArea.value = text;
+
+            // To measure sizes we need to add textarea to DOM.
+            angular.element(document.querySelector('body')).append(textArea);
+
+            // Measure height.
+            textArea.style.height = 'auto';
+            textArea.style.height = textArea.scrollHeight + 'px';
+
+            var height = parseInt(textArea.style.height);
+
+            // Remove textarea.
+            angular.element(textArea).remove();
+
+            return height;
+        },
+
+        isGreater: function (value, valueToCompare) {
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
+
+            if (isNumber) {
+                return parseFloat(value) > parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.isGreater(date2);
+            }
+
+            return value > valueToCompare;
+        },
+
+        isGreaterOrEqual: function (value, valueToCompare) {
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
+
+            if (isNumber) {
+                return parseFloat(value) >= parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.isGreaterOrEqual(date2);
+            }
+
+            return value >= valueToCompare;
+        },
+
+        isLengthGreaterOrEqual: function (value, length) {
+            var valueLength = (value || '').toString().length;
+            return valueLength >= length;
+        },
+
+        isLess: function (value, valueToCompare) {
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
+
+            if (isNumber) {
+                return parseFloat(value) < parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.isLess(date2);
+            }
+
+            return value < valueToCompare;
+        },
+
+        isLessOrEqual: function (value, valueToCompare) {
+            var date1 = new MaDate(value),
+                date2 = new MaDate(valueToCompare),
+                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
+
+            if (isNumber) {
+                return parseFloat(value) <= parseFloat(valueToCompare);
+            } else if (!date1.isEmpty() && !date2.isEmpty()) {
+                return date1.isLessOrEqual(date2);
+            }
+
+            return value <= valueToCompare;
+        },
+
+        isLengthLessOrEqual: function (value, length) {
+            var valueLength = (value || '').toString().length;
+            return valueLength <= length;
+        },
+
+        isNumber: function (value) {
+            if (typeof value === 'number') {
+                return true;
+            }
+
+            if (this.isNullOrWhiteSpace(value)) {
+                return false;
+            }
+
+            return value.match(/^-?\d+\.?\d*$/) !== null;
+        },
+
+        isJson: function (value) {
+            try {
+                JSON.parse(value);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+
+        safeApply: function (method) {
+            var phase = $rootScope.$$phase;
+
+            if (phase !== '$apply' && phase !== '$digest') {
+                $rootScope.$apply(method);
+                return;
+            }
+
+            if (method && typeof method === 'function') {
+                method();
+            }
+        }
+    };
+}]);})();
+(function(){/**
+* A set of utility methods that can be use to retrieve position of DOM elements.
+* It is meant to be used where we need to absolute-position DOM elements in
+* relation to other, existing elements (this is the case for tooltips, popovers,
+* typeahead suggestions etc.).
+*/
+angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$window', function ($document, $window) {
+    function getStyle(el, cssprop) {
+        // IE
+        if (el.currentStyle) {
+            return el.currentStyle[cssprop];
+        } else if ($window.getComputedStyle) {
+            return $window.getComputedStyle(el)[cssprop];
+        }
+
+        // finally try and get inline style
+        return el.style[cssprop];
+    }
+
+    /**
+     * Checks if a given element is statically positioned
+     * @param element - raw DOM element
+     */
+    function isStaticPositioned(element) {
+        return (getStyle(element, 'position') || 'static') === 'static';
+    }
+
+    /**
+     * returns the closest, non-statically positioned parentOffset of a given element
+     * @param element
+     */
+    var parentOffsetEl = function (element) {
+        var docDomEl = $document[0];
+        var offsetParent = element.offsetParent || docDomEl;
+        while (offsetParent && offsetParent !== docDomEl && isStaticPositioned(offsetParent)) {
+            offsetParent = offsetParent.offsetParent;
+        }
+        return offsetParent || docDomEl;
+    };
+
+    return {
+        /**
+         * Provides read-only equivalent of jQuery's position function:
+         * http://api.jquery.com/position/
+         */
+        position: function (element) {
+            var elBCR = this.offset(element);
+            var offsetParentBCR = { top: 0, left: 0 };
+            var offsetParentEl = parentOffsetEl(element[0]);
+            if (offsetParentEl != $document[0]) {
+                offsetParentBCR = this.offset(angular.element(offsetParentEl));
+                offsetParentBCR.top += offsetParentEl.clientTop - offsetParentEl.scrollTop;
+                offsetParentBCR.left += offsetParentEl.clientLeft - offsetParentEl.scrollLeft;
+            }
+
+            var boundingClientRect = element[0].getBoundingClientRect();
+            return {
+                width: boundingClientRect.width || element.prop('offsetWidth'),
+                height: boundingClientRect.height || element.prop('offsetHeight'),
+                top: elBCR.top - offsetParentBCR.top,
+                left: elBCR.left - offsetParentBCR.left
+            };
+        },
+
+        /**
+         * Provides read-only equivalent of jQuery's offset function:
+         * http://api.jquery.com/offset/
+         */
+        offset: function (element) {
+            var boundingClientRect = element[0].getBoundingClientRect();
+            return {
+                width: boundingClientRect.width || element.prop('offsetWidth'),
+                height: boundingClientRect.height || element.prop('offsetHeight'),
+                top: boundingClientRect.top + ($window.pageYOffset || $document[0].documentElement.scrollTop),
+                left: boundingClientRect.left + ($window.pageXOffset || $document[0].documentElement.scrollLeft)
+            };
+        },
+
+        /**
+         * Provides coordinates for the targetEl in relation to hostEl
+         */
+        positionElements: function (hostEl, targetEl, positionStr, appendToBody) {
+
+            var positionStrParts = positionStr.split('-');
+            var pos0 = positionStrParts[0], pos1 = positionStrParts[1] || 'center';
+
+            var hostElPos,
+                targetElWidth,
+                targetElHeight,
+                targetElPos;
+
+            hostElPos = appendToBody ? this.offset(hostEl) : this.position(hostEl);
+
+            targetElWidth = targetEl.prop('offsetWidth');
+            targetElHeight = targetEl.prop('offsetHeight');
+
+            var shiftWidth = {
+                center: function () {
+                    return hostElPos.left + hostElPos.width / 2 - targetElWidth / 2;
+                },
+                left: function () {
+                    return hostElPos.left;
+                },
+                right: function () {
+                    return hostElPos.left + hostElPos.width;
+                }
+            };
+
+            var shiftHeight = {
+                center: function () {
+                    return hostElPos.top + hostElPos.height / 2 - targetElHeight / 2;
+                },
+                top: function () {
+                    return hostElPos.top;
+                },
+                bottom: function () {
+                    return hostElPos.top + hostElPos.height;
+                }
+            };
+
+            switch (pos0) {
+                case 'right':
+                    targetElPos = {
+                        top: shiftHeight[pos1](),
+                        left: shiftWidth[pos0]()
+                    };
+                    break;
+                case 'left':
+                    targetElPos = {
+                        top: shiftHeight[pos1](),
+                        left: hostElPos.left - targetElWidth
+                    };
+                    break;
+                case 'bottom':
+                    targetElPos = {
+                        top: shiftHeight[pos0](),
+                        left: shiftWidth[pos1]()
+                    };
+                    break;
+                default:
+                    targetElPos = {
+                        top: hostElPos.top - targetElHeight,
+                        left: shiftWidth[pos1]()
+                    };
+                    break;
+            }
+
+            return targetElPos;
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.services').factory('MaValidators', ['MaHelper', 'MaDate', function (MaHelper, MaDate) {
+    var formatValueToCompare = function (value) {
+        if (!value) {
+            return null;
+        }
+
+        var formattedValue = value.toString();
+
+        if (MaDate.isMaDate(value)) {
+            formattedValue = value.format('dd MMM yyyy');
+        }
+
+        return formattedValue;
+    };
+
+    return {
+        isNotEmpty: function () {
+            return {
+                name: 'IsNotEmpty',
+                message: 'This field cannot be empty.',
+                validate: function (value) {
+                    if (angular.isArray(value)) {
+                        return value.length > 0;
+                    }
+
+                    return !MaHelper.isNullOrWhiteSpace(value);
+                }
+            };
+        },
+
+        isGreater: function (valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field cannot be less than or equal to ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
+            return {
+                name: 'IsGreater',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isGreater(value, valueToCompare);
+                }
+            };
+        },
+
+        isGreaterOrEqual: function (valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field cannot be less than ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
+            return {
+                name: 'IsGreaterOrEqual',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isGreaterOrEqual(value, valueToCompare);
+                }
+            };
+        },
+
+        isLengthGreaterOrEqual: function (length, allowEmpty) {
+            var message = null;
+
+            if (length) {
+                message = 'Length cannot be less than ' + formatValueToCompare(length) + '.';
+            }
+
+            return {
+                name: 'IsLengthGreaterOrEqual',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isLengthGreaterOrEqual(value, length);
+                }
+            };
+        },
+
+        isLess: function (valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field cannot be greater than or equal to ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
+            return {
+                name: 'IsLess',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isLess(value, valueToCompare);
+                }
+            };
+        },
+
+        isLessOrEqual: function (valueToCompare, allowEmpty) {
+            var message = null;
+
+            if (valueToCompare) {
+                message = 'This field cannot be greater than ' + formatValueToCompare(valueToCompare) + '.';
+            }
+
+            return {
+                name: 'IsLessOrEqual',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isLessOrEqual(value, valueToCompare);
+                }
+            };
+        },
+
+        isLengthLessOrEqual: function (length, allowEmpty) {
+            var message = null;
+
+            if (length) {
+                message = 'Length cannot be greater than ' + formatValueToCompare(length) + '.';
+            }
+
+            return {
+                name: 'IsLengthLessOrEqual',
+                message: message,
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isLengthLessOrEqual(value, length);
+                }
+            };
+        },
+
+        isNumber: function (allowEmpty) {
+            return {
+                name: 'IsNumber',
+                message: 'This field should be a number.',
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isNumber(value);
+                }
+            };
+        },
+
+        isEmail: function (allowEmpty) {
+            return {
+                name: 'IsEmail',
+                message: 'This field should be an email.',
+                validate: function (value) {
+                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
+                        return true;
+                    }
+
+                    return MaHelper.isEmail(value);
+                }
+            };
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function ($state, MaHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-tabs">\
+                <ul class="ma-tabs-list clearfix">\
+                    <li class="ma-tabs-item{{item.modifier ? (\' ma-tabs-item-\' + item.modifier) : \'\'}}" ng-repeat="item in items"\
+                        ng-focus="onFocus(item)"\
+                        ng-blur="onBlur(item)"\
+                        ng-keypress="onKeypress($event, item)"\
+                        ng-class="{\
+                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
+                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
+                            \'ma-tabs-item-is-focused\': item.isFocused\
+                        }"\
+                        ng-click="onSelect(item)">\
+                        <a class="ma-tabs-link" href="" tabindex="-1">\
+                            <span class="ma-tabs-text">{{item.text}}</span>\
+                        </a>\
+                    </li>\
+                </ul>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function (item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function (item) {
+                if (item.isDisabled || item.isSelected) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function (item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        maItem: item
+                    });
+                }
+            };
+
+            scope.onKeypress = function (event, item) {
+                if (event.keyCode === MaHelper.keyCode.enter) {
+                    scope.onSelect(item);
+                }
+            };
+
+            scope.onFocus = function (item) {
+                item.isFocused = true;
+            };
+
+            scope.onBlur = function (item) {
+                item.isFocused = false;
+            };
+
+            $timeout(function () {
+                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
+
+                itemElements.each(function (itemIndex, itemElement) {
+                    var item = scope.items[itemIndex];
+
+                    if (!item.isDisabled) {
+                        angular.element(itemElement).attr('tabindex', '0');
+                    }
+                });
+            });
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components')
     .provider('maTextBoxConfiguration', function () {
         this.$get = function () {
@@ -9068,1476 +10560,3 @@ angular.module('marcuraUI.components')
     //     });
     // }]);
 })();
-(function(){angular.module('marcuraUI.services').factory('MaDate', [function () {
-    var months = [{
-        language: 'en',
-        full: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-        short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    }],
-        weekDays = [{
-            language: 'en',
-            full: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-            short: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-        }],
-        daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-    var isInteger = function (value) {
-        return value === parseInt(value, 10);
-    };
-
-    var isDate = function (value) {
-        if (!value) {
-            return false;
-        }
-
-        return Object.prototype.toString.call(value) === '[object Date]' && value.getTime && !isNaN(value.getTime());
-    };
-
-    var isMaDate = function (value) {
-        return value instanceof MaDate || (!!value && value._isMaDate);
-    };
-
-    var isMatch = function (date, substring) {
-        return date.match(new RegExp(substring, 'i'));
-    };
-
-    var getTotalDate = function (year, month, day, hours, minutes, seconds, milliseconds, offset) {
-        var finalMonth,
-            maDate = MaDate.createEmpty();
-        day = day.toString();
-        month = month.toString();
-        hours = Number(hours) || 0;
-        minutes = Number(minutes) || 0;
-        seconds = Number(seconds) || 0;
-        milliseconds = Number(milliseconds) || 0;
-        offset = offset || 0;
-
-        // Convert YY to YYYY.
-        if (year <= 99) {
-            if (year >= 0 && year < 30) {
-                year = '20' + year;
-            } else {
-                year = '19' + year;
-            }
-        }
-
-        // Detect leap year and change amount of days in daysPerMonth for February.
-        var isLeap = new Date(year, 1, 29).getMonth() === 1;
-
-        if (isLeap) {
-            daysPerMonth[1] = 29;
-        } else {
-            daysPerMonth[1] = 28;
-        }
-
-        // Convert month to number.
-        if (month.match(/([^\u0000-\u0080]|[a-zA-Z])$/) !== null) {
-            for (var j = 0; j < months.length; j++) {
-                for (var i = 0; i < months[j].full.length; i++) {
-                    if (isMatch(month, months[j].full[i].slice(0, 3))) {
-                        finalMonth = i + 1;
-                        break;
-                    }
-                }
-            }
-
-            if (!finalMonth) {
-                return maDate;
-            }
-
-            month = finalMonth;
-        }
-
-        if (month > 12) {
-            return maDate;
-        }
-
-        if (day > daysPerMonth[month - 1]) {
-            return maDate;
-        }
-
-        var date = new Date(Number(year), Number(month - 1), Number(day), hours, minutes, seconds);
-        date.setMilliseconds(milliseconds);
-
-        maDate = new MaDate(date);
-        maDate.offset(offset);
-
-        return maDate;
-    };
-
-    var getDayAndMonth = function (day, month, culture) {
-        var dayAndMonth = {
-            day: day,
-            month: month,
-            isValid: true
-        };
-
-        // Handle difference between en-GB and en-US culture formats.
-        if (culture === 'en-GB' && month > 12) {
-            dayAndMonth.isValid = false;
-        }
-
-        if (culture === 'en-US') {
-            dayAndMonth.day = month;
-            dayAndMonth.month = day;
-
-            if (day > 12) {
-                dayAndMonth.isValid = false;
-            }
-        }
-
-        // Give priority to en-GB if culture is not set.
-        if (!culture && month > 12) {
-            dayAndMonth.day = month;
-            dayAndMonth.month = day;
-        }
-
-        return dayAndMonth;
-    };
-
-    var parse = function (value, culture) {
-        var pattern, parts, dayAndMonth,
-            date = MaDate.createEmpty();
-
-        // Check if a date requires parsing.
-        if (isDate(value) || isMaDate(value)) {
-            return value;
-        }
-
-        if (typeof value !== 'string') {
-            return date;
-        }
-
-        // Replace multiple whitespaces with a single one.
-        value = value.replace(/\s+/g, ' ');
-
-        // 21
-        pattern = /^\d{1,2}$/;
-
-        if (value.match(pattern) !== null) {
-            var currentDate = new Date();
-
-            return getTotalDate(currentDate.getFullYear(), currentDate.getMonth() + 1, value);
-        }
-
-        // 21-02
-        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-            dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
-
-            if (!dayAndMonth.isValid) {
-                return date;
-            }
-
-            return getTotalDate(new Date().getFullYear(), dayAndMonth.month, dayAndMonth.day);
-        }
-
-        // 21 Feb 15
-        // 21 February 2015
-        pattern = /^(\d{1,2})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{2,4}\b)/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-
-            return getTotalDate(parts[5], parts[3], parts[1]);
-        }
-
-        // Feb 21, 15
-        // Feb 21, 2015
-        pattern = /([^\u0000-\u0080]|[a-zA-Z]{3})(\s|)(\d{1,2})(,)(\s|)(\d{2,4})$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-
-            return getTotalDate(parts[6], parts[1], parts[3]);
-        }
-
-        // Feb 21 15
-        // February 21 2015
-        pattern = /^([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4}\b)/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-
-            return getTotalDate(parts[5], parts[1], parts[3]);
-        }
-
-        // 2015-02-21
-        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-
-            return getTotalDate(parts[1], parts[3], parts[5]);
-        }
-
-        // 21-02-15
-        // 21-02-2015
-        pattern = /^(\d{1,2})(\/|-|\.|\s|)(\d{1,2})(\/|-|\.|\s|)(\d{2,4})$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-            dayAndMonth = getDayAndMonth(parts[1], parts[3], culture);
-
-            if (!dayAndMonth.isValid) {
-                return date;
-            }
-
-            return getTotalDate(parts[5], dayAndMonth.month, dayAndMonth.day);
-        }
-
-        // 2015-February-21
-        pattern = /^(\d{4})(\/|-|\.|\s|)([^\u0000-\u0080]|[a-zA-Z]{1,12})(\/|-|\.|\s|)(\d{1,2})$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-
-            return getTotalDate(parts[1], parts[3], parts[5]);
-        }
-
-        // 2015-02-21T10:00:00Z
-        // 2015-02-21T10:00:00.652+03:00
-        pattern = /^(\d{4})(\/|-|\.|\s)(\d{1,2})(\/|-|\.|\s)(\d{1,2})T(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)(\.(\d{3}))?(?:Z|([+-])(2[0-3]|[01][0-9]):([0-5][0-9]))$/;
-
-        if (value.match(pattern) !== null) {
-            parts = pattern.exec(value);
-            var offset = 0;
-
-            // Get time zone offset.
-            if (parts.length === 14) {
-                offset = (Number(parts[12]) || 0) * 60 + (Number(parts[13]) || 0);
-
-                if (parts[11] === '-' && offset !== 0) {
-                    offset = -offset;
-                }
-            }
-
-            return getTotalDate(parts[1], parts[3], parts[5], parts[6], parts[7], parts[8], parts[10], offset);
-        }
-
-        return date;
-    };
-
-    var formatNumber = function (number, length) {
-        var string = '';
-
-        for (var i = 0; i < length; i++) {
-            string += '0';
-        }
-
-        return (string + number).slice(-length);
-    };
-
-    var isValidTimeZoneOffset = function (offset) {
-        return offset >= -720 && offset <= 840;
-    };
-
-    var offsetToTimeZone = function (offset) {
-        if (offset === 0) {
-            return 'Z';
-        }
-
-        if (!isInteger(offset)) {
-            return null;
-        }
-
-        // Time zones vary from -12:00 to 14:00.
-        if (offset < -720 || offset > 840) {
-            return null;
-        }
-
-        var sign = '+';
-
-        if (offset < 0) {
-            offset *= -1;
-            sign = '-';
-        }
-
-        var minutes = offset % 60,
-            hours = (offset - minutes) / 60;
-
-        return sign + formatNumber(hours, 2) + ':' + formatNumber(minutes, 2);
-    };
-
-    /*
-        Overloads:
-        - format(date)
-        - format(MaDate)
-        - format(date, format)
-        - format(MaDate, format)
-        - format(date, offset)
-        - format(MaDate, offset)
-        - format(date, format, offset)
-        - format(MaDate, format, offset)
-    */
-    var format = function (date) {
-        if (!isDate(date) && !isMaDate(date)) {
-            return null;
-        }
-
-        var parameters = arguments,
-            format,
-            offset = 0;
-
-        if (parameters.length === 2) {
-            if (typeof parameters[1] === 'string') {
-                format = parameters[1];
-            } else {
-                offset = parameters[1];
-
-                if (!isValidTimeZoneOffset(offset)) {
-                    return null;
-                }
-            }
-        } else if (parameters.length === 3) {
-            format = parameters[1];
-            offset = parameters[2];
-
-            if (!isValidTimeZoneOffset(offset)) {
-                return null;
-            }
-        }
-
-        format = format || 'yyyy-MM-ddTHH:mm:ssZ';
-
-        var languageIndex = 0,
-            timeZone = offsetToTimeZone(offset),
-            _date = isMaDate(date) ? date.toDate() : date,
-            // Possible formats of date parts (day, month, year).
-            datePartFormats = {
-                f: ['fff'],
-                s: ['ss'],
-                m: ['mm'],
-                H: ['HH'],
-                d: ['d', 'dd', 'ddd', 'dddd'],
-                M: ['M', 'MM', 'MMM', 'MMMM'],
-                y: ['yy', 'yyyy'],
-                Z: ['Z']
-            },
-            day = _date.getDate(),
-            dayOfWeek = _date.getDay(),
-            month = _date.getMonth(),
-            year = _date.getFullYear(),
-            hours = _date.getHours(),
-            minutes = _date.getMinutes(),
-            seconds = _date.getSeconds(),
-            milliseconds = _date.getMilliseconds();
-
-        // Checks format string parts on conformity with available date formats.
-        var checkDatePart = function (dateChar) {
-            var datePart = '';
-
-            // Try-catch construction because some sub-formats may be not listed.
-            try {
-                datePart = format.match(new RegExp(dateChar + '+', ''))[0];
-            } catch (error) { }
-
-            return datePartFormats[dateChar].indexOf(datePart);
-        };
-
-        // Formats date parts.
-        var formatDatePart = function (datePartFormat) {
-            var datePart = '';
-
-            switch (datePartFormat) {
-                case datePartFormats.d[0]:
-                    // d
-                    {
-                        datePart = day;
-                        break;
-                    }
-                case datePartFormats.d[1]:
-                    // dd
-                    {
-                        datePart = formatNumber(day, 2);
-                        break;
-                    }
-                case datePartFormats.d[2]:
-                    // ddd
-                    {
-                        datePart = weekDays[languageIndex].short[dayOfWeek];
-                        break;
-                    }
-                case datePartFormats.d[3]:
-                    // dddd
-                    {
-                        datePart = weekDays[languageIndex].full[dayOfWeek];
-                        break;
-                    }
-                case datePartFormats.M[0]:
-                    // M
-                    {
-                        datePart = month + 1;
-                        break;
-                    }
-                case datePartFormats.M[1]:
-                    // MM
-                    {
-                        datePart = formatNumber(month + 1, 2);
-                        break;
-                    }
-                case datePartFormats.M[2]:
-                    // MMM
-                    {
-                        datePart = months[languageIndex].short[month];
-                        break;
-                    }
-                case datePartFormats.M[3]:
-                    // MMMM
-                    {
-                        datePart = months[languageIndex].full[month];
-                        break;
-                    }
-                case datePartFormats.y[0]:
-                    // yy
-                    {
-                        datePart = formatNumber(year, 2);
-                        break;
-                    }
-                case datePartFormats.y[1]:
-                    // yyyy
-                    {
-                        datePart = year;
-                        break;
-                    }
-                case datePartFormats.H[0]:
-                    // HH
-                    {
-                        datePart = formatNumber(hours, 2);
-                        break;
-                    }
-                case datePartFormats.m[0]:
-                    // mm
-                    {
-                        datePart = formatNumber(minutes, 2);
-                        break;
-                    }
-                case datePartFormats.s[0]:
-                    // ss
-                    {
-                        datePart = formatNumber(seconds, 2);
-                        break;
-                    }
-                case datePartFormats.f[0]:
-                    // fff
-                    {
-                        datePart = formatNumber(milliseconds, 3);
-                        break;
-                    }
-                case datePartFormats.Z[0]:
-                    // Z
-                    {
-                        datePart = timeZone || 'Z';
-                        break;
-                    }
-                default:
-                    {
-                        return '';
-                    }
-            }
-
-            return datePart;
-        };
-
-        // Check format of each part of the obtained format.
-        var dateParts = {
-            days: formatDatePart(datePartFormats.d[checkDatePart('d')]),
-            months: formatDatePart(datePartFormats.M[checkDatePart('M')]),
-            years: formatDatePart(datePartFormats.y[checkDatePart('y')]),
-            hours: formatDatePart(datePartFormats.H[checkDatePart('H')]),
-            minutes: formatDatePart(datePartFormats.m[checkDatePart('m')]),
-            seconds: formatDatePart(datePartFormats.s[checkDatePart('s')]),
-            milliseconds: formatDatePart(datePartFormats.f[checkDatePart('f')]),
-            timeZone: formatDatePart(datePartFormats.Z[0]),
-            separator: /^\w+([^\w])/.exec(format)
-        };
-
-        // Return formatted date string.
-        return format
-            .replace(/d+/, dateParts.days)
-            .replace(/y+/, dateParts.years)
-            .replace(/M+/, dateParts.months)
-            .replace(/H+/, dateParts.hours)
-            .replace(/m+/, dateParts.minutes)
-            .replace(/s+/, dateParts.seconds)
-            .replace(/f+/, dateParts.milliseconds)
-            .replace(/Z+/, dateParts.timeZone);
-    };
-
-    var parseTimeZone = function (timeZone) {
-        if (!timeZone) {
-            return 0;
-        }
-
-        timeZone = timeZone.replace(/GMT/gi, '');
-
-        var parts = /^(?:Z|([+-]?)(2[0-3]|[01][0-9]):([0-5][0-9]))$/.exec(timeZone);
-
-        if (!parts || parts.length !== 4) {
-            return 0;
-        }
-
-        if (parts[0] === 'Z') {
-            return 0;
-        }
-
-        // Calculate time zone offset in minutes.
-        var offset = Number(parts[2]) * 60 + Number(parts[3]);
-
-        if (offset !== 0 && parts[1] === '-') {
-            offset *= -1;
-        }
-
-        return offset;
-    };
-
-    /*
-        Overloads:
-        - new MaDate()
-        - new MaDate(useLocalTimeZone)
-        - new MaDate(Date)
-        - new MaDate(MaDate)
-        - new MaDate(dateString)
-        - new MaDate(dateString, culture)
-        - new MaDate(year)
-        - new MaDate(year, month)
-        - new MaDate(year, month, date)
-        - new MaDate(year, month, date, hour)
-        - new MaDate(year, month, date, hour, minute)
-        - new MaDate(year, month, date, hour, minute, second)
-    */
-    function MaDate() {
-        var parameters = arguments,
-            date;
-        this._date = null;
-        this._offset = 0;
-        this._isMaDate = true;
-
-        if (parameters.length === 0) {
-            // Create a current date.
-            this._date = new Date();
-        } else if (parameters.length === 1) {
-            date = parameters[0];
-
-            if (isDate(date)) {
-                this._date = new Date(date.valueOf());
-            } else if (isMaDate(date)) {
-                // MaDate is provided - copy it.
-                if (!date.isEmpty()) {
-                    this._date = new Date(date.toDate().valueOf());
-                }
-
-                this._offset = date.offset();
-            } else if (typeof date === 'boolean') {
-                this._date = new Date();
-                this._offset = -this._date.getTimezoneOffset();
-            } else if (typeof date === 'string') {
-                // Parse date.
-                date = parse(date);
-                this._date = date.toDate();
-                this._offset = date.offset();
-            } else if (isInteger(date)) {
-                // Year.
-                this._date = new Date(date, 0, 1, 0, 0, 0);
-            }
-        } else if (parameters.length === 2) {
-            // Date string and culture.
-            if (typeof parameters[0] === 'string' && typeof parameters[1] === 'string') {
-                date = parse(parameters[0], parameters[1]);
-                this._date = date.toDate();
-                this._offset = date.offset();
-            } else if (isInteger(parameters[0]) && isInteger(parameters[1])) {
-                // Year and month.
-                this._date = new Date(parameters[0], parameters[1], 1, 0, 0, 0);
-            }
-        } else if (parameters.length === 3 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2])) {
-            // Year, month and date.
-            this._date = new Date(parameters[0], parameters[1], parameters[2], 0, 0, 0);
-        } else if (parameters.length === 4 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3])) {
-            // Year, month and date.
-            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], 0, 0);
-        } else if (parameters.length === 5 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
-            isInteger(parameters[4])) {
-            // Year, month and date.
-            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], 0);
-        } else if (parameters.length === 6 && isInteger(parameters[0]) && isInteger(parameters[1]) && isInteger(parameters[2]) && isInteger(parameters[3]) &&
-            isInteger(parameters[4]) && isInteger(parameters[5])) {
-            // Year, month and date.
-            this._date = new Date(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5]);
-        }
-    }
-
-    MaDate.createEmpty = function () {
-        return new MaDate(null);
-    };
-
-    MaDate.createLocal = function () {
-        return new MaDate(true);
-    };
-
-    MaDate.prototype.copy = function () {
-        return new MaDate(this);
-    };
-
-    MaDate.prototype.toDate = function () {
-        return this._date;
-    };
-
-    MaDate.prototype.offset = function (offset) {
-        if (arguments.length === 0) {
-            return this._offset;
-        }
-
-        this._offset = offset;
-        return this;
-    };
-
-    MaDate.prototype.toUtc = function () {
-        if (this.isEmpty() || this._offset === 0) {
-            return this;
-        }
-
-        this.subtract(this._offset, 'minute');
-        this._offset = 0;
-
-        return this;
-    };
-
-    MaDate.prototype.isEmpty = function () {
-        return !this._date;
-    };
-
-    MaDate.prototype.isUtc = function () {
-        return !this.isEmpty() && this._offset === 0;
-    };
-
-    MaDate.prototype.isEqual = function (date) {
-        return this.difference(date) === 0;
-    };
-
-    MaDate.prototype.isLess = function (date) {
-        return this.difference(date) < 0;
-    };
-
-    MaDate.prototype.isLessOrEqual = function (date) {
-        return this.difference(date) <= 0;
-    };
-
-    MaDate.prototype.isGreater = function (date) {
-        return this.difference(date) > 0;
-    };
-
-    MaDate.prototype.isGreaterOrEqual = function (date) {
-        return this.difference(date) >= 0;
-    };
-
-    MaDate.prototype.isBetween = function (startDate, endDate, isInclusive) {
-        var _startDate = new MaDate(startDate),
-            _endDate = new MaDate(endDate);
-
-        if (this.isEmpty() || _startDate.isEmpty() || _endDate.isEmpty()) {
-            return false;
-        }
-
-        if (isInclusive) {
-            return this.isGreaterOrEqual(_startDate) && this.isLessOrEqual(_endDate);
-        }
-
-        return this.isGreater(_startDate) && this.isLess(_endDate);
-    };
-
-    MaDate.prototype.difference = function (date) {
-        return this.valueOf() - new MaDate(date).valueOf();
-    };
-
-    MaDate.prototype.valueOf = function () {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        var time = this._date.valueOf();
-
-        // Add offset which is in minutes, and thus should be converted to milliseconds.
-        if (this._offset !== 0) {
-            time -= this._offset * 60000;
-        }
-
-        return time;
-    };
-
-    MaDate.prototype.format = function (_format) {
-        if (this.isEmpty()) {
-            return null;
-        }
-
-        return format(this._date, _format, this._offset);
-    };
-
-    MaDate.prototype.add = function (number, unit) {
-        if (this.isEmpty() || !number) {
-            return this;
-        }
-
-        // Don't change original date.
-        var date = new Date(this._date);
-
-        switch (unit) {
-            case 'year':
-                date.setFullYear(date.getFullYear() + number);
-                break;
-            case 'quarter':
-                date.setMonth(date.getMonth() + 3 * number);
-                break;
-            case 'month':
-                date.setMonth(date.getMonth() + number);
-                break;
-            case 'week':
-                date.setDate(date.getDate() + 7 * number);
-                break;
-            case 'day':
-                date.setDate(date.getDate() + number);
-                break;
-            case 'hour':
-                date.setTime(date.getTime() + number * 3600000);
-                break;
-            case 'minute':
-                date.setTime(date.getTime() + number * 60000);
-                break;
-            case 'second':
-                date.setTime(date.getTime() + number * 1000);
-                break;
-            case 'millisecond':
-                date.setTime(date.getTime() + number);
-                break;
-        }
-
-        this._date = date;
-
-        return this;
-    };
-
-    MaDate.prototype.subtract = function (number, unit) {
-        return this.add(number * -1, unit);
-    };
-
-    MaDate.prototype.millisecond = function (millisecond) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getMilliseconds();
-        } else {
-            this._date.setMilliseconds(millisecond);
-            return this;
-        }
-    };
-
-    MaDate.prototype.second = function (second) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getSeconds();
-        } else {
-            this._date.setSeconds(second);
-            return this;
-        }
-    };
-
-    MaDate.prototype.minute = function (minute) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getMinutes();
-        } else {
-            this._date.setMinutes(minute);
-            return this;
-        }
-    };
-
-    MaDate.prototype.hour = function (hour) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getHours();
-        } else {
-            this._date.setHours(hour);
-            return this;
-        }
-    };
-
-    MaDate.prototype.date = function (date) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getDate();
-        } else {
-            this._date.setDate(date);
-            return this;
-        }
-    };
-
-    MaDate.prototype.month = function (month) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getMonth();
-        } else {
-            this._date.setMonth(month);
-            return this;
-        }
-    };
-
-    MaDate.prototype.year = function (year) {
-        if (this.isEmpty()) {
-            return 0;
-        }
-
-        if (arguments.length === 0) {
-            return this._date.getFullYear();
-        } else {
-            this._date.setFullYear(year);
-            return this;
-        }
-    };
-
-    MaDate.prototype.startOf = function (unit) {
-        switch (unit) {
-            case 'year':
-                this.month(0);
-            /* falls through */
-            case 'month':
-                this.date(1);
-            /* falls through */
-            case 'day':
-                this.hour(0);
-            /* falls through */
-            case 'hour':
-                this.minute(0);
-            /* falls through */
-            case 'minute':
-                this.second(0);
-            /* falls through */
-            case 'second':
-                this.millisecond(0);
-        }
-
-        return this;
-    };
-
-    MaDate.prototype.endOf = function (unit) {
-        if (!unit) {
-            return this;
-        }
-
-        return this.startOf(unit).add(1, unit).subtract(1, 'millisecond');
-    };
-
-    MaDate.parse = parse;
-    MaDate.parseTimeZone = parseTimeZone;
-    MaDate.offsetToTimeZone = offsetToTimeZone;
-    MaDate.isDate = isDate;
-    MaDate.isMaDate = isMaDate;
-
-    return MaDate;
-}]);})();
-(function(){angular.module('marcuraUI.services').factory('MaHelper', ['MaDate', '$rootScope', function (MaDate, $rootScope) {
-    return {
-        keyCode: {
-            backspace: 8,
-            comma: 188,
-            delete: 46,
-            down: 40,
-            end: 35,
-            enter: 13,
-            escape: 27,
-            home: 36,
-            left: 37,
-            pageDown: 34,
-            pageUp: 33,
-            period: 190,
-            right: 39,
-            shift: 16,
-            space: 32,
-            tab: 9,
-            up: 38,
-            dash: 109,
-            dash2: 189,
-            numLock: {
-                period: 110
-            }
-        },
-
-        html: {
-            nbsp: '&nbsp;'
-        },
-
-        isEmail: function (value) {
-            var pattern = /^([\+\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
-            return pattern.test(value);
-        },
-
-        isNullOrWhiteSpace: function (value) {
-            if (value === null || value === undefined) {
-                return true;
-            }
-
-            if (angular.isArray(value)) {
-                return false;
-            }
-
-            // Convert value to string in case if it is not.
-            return value.toString().replace(/\s/g, '').length < 1;
-        },
-
-        isNullOrUndefined: function (value) {
-            return value === null || angular.isUndefined(value);
-        },
-
-        formatString: function (value) {
-            // Source: http://ajaxcontroltoolkit.codeplex.com/SourceControl/latest#Client/MicrosoftAjax/Extensions/String.js
-            var formattedString = '';
-
-            for (var i = 0; ;) {
-                // Search for curly bracers.
-                var open = value.indexOf('{', i);
-                var close = value.indexOf('}', i);
-
-                // Curly bracers are not found - copy rest of string and exit loop.
-                if (open < 0 && close < 0) {
-                    formattedString += value.slice(i);
-                    break;
-                }
-
-                if (close > 0 && (close < open || open < 0)) {
-                    // Closing brace before opening is error.
-                    if (value.charAt(close + 1) !== '}') {
-                        throw new Error('The format string contains an unmatched opening or closing brace.');
-                    }
-
-                    formattedString += value.slice(i, close + 1);
-                    i = close + 2;
-                    continue;
-                }
-
-                // Copy string before brace.
-                formattedString += value.slice(i, open);
-                i = open + 1;
-
-                // Check for double braces (which display as one and are not arguments).
-                if (value.charAt(i) === '{') {
-                    formattedString += '{';
-                    i++;
-                    continue;
-                }
-
-                // At this point we have valid opening brace, which should be matched by closing brace.
-                if (close < 0) {
-                    throw new Error('The format string contains an unmatched opening or closing brace.');
-                }
-
-                // This test is just done to break a potential infinite loop for invalid format strings.
-                // The code here is minimal because this is an error condition in debug mode anyway.
-                if (close < 0) {
-                    break;
-                }
-
-                // Find closing brace.
-                // Get string between braces, and split it around ':' (if any).
-                var brace = value.substring(i, close);
-                var colonIndex = brace.indexOf(':');
-                var argNumber = parseInt((colonIndex < 0) ? brace : brace.substring(0, colonIndex), 10) + 1;
-
-                if (isNaN(argNumber)) {
-                    throw new Error('The format string is invalid.');
-                }
-
-                var arg = arguments[argNumber];
-
-                if (typeof (arg) === 'undefined' || arg === null) {
-                    arg = '';
-                }
-
-                formattedString += arg.toString();
-                i = close + 1;
-            }
-
-            return formattedString;
-        },
-
-        getTextHeight: function (text, font, width, lineHeight) {
-            if (!font) {
-                return 0;
-            }
-
-            // Prepare textarea.
-            var textArea = document.createElement('TEXTAREA');
-            textArea.setAttribute('rows', 1);
-            textArea.style.font = font;
-            textArea.style.width = width || '0px';
-            textArea.style.border = '0';
-            textArea.style.overflow = 'hidden';
-            textArea.style.padding = '0';
-            textArea.style.outline = '0';
-            textArea.style.resize = 'none';
-            textArea.style.lineHeight = lineHeight || 'normal';
-            textArea.value = text;
-
-            // To measure sizes we need to add textarea to DOM.
-            angular.element(document.querySelector('body')).append(textArea);
-
-            // Measure height.
-            textArea.style.height = 'auto';
-            textArea.style.height = textArea.scrollHeight + 'px';
-
-            var height = parseInt(textArea.style.height);
-
-            // Remove textarea.
-            angular.element(textArea).remove();
-
-            return height;
-        },
-
-        isGreater: function (value, valueToCompare) {
-            var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare),
-                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
-
-            if (isNumber) {
-                return parseFloat(value) > parseFloat(valueToCompare);
-            } else if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.isGreater(date2);
-            }
-
-            return value > valueToCompare;
-        },
-
-        isGreaterOrEqual: function (value, valueToCompare) {
-            var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare),
-                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
-
-            if (isNumber) {
-                return parseFloat(value) >= parseFloat(valueToCompare);
-            } else if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.isGreaterOrEqual(date2);
-            }
-
-            return value >= valueToCompare;
-        },
-
-        isLengthGreaterOrEqual: function (value, length) {
-            var valueLength = (value || '').toString().length;
-            return valueLength >= length;
-        },
-
-        isLess: function (value, valueToCompare) {
-            var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare),
-                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
-
-            if (isNumber) {
-                return parseFloat(value) < parseFloat(valueToCompare);
-            } else if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.isLess(date2);
-            }
-
-            return value < valueToCompare;
-        },
-
-        isLessOrEqual: function (value, valueToCompare) {
-            var date1 = new MaDate(value),
-                date2 = new MaDate(valueToCompare),
-                isNumber = typeof value === 'number' || typeof valueToCompare === 'number';
-
-            if (isNumber) {
-                return parseFloat(value) <= parseFloat(valueToCompare);
-            } else if (!date1.isEmpty() && !date2.isEmpty()) {
-                return date1.isLessOrEqual(date2);
-            }
-
-            return value <= valueToCompare;
-        },
-
-        isLengthLessOrEqual: function (value, length) {
-            var valueLength = (value || '').toString().length;
-            return valueLength <= length;
-        },
-
-        isNumber: function (value) {
-            if (typeof value === 'number') {
-                return true;
-            }
-
-            if (this.isNullOrWhiteSpace(value)) {
-                return false;
-            }
-
-            return value.match(/^-?\d+\.?\d*$/) !== null;
-        },
-
-        isJson: function (value) {
-            try {
-                JSON.parse(value);
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-
-        safeApply: function (method) {
-            var phase = $rootScope.$$phase;
-
-            if (phase !== '$apply' && phase !== '$digest') {
-                $rootScope.$apply(method);
-                return;
-            }
-
-            if (method && typeof method === 'function') {
-                method();
-            }
-        }
-    };
-}]);})();
-(function(){/**
-* A set of utility methods that can be use to retrieve position of DOM elements.
-* It is meant to be used where we need to absolute-position DOM elements in
-* relation to other, existing elements (this is the case for tooltips, popovers,
-* typeahead suggestions etc.).
-*/
-angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$window', function ($document, $window) {
-    function getStyle(el, cssprop) {
-        // IE
-        if (el.currentStyle) {
-            return el.currentStyle[cssprop];
-        } else if ($window.getComputedStyle) {
-            return $window.getComputedStyle(el)[cssprop];
-        }
-
-        // finally try and get inline style
-        return el.style[cssprop];
-    }
-
-    /**
-     * Checks if a given element is statically positioned
-     * @param element - raw DOM element
-     */
-    function isStaticPositioned(element) {
-        return (getStyle(element, 'position') || 'static') === 'static';
-    }
-
-    /**
-     * returns the closest, non-statically positioned parentOffset of a given element
-     * @param element
-     */
-    var parentOffsetEl = function (element) {
-        var docDomEl = $document[0];
-        var offsetParent = element.offsetParent || docDomEl;
-        while (offsetParent && offsetParent !== docDomEl && isStaticPositioned(offsetParent)) {
-            offsetParent = offsetParent.offsetParent;
-        }
-        return offsetParent || docDomEl;
-    };
-
-    return {
-        /**
-         * Provides read-only equivalent of jQuery's position function:
-         * http://api.jquery.com/position/
-         */
-        position: function (element) {
-            var elBCR = this.offset(element);
-            var offsetParentBCR = { top: 0, left: 0 };
-            var offsetParentEl = parentOffsetEl(element[0]);
-            if (offsetParentEl != $document[0]) {
-                offsetParentBCR = this.offset(angular.element(offsetParentEl));
-                offsetParentBCR.top += offsetParentEl.clientTop - offsetParentEl.scrollTop;
-                offsetParentBCR.left += offsetParentEl.clientLeft - offsetParentEl.scrollLeft;
-            }
-
-            var boundingClientRect = element[0].getBoundingClientRect();
-            return {
-                width: boundingClientRect.width || element.prop('offsetWidth'),
-                height: boundingClientRect.height || element.prop('offsetHeight'),
-                top: elBCR.top - offsetParentBCR.top,
-                left: elBCR.left - offsetParentBCR.left
-            };
-        },
-
-        /**
-         * Provides read-only equivalent of jQuery's offset function:
-         * http://api.jquery.com/offset/
-         */
-        offset: function (element) {
-            var boundingClientRect = element[0].getBoundingClientRect();
-            return {
-                width: boundingClientRect.width || element.prop('offsetWidth'),
-                height: boundingClientRect.height || element.prop('offsetHeight'),
-                top: boundingClientRect.top + ($window.pageYOffset || $document[0].documentElement.scrollTop),
-                left: boundingClientRect.left + ($window.pageXOffset || $document[0].documentElement.scrollLeft)
-            };
-        },
-
-        /**
-         * Provides coordinates for the targetEl in relation to hostEl
-         */
-        positionElements: function (hostEl, targetEl, positionStr, appendToBody) {
-
-            var positionStrParts = positionStr.split('-');
-            var pos0 = positionStrParts[0], pos1 = positionStrParts[1] || 'center';
-
-            var hostElPos,
-                targetElWidth,
-                targetElHeight,
-                targetElPos;
-
-            hostElPos = appendToBody ? this.offset(hostEl) : this.position(hostEl);
-
-            targetElWidth = targetEl.prop('offsetWidth');
-            targetElHeight = targetEl.prop('offsetHeight');
-
-            var shiftWidth = {
-                center: function () {
-                    return hostElPos.left + hostElPos.width / 2 - targetElWidth / 2;
-                },
-                left: function () {
-                    return hostElPos.left;
-                },
-                right: function () {
-                    return hostElPos.left + hostElPos.width;
-                }
-            };
-
-            var shiftHeight = {
-                center: function () {
-                    return hostElPos.top + hostElPos.height / 2 - targetElHeight / 2;
-                },
-                top: function () {
-                    return hostElPos.top;
-                },
-                bottom: function () {
-                    return hostElPos.top + hostElPos.height;
-                }
-            };
-
-            switch (pos0) {
-                case 'right':
-                    targetElPos = {
-                        top: shiftHeight[pos1](),
-                        left: shiftWidth[pos0]()
-                    };
-                    break;
-                case 'left':
-                    targetElPos = {
-                        top: shiftHeight[pos1](),
-                        left: hostElPos.left - targetElWidth
-                    };
-                    break;
-                case 'bottom':
-                    targetElPos = {
-                        top: shiftHeight[pos0](),
-                        left: shiftWidth[pos1]()
-                    };
-                    break;
-                default:
-                    targetElPos = {
-                        top: hostElPos.top - targetElHeight,
-                        left: shiftWidth[pos1]()
-                    };
-                    break;
-            }
-
-            return targetElPos;
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.services').factory('MaValidators', ['MaHelper', 'MaDate', function (MaHelper, MaDate) {
-    var formatValueToCompare = function (value) {
-        if (!value) {
-            return null;
-        }
-
-        var formattedValue = value.toString();
-
-        if (MaDate.isMaDate(value)) {
-            formattedValue = value.format('dd MMM yyyy');
-        }
-
-        return formattedValue;
-    };
-
-    return {
-        isNotEmpty: function () {
-            return {
-                name: 'IsNotEmpty',
-                message: 'This field cannot be empty.',
-                validate: function (value) {
-                    if (angular.isArray(value)) {
-                        return value.length > 0;
-                    }
-
-                    return !MaHelper.isNullOrWhiteSpace(value);
-                }
-            };
-        },
-
-        isGreater: function (valueToCompare, allowEmpty) {
-            var message = null;
-
-            if (valueToCompare) {
-                message = 'This field cannot be less than or equal to ' + formatValueToCompare(valueToCompare) + '.';
-            }
-
-            return {
-                name: 'IsGreater',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isGreater(value, valueToCompare);
-                }
-            };
-        },
-
-        isGreaterOrEqual: function (valueToCompare, allowEmpty) {
-            var message = null;
-
-            if (valueToCompare) {
-                message = 'This field cannot be less than ' + formatValueToCompare(valueToCompare) + '.';
-            }
-
-            return {
-                name: 'IsGreaterOrEqual',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isGreaterOrEqual(value, valueToCompare);
-                }
-            };
-        },
-
-        isLengthGreaterOrEqual: function (length, allowEmpty) {
-            var message = null;
-
-            if (length) {
-                message = 'Length cannot be less than ' + formatValueToCompare(length) + '.';
-            }
-
-            return {
-                name: 'IsLengthGreaterOrEqual',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isLengthGreaterOrEqual(value, length);
-                }
-            };
-        },
-
-        isLess: function (valueToCompare, allowEmpty) {
-            var message = null;
-
-            if (valueToCompare) {
-                message = 'This field cannot be greater than or equal to ' + formatValueToCompare(valueToCompare) + '.';
-            }
-
-            return {
-                name: 'IsLess',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isLess(value, valueToCompare);
-                }
-            };
-        },
-
-        isLessOrEqual: function (valueToCompare, allowEmpty) {
-            var message = null;
-
-            if (valueToCompare) {
-                message = 'This field cannot be greater than ' + formatValueToCompare(valueToCompare) + '.';
-            }
-
-            return {
-                name: 'IsLessOrEqual',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isLessOrEqual(value, valueToCompare);
-                }
-            };
-        },
-
-        isLengthLessOrEqual: function (length, allowEmpty) {
-            var message = null;
-
-            if (length) {
-                message = 'Length cannot be greater than ' + formatValueToCompare(length) + '.';
-            }
-
-            return {
-                name: 'IsLengthLessOrEqual',
-                message: message,
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isLengthLessOrEqual(value, length);
-                }
-            };
-        },
-
-        isNumber: function (allowEmpty) {
-            return {
-                name: 'IsNumber',
-                message: 'This field should be a number.',
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isNumber(value);
-                }
-            };
-        },
-
-        isEmail: function (allowEmpty) {
-            return {
-                name: 'IsEmail',
-                message: 'This field should be an email.',
-                validate: function (value) {
-                    if (allowEmpty && MaHelper.isNullOrWhiteSpace(value)) {
-                        return true;
-                    }
-
-                    return MaHelper.isEmail(value);
-                }
-            };
-        }
-    };
-}]);})();

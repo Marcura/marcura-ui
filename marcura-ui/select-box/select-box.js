@@ -1,7 +1,9 @@
 /*
     TODO:
-    - IE Bug: "Adding item as object" - When clicking quickly twice on Toggle button selectedItem gets cleared.
-    - IE Bug: "Multiple" - 1) Add item 2) Remove item 3) Open list - triggers blur/focus, but shouldn't.
+    - Mousedown triggers focus, but shouldn't.
+    - Multiple: Second click on container doesn't close dropdown.
+    - IE Multiple: Selecting value with Enter triggers focus.
+    - IE Single: "Adding item as object" When clicking quickly twice on Toggle button selectedItem gets cleared.
 */
 angular.module('marcuraUI.components')
     .directive('maSelectBox', ['$document', '$timeout', 'MaHelper', function ($document, $timeout, MaHelper) {

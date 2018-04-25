@@ -24,7 +24,6 @@ angular.module('marcuraUI.services').factory('MaHelper', ['MaDate', '$rootScope'
                 period: 110
             }
         },
-
         html: {
             nbsp: '&nbsp;'
         },

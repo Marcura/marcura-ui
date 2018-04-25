@@ -77,6 +77,10 @@ function selectBoxPageController($scope, $timeout, $modal, helper, MaHelper) {
         return item ? 'Yes' : 'No';
     };
     $scope.yesNo = false;
+    $scope.port19 = $scope.ports1[1];
+    $scope.text1 = 'Tokyo';
+    $scope.text2 = 'Tokyo';
+    $scope.port20 = [$scope.ports2[1]];
 
     $scope.openModal = function () {
         $modal.open({
@@ -99,18 +103,20 @@ function selectBoxPageController($scope, $timeout, $modal, helper, MaHelper) {
         console.log('---');
     };
 
-    $scope.blur = function (value, property) {
-        console.log('blur');
-        console.log('event:', value);
-        console.log('scope:', $scope[property]);
-        console.log('---');
+    $scope.blur = function (value, property, component) {
+        var eventName = 'blur ' + property;
+        console.log(eventName);
+        // console.log('event:', value);
+        // console.log('scope:', $scope[property]);
+        // console.log('---');
     };
 
-    $scope.focus = function (value, property) {
-        console.log('focus');
-        console.log('event:', value);
-        console.log('scope:', $scope[property]);
-        console.log('---');
+    $scope.focus = function (value, property, component) {
+        var eventName = 'focus ' + property;
+        console.log(eventName);
+        // console.log('event:', value);
+        // console.log('scope:', $scope[property]);
+        // console.log('---');
     };
 
     // Test placeholder in AJAX mode.

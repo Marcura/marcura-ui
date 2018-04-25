@@ -223,6 +223,33 @@
         <pre>{{(port15 || null) | json}}</pre>
     </div>
     <div class="nodes-item">
+        <h2>Interaction with TextBox (focus/blur)</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box type="string" items="ports1" value="port19" focus="focus(maValue, 'port19')"
+            blur="blur(maValue, 'port19')" change="change(maValue, maOldValue, 'port19')"
+            can-reset="true" can-add-item="true">
+        </ma-select-box>
+        <ma-text-box value="text1" focus="focus(maValue, 'text1')" change="change(maValue, maOldValue, 'text1')"
+            blur="blur(maValue, 'text1')" change="change(maValue, maOldValue, 'text1')">
+        </ma-text-box>
+    </div>
+    <div class="nodes-item">
+        <h2>Multiple: Interaction with TextBox (focus/blur)</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-select-box items="ports15" value="port20" item-text-field="name" item-value-field="id"
+            placeholder="Select port" is-multiple="true" can-reset="true" focus="focus(maValue, 'port20')"
+            blur="blur(maValue, 'port20')" change="change(maValue, maOldValue, 'port20')">
+        </ma-select-box>
+        <ma-text-box value="text2" focus="focus(maValue, 'text2')" change="change(maValue, maOldValue, 'text2')"
+            blur="blur(maValue, 'text2')" change="change(maValue, maOldValue, 'text2')">
+        </ma-text-box>
+    </div>
+    <div class="nodes-item">
+        <pre>{{(port20 || null) | json}}</pre>
+    </div>
+    <div class="nodes-item">
         <h2>Inside modal</h2>
     </div>
     <div class="nodes-item">
