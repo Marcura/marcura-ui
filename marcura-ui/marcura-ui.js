@@ -3,22 +3,6 @@ angular.module('marcuraUI.components', ['marcuraUI.services']);
 angular.module('marcuraUI', ['marcuraUI.components']);
 
 angular.element(document).ready(function () {
-    // Detect IE9.
-    var ie = (function () {
-        var version = 3,
-            div = document.createElement('div'),
-            all = div.getElementsByTagName('i');
-
-        while (div.innerHTML = '<!--[if gt IE ' + (++version) + ']><i></i><![endif]-->', all[0]);
-
-        return version > 4 ? version : null;
-    }());
-
-    if (ie) {
-        var body = angular.element(document.getElementsByTagName('body')[0]);
-        body.addClass('ma-ie' + ie);
-    }
-
     // Override angular-modal hideModal method so it does not remove
     // 'modal-open' CSS-class from body if there are opened modals.
     // E.g. when bootbox modal is displayed above angular-modal.
