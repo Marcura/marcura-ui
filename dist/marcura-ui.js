@@ -2309,23 +2309,31 @@ the specific language governing permissions and limitations under the Apache Lic
 
         // single
         clear: function (triggerChange) {
-            var data = this.selection.data("select2-data");
-            if (data) { // guard against queued quick consecutive clicks
-                var evt = $.Event("select2-clearing");
-                this.opts.element.trigger(evt);
-                if (evt.isDefaultPrevented()) {
-                    return;
-                }
-                var placeholderOption = this.getPlaceholderOption();
-                this.opts.element.val(placeholderOption ? placeholderOption.val() : "");
-                this.selection.find(".select2-chosen").empty();
-                this.selection.removeData("select2-data");
-                this.setPlaceholder();
+            if (!this.selection) {
+                return;
+            }
 
-                if (triggerChange !== false) {
-                    this.opts.element.trigger({ type: "select2-removed", val: this.id(data), choice: data });
-                    this.triggerChange({ removed: data });
-                }
+            var data = this.selection.data("select2-data");
+
+            // guard against queued quick consecutive clicks
+            if (!data) {
+                return;
+            }
+
+            var evt = $.Event("select2-clearing");
+            this.opts.element.trigger(evt);
+            if (evt.isDefaultPrevented()) {
+                return;
+            }
+            var placeholderOption = this.getPlaceholderOption();
+            this.opts.element.val(placeholderOption ? placeholderOption.val() : "");
+            this.selection.find(".select2-chosen").empty();
+            this.selection.removeData("select2-data");
+            this.setPlaceholder();
+
+            if (triggerChange !== false) {
+                this.opts.element.trigger({ type: "select2-removed", val: this.id(data), choice: data });
+                this.triggerChange({ removed: data });
             }
         },
 
