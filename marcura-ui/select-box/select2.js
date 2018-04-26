@@ -736,8 +736,10 @@ the specific language governing permissions and limitations under the Apache Lic
                 .data("select2", this)
                 .attr("tabindex", "-1")
                 .before(this.container)
-                .on("click.select2", killEvent); // do not leak click events
-
+                .on("click.select2", function (e) {
+                    // do not leak click events
+                    killEvent(e);
+                });
             this.container.data("select2", this);
 
             this.dropdown = this.container.find(".select2-drop");
@@ -759,8 +761,6 @@ the specific language governing permissions and limitations under the Apache Lic
 
             // initialize the container
             this.initContainer();
-
-            this.container.on("click", killEvent);
 
             this.container.on('mouseenter', this.bind(function () {
                 this.isContainerHovered = true;
@@ -2255,17 +2255,12 @@ the specific language governing permissions and limitations under the Apache Lic
 
                 if (this.opened()) {
                     this.close();
-                    killEvent(e);
                 } else if (this.isInterfaceEnabled()) {
                     // IE: Focus event isn't triggered somehow, so we need to do it manually.
-                    this.selection.focus();
+                    // this.selection.focus();
+                    this.opts.instance.focus();
                     this.open();
                 }
-            }));
-
-            selection.on("focus", this.bind(function (e) {
-                this.opts.instance.focus();
-                killEvent(e);
             }));
 
             dropdown.on("mousedown touchstart", this.bind(function () {

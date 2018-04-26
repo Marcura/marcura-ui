@@ -1,6 +1,6 @@
 angular.module('app.controllers').controller('selectBoxPageController', selectBoxPageController);
 
-function selectBoxPageController($scope, $timeout, $modal, helper, MaHelper) {
+function selectBoxPageController($scope, $timeout, $modal, $document, helper, MaHelper) {
     $scope.MaHelper = MaHelper;
     $scope.ports2 = helper.getPorts();
     $scope.ports1 = [];
@@ -107,17 +107,17 @@ function selectBoxPageController($scope, $timeout, $modal, helper, MaHelper) {
     $scope.blur = function (value, property, component) {
         var eventName = 'blur ' + property;
         console.log(eventName);
-        // console.log('event:', value);
-        // console.log('scope:', $scope[property]);
-        // console.log('---');
+        console.log('event:', value);
+        console.log('scope:', $scope[property]);
+        console.log('---');
     };
 
     $scope.focus = function (value, property, component) {
         var eventName = 'focus ' + property;
         console.log(eventName);
-        // console.log('event:', value);
-        // console.log('scope:', $scope[property]);
-        // console.log('---');
+        console.log('event:', value);
+        console.log('scope:', $scope[property]);
+        console.log('---');
     };
 
     // Test placeholder in AJAX mode.

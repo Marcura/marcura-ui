@@ -736,8 +736,10 @@ the specific language governing permissions and limitations under the Apache Lic
                 .data("select2", this)
                 .attr("tabindex", "-1")
                 .before(this.container)
-                .on("click.select2", killEvent); // do not leak click events
-
+                .on("click.select2", function (e) {
+                    // do not leak click events
+                    killEvent(e);
+                });
             this.container.data("select2", this);
 
             this.dropdown = this.container.find(".select2-drop");
@@ -759,8 +761,6 @@ the specific language governing permissions and limitations under the Apache Lic
 
             // initialize the container
             this.initContainer();
-
-            this.container.on("click", killEvent);
 
             this.container.on('mouseenter', this.bind(function () {
                 this.isContainerHovered = true;
@@ -2255,17 +2255,12 @@ the specific language governing permissions and limitations under the Apache Lic
 
                 if (this.opened()) {
                     this.close();
-                    killEvent(e);
                 } else if (this.isInterfaceEnabled()) {
                     // IE: Focus event isn't triggered somehow, so we need to do it manually.
-                    this.selection.focus();
+                    // this.selection.focus();
+                    this.opts.instance.focus();
                     this.open();
                 }
-            }));
-
-            selection.on("focus", this.bind(function (e) {
-                this.opts.instance.focus();
-                killEvent(e);
             }));
 
             dropdown.on("mousedown touchstart", this.bind(function () {
@@ -3752,6 +3747,221 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            value: '=',
+            isDisabled: '=',
+            change: '&',
+            size: '@',
+            rtl: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-check-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
+                ng-click="onChange()"\
+                ng-class="{\
+                    \'ma-check-box-is-checked\': value === true,\
+                    \'ma-check-box-is-disabled\': isDisabled,\
+                    \'ma-check-box-has-text\': hasText,\
+                    \'ma-check-box-rtl\': rtl,\
+                    \'ma-check-box-is-focused\': isFocused,\
+                    \'ma-check-box-is-invalid\': !isValid,\
+                    \'ma-check-box-is-touched\': isTouched\
+                }">\
+                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
+                <div class="ma-check-box-inner"></div>\
+                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            var validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
+            var setTabindex = function () {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
+            var setText = function () {
+                scope.hasText = scope.text ? true : false;
+            };
+
+            scope._size = scope.size ? scope.size : 'xs';
+            scope.cssClass = ' ma-check-box-' + scope._size;
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var getControllerScope = function () {
+                var valuePropertyParts = null,
+                    controllerScope = null,
+                    initialScope = scope.$parent,
+                    property = attributes.value;
+
+                // In case of a nested property binding like 'company.port.id'.
+                if (property.indexOf('.') !== -1) {
+                    valuePropertyParts = property.split('.');
+                    property = valuePropertyParts[0];
+                }
+
+                while (initialScope && !controllerScope) {
+                    if (initialScope.hasOwnProperty(property)) {
+                        controllerScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                // Use parent scope by default if search is unsuccessful.
+                return controllerScope || scope.$parent;
+            };
+
+            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
+            // as the value will be stored by Angular on ng-if scope.
+            var controllerScope = getControllerScope();
+
+            var validate = function () {
+                scope.isValid = true;
+                scope.isTouched = true;
+
+                // Remove 'false' value for 'IsNotEmpty' to work correctly.
+                var value = scope.value === false ? null : scope.value;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        var validator = validators[i];
+
+                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            scope.onChange = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                // Handle nested properties or function calls with $parse service.
+                // This is related to a case when the component is located inside ng-if,
+                // but it works for other cases as well.
+                var valueGetter = $parse(attributes.value),
+                    valueSetter = valueGetter.assign,
+                    value = !valueGetter(controllerScope);
+
+                scope.value = value;
+                valueSetter(controllerScope, value);
+                validate();
+
+                $timeout(function () {
+                    scope.change({
+                        maValue: scope.value
+                    });
+                });
+            };
+
+            scope.onFocus = function () {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                scope.isFocused = false;
+                validate();
+            };
+
+            scope.onKeypress = function (event) {
+                if (event.keyCode === MaHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (!scope.isDisabled) {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            scope.$watch('isDisabled', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            scope.$watch('text', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setText();
+            });
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate();
+                };
+            }
+
+            setTabindex();
+            setText();
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function () {
         this.$get = function () {
@@ -4575,218 +4785,37 @@ if (!String.prototype.endsWith) {
             }
         };
     }]);})();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
+(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
     return {
         restrict: 'E',
+        transclude: true,
         scope: {
-            text: '@',
-            value: '=',
-            isDisabled: '=',
-            change: '&',
-            size: '@',
-            rtl: '=',
+            cutOverflow: '=',
+            for: '@',
             isRequired: '=',
-            validators: '=',
-            instance: '=',
+            hasWarning: '=',
+            hasHint: '='
         },
         replace: true,
         template: function () {
             var html = '\
-            <div class="ma-check-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-check-box-is-checked\': value === true,\
-                    \'ma-check-box-is-disabled\': isDisabled,\
-                    \'ma-check-box-has-text\': hasText,\
-                    \'ma-check-box-rtl\': rtl,\
-                    \'ma-check-box-is-focused\': isFocused,\
-                    \'ma-check-box-is-invalid\': !isValid,\
-                    \'ma-check-box-is-touched\': isTouched\
+                <div class="ma-label" ng-class="{\
+                    \'ma-label-is-required\': isRequired,\
+                    \'ma-label-has-content\': hasContent,\
+                    \'ma-label-has-warning\': hasWarning,\
+                    \'ma-label-has-hint\': hasHint,\
+                    \'ma-label-cut-overflow\': cutOverflow\
                 }">\
-                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
-                <div class="ma-check-box-inner"></div>\
-                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
-            </div>';
+                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div><!--\
+                    --><div class="ma-label-warning" ng-if="hasWarning">&nbsp;\
+                    <i class="fa fa-exclamation-triangle"></i></div><div class="ma-label-hint" ng-if="hasHint">&nbsp;<div class="ma-label-hint-inner"><i class="fa fa-question"></i><div></div>\
+                </div>';
 
             return html;
         },
-        link: function (scope, element, attributes) {
-            var validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
-
-            var setTabindex = function () {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
-
-            var setText = function () {
-                scope.hasText = scope.text ? true : false;
-            };
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-check-box-' + scope._size;
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var getControllerScope = function () {
-                var valuePropertyParts = null,
-                    controllerScope = null,
-                    initialScope = scope.$parent,
-                    property = attributes.value;
-
-                // In case of a nested property binding like 'company.port.id'.
-                if (property.indexOf('.') !== -1) {
-                    valuePropertyParts = property.split('.');
-                    property = valuePropertyParts[0];
-                }
-
-                while (initialScope && !controllerScope) {
-                    if (initialScope.hasOwnProperty(property)) {
-                        controllerScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                // Use parent scope by default if search is unsuccessful.
-                return controllerScope || scope.$parent;
-            };
-
-            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
-            // as the value will be stored by Angular on ng-if scope.
-            var controllerScope = getControllerScope();
-
-            var validate = function () {
-                scope.isValid = true;
-                scope.isTouched = true;
-
-                // Remove 'false' value for 'IsNotEmpty' to work correctly.
-                var value = scope.value === false ? null : scope.value;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        var validator = validators[i];
-
-                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.onChange = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                // Handle nested properties or function calls with $parse service.
-                // This is related to a case when the component is located inside ng-if,
-                // but it works for other cases as well.
-                var valueGetter = $parse(attributes.value),
-                    valueSetter = valueGetter.assign,
-                    value = !valueGetter(controllerScope);
-
-                scope.value = value;
-                valueSetter(controllerScope, value);
-                validate();
-
-                $timeout(function () {
-                    scope.change({
-                        maValue: scope.value
-                    });
-                });
-            };
-
-            scope.onFocus = function () {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                scope.isFocused = false;
-                validate();
-            };
-
-            scope.onKeypress = function (event) {
-                if (event.keyCode === MaHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (!scope.isDisabled) {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            scope.$watch('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            scope.$watch('text', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setText();
-            });
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate();
-                };
-            }
-
-            setTabindex();
-            setText();
+        link: function (scope, element) {
+            scope.hasContent = element.find('span').contents().length > 0;
         }
     };
 }]);})();
@@ -4971,40 +5000,6 @@ if (!String.prototype.endsWith) {
 
                 setModifier('responsive-size', responsiveSize);
             }
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            cutOverflow: '=',
-            for: '@',
-            isRequired: '=',
-            hasWarning: '=',
-            hasHint: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-label" ng-class="{\
-                    \'ma-label-is-required\': isRequired,\
-                    \'ma-label-has-content\': hasContent,\
-                    \'ma-label-has-warning\': hasWarning,\
-                    \'ma-label-has-hint\': hasHint,\
-                    \'ma-label-cut-overflow\': cutOverflow\
-                }">\
-                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div><!--\
-                    --><div class="ma-label-warning" ng-if="hasWarning">&nbsp;\
-                    <i class="fa fa-exclamation-triangle"></i></div><div class="ma-label-hint" ng-if="hasHint">&nbsp;<div class="ma-label-hint-inner"><i class="fa fa-question"></i><div></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            scope.hasContent = element.find('span').contents().length > 0;
         }
     };
 }]);})();
@@ -6334,7 +6329,6 @@ angular.module('marcuraUI.components').directive('maSelectBoxWrapper', ['$timeou
     TODO:
     - Tabbing out in 'add' mode when list is open doesn't trigger blur. Focus goes to browser navigation bar.
       However, if mouse hovers container, then it works fine.
-    - Mousedown triggers focus, but shouldn't.
     - Multiple: Second click on container doesn't close dropdown.
     - IE Multiple: Selecting value with Enter triggers focus.
     - IE Single: "Adding item as object" When clicking quickly twice on Toggle button selectedItem gets cleared.

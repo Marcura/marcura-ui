@@ -2,7 +2,6 @@
     TODO:
     - Tabbing out in 'add' mode when list is open doesn't trigger blur. Focus goes to browser navigation bar.
       However, if mouse hovers container, then it works fine.
-    - Mousedown triggers focus, but shouldn't.
     - Multiple: Second click on container doesn't close dropdown.
     - IE Multiple: Selecting value with Enter triggers focus.
     - IE Single: "Adding item as object" When clicking quickly twice on Toggle button selectedItem gets cleared.
