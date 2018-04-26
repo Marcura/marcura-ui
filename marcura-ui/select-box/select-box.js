@@ -1032,8 +1032,7 @@ angular.module('marcuraUI.components')
 
                     scope.instance.validate = function () {
                         scope.isTouched = true;
-
-                        validate(scope.isAddMode ? scope.text : scope.value);
+                        validate(scope.isAddMode ? scope.text : scope.selectedItem);
                     };
 
                     scope.instance.failedValidator = function () {

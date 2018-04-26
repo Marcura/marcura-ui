@@ -71,7 +71,7 @@
     <div class="nodes-item">
         <ma-select-box items="ports2" value="port3" item-text-field="name" item-value-field="id"
             can-add-item="true" focus="focus(maValue, 'port3')" blur="blur(maValue, 'port3')"
-            change="change(maValue, maOldValue, 'port3')" instance="port3SelectBox" can-reset="true">
+            change="change(maValue, maOldValue, 'port3')" instance="port3Component" can-reset="true">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -121,7 +121,7 @@
     <div class="nodes-item">
         <ma-select-box items="ports2" item-text-field="name" item-value-field="id" value="port8"
             focus="focus(maValue, 'port8')" blur="blur(maValue, 'port8')" change="change(maValue, maOldValue, 'port8')"
-            can-add-item="true" instance="port8SelectBox">
+            can-add-item="true" instance="port8Component">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -133,7 +133,7 @@
     <div class="nodes-item">
         <ma-select-box items="ports2" value="port9" item-text-field="name" item-value-field="id"
             is-required="true" can-add-item="true" focus="focus(maValue, 'port9')" blur="blur(maValue, 'port9')"
-            change="change(maValue, maOldValue, 'port9')" instance="port9SelectBox">
+            change="change(maValue, maOldValue, 'port9')" instance="port9Component">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -157,7 +157,8 @@
     <div class="nodes-item">
         <ma-select-box ajax="portsRequest" value="port18" item-text-field="name" item-value-field="id"
             item-template="portItemTemplate" focus="focus(maValue, 'port18')" blur="blur(maValue, 'port18')"
-            change="change(maValue, maOldValue, 'port18')" can-reset="true" can-add-item="true">
+            change="change(maValue, maOldValue, 'port18')" can-add-item="true" can-reset="true"
+            instance="port18Component">
         </ma-select-box>
     </div>
     <div class="nodes-item">

@@ -33,23 +33,24 @@ function selectBoxPageController($scope, $timeout, $modal, helper, MaHelper) {
     $scope.port1 = $scope.ports1[1];
     $scope.port2 = $scope.ports2[1];
     $scope.port3 = $scope.ports2[1];
-    $scope.port3SelectBox = {};
+    $scope.port3Component = {};
     $scope.port4 = $scope.ports2[1];
     $scope.port5 = $scope.ports1[1];
     $scope.port7 = $scope.ports2[1];
     $scope.port8 = {
         name: 'Moscow'
     };
-    $scope.port8SelectBox = {};
+    $scope.port8Component = {};
     // $scope.port8 = 'Moscow';
     // $scope.port8 = $scope.ports2[1];
     $scope.port9 = {
         name: 'Moscow'
     };
-    $scope.port9SelectBox = {};
+    $scope.port9Component = {};
     $scope.port10 = angular.copy($scope.ports2[2]);
     $scope.portsRequest = getPortsRequest();
     $scope.port18 = angular.copy($scope.ports2[3]);
+    $scope.port18Component = {};
     $scope.portsRequest = getPortsRequest();
     $scope.port11 = $scope.ports2[1];
     $scope.port12 = null;
@@ -138,15 +139,15 @@ function selectBoxPageController($scope, $timeout, $modal, helper, MaHelper) {
 
     // API: Mode.
     // $timeout(function() {
-    //     $scope.port8SelectBox.mode('add');
+    //     $scope.port8Component.mode('add');
     // }, 5000);
     //
     // $timeout(function() {
-    //     $scope.port8SelectBox.mode('select');
+    //     $scope.port8Component.mode('select');
     // }, 10000);
     //
     // $timeout(function() {
-    //     $scope.port8SelectBox.mode('add');
+    //     $scope.port8Component.mode('add');
     // }, 15000);
 
     // Setting value changes mode.
