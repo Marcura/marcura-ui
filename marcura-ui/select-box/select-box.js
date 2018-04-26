@@ -1,7 +1,10 @@
 /*
-    TODO:
+    Features:
+    - Add support for Enter button on search field. If user clicks enter while text is entered and no items found, go to add mode.
+    
+    Bugs:
     - Tabbing out in 'add' mode when list is open doesn't trigger blur. Focus goes to browser navigation bar.
-      However, if mouse hovers container, then it works fine.
+    However, if mouse hovers container, then it works fine.
     - Multiple: Second click on container doesn't close dropdown.
     - IE Multiple: Selecting value with Enter triggers focus.
     - IE Single: "Adding item as object" When clicking quickly twice on Toggle button selectedItem gets cleared.
@@ -1095,7 +1098,7 @@ angular.module('marcuraUI.components')
                             selectData.search.focus();
                         });
                     } else {
-                        selectData.addItemButton.on('click', function (e) {
+                        selectData.addItemButton.on('click', function () {
                             scope.$apply(function () {
                                 scope.toggleMode('add', true, true);
                             });
