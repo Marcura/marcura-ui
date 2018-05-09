@@ -28,6 +28,39 @@ function selectBoxPageController($scope, $timeout, $modal, $document, helper, Ma
         }
     };
 
+    var getPortsByRegionRequest = function () {
+        return {
+            url: '/api/ports',
+            results: function (ports, page) {
+                for (var i = 0; i < ports.length; i++) {
+                    ports[i].text = $scope.portItemTemplate(ports[i]);
+                }
+
+                var portsByRegion = _.map(_.groupBy(helper.getPorts(), function (port) {
+                    return port.region.id;
+                }), function (ports) {
+                    return {
+                        text: ports[0].region.name,
+                        children: ports
+                    }
+                });
+
+                return {
+                    results: portsByRegion
+                };
+            }
+        }
+    };
+
+    $scope.portsByRegion = _.map(_.groupBy(helper.getPorts(), function (port) {
+        return port.region.id;
+    }), function (ports) {
+        return {
+            id: ports[0].region.id,
+            text: ports[0].region.name,
+            children: ports
+        }
+    });
     $scope.years = helper.getYears(1950);
     $scope.year = 1958;
     $scope.port1 = $scope.ports1[1];
@@ -49,9 +82,9 @@ function selectBoxPageController($scope, $timeout, $modal, $document, helper, Ma
     $scope.port9Component = {};
     $scope.port10 = angular.copy($scope.ports2[2]);
     $scope.portsRequest = getPortsRequest();
+    $scope.portsByRegionRequest = getPortsByRegionRequest();
     $scope.port18 = angular.copy($scope.ports2[3]);
     $scope.port18Component = {};
-    $scope.portsRequest = getPortsRequest();
     $scope.port11 = $scope.ports2[1];
     $scope.port12 = null;
     $scope.port13 = $scope.ports2[1];
