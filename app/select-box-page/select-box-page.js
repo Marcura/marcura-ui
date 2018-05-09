@@ -41,7 +41,7 @@ function selectBoxPageController($scope, $timeout, $modal, $document, helper, Ma
                 }), function (ports) {
                     return {
                         text: ports[0].region.name,
-                        children: ports
+                        items: ports
                     }
                 });
 
@@ -58,7 +58,7 @@ function selectBoxPageController($scope, $timeout, $modal, $document, helper, Ma
         return {
             id: ports[0].region.id,
             text: ports[0].region.name,
-            children: ports
+            items: ports
         }
     });
     $scope.years = helper.getYears(1950);

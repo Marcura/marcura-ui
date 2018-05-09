@@ -518,14 +518,18 @@ the specific language governing permissions and limitations under the Apache Lic
             process = function (datum, collection) {
                 var group, attr;
                 datum = datum[0];
-                if (datum.children) {
+
+                if (datum.items) {
                     group = {};
+
                     for (attr in datum) {
                         if (datum.hasOwnProperty(attr)) group[attr] = datum[attr];
                     }
-                    group.children = [];
-                    $(datum.children).each2(function (i, childDatum) { process(childDatum, group.children); });
-                    if (group.children.length || query.matcher(t, text(group), datum)) {
+
+                    group.items = [];
+                    $(datum.items).each2(function (i, childDatum) { process(childDatum, group.items); });
+
+                    if (group.items.length || query.matcher(t, text(group), datum)) {
                         collection.push(group);
                     }
                 } else {
@@ -535,7 +539,9 @@ the specific language governing permissions and limitations under the Apache Lic
                 }
             };
 
-            $(data().results).each2(function (i, datum) { process(datum, filtered.results); });
+            $(data().results).each2(function (i, datum) {
+                process(datum, filtered.results);
+            });
             query.callback(filtered);
         };
     }
@@ -592,8 +598,8 @@ the specific language governing permissions and limitations under the Apache Lic
     function countResults(results) {
         var count = 0;
         $.each(results, function (i, item) {
-            if (item.children) {
-                count += countResults(item.children);
+            if (item.items) {
+                count += countResults(item.items);
             } else {
                 count++;
             }
@@ -940,7 +946,7 @@ the specific language governing permissions and limitations under the Apache Lic
             } else if (element.is("optgroup")) {
                 return {
                     text: element.attr("label"),
-                    children: [],
+                    items: [],
                     element: element.get(),
                     css: element.attr("class")
                 };
@@ -985,14 +991,14 @@ the specific language governing permissions and limitations under the Apache Lic
                             disabled = (result.disabled === true);
                             selectable = (!disabled) && (id(result) !== undefined);
 
-                            compound = result.children && result.children.length > 0;
+                            compound = result.items && result.items.length > 0;
 
                             node = $("<li></li>");
                             node.addClass("select2-results-dept-" + depth);
                             node.addClass("select2-result");
                             node.addClass(selectable ? "select2-result-selectable" : "select2-result-unselectable");
                             if (disabled) { node.addClass("select2-disabled"); }
-                            if (compound) { node.addClass("select2-result-with-children"); }
+                            if (compound) { node.addClass("select2-result-has-items"); }
                             node.addClass(self.opts.formatResultCssClass(result));
                             node.attr("role", "presentation");
 
@@ -1012,7 +1018,7 @@ the specific language governing permissions and limitations under the Apache Lic
 
                                 innerContainer = $("<ul></ul>");
                                 innerContainer.addClass("select2-result-sub");
-                                populate(result.children, innerContainer, depth + 1);
+                                populate(result.items, innerContainer, depth + 1);
                                 node.append(innerContainer);
                             }
 
@@ -1045,7 +1051,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 opts.query = this.bind(function (query) {
                     var data = { results: [], more: false },
                         term = query.term,
-                        children, placeholderOption, process;
+                        items, placeholderOption, process;
 
                     process = function (element, collection) {
                         var group;
@@ -1055,24 +1061,24 @@ the specific language governing permissions and limitations under the Apache Lic
                             }
                         } else if (element.is("optgroup")) {
                             group = self.optionToData(element);
-                            element.children().each2(function (i, elm) { process(elm, group.children); });
-                            if (group.children.length > 0) {
+                            element.children().each2(function (i, elm) { process(elm, group.items); });
+                            if (group.items.length > 0) {
                                 collection.push(group);
                             }
                         }
                     };
 
-                    children = element.children();
+                    items = element.children();
 
                     // ignore the placeholder option if there is one
-                    if (this.getPlaceholder() !== undefined && children.length > 0) {
+                    if (this.getPlaceholder() !== undefined && items.length > 0) {
                         placeholderOption = this.getPlaceholderOption();
                         if (placeholderOption) {
-                            children = children.not(placeholderOption);
+                            items = items.not(placeholderOption);
                         }
                     }
 
-                    children.each2(function (i, elm) { process(elm, data.results); });
+                    items.each2(function (i, elm) { process(elm, data.results); });
 
                     query.callback(data);
                 });
@@ -1541,7 +1547,7 @@ the specific language governing permissions and limitations under the Apache Lic
 
         // abstract
         ensureHighlightVisible: function () {
-            var results = this.results, children, index, child, hb, rb, y, more, topOffset;
+            var results = this.results, items, index, child, hb, rb, y, more, topOffset;
 
             index = this.highlight();
 
@@ -1557,16 +1563,16 @@ the specific language governing permissions and limitations under the Apache Lic
                 return;
             }
 
-            children = this.findHighlightableChoices().find('.select2-result-label');
+            items = this.findHighlightableChoices().find('.select2-result-label');
 
-            child = $(children[index]);
+            child = $(items[index]);
 
             topOffset = (child.offset() || {}).top || 0;
 
             hb = topOffset + child.outerHeight(true);
 
             // if this is the last child lets also make sure select2-more-results is visible
-            if (index === children.length - 1) {
+            if (index === items.length - 1) {
                 more = results.find("li.select2-more-results");
                 if (more.length > 0) {
                     hb = more.offset().top + more.outerHeight(true);
@@ -3222,7 +3228,7 @@ the specific language governing permissions and limitations under the Apache Lic
         postprocessResults: function (data, initial, noHighlightUpdate) {
             var val = this.getVal(),
                 choices = this.results.find(".select2-result"),
-                compound = this.results.find(".select2-result-with-children"),
+                compound = this.results.find(".select2-result-has-items"),
                 self = this;
 
             choices.each2(function (i, choice) {
@@ -3745,6 +3751,221 @@ if (!String.prototype.endsWith) {
             });
 
             setModifiers();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            value: '=',
+            isDisabled: '=',
+            change: '&',
+            size: '@',
+            rtl: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-check-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
+                ng-click="onChange()"\
+                ng-class="{\
+                    \'ma-check-box-is-checked\': value === true,\
+                    \'ma-check-box-is-disabled\': isDisabled,\
+                    \'ma-check-box-has-text\': hasText,\
+                    \'ma-check-box-rtl\': rtl,\
+                    \'ma-check-box-is-focused\': isFocused,\
+                    \'ma-check-box-is-invalid\': !isValid,\
+                    \'ma-check-box-is-touched\': isTouched\
+                }">\
+                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
+                <div class="ma-check-box-inner"></div>\
+                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            var validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
+            var setTabindex = function () {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
+            var setText = function () {
+                scope.hasText = scope.text ? true : false;
+            };
+
+            scope._size = scope.size ? scope.size : 'xs';
+            scope.cssClass = ' ma-check-box-' + scope._size;
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var getControllerScope = function () {
+                var valuePropertyParts = null,
+                    controllerScope = null,
+                    initialScope = scope.$parent,
+                    property = attributes.value;
+
+                // In case of a nested property binding like 'company.port.id'.
+                if (property.indexOf('.') !== -1) {
+                    valuePropertyParts = property.split('.');
+                    property = valuePropertyParts[0];
+                }
+
+                while (initialScope && !controllerScope) {
+                    if (initialScope.hasOwnProperty(property)) {
+                        controllerScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                // Use parent scope by default if search is unsuccessful.
+                return controllerScope || scope.$parent;
+            };
+
+            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
+            // as the value will be stored by Angular on ng-if scope.
+            var controllerScope = getControllerScope();
+
+            var validate = function () {
+                scope.isValid = true;
+                scope.isTouched = true;
+
+                // Remove 'false' value for 'IsNotEmpty' to work correctly.
+                var value = scope.value === false ? null : scope.value;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        var validator = validators[i];
+
+                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            scope.onChange = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                // Handle nested properties or function calls with $parse service.
+                // This is related to a case when the component is located inside ng-if,
+                // but it works for other cases as well.
+                var valueGetter = $parse(attributes.value),
+                    valueSetter = valueGetter.assign,
+                    value = !valueGetter(controllerScope);
+
+                scope.value = value;
+                valueSetter(controllerScope, value);
+                validate();
+
+                $timeout(function () {
+                    scope.change({
+                        maValue: scope.value
+                    });
+                });
+            };
+
+            scope.onFocus = function () {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                scope.isFocused = false;
+                validate();
+            };
+
+            scope.onKeypress = function (event) {
+                if (event.keyCode === MaHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (!scope.isDisabled) {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            scope.$watch('isDisabled', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            scope.$watch('text', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setText();
+            });
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate();
+                };
+            }
+
+            setTabindex();
+            setText();
         }
     };
 }]);})();
@@ -4755,40 +4976,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            cutOverflow: '=',
-            for: '@',
-            isRequired: '=',
-            hasWarning: '=',
-            hasHint: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-label" ng-class="{\
-                    \'ma-label-is-required\': isRequired,\
-                    \'ma-label-has-content\': hasContent,\
-                    \'ma-label-has-warning\': hasWarning,\
-                    \'ma-label-has-hint\': hasHint,\
-                    \'ma-label-cut-overflow\': cutOverflow\
-                }">\
-                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div><!--\
-                    --><div class="ma-label-warning" ng-if="hasWarning">&nbsp;\
-                    <i class="fa fa-exclamation-triangle"></i></div><div class="ma-label-hint" ng-if="hasHint">&nbsp;<div class="ma-label-hint-inner"><i class="fa fa-question"></i><div></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            scope.hasContent = element.find('span').contents().length > 0;
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maMessage', [function () {
     return {
         restrict: 'E',
@@ -4849,6 +5036,40 @@ if (!String.prototype.endsWith) {
 
             setState();
             setCssClass();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            cutOverflow: '=',
+            for: '@',
+            isRequired: '=',
+            hasWarning: '=',
+            hasHint: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-label" ng-class="{\
+                    \'ma-label-is-required\': isRequired,\
+                    \'ma-label-has-content\': hasContent,\
+                    \'ma-label-has-warning\': hasWarning,\
+                    \'ma-label-has-hint\': hasHint,\
+                    \'ma-label-cut-overflow\': cutOverflow\
+                }">\
+                    <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div><!--\
+                    --><div class="ma-label-warning" ng-if="hasWarning">&nbsp;\
+                    <i class="fa fa-exclamation-triangle"></i></div><div class="ma-label-hint" ng-if="hasHint">&nbsp;<div class="ma-label-hint-inner"><i class="fa fa-question"></i><div></div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            scope.hasContent = element.find('span').contents().length > 0;
         }
     };
 }]);})();
@@ -5316,6 +5537,69 @@ if (!String.prototype.endsWith) {
             setTotalPages();
             setRangePages();
             setHasPager();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            scope.calculateLeft = function (stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function () {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function (stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
         }
     };
 }]);})();
@@ -8658,69 +8942,6 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            scope.calculateLeft = function (stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function () {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function (stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
     return {
         restrict: 'E',
@@ -8745,6 +8966,107 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
             var size = scope.size ? scope.size : 'xs',
                 position = scope.position ? scope.position : 'center';
             scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function ($state, MaHelper, $timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            items: '=',
+            select: '&',
+            useState: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-tabs">\
+                <ul class="ma-tabs-list clearfix">\
+                    <li class="ma-tabs-item{{item.modifier ? (\' ma-tabs-item-\' + item.modifier) : \'\'}}" ng-repeat="item in items"\
+                        ng-focus="onFocus(item)"\
+                        ng-blur="onBlur(item)"\
+                        ng-keypress="onKeypress($event, item)"\
+                        ng-class="{\
+                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
+                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
+                            \'ma-tabs-item-is-focused\': item.isFocused\
+                        }"\
+                        ng-click="onSelect(item)">\
+                        <a class="ma-tabs-link" href="" tabindex="-1">\
+                            <span class="ma-tabs-text">{{item.text}}</span>\
+                        </a>\
+                    </li>\
+                </ul>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            scope.$state = $state;
+            var useState = scope.useState === false ? false : true;
+
+            scope.isItemSelected = function (item) {
+                if (item.selector) {
+                    return item.selector();
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        return $state.includes(item.state.name);
+                    }
+                } else {
+                    return item.isSelected;
+                }
+
+                return false;
+            };
+
+            scope.onSelect = function (item) {
+                if (item.isDisabled || item.isSelected) {
+                    return;
+                }
+
+                if (useState) {
+                    if (item.state && item.state.name) {
+                        $state.go(item.state.name, item.state.parameters);
+                    }
+                } else {
+                    angular.forEach(scope.items, function (item) {
+                        item.isSelected = false;
+                    });
+                    item.isSelected = true;
+
+                    scope.select({
+                        maItem: item
+                    });
+                }
+            };
+
+            scope.onKeypress = function (event, item) {
+                if (event.keyCode === MaHelper.keyCode.enter) {
+                    scope.onSelect(item);
+                }
+            };
+
+            scope.onFocus = function (item) {
+                item.isFocused = true;
+            };
+
+            scope.onBlur = function (item) {
+                item.isFocused = false;
+            };
+
+            $timeout(function () {
+                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
+
+                itemElements.each(function (itemIndex, itemElement) {
+                    var item = scope.items[itemIndex];
+
+                    if (!item.isDisabled) {
+                        angular.element(itemElement).attr('tabindex', '0');
+                    }
+                });
+            });
         }
     };
 }]);})();
@@ -9756,322 +10078,6 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
             }
         };
     }]);})();
-(function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function ($state, MaHelper, $timeout) {
-    return {
-        restrict: 'E',
-        scope: {
-            items: '=',
-            select: '&',
-            useState: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-tabs">\
-                <ul class="ma-tabs-list clearfix">\
-                    <li class="ma-tabs-item{{item.modifier ? (\' ma-tabs-item-\' + item.modifier) : \'\'}}" ng-repeat="item in items"\
-                        ng-focus="onFocus(item)"\
-                        ng-blur="onBlur(item)"\
-                        ng-keypress="onKeypress($event, item)"\
-                        ng-class="{\
-                            \'ma-tabs-item-is-selected\': isItemSelected(item),\
-                            \'ma-tabs-item-is-disabled\': item.isDisabled,\
-                            \'ma-tabs-item-is-focused\': item.isFocused\
-                        }"\
-                        ng-click="onSelect(item)">\
-                        <a class="ma-tabs-link" href="" tabindex="-1">\
-                            <span class="ma-tabs-text">{{item.text}}</span>\
-                        </a>\
-                    </li>\
-                </ul>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
-
-            scope.isItemSelected = function (item) {
-                if (item.selector) {
-                    return item.selector();
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        return $state.includes(item.state.name);
-                    }
-                } else {
-                    return item.isSelected;
-                }
-
-                return false;
-            };
-
-            scope.onSelect = function (item) {
-                if (item.isDisabled || item.isSelected) {
-                    return;
-                }
-
-                if (useState) {
-                    if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
-                    }
-                } else {
-                    angular.forEach(scope.items, function (item) {
-                        item.isSelected = false;
-                    });
-                    item.isSelected = true;
-
-                    scope.select({
-                        maItem: item
-                    });
-                }
-            };
-
-            scope.onKeypress = function (event, item) {
-                if (event.keyCode === MaHelper.keyCode.enter) {
-                    scope.onSelect(item);
-                }
-            };
-
-            scope.onFocus = function (item) {
-                item.isFocused = true;
-            };
-
-            scope.onBlur = function (item) {
-                item.isFocused = false;
-            };
-
-            $timeout(function () {
-                var itemElements = angular.element(element[0].querySelectorAll('.ma-tabs-item'));
-
-                itemElements.each(function (itemIndex, itemElement) {
-                    var item = scope.items[itemIndex];
-
-                    if (!item.isDisabled) {
-                        angular.element(itemElement).attr('tabindex', '0');
-                    }
-                });
-            });
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            value: '=',
-            isDisabled: '=',
-            change: '&',
-            size: '@',
-            rtl: '=',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-check-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-check-box-is-checked\': value === true,\
-                    \'ma-check-box-is-disabled\': isDisabled,\
-                    \'ma-check-box-has-text\': hasText,\
-                    \'ma-check-box-rtl\': rtl,\
-                    \'ma-check-box-is-focused\': isFocused,\
-                    \'ma-check-box-is-invalid\': !isValid,\
-                    \'ma-check-box-is-touched\': isTouched\
-                }">\
-                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
-                <div class="ma-check-box-inner"></div>\
-                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            var validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
-
-            var setTabindex = function () {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
-
-            var setText = function () {
-                scope.hasText = scope.text ? true : false;
-            };
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-check-box-' + scope._size;
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var getControllerScope = function () {
-                var valuePropertyParts = null,
-                    controllerScope = null,
-                    initialScope = scope.$parent,
-                    property = attributes.value;
-
-                // In case of a nested property binding like 'company.port.id'.
-                if (property.indexOf('.') !== -1) {
-                    valuePropertyParts = property.split('.');
-                    property = valuePropertyParts[0];
-                }
-
-                while (initialScope && !controllerScope) {
-                    if (initialScope.hasOwnProperty(property)) {
-                        controllerScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                // Use parent scope by default if search is unsuccessful.
-                return controllerScope || scope.$parent;
-            };
-
-            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
-            // as the value will be stored by Angular on ng-if scope.
-            var controllerScope = getControllerScope();
-
-            var validate = function () {
-                scope.isValid = true;
-                scope.isTouched = true;
-
-                // Remove 'false' value for 'IsNotEmpty' to work correctly.
-                var value = scope.value === false ? null : scope.value;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        var validator = validators[i];
-
-                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.onChange = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                // Handle nested properties or function calls with $parse service.
-                // This is related to a case when the component is located inside ng-if,
-                // but it works for other cases as well.
-                var valueGetter = $parse(attributes.value),
-                    valueSetter = valueGetter.assign,
-                    value = !valueGetter(controllerScope);
-
-                scope.value = value;
-                valueSetter(controllerScope, value);
-                validate();
-
-                $timeout(function () {
-                    scope.change({
-                        maValue: scope.value
-                    });
-                });
-            };
-
-            scope.onFocus = function () {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                scope.isFocused = false;
-                validate();
-            };
-
-            scope.onKeypress = function (event) {
-                if (event.keyCode === MaHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (!scope.isDisabled) {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            scope.$watch('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            scope.$watch('text', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setText();
-            });
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate();
-                };
-            }
-
-            setTabindex();
-            setText();
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components')
     /**
      * The MaTooltip service creates tooltip- and popover-like directives as well as
