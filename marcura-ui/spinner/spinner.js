@@ -11,8 +11,8 @@ angular.module('marcuraUI.components').directive('maSpinner', [function () {
         template: function () {
             var html = '\
                 <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
-                    <div class="pace">\
-                        <div class="pace-activity"></div>\
+                    <div class="ma-pace">\
+                        <div class="ma-pace-activity"></div>\
                     </div>\
                 </div>';
 

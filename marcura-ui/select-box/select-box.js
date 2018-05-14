@@ -63,8 +63,8 @@ angular.module('marcuraUI.components')
                             \'ma-select-box-has-value\': _hasValue\
                         }">\
                         <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
-                            <div class="pace">\
-                                <div class="pace-activity"></div>\
+                            <div class="ma-pace">\
+                                <div class="ma-pace-activity"></div>\
                             </div>\
                         </div>';
 

@@ -2013,7 +2013,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 "       <label for='' class='select2-offscreen'></label>",
                 "       <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input' role='combobox' aria-expanded='true'",
                 "       aria-autocomplete='list' />",
-                "       <div class='pace'><div class='pace-activity'></div></div>",
+                "       <div class='ma-pace'><div class='ma-pace-activity'></div></div>",
                 "       <i class='select2-drop-search-icon fa fa-search'></i>",
                 this.opts.canAddItem ? "<div class='select2-drop-add-item-button'><i class='fa fa-plus'></i></div>" : "",
                 "   </div>",
@@ -2636,7 +2636,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 "  <li class='select2-search-field'>",
                 "    <label for='' class='select2-offscreen'></label>",
                 "    <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input'>",
-                "    <div class='pace'><div class='pace-activity'></div></div>",
+                "    <div class='ma-pace'><div class='ma-pace-activity'></div></div>",
                 "  </li>",
                 "</ul>",
                 "<div class='select2-drop select2-drop-multi select2-display-none'>",
@@ -3677,8 +3677,8 @@ if (!String.prototype.endsWith) {
                         \'ma-button-is-loading\': isLoading\
                     }">\
                     <span class="ma-button-spinner" ng-if="isLoading">\
-                        <div class="pace">\
-                            <div class="pace-activity"></div>\
+                        <div class="ma-pace">\
+                            <div class="ma-pace-activity"></div>\
                         </div>\
                     </span>\
                     <span ng-if="leftIcon" class="ma-button-icon ma-button-icon-left">\
@@ -5010,69 +5010,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maMessage', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            type: '@',
-            state: '@',
-            size: '@',
-            textAlign: '@',
-            hasIcon: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-message{{cssClass}}">\
-                    <div class="ma-message-icon" ng-if="_hasIcon">\
-                        <i class="fa" ng-class="{\
-                            \'fa-info-circle\': _state === \'info\',\
-                            \'fa-check-circle\': _state === \'success\',\
-                            \'fa-exclamation-triangle\': _state === \'warning\',\
-                            \'fa-times-circle\': _state === \'danger\'\
-                        }"></i>\
-                    </div>\
-                    <div class="ma-message-text"><ng-transclude></ng-transclude></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            var type = scope.type || 'message',
-                size = scope.size ? scope.size : 'sm';
-            scope._hasIcon = scope.hasIcon === false ? false : true;
-
-            var setState = function () {
-                scope._state = scope.state || 'default';
-            };
-
-            var setCssClass = function () {
-                scope.cssClass = ' ma-message-' + type + ' ma-message-' + scope._state + ' ma-message-' + size;
-
-                if (scope.textAlign) {
-                    scope.cssClass += ' ma-message-text-align-' + scope.textAlign;
-                }
-
-                if (scope._hasIcon) {
-                    scope.cssClass += ' ma-message-has-icon';
-                }
-            };
-
-            scope.$watch('state', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setState();
-                setCssClass();
-            });
-
-            setState();
-            setCssClass();
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout', 'MaValidators', function ($timeout, MaValidators) {
     return {
         restrict: 'E',
@@ -6102,6 +6039,69 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maMessage', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            type: '@',
+            state: '@',
+            size: '@',
+            textAlign: '@',
+            hasIcon: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-message{{cssClass}}">\
+                    <div class="ma-message-icon" ng-if="_hasIcon">\
+                        <i class="fa" ng-class="{\
+                            \'fa-info-circle\': _state === \'info\',\
+                            \'fa-check-circle\': _state === \'success\',\
+                            \'fa-exclamation-triangle\': _state === \'warning\',\
+                            \'fa-times-circle\': _state === \'danger\'\
+                        }"></i>\
+                    </div>\
+                    <div class="ma-message-text"><ng-transclude></ng-transclude></div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            var type = scope.type || 'message',
+                size = scope.size ? scope.size : 'sm';
+            scope._hasIcon = scope.hasIcon === false ? false : true;
+
+            var setState = function () {
+                scope._state = scope.state || 'default';
+            };
+
+            var setCssClass = function () {
+                scope.cssClass = ' ma-message-' + type + ' ma-message-' + scope._state + ' ma-message-' + size;
+
+                if (scope.textAlign) {
+                    scope.cssClass += ' ma-message-text-align-' + scope.textAlign;
+                }
+
+                if (scope._hasIcon) {
+                    scope.cssClass += ' ma-message-has-icon';
+                }
+            };
+
+            scope.$watch('state', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setState();
+                setCssClass();
+            });
+
+            setState();
+            setCssClass();
+        }
+    };
+}]);})();
 (function(){/**
  * This is a clone of https://www.npmjs.com/package/angular-ui-select2 package, which is no longer maintained.
  * It was copied so we can maintain it ourselves.
@@ -6397,8 +6397,8 @@ angular.module('marcuraUI.components')
                             \'ma-select-box-has-value\': _hasValue\
                         }">\
                         <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
-                            <div class="pace">\
-                                <div class="pace-activity"></div>\
+                            <div class="ma-pace">\
+                                <div class="ma-pace-activity"></div>\
                             </div>\
                         </div>';
 
@@ -8955,8 +8955,8 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
         template: function () {
             var html = '\
                 <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
-                    <div class="pace">\
-                        <div class="pace-activity"></div>\
+                    <div class="ma-pace">\
+                        <div class="ma-pace-activity"></div>\
                     </div>\
                 </div>';
 

@@ -29,6 +29,7 @@ var paths = {
         ],
         css: [
             'marcura-ui/less.less',
+            'marcura-ui/pace/pace.less',
             'marcura-ui/button/button-variables.less',
             'marcura-ui/pager/pager-variables.less',
             'marcura-ui/button/button.less',
