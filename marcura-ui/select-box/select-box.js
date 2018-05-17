@@ -1008,7 +1008,7 @@ angular.module('marcuraUI.components')
 
                     scope.isTouched = true;
                     setHasValue();
-                    validate(newValue);
+                    validate(scope._type === 'object' ? getNewItem(newValue) : newValue);
                 });
 
                 scope.$watch('isRequired', function (newValue, oldValue) {

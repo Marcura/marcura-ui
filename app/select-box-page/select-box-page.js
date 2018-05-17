@@ -129,37 +129,37 @@ function selectBoxPageController($scope, $timeout, $modal, $document, helper, Ma
         });
     };
 
-    $scope.change = function (value, oldValue, property) {
-        console.log('change');
-        console.log('event:', value);
-        console.log('scope:', $scope[property]);
-        console.log('old:  ', oldValue);
-        console.log('---');
-    };
+    // $scope.change = function (value, oldValue, property) {
+    //     console.log('change');
+    //     console.log('event:', value);
+    //     console.log('scope:', $scope[property]);
+    //     console.log('old:  ', oldValue);
+    //     console.log('---');
+    // };
 
-    $scope.blur = function (value, property, component) {
-        var eventName = 'blur ' + property;
-        console.log(eventName);
-        console.log('event:', value);
-        console.log('scope:', $scope[property]);
-        console.log('---');
-    };
+    // $scope.blur = function (value, property, component) {
+    //     var eventName = 'blur ' + property;
+    //     console.log(eventName);
+    //     console.log('event:', value);
+    //     console.log('scope:', $scope[property]);
+    //     console.log('---');
+    // };
 
-    $scope.focus = function (value, property, component) {
-        var eventName = 'focus ' + property;
-        console.log(eventName);
-        console.log('event:', value);
-        console.log('scope:', $scope[property]);
-        console.log('---');
-    };
+    // $scope.focus = function (value, property, component) {
+    //     var eventName = 'focus ' + property;
+    //     console.log(eventName);
+    //     console.log('event:', value);
+    //     console.log('scope:', $scope[property]);
+    //     console.log('---');
+    // };
 
-    $scope.modeToggle = function (value, oldValue, property) {
-        console.log('modeToggle');
-        console.log('event:', value);
-        console.log('scope:', $scope[property]);
-        console.log('old:  ', oldValue);
-        console.log('---');
-    };
+    // $scope.modeToggle = function (value, oldValue, property) {
+    //     console.log('modeToggle');
+    //     console.log('event:', value);
+    //     console.log('scope:', $scope[property]);
+    //     console.log('old:  ', oldValue);
+    //     console.log('---');
+    // };
 
     // Test placeholder in AJAX mode.
     // $timeout(function () {
