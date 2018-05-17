@@ -484,6 +484,11 @@ angular.module('marcuraUI.services').factory('MaDate', [function () {
             separator: /^\w+([^\w])/.exec(format)
         };
 
+        // TODO: Workarounds.
+        if (format === 'ddd') {
+            return format.replace(/d+/, dateParts.days);
+        }
+
         // Return formatted date string.
         return format
             .replace(/d+/, dateParts.days)

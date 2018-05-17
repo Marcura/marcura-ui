@@ -27,7 +27,9 @@ angular.module('marcuraUI.components')
                 max: '=',
                 changeTimeout: '=',
                 placeholder: '@',
-                modifier: '@'
+                modifier: '@',
+                eventDates: '=',
+                disabledDates: '='
             },
             replace: true,
             template: function (element) {
@@ -108,7 +110,8 @@ angular.module('marcuraUI.components')
                     minuteCaretPosition = 0,
                     isDateFocused,
                     isHourFocused,
-                    isMinuteFocused;
+                    isMinuteFocused,
+                    eventDates = [];
 
                 var hasDateChanged = function (date) {
                     if (previousDate.isEqual(date)) {
@@ -270,6 +273,18 @@ angular.module('marcuraUI.components')
                 };
 
                 var initializePikaday = function () {
+                    var theme = 'ma-pika';
+
+                    if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
+                        var modifiers = scope.modifier.split(' ');
+
+                        for (var i = 0; i < modifiers.length; i++) {
+                            theme += ' ma-pika-' + modifiers[i];
+                        }
+                    }
+
+                    console.log(theme);
+
                     picker = new Pikaday({
                         field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                         position: 'bottom right',
@@ -301,7 +316,26 @@ angular.module('marcuraUI.components')
                             }
 
                             triggerChange(date);
-                        }
+                        },
+                        disableDayFn: function (date) {
+                            var isDateDisabled = false;
+                            date = new MaDate(date).offset(timeZoneOffset);
+
+                            if (scope.disabledDates) {
+                                for (var i = 0; i < scope.disabledDates.length; i++) {
+                                    var disabledDate = new MaDate(scope.disabledDates[i]).offset(timeZoneOffset);
+
+                                    if (date.isEqual(disabledDate)) {
+                                        isDateDisabled = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            return isDateDisabled;
+                        },
+                        events: eventDates,
+                        theme: theme
                     });
 
                     setDisplayDate(previousDate);
@@ -542,6 +576,17 @@ angular.module('marcuraUI.components')
                     }
                 };
 
+                var setEventDates = function () {
+                    eventDates = [];
+
+                    if (scope.eventDates && scope.eventDates.length) {
+                        for (var i = 0; i < scope.eventDates.length; i++) {
+                            var event = new MaDate(scope.eventDates[i]);
+                            eventDates.push(event.format('ddd') + ' ' + event.format('MMM dd yyyy'));
+                        }
+                    }
+                };
+
                 setValidators();
                 scope.isFocused = false;
                 scope.isValid = true;
@@ -777,7 +822,16 @@ angular.module('marcuraUI.components')
                     setModifiers(oldValue);
                 });
 
+                scope.$watch('eventDates', function (newValue, oldValue) {
+                    if (angular.equals(newValue, oldValue)) {
+                        return;
+                    }
+
+                    setEventDates();
+                });
+
                 setModifiers();
+                setEventDates();
 
                 // Prepare API instance.
                 if (scope.instance) {

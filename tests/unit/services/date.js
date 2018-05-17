@@ -366,6 +366,10 @@ describe('MaDate', function () {
             expect(new MaDate(date).format('yyyy-MM-dd')).toEqual('2015-02-07');
             expect(new MaDate(date).format('yyyy-MM-ddd')).toEqual('2015-02-Sat');
             expect(new MaDate(date).format('yyyy-MM-dddd')).toEqual('2015-02-Saturday');
+
+            // Test that 'M' in 'Mon' isn't replaced with empty string.
+            date = new Date(2015, 1, 2);
+            expect(new MaDate(date).format('ddd')).toEqual('Mon');
         });
 
         it('supports month format', function () {
@@ -526,7 +530,9 @@ describe('MaDate', function () {
 
     describe('createLocal method', function () {
         it('creates date in local time zone', function () {
-            expect(MaDate.createLocal().format('yyyy-MM-ddTHH:mm:ss.fffZ')).toEqual(new MaDate(true).format('yyyy-MM-ddTHH:mm:ss.fffZ'));
+            // Don't check milliseconds as there might be 1 ms delay between processing of
+            // expected and actual dates.
+            expect(MaDate.createLocal().format('yyyy-MM-ddTHH:mm:ssZ')).toEqual(new MaDate(true).format('yyyy-MM-ddTHH:mm:ssZ'));
         });
     });
 

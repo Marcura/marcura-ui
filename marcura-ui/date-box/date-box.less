@@ -154,16 +154,41 @@
     border-color: @border-color;
 
     .is-selected .pika-button {
-        border-radius: 0;
         .box-shadow(none);
         background: @color-primary;
     }
 
-    .pika-button:hover {
-        border-radius: 0;
+    .is-disabled .pika-button {
+        color: #666;
+        background: none;
     }
 
-    .pika-table abbr {
-        cursor: default;
+    .is-disabled.has-event .pika-button {
+        background: #bebebe;
+        opacity: 1;
+        color: #ffffff;
+    }
+
+    .has-event .pika-button {
+        .box-shadow(none);
+    }
+
+    td:not(.is-disabled):not(.has-event):not(.is-today) .pika-button:hover {
+        color: inherit;
+        background: @background-color-darker-light;
+    }
+
+    .has-event .pika-button:hover {
+        background: #005da9;
+    }
+
+    .pika {
+        &-button {
+            border-radius: 0;
+        }
+
+        &-table abbr {
+            cursor: default;
+        }
     }
 }
