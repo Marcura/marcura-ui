@@ -22,6 +22,7 @@ angular.module('marcuraUI.components')
                 blur: '&',
                 focus: '&',
                 init: '&',
+                modeToggle: '&',
                 itemTemplate: '=',
                 itemTextField: '@',
                 itemValueField: '@',
@@ -102,7 +103,7 @@ angular.module('marcuraUI.components')
                         ma-tooltip="{{_addItemTooltip}}"\
                         ma-tooltip-is-disabled="!canAddItem"\
                         right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
-                        click="toggleMode(null, null, true)"\
+                        click="changeMode()"\
                         ng-focus="onFocus(\'toggle\')"\
                         is-disabled="isDisabled">\
                     </ma-button>\
@@ -657,6 +658,17 @@ angular.module('marcuraUI.components')
                     }
                 };
 
+                scope.changeMode = function () {
+                    scope.toggleMode(null, null, true);
+
+                    $timeout(function () {
+                        scope.modeToggle({
+                            maValue: scope.value,
+                            maOldValue: previousValue
+                        });
+                    });
+                };
+
                 scope.reset = function () {
                     previousValue = scope.value;
                     scope.value = scope.isMultiple ? [] : null;
@@ -1101,6 +1113,12 @@ angular.module('marcuraUI.components')
                         selectData.addItemButton.on('click', function () {
                             scope.$apply(function () {
                                 scope.toggleMode('add', true, true);
+                                $timeout(function () {
+                                    scope.modeToggle({
+                                        maValue: scope.value,
+                                        maOldValue: previousValue
+                                    });
+                                });
                             });
                         });
                     }

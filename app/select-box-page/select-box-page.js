@@ -153,6 +153,14 @@ function selectBoxPageController($scope, $timeout, $modal, $document, helper, Ma
         console.log('---');
     };
 
+    $scope.modeToggle = function (value, oldValue, property) {
+        console.log('modeToggle');
+        console.log('event:', value);
+        console.log('scope:', $scope[property]);
+        console.log('old:  ', oldValue);
+        console.log('---');
+    };
+
     // Test placeholder in AJAX mode.
     // $timeout(function () {
     //     $scope.port10 = null;

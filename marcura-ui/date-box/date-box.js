@@ -283,8 +283,6 @@ angular.module('marcuraUI.components')
                         }
                     }
 
-                    console.log(theme);
-
                     picker = new Pikaday({
                         field: angular.element(element[0].querySelector('.ma-date-box-icon'))[0],
                         position: 'bottom right',
