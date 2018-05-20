@@ -22,6 +22,7 @@ angular.module('marcuraUI.components')
                 blur: '&',
                 focus: '&',
                 init: '&',
+                validate: '&',
                 modeToggle: '&',
                 itemTemplate: '=',
                 itemTextField: '@',
@@ -343,6 +344,16 @@ angular.module('marcuraUI.components')
                     }
                 };
 
+                var triggerValidate = function (value) {
+                    // Postpone the event to allow scope.value to be updated, so
+                    // the event can operate relevant value.
+                    $timeout(function () {
+                        scope.validate({
+                            maValue: value
+                        });
+                    });
+                };
+
                 var isExistingItem = function (item) {
                     // In AJAX mode existing items can be detect the presence of id field,
                     // thus only object types are supported for now.
@@ -574,9 +585,10 @@ angular.module('marcuraUI.components')
                     }
                 };
 
-                var validate = function (value) {
+                var validate = function (value, triggerValidateEvent) {
                     scope.isValid = true;
                     failedValidator = null;
+                    triggerValidateEvent = triggerValidateEvent !== undefined ? triggerValidateEvent : true;
 
                     if (validators && validators.length) {
                         for (var i = 0; i < validators.length; i++) {
@@ -586,6 +598,10 @@ angular.module('marcuraUI.components')
                                 break;
                             }
                         }
+                    }
+
+                    if (triggerValidateEvent !== false) {
+                        triggerValidate(value);
                     }
                 };
 
@@ -1047,7 +1063,7 @@ angular.module('marcuraUI.components')
 
                     scope.instance.validate = function () {
                         scope.isTouched = true;
-                        validate(scope.isAddMode ? scope.text : scope.selectedItem);
+                        validate(scope.isAddMode ? scope.text : scope.selectedItem, false);
                     };
 
                     scope.instance.failedValidator = function () {
