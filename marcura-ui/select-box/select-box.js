@@ -901,6 +901,7 @@ angular.module('marcuraUI.components')
                             return;
                         }
 
+                        scope.isTouched = true;
                         previousValue = cleanItemValue(scope.value);
                         scope.value = cleanItemValue(scope.convertItemValue(item));
                         scope.previousSelectedItem = item;
