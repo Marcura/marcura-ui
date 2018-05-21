@@ -1827,7 +1827,10 @@ the specific language governing permissions and limitations under the Apache Lic
 
                     // ignore a response if the select2 has been closed before it was received
                     if (!this.opened()) {
-                        this.search.removeClass("select2-active");
+                        if (this.search) {
+                            this.search.removeClass("select2-active");
+                        }
+
                         return;
                     }
 
