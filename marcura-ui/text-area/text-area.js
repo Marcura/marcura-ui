@@ -50,6 +50,13 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             scope.isFocused = false;
             scope.isTouched = false;
 
+            // Set initial height to avoid jumping.
+            valueElement[0].style.height = '30px';
+
+            if (scope.isResizable === false) {
+                valueElement.css('resize', 'none');
+            }
+
             var getValueElementStyle = function () {
                 var style = $window.getComputedStyle(valueElement[0], null),
                     properties = {},
