@@ -583,6 +583,12 @@ angular.module('marcuraUI.components')
                             eventDates.push(event.format('ddd') + ' ' + event.format('MMM dd yyyy'));
                         }
                     }
+
+                    // Refresh calendar.
+                    if (picker && picker._o) {
+                        picker._o.events = eventDates;
+                        picker.draw();
+                    }
                 };
 
                 setValidators();
@@ -825,10 +831,7 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
-                    // Set event dates and refresh calendar.
                     setEventDates();
-                    picker._o.events = eventDates;
-                    picker.draw();
                 });
 
                 setModifiers();

@@ -173,9 +173,22 @@
         .box-shadow(none);
     }
 
-    td:not(.is-disabled):not(.has-event):not(.is-today) .pika-button:hover {
+    .is-today .pika-button {
+        color: @color-primary;
+        font-weight: bold;
+    }
+
+    td:not(.is-disabled):not(.has-event):not(.is-today):not(.is-selected) .pika-button:hover {
         color: inherit;
         background: @background-color-darker-light;
+    }
+
+    .is-today:not(.is-disabled):not(.has-event):not(.is-selected) .pika-button:hover {
+        background: @background-color-darker-light;
+    }
+
+    .is-today.is-selected .pika-button{
+        color: #ffffff;
     }
 
     .has-event .pika-button:hover {
