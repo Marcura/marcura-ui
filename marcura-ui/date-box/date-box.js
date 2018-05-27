@@ -825,8 +825,10 @@ angular.module('marcuraUI.components')
                         return;
                     }
 
+                    // Set event dates and refresh calendar.
                     setEventDates();
-                    initializePikaday();
+                    picker._o.events = eventDates;
+                    picker.draw();
                 });
 
                 setModifiers();
