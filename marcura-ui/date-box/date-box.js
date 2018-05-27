@@ -821,11 +821,12 @@ angular.module('marcuraUI.components')
                 });
 
                 scope.$watch('eventDates', function (newValue, oldValue) {
-                    if (angular.equals(newValue, oldValue)) {
+                    if (scope.isDisabled || angular.equals(newValue, oldValue)) {
                         return;
                     }
 
                     setEventDates();
+                    initializePikaday();
                 });
 
                 setModifiers();
