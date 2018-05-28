@@ -7,6 +7,26 @@
     position: relative;
     .input-reset-button;
 
+    .ma-pace .ma-pace-activity {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        margin: auto;
+    }
+
+    &-spinner {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: #d9edf7;
+        opacity: 0.5;
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
+
     &-is-reset-disabled {
         .input-reset-button-disabled;
     }
@@ -58,7 +78,7 @@
         }
     }
 
-    &-is-invalid&-is-touched {
+    :not(&-is-loading)&-is-invalid&-is-touched {
         &.ma-date-box-is-focused .ma-date-box-inner {
             .box-shadow(@input-shadow-invalid);
         }

@@ -14,6 +14,7 @@ angular.module('marcuraUI.components')
                 culture: '=',
                 isDisabled: '=',
                 isRequired: '=',
+                isLoading: '=',
                 change: '&',
                 validate: '&',
                 canReset: '=',
@@ -41,6 +42,7 @@ angular.module('marcuraUI.components')
                         \'ma-date-box-is-focused\': isFocused,\
                         \'ma-date-box-is-touched\': isTouched,\
                         \'ma-date-box-can-reset\': canReset,\
+                        \'ma-date-box-is-loading\': isLoading,\
                         \'ma-date-box-is-reset-disabled\': canReset && !isDisabled && !isResetEnabled(),\
                         \'ma-date-box-has-value\': hasValue()\
                     }">\
@@ -70,6 +72,11 @@ angular.module('marcuraUI.components')
                         click="onReset()"\
                         is-disabled="!isResetEnabled()">\
                     </ma-button>\
+                    <div class="ma-date-box-spinner" ng-if="isLoading && !isDisabled">\
+                        <div class="ma-pace">\
+                            <div class="ma-pace-activity"></div>\
+                        </div>\
+                    </div>\
                 </div>';
 
                 return html;
@@ -609,7 +616,8 @@ angular.module('marcuraUI.components')
                 scope.isTouched = false;
 
                 scope.hasValue = function () {
-                    return dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00';
+                    return (dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00') &&
+                        !scope.isLoading;
                 };
 
                 scope.isResetEnabled = function () {
