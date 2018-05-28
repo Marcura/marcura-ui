@@ -272,6 +272,24 @@ angular.module('marcuraUI.components')
                     initialDateOffset = timeZoneOffset;
                 };
 
+                var isDateDisabled = function (date) {
+                    var _isDateDisabled = false,
+                        _date = new MaDate(date).offset(timeZoneOffset);
+
+                    if (scope.disabledDates && scope.disabledDates.length) {
+                        for (var i = 0; i < scope.disabledDates.length; i++) {
+                            var disabledDate = new MaDate(scope.disabledDates[i]).offset(timeZoneOffset);
+
+                            if (_date.isEqual(disabledDate)) {
+                                _isDateDisabled = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return _isDateDisabled;
+                };
+
                 var initializePikaday = function () {
                     var theme = 'ma-pika';
 
@@ -315,23 +333,7 @@ angular.module('marcuraUI.components')
 
                             triggerChange(date);
                         },
-                        disableDayFn: function (date) {
-                            var isDateDisabled = false;
-                            date = new MaDate(date).offset(timeZoneOffset);
-
-                            if (scope.disabledDates) {
-                                for (var i = 0; i < scope.disabledDates.length; i++) {
-                                    var disabledDate = new MaDate(scope.disabledDates[i]).offset(timeZoneOffset);
-
-                                    if (date.isEqual(disabledDate)) {
-                                        isDateDisabled = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            return isDateDisabled;
-                        },
+                        disableDayFn: isDateDisabled,
                         events: eventDates,
                         theme: theme
                     });
@@ -393,6 +395,16 @@ angular.module('marcuraUI.components')
 
                     if (!maxDate.isEmpty()) {
                         validators.push(MaValidators.isLessOrEqual(maxDate, true));
+                    }
+
+                    if (scope.disabledDates && scope.disabledDates.length) {
+                        validators.push({
+                            name: 'IsDisabled',
+                            message: 'Date is disabled.',
+                            validate: function (date) {
+                                return !isDateDisabled(date);
+                            }
+                        });
                     }
                 };
 
@@ -832,7 +844,47 @@ angular.module('marcuraUI.components')
                     }
 
                     setEventDates();
-                });
+                }, true);
+
+                scope.$watch('disabledDates', function (newValue, oldValue) {
+                    if (scope.isDisabled || angular.equals(newValue, oldValue)) {
+                        return;
+                    }
+
+                    setValidators();
+
+                    // Run only IsDisabled validator to avoid the component being highligthed as invalid
+                    // by other validators like IsNotEmpty.
+                    var validator;
+
+                    for (var i = 0; i < validators.length; i++) {
+                        if (validators[i].name === 'IsDisabled') {
+                            validator = validators[i];
+                        }
+                    }
+
+                    if (validator) {
+                        var date = parseDate(dateElement.val().trim());
+                        date.offset(timeZoneOffset);
+                        var formattedDate = date.format(format);
+
+                        if (failedValidator && failedValidator.name === validator.name) {
+                            failedValidator = null;
+                            scope.isValid = true;
+                        }
+
+                        if (!validator.validate(formattedDate)) {
+                            scope.isValid = false;
+                            failedValidator = validator;
+                        }
+
+                        if (!scope.isValid) {
+                            scope.isTouched = true;
+                        }
+
+                        triggerValidate(date);
+                    }
+                }, true);
 
                 setModifiers();
                 setEventDates();
