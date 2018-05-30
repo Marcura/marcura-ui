@@ -677,6 +677,16 @@ angular.module('marcuraUI.components')
                         // Prevent loop that might occur if validate method is invoked
                         // from validate event from outside.
                         validate(false);
+
+                        // In case value validity depends on side factors, we need to set scope value
+                        // when validation has passed.
+                        if (scope.isValid) {
+                            var value = getValue();
+
+                            if (hasValueChanged(value)) {
+                                scope.value = value;
+                            }
+                        }
                     };
 
                     scope.instance.isValid = function () {
