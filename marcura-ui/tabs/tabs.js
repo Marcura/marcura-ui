@@ -57,7 +57,7 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper'
 
                 if (useState) {
                     if (item.state && item.state.name) {
-                        $state.go(item.state.name, item.state.parameters);
+                        $state.go(item.state.name, item.state.parameters, item.state.options);
                     }
                 } else {
                     angular.forEach(scope.items, function (item) {
