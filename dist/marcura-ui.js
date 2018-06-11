@@ -9568,7 +9568,8 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                 decimals: '=',
                 useFormat: '=',
                 reset: '&',
-                defaultValue: '='
+                defaultValue: '=',
+                modifier: '@'
             },
             replace: true,
             template: function (element, attributes) {
@@ -9653,6 +9654,27 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                 if (scope.type === 'number') {
                     defaultValue = typeof scope.defaultValue === 'number' ? scope.defaultValue : null;
                 }
+
+                var setModifiers = function (oldModifiers) {
+                    // Remove previous modifiers first.
+                    if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
+                        oldModifiers = oldModifiers.split(' ');
+
+                        for (var i = 0; i < oldModifiers.length; i++) {
+                            element.removeClass('ma-text-box-' + oldModifiers[i]);
+                        }
+                    }
+
+                    var modifiers = '';
+
+                    if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
+                        modifiers = scope.modifier.split(' ');
+                    }
+
+                    for (var j = 0; j < modifiers.length; j++) {
+                        element.addClass('ma-text-box-' + modifiers[j]);
+                    }
+                };
 
                 var setPreviousValue = function (value) {
                     value = MaHelper.isNullOrUndefined(value) ? '' : value;
@@ -10192,6 +10214,14 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                     minMaxWatcher(newValue, oldValue);
                 });
 
+                scope.$watch('modifier', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    setModifiers(oldValue);
+                });
+
                 // Set initial value.
                 if (hasDefaultValue && MaHelper.isNullOrUndefined(scope.value)) {
                     scope.value = defaultValue;
@@ -10200,6 +10230,7 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                 valueElement.val(formatValue(scope.value));
                 validate();
                 setPreviousValue(scope.value);
+                setModifiers();
 
                 // Prepare API instance.
                 if (scope.instance) {

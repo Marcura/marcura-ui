@@ -32,6 +32,16 @@
         }
     }
 
+    &-danger:not(&-is-disabled) {
+        &.ma-text-box-is-focused .ma-text-box-value {
+            .box-shadow(@input-shadow-invalid);
+        }
+
+        .ma-text-box-value {
+            border-color: @color-danger;
+        }
+    }
+
     &-can-reset,
     &-can-toggle-password {
         padding-right: 29px;
