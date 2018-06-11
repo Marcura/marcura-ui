@@ -549,7 +549,9 @@ angular.module('marcuraUI.components')
                             }
                         });
                     } else if (elementName === 'select') {
-                        scope.$apply(function () {
+                        // Use safeApply() to avoid digest error that happens when disabling
+                        // the component inside change event.
+                        MaHelper.safeApply(function () {
                             scope.isTouched = true;
                         });
                     }
