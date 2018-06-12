@@ -2514,6 +2514,10 @@ the specific language governing permissions and limitations under the Apache Lic
 
         // single
         updateSelection: function (data) {
+            if (!this.selection) {
+                return;
+            }
+
             var container = this.selection.find(".select2-chosen"), formatted, cssClass;
             this.selection.data("select2-data", data);
             container.empty();
@@ -2605,8 +2609,12 @@ the specific language governing permissions and limitations under the Apache Lic
                 triggerChange = false;
 
             if (arguments.length === 0) {
-                data = this.selection.data("select2-data");
-                if (data == undefined) data = null;
+                data = this.selection ? this.selection.data("select2-data") : undefined;
+
+                if (data == undefined) {
+                    data = null;
+                }
+
                 return data;
             } else {
                 if (arguments.length > 1) {
@@ -7628,33 +7636,6 @@ angular.module('marcuraUI.components')
             }
         };
     }]);})();
-(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            isVisible: '=',
-            size: '@',
-            position: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
-                    <div class="ma-pace">\
-                        <div class="ma-pace-activity"></div>\
-                    </div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            var size = scope.size ? scope.size : 'xs',
-                position = scope.position ? scope.position : 'center';
-            scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.services').factory('MaDate', [function () {
     var months = [{
         language: 'en',
@@ -9129,6 +9110,33 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                     return MaHelper.isEmail(value);
                 }
             };
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            isVisible: '=',
+            size: '@',
+            position: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
+                    <div class="ma-pace">\
+                        <div class="ma-pace-activity"></div>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            var size = scope.size ? scope.size : 'xs',
+                position = scope.position ? scope.position : 'center';
+            scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
         }
     };
 }]);})();

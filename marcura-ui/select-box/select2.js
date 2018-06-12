@@ -2514,6 +2514,10 @@ the specific language governing permissions and limitations under the Apache Lic
 
         // single
         updateSelection: function (data) {
+            if (!this.selection) {
+                return;
+            }
+
             var container = this.selection.find(".select2-chosen"), formatted, cssClass;
             this.selection.data("select2-data", data);
             container.empty();
@@ -2605,8 +2609,12 @@ the specific language governing permissions and limitations under the Apache Lic
                 triggerChange = false;
 
             if (arguments.length === 0) {
-                data = this.selection.data("select2-data");
-                if (data == undefined) data = null;
+                data = this.selection ? this.selection.data("select2-data") : undefined;
+
+                if (data == undefined) {
+                    data = null;
+                }
+
                 return data;
             } else {
                 if (arguments.length > 1) {
