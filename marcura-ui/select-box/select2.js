@@ -2430,14 +2430,13 @@ the specific language governing permissions and limitations under the Apache Lic
             var placeholder = this.getPlaceholder();
 
             if (this.isPlaceholderOptionSelected() && placeholder !== undefined) {
-
                 // check for a placeholder option if attached to a select
-                if (this.select && this.getPlaceholderOption() === undefined) return;
+                if (this.select && this.getPlaceholderOption() === undefined) {
+                    return;
+                }
 
                 this.selection.find(".select2-chosen").html(this.opts.escapeMarkup(placeholder));
-
                 this.selection.addClass("select2-default");
-
                 this.container.removeClass("select2-allowclear");
             }
         },
@@ -3532,7 +3531,7 @@ the specific language governing permissions and limitations under the Apache Lic
             return markup.join("");
         },
         formatSelection: function (data, container, escapeMarkup) {
-            return data ? escapeMarkup(data.text) : undefined;
+            return data && data.text !== undefined ? escapeMarkup(data.text) : undefined;
         },
         sortResults: function (results, container, query) {
             return results;
