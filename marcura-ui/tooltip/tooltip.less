@@ -2,8 +2,8 @@
 
 @ma-tooltip-border-color: #000000;
 @ma-tooltip-background-color: #000000;
-@ma-tooltip-inner-padding-left: 8px;
-@ma-tooltip-inner-padding-top: 3px;
+@ma-tooltip-inner-padding-left: 10px;
+@ma-tooltip-inner-padding-top: 5px;
 
 .ma-tooltip {
     position: absolute;
@@ -25,7 +25,7 @@
     word-break: normal;
     word-spacing: normal;
     word-wrap: normal;
-    font-size: 12px;
+    font-size: 14px;
     opacity: 0;
 
     &.in {
@@ -34,52 +34,62 @@
     
     &.top {
         margin-top: -3px;
-        padding: 5px 0;
+        padding: 7px 0;
 
         .ma-tooltip-arrow {
             bottom: 0;
             left: 50%;
-            margin-left: -5px;
-            border-width: 5px 5px 0;
+            margin-left: -7px;
+            border-width: 7px 7px 0;
             border-top-color: @ma-tooltip-border-color;
         }
     }
 
     &.right {
         margin-left: 3px;
-        padding: 0 5px;
+        padding: 0 7px;
+
+        .ma-tooltip-close {
+            top: 7px;
+            right: 15px;
+        }
 
         .ma-tooltip-arrow {
             top: 50%;
             left: 0;
-            margin-top: -5px;
-            border-width: 5px 5px 5px 0;
+            margin-top: -7px;
+            border-width: 7px 7px 7px 0;
             border-right-color: @ma-tooltip-border-color;
         }
     }
     
     &.bottom {
         margin-top: 3px;
-        padding: 5px 0;
+        padding: 7px 0;
 
         .ma-tooltip-arrow {
             top: 0;
             left: 50%;
-            margin-left: -5px;
-            border-width: 0 5px 5px;
+            margin-left: -7px;
+            border-width: 0 7px 7px;
             border-bottom-color: @ma-tooltip-border-color;
         }
     }
     
     &.left {
         margin-left: -3px;
-        padding: 0 5px;
+        padding: 0 7px;
+
+        .ma-tooltip-close {
+            top: 7px;
+            right: 15px;
+        }
 
         .ma-tooltip-arrow {
             top: 50%;
             right: 0;
-            margin-top: -5px;
-            border-width: 5px 0 5px 5px;
+            margin-top: -7px;
+            border-width: 7px 0 7px 7px;
             border-left-color: @ma-tooltip-border-color;
         }
     }
@@ -143,8 +153,8 @@
 
     &-close {
         position: absolute;
-        top: 9px;
-        right: 4px;
+        top: 14px;
+        right: 7px;
         width: 12px;
         height: 12px;
         color: #ffffff;
@@ -165,7 +175,7 @@
         }
 
         .ma-tooltip-inner {
-            padding-right: @ma-tooltip-inner-padding-left + 16px;
+            padding-right: @ma-tooltip-inner-padding-left + 20px;
         }
     }
 }
