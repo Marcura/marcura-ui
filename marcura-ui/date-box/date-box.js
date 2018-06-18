@@ -30,7 +30,8 @@ angular.module('marcuraUI.components')
                 placeholder: '@',
                 modifier: '@',
                 eventDates: '=',
-                disabledDates: '='
+                disabledDates: '=',
+                message: '@'
             },
             replace: true,
             template: function (element) {
@@ -339,6 +340,11 @@ angular.module('marcuraUI.components')
                             }
 
                             triggerChange(date);
+                        },
+                        onDraw: function () {
+                            if (scope.message) {
+                                $(picker.el).append('<div class="ma-pika-message">' + scope.message + '</div>');
+                            }
                         },
                         disableDayFn: isDateDisabled,
                         events: eventDates,
