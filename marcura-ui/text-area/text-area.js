@@ -294,6 +294,11 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     return scope.isValid;
                 };
 
+                scope.instance.validate = function () {
+                    scope.isTouched = true;
+                    validate();
+                };
+
                 scope.instance.focus = function () {
                     if (!scope.isFocused) {
                         valueElement.focus();
