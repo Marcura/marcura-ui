@@ -84,13 +84,21 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 return properties;
             };
 
+            var getValue = function () {
+                return valueElement.val();
+            };
+
+            var setValue = function (value) {
+                return valueElement.val(value);
+            };
+
             var resize = function () {
                 if (!scope.fitContentHeight) {
                     return;
                 }
 
                 var valueElementStyle = getValueElementStyle(),
-                    textHeight = MaHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
+                    textHeight = MaHelper.getTextHeight(getValue(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
                     height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
 
                 if (height < 40) {
@@ -106,30 +114,12 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(valueElement.val())) {
+                        if (!validators[i].validate(getValue())) {
                             scope.isValid = false;
                             break;
                         }
                     }
                 }
-            };
-
-            var changeValue = function () {
-                var value = valueElement.val();
-
-                if (previousValue === value) {
-                    return;
-                }
-
-                previousValue = scope.value;
-                scope.value = value;
-
-                $timeout(function () {
-                    scope.change({
-                        maValue: scope.value,
-                        maOldValue: previousValue
-                    });
-                });
             };
 
             // Set up validators.
@@ -165,7 +155,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 scope.blur({
                     maValue: scope.value,
                     maOldValue: focusValue,
-                    maHasValueChanged: focusValue !== scope.value
+                    maHasValueChanged: focusValue !== getValue()
                 });
             };
 
@@ -201,6 +191,8 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     hasChanged = true;
                 }
 
+                previousValue = keydownValue;
+
                 // Change value after a timeout while the user is typing.
                 if (!hasChanged) {
                     return;
@@ -211,7 +203,14 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
                 if (scope.isValid) {
                     scope.$apply(function () {
-                        changeValue();
+                        scope.value = getValue();
+
+                        $timeout(function () {
+                            scope.change({
+                                maValue: scope.value,
+                                maOldValue: previousValue
+                            });
+                        });
                     });
                 }
             });
@@ -262,7 +261,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 // IE 11.0 version moves the caret at the end when textarea value is fully replaced.
                 // In IE 11.126+ the issue has been fixed.
                 var caretPosition = valueElement.prop('selectionStart');
-                valueElement.val(newValue);
+                setValue(newValue);
 
                 // Restore caret position if text area is visible.
                 var isVisible = $(element).is(':visible');
@@ -278,7 +277,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             });
 
             // Set initial value.
-            valueElement.val(scope.value);
+            setValue(scope.value);
             validate();
             previousValue = scope.value;
 

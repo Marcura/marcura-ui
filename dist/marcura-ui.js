@@ -5897,6 +5897,69 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            scope.calculateLeft = function (stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function () {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function (stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$timeout', '$sce', 'MaValidators', function (MaHelper, $timeout, $sce, MaValidators) {
     var radioBoxes = {};
 
@@ -6228,69 +6291,6 @@ if (!String.prototype.endsWith) {
             });
 
             setTabindex();
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            scope.calculateLeft = function (stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function () {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function (stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
         }
     };
 }]);})();
@@ -9555,13 +9555,21 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                 return properties;
             };
 
+            var getValue = function () {
+                return valueElement.val();
+            };
+
+            var setValue = function (value) {
+                return valueElement.val(value);
+            };
+
             var resize = function () {
                 if (!scope.fitContentHeight) {
                     return;
                 }
 
                 var valueElementStyle = getValueElementStyle(),
-                    textHeight = MaHelper.getTextHeight(valueElement.val(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
+                    textHeight = MaHelper.getTextHeight(getValue(), valueElementStyle.font, valueElementStyle.width + 'px', valueElementStyle.lineHeight),
                     height = (textHeight + valueElementStyle.paddingHeight + valueElementStyle.borderHeight);
 
                 if (height < 40) {
@@ -9577,30 +9585,12 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
 
                 if (validators && validators.length) {
                     for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(valueElement.val())) {
+                        if (!validators[i].validate(getValue())) {
                             scope.isValid = false;
                             break;
                         }
                     }
                 }
-            };
-
-            var changeValue = function () {
-                var value = valueElement.val();
-
-                if (previousValue === value) {
-                    return;
-                }
-
-                previousValue = scope.value;
-                scope.value = value;
-
-                $timeout(function () {
-                    scope.change({
-                        maValue: scope.value,
-                        maOldValue: previousValue
-                    });
-                });
             };
 
             // Set up validators.
@@ -9636,7 +9626,7 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                 scope.blur({
                     maValue: scope.value,
                     maOldValue: focusValue,
-                    maHasValueChanged: focusValue !== scope.value
+                    maHasValueChanged: focusValue !== getValue()
                 });
             };
 
@@ -9672,6 +9662,8 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                     hasChanged = true;
                 }
 
+                previousValue = keydownValue;
+
                 // Change value after a timeout while the user is typing.
                 if (!hasChanged) {
                     return;
@@ -9682,7 +9674,14 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
 
                 if (scope.isValid) {
                     scope.$apply(function () {
-                        changeValue();
+                        scope.value = getValue();
+
+                        $timeout(function () {
+                            scope.change({
+                                maValue: scope.value,
+                                maOldValue: previousValue
+                            });
+                        });
                     });
                 }
             });
@@ -9733,7 +9732,7 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                 // IE 11.0 version moves the caret at the end when textarea value is fully replaced.
                 // In IE 11.126+ the issue has been fixed.
                 var caretPosition = valueElement.prop('selectionStart');
-                valueElement.val(newValue);
+                setValue(newValue);
 
                 // Restore caret position if text area is visible.
                 var isVisible = $(element).is(':visible');
@@ -9749,7 +9748,7 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
             });
 
             // Set initial value.
-            valueElement.val(scope.value);
+            setValue(scope.value);
             validate();
             previousValue = scope.value;
 
