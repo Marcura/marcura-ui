@@ -6,6 +6,7 @@
         "console": false,
         "Pikaday": false,
         "document": false,
+        "window": false,
         "$": false
     }
 }

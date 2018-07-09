@@ -22,6 +22,43 @@ angular.element(document).ready(function () {
             });
         };
     }
+
+    if (window.Trix) {
+        // Override Trix toolbar in order to add Underline button to it.
+        // https://github.com/basecamp/trix/blob/master/src/trix/config/toolbar.coffee
+        window.Trix.config.textAttributes.underline = {
+            tagName: 'underline',
+            style: { 'textDecoration': 'underline' },
+            inheritable: true,
+            parser: function (element) {
+                return window.getComputedStyle(element).textDecoration === 'underline';
+            }
+        };
+
+        window.Trix.config.toolbar.getDefaultHTML = function () {
+            return '\
+            <div class="trix-button-row">\
+                <span class="trix-button-group trix-button-group--text-tools" data-trix-button-group="text-tools">\
+                    <div class="trix-button trix-button--icon"\
+                        data-trix-attribute="bold" data-trix-key="b">\
+                        <i class="fa fa-bold"></i>\
+                    </div>\
+                    <div class="trix-button trix-button--icon"\
+                        data-trix-attribute="italic" data-trix-key="i">\
+                        <i class="fa fa-italic"></i>\
+                    </div>\
+                    <div class="trix-button trix-button--icon"\
+                        data-trix-attribute="underline">\
+                        <i class="fa fa-underline"></i>\
+                    </div>\
+                    <!--<div class="trix-button trix-button--icon"\
+                        data-trix-attribute="strike">\
+                        <i class="fa fa-strikethrough"></i>\
+                    </div>-->\
+                </span>\
+            </div>';
+        };
+    }
 });
 
 // Add a polyfill for String.prototype.endsWith().

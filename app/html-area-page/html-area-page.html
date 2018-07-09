@@ -1,0 +1,58 @@
+<div class="nodes nodes-padding-bottom-m">
+    <div class="nodes-item">
+        <a href="#/home">Home</a>
+    </div>
+    <div class="nodes-item">
+        <h1>HtmlArea</h1>
+        <div class="api-documentation">
+            <a href="https://github.com/Marcura/marcura-ui/wiki/htmlarea">API documentation</a>
+        </div>
+    </div>
+    <div class="nodes-item">
+        <h2>Basic</h2>
+    </div>
+    <div>
+        <ma-label for="text1">Text</ma-label>
+    </div>
+    <div class="nodes-item">
+        <ma-html-area id="text1" value="text1" blur="blur(maValue, maOldValue, maHasValueChanged, 'text1')"
+            focus="focus(maValue, 'text1')" change="change(maValue, 'text1')">
+        </ma-html-area>
+    </div>
+    <div class="nodes-item">
+        <h2>Required</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-html-area value="text2" is-required="true">
+        </ma-html-area>
+    </div>
+
+    <div class="nodes-item">
+        <h2>Disabled</h2>
+    </div>
+    <div class="nodes-item">
+        <ma-html-area value="text3" is-disabled="true">
+        </ma-html-area>
+    </div>
+    <div class="nodes-item">
+        <h2>Inside form</h2>
+    </div>
+    <div class="nodes-item">
+        <div class="form">
+            <div class="form-content">
+                <div class="form-group">
+                    <div class="form-col col-xs-4">
+                        <ma-html-area value="text4" blur="blur(maValue, maOldValue, maHasValueChanged, 'text4')"
+                            focus="focus(maValue, 'text4')">
+                        </ma-html-area>
+                    </div>
+                    <div class="form-col col-xs-8">
+                        <ma-html-area value="text5" blur="blur(maValue, maOldValue, maHasValueChanged, 'text5')"
+                            focus="focus(maValue, 'text5')">
+                        </ma-html-area>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

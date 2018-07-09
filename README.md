@@ -11,14 +11,19 @@
 https://marcura-ui.herokuapp.com/#/home
 
 ## Dependencies
-* [jQuery](https://jquery.com/) (2.2.0 or higher)
-* [Angular](https://angularjs.org/) (1.3.8 or higher)
-* [Angular Sanitize](https://www.npmjs.com/package/angular-sanitize) (1.3.8 or higher)  
-Required for [RadioBox](../../wiki/radiobox).
-* [Font Awesome](http://fontawesome.io/) (4.4.0 or higher)
-* [Bootstrap](http://getbootstrap.com/) (3.3.4 or higher)
-* [Pikaday](https://github.com/dbushell/Pikaday) (1.3.2 or higher)  
+* [jQuery](https://jquery.com/) (2.2.0)
+* [Angular](https://angularjs.org/) (1.3.8)
+* [Font Awesome](http://fontawesome.io/) (4.4.0)
+
+## Optional dependencies
+* [Bootstrap](http://getbootstrap.com/) (3.3.4)  
+Required for [Form](../../wiki/form), [Grid](../../wiki/grid).
+* [Angular Sanitize](https://www.npmjs.com/package/angular-sanitize) (1.3.8)  
+Required for [Button](../../wiki/button), [RadioBox](../../wiki/radiobox), [Tooltip](../../wiki/tooltip).
+* [Pikaday](https://github.com/dbushell/Pikaday) (1.3.2)  
 Required for [DateBox](../../wiki/datebox).
+* [Trix](https://github.com/basecamp/trix) (0.11.4)  
+Required for [HtmlArea](../../wiki/htmlarea).
 
 ## Download
 Download it using npm:
@@ -29,23 +34,33 @@ Download it using npm:
 
 Include third-party dependencies:
 
-`<link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">`  
-`<link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">`  
-`<link href="node_modules/pikaday/css/pikaday.css" rel="stylesheet">`  
+```
+<link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+<link href="node_modules/pikaday/css/pikaday.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/trix/0.11.4/trix.css" rel="stylesheet">
+```
 
-`<script src="node_modules/jquery/dist/jquery.min.js"></script>`  
-`<script src="node_modules/angular/angular.min.js"></script>`  
-`<script src="node_modules/angular-sanitize/angular-sanitize.min.js"></script>`  
-`<script src="node_modules/pikaday/pikaday.js"></script>`  
+```
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="node_modules/angular/angular.min.js"></script>
+<script src="node_modules/angular-sanitize/angular-sanitize.min.js"></script>
+<script src="node_modules/pikaday/pikaday.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/trix/0.11.4/trix.js"></script>
+```
 
 Include Marcura UI assets:
 
-`<link rel="stylesheet" href="node_modules/marcura-ui/dist/marcura-ui.min.css">`  
-`<script src="node_modules/marcura-ui/dist/marcura-ui.min.js"></script>`
+```
+<link rel="stylesheet" href="node_modules/marcura-ui/dist/marcura-ui.min.css">
+<script src="node_modules/marcura-ui/dist/marcura-ui.min.js"></script>
+```
 
 As soon as you've downloaded the package and included it in your page you need to declare a dependency on it:
 
-`angular.module('app', ['marcuraUI']);`
+```
+angular.module('app', ['marcuraUI']);
+```
 
 ## Documentation
 Detailed documentation about all components and services can be found [here](../../wiki).

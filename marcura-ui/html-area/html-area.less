@@ -1,0 +1,101 @@
+@import 'marcura-ui/less.less';
+.ma-html-area {
+    trix {
+        &-editor {
+            .input;
+            .input-transition;
+            .box-shadow(@input-shadow);
+            min-height: 30px;
+            border: 1px solid @border-color;
+            border-radius: 0;
+            padding: 4px 10px;
+            line-height: 20px;
+            background-color: @input-background-color;
+            font-family: @font-family;
+        }
+        &-toolbar {
+            .trix-button-group {
+                border: 0;
+            }
+            .trix-button--icon {
+                position: relative;
+                width: 30px;
+                min-width: 30px;
+                height: 30px;
+                padding: 0;
+                border: 1px solid @border-color;
+                text-indent: 0;
+                color: @text-color;
+                .fa {
+                    display: block;
+                    width: 20px;
+                    height: 20px;
+                    margin-top: -7px;
+                    position: absolute;
+                    top: 50%;
+                    margin-left: 5px;
+                    text-align: center
+                }
+                &:first-child {
+                    border-top-left-radius: 4px;
+                    border-bottom-left-radius: 4px;
+                }
+                &:last-child {
+                    border-top-right-radius: 4px;
+                    border-bottom-right-radius: 4px;
+                }
+                &:not(:last-child) {
+                    border-right: 0px;
+                }
+                &.trix-active {
+                    background-color: transparent;
+                }
+                &:hover {
+                    background-color: @background-color-darker-light;
+                }
+            }
+        }
+    }
+    &-is-disabled {
+        trix {
+            &-editor {
+                .box-shadow(none);
+                background-color: @color-disabled;
+                color: @text-color-disabled;
+            }
+            &-toolbar {
+                .trix-button--icon {
+                    cursor: default;
+                    pointer-events: none;
+                    &.trix-active {
+                        background-color: @background-color-darker-light;
+                    }
+                }
+            }
+        }
+        .trix-button--icon {
+            background-color: @background-color-darker-light;
+        }
+    }
+    &-is-focused {
+        trix {
+            &-editor {
+                .box-shadow(@input-shadow-focused);
+                border-color: @color-primary;
+            }
+            &-toolbar {
+                .trix-button--icon.trix-active {
+                    background-color: @background-color-darker-light;
+                }
+            }
+        }
+    }
+    &-is-invalid&-is-touched {
+        &.ma-html-area-is-focused trix-editor {
+            .box-shadow(@input-shadow-invalid);
+        }
+        trix-editor {
+            border-color: @color-danger;
+        }
+    }
+}

@@ -51,6 +51,7 @@ var paths = {
             'marcura-ui/spinner/spinner.less',
             'marcura-ui/tabs/tabs.less',
             'marcura-ui/text-area/text-area.less',
+            'marcura-ui/html-area/html-area.less',
             'marcura-ui/text-box/text-box.less',
             'marcura-ui/tooltip/tooltip.less'
         ]

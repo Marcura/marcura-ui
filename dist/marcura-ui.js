@@ -3644,6 +3644,43 @@ angular.element(document).ready(function () {
             });
         };
     }
+
+    if (window.Trix) {
+        // Override Trix toolbar in order to add Underline button to it.
+        // https://github.com/basecamp/trix/blob/master/src/trix/config/toolbar.coffee
+        window.Trix.config.textAttributes.underline = {
+            tagName: 'underline',
+            style: { 'textDecoration': 'underline' },
+            inheritable: true,
+            parser: function (element) {
+                return window.getComputedStyle(element).textDecoration === 'underline';
+            }
+        };
+
+        window.Trix.config.toolbar.getDefaultHTML = function () {
+            return '\
+            <div class="trix-button-row">\
+                <span class="trix-button-group trix-button-group--text-tools" data-trix-button-group="text-tools">\
+                    <div class="trix-button trix-button--icon"\
+                        data-trix-attribute="bold" data-trix-key="b">\
+                        <i class="fa fa-bold"></i>\
+                    </div>\
+                    <div class="trix-button trix-button--icon"\
+                        data-trix-attribute="italic" data-trix-key="i">\
+                        <i class="fa fa-italic"></i>\
+                    </div>\
+                    <div class="trix-button trix-button--icon"\
+                        data-trix-attribute="underline">\
+                        <i class="fa fa-underline"></i>\
+                    </div>\
+                    <!--<div class="trix-button trix-button--icon"\
+                        data-trix-attribute="strike">\
+                        <i class="fa fa-strikethrough"></i>\
+                    </div>-->\
+                </span>\
+            </div>';
+        };
+    }
 });
 
 // Add a polyfill for String.prototype.endsWith().
@@ -5110,6 +5147,192 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', '$window', 'MaHelper', 'MaValidators', function ($timeout, $window, MaHelper, MaValidators) {
+    return {
+        restrict: 'E',
+        scope: {
+            id: '@',
+            value: '=',
+            isDisabled: '=',
+            isRequired: '=',
+            instance: '=',
+            validators: '=',
+            focus: '&',
+            blur: '&',
+            change: '&'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-html-area"\
+                ng-class="{\
+                    \'ma-html-area-is-disabled\': isDisabled,\
+                    \'ma-html-area-is-focused\': isFocused,\
+                    \'ma-html-area-is-invalid\': !isValid,\
+                    \'ma-html-area-is-touched\': isTouched\
+                }">\
+                <trix-editor ng-disabled="isDisabled">\
+                </trix-editor>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            var editorElement = angular.element(element[0].querySelector('.ma-html-area trix-editor')),
+                buttonElements = angular.element(element[0].querySelectorAll('.ma-html-area .trix-button')),
+                editor,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false,
+                focusValue,
+                isInternalChange = false;
+            scope._value = scope.value || '';
+            scope.isTouched = false;
+
+            var setEditorValue = function (value) {
+                editor.loadHTML(value);
+            };
+
+            var getEditorValue = function () {
+                return editorElement.html();
+            };
+
+            var disableEditor = function () {
+                editorElement[0].contentEditable = !scope.isDisabled;
+
+                if (scope.isDisabled) {
+                    buttonElements.attr('disabled', true);
+                } else {
+                    buttonElements.removeAttr('disabled');
+                }
+            };
+
+            var validate = function () {
+                var value = getEditorValue();
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            editorElement.on('trix-initialize', function () {
+                editor = editorElement[0].editor;
+                disableEditor();
+                setEditorValue(scope.value);
+            });
+
+            editorElement.on('trix-change', function () {
+                validate();
+
+                if (scope.isValid) {
+                    scope.$apply(function () {
+                        isInternalChange = true;
+                        scope.value = getEditorValue();
+
+                        $timeout(function () {
+                            scope.change({
+                                maValue: scope.value
+                            });
+                        });
+                    });
+                }
+            });
+
+            editorElement.on('trix-focus', function () {
+                scope.$apply(function () {
+                    scope.isFocused = true;
+                    focusValue = scope.value;
+
+                    scope.focus({
+                        maValue: scope.value
+                    });
+                });
+            });
+
+            editorElement.on('trix-blur', function () {
+                scope.$apply(function () {
+                    scope.isFocused = false;
+                    scope.isTouched = true;
+
+                    validate();
+
+                    scope.blur({
+                        maValue: scope.value,
+                        maOldValue: focusValue,
+                        maHasValueChanged: focusValue !== scope.value
+                    });
+                });
+            });
+
+            scope.$watch('value', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (isInternalChange) {
+                    isInternalChange = false;
+                    return;
+                }
+
+                scope.isValid = true;
+                setEditorValue(scope.value);
+            });
+
+            scope.$watch('isDisabled', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                disableEditor();
+            });
+
+            $timeout(function () {
+                $('[for="' + scope.id + '"]').on('click', function () {
+                    editorElement.focus();
+                });
+            });
+
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    scope.isTouched = true;
+                    validate();
+                };
+            }
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
     return {
         restrict: 'E',
@@ -5674,69 +5897,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            scope.calculateLeft = function (stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function () {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function (stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$timeout', '$sce', 'MaValidators', function (MaHelper, $timeout, $sce, MaValidators) {
     var radioBoxes = {};
 
@@ -6068,6 +6228,69 @@ if (!String.prototype.endsWith) {
             });
 
             setTabindex();
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            scope.calculateLeft = function (stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function () {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function (stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
         }
     };
 }]);})();
