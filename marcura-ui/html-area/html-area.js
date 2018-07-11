@@ -1,4 +1,4 @@
-angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', '$window', 'MaHelper', 'MaValidators', function ($timeout, $window, MaHelper, MaValidators) {
+angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
     return {
         restrict: 'E',
         scope: {
@@ -98,7 +98,7 @@ angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', '$wi
                 validate();
 
                 if (scope.isValid) {
-                    scope.$apply(function () {
+                    MaHelper.safeApply(function () {
                         isInternalChange = true;
                         scope.value = getEditorValue();
 
@@ -112,7 +112,7 @@ angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', '$wi
             });
 
             editorElement.on('trix-focus', function () {
-                scope.$apply(function () {
+                MaHelper.safeApply(function () {
                     scope.isFocused = true;
                     focusValue = scope.value;
 
@@ -123,7 +123,7 @@ angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', '$wi
             });
 
             editorElement.on('trix-blur', function () {
-                scope.$apply(function () {
+                MaHelper.safeApply(function () {
                     scope.isFocused = false;
                     scope.isTouched = true;
 
