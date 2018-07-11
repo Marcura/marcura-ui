@@ -27,7 +27,7 @@ angular.element(document).ready(function () {
         // Override Trix toolbar in order to add Underline button to it.
         // https://github.com/basecamp/trix/blob/master/src/trix/config/toolbar.coffee
         window.Trix.config.textAttributes.underline = {
-            tagName: 'underline',
+            tagName: 'span',
             style: { 'textDecoration': 'underline' },
             inheritable: true,
             parser: function (element) {

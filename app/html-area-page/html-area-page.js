@@ -4,7 +4,7 @@ function htmlAreaPageController($scope, $timeout) {
     $scope.text1 = '\
         Text <strong>bold</strong><br>\
         <em>italic</em><br>\
-        <underline style="text-decoration: underline;">unde</underline>rline\
+        <span style="text-decoration: underline;">unde</span>rline\
     ';
 
     $scope.focus = function (value, property) {
