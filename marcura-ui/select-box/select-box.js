@@ -874,7 +874,7 @@ angular.module('marcuraUI.components')
 
                         // In case if JSON.parse has parsed string to a number.
                         // This can happen when items is an array of numbers.
-                        if (scope._type === 'number') {
+                        if (typeof item === 'number' && scope._type === 'string') {
                             item = scope.selectedItem;
                         }
 
