@@ -951,7 +951,7 @@ angular.module('marcuraUI.components')
 
                 if (!scope.hasAjax) {
                     scope.$watch('items', function (newItems) {
-                        if (areItemsEqual(scope._items, newItems)) {
+                        if (areItemsEqual(scope._items, newItems) || !selectData) {
                             return;
                         }
 
