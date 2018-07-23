@@ -1091,84 +1091,87 @@ angular.module('marcuraUI.components')
                     setInternalValue(scope.value);
 
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
-                    selectData = selectElement.data().select2;
-                    labelElement = $('label[for="' + scope.id + '"]');
-                    toggleButtonElement = angular.element(element[0].querySelector('.ma-button-toggle'));
-                    resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset'));
 
-                    initializeSelect2Value();
+                    if (selectElement.data()) {
+                        selectData = selectElement.data().select2;
+                        labelElement = $('label[for="' + scope.id + '"]');
+                        toggleButtonElement = angular.element(element[0].querySelector('.ma-button-toggle'));
+                        resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset'));
 
-                    // Focus the component when label is clicked.
-                    if (labelElement.length > 0) {
-                        $($document).on('click', 'label[for="' + scope.id + '"]', function () {
-                            setFocus();
-                        });
-                    }
+                        initializeSelect2Value();
 
-                    if (scope.isMultiple) {
-                        // Track that the select is hovered to prevent focus lost when a selected item
-                        // or selection is clicked.
-                        selectData.selection.on('mouseenter', function () {
-                            isMultiselectHovered = true;
-                        });
+                        // Focus the component when label is clicked.
+                        if (labelElement.length > 0) {
+                            $($document).on('click', 'label[for="' + scope.id + '"]', function () {
+                                setFocus();
+                            });
+                        }
 
-                        selectData.selection.on('mouseleave', function () {
-                            isMultiselectHovered = false;
-                        });
+                        if (scope.isMultiple) {
+                            // Track that the select is hovered to prevent focus lost when a selected item
+                            // or selection is clicked.
+                            selectData.selection.on('mouseenter', function () {
+                                isMultiselectHovered = true;
+                            });
 
-                        selectData.dropdown.on('mouseenter', function () {
-                            isMultiselectHovered = true;
-                        });
+                            selectData.selection.on('mouseleave', function () {
+                                isMultiselectHovered = false;
+                            });
 
-                        selectData.dropdown.on('mouseleave', function () {
-                            isMultiselectHovered = false;
-                        });
+                            selectData.dropdown.on('mouseenter', function () {
+                                isMultiselectHovered = true;
+                            });
 
-                        selectData.dropdown.on('click', function () {
-                            // Return focus to the input field for the next blur event to work properly.
-                            selectData.search.focus();
-                        });
-                    } else {
-                        selectData.addItemButton.on('click', function () {
-                            scope.$apply(function () {
-                                scope.toggleMode('add', true, true);
-                                $timeout(function () {
-                                    scope.modeToggle({
-                                        maValue: scope.value,
-                                        maOldValue: previousValue
+                            selectData.dropdown.on('mouseleave', function () {
+                                isMultiselectHovered = false;
+                            });
+
+                            selectData.dropdown.on('click', function () {
+                                // Return focus to the input field for the next blur event to work properly.
+                                selectData.search.focus();
+                            });
+                        } else {
+                            selectData.addItemButton.on('click', function () {
+                                scope.$apply(function () {
+                                    scope.toggleMode('add', true, true);
+                                    $timeout(function () {
+                                        scope.modeToggle({
+                                            maValue: scope.value,
+                                            maOldValue: previousValue
+                                        });
                                     });
                                 });
                             });
+                        }
+
+                        toggleButtonElement.focusout(function (event) {
+                            onFocusout(event);
+                        });
+
+                        resetButtonElement.focusout(function (event) {
+                            onFocusout(event);
+                        });
+
+                        toggleButtonElement.mousedown(function (event) {
+                            isToggleButtonDown = true;
+                        });
+
+                        toggleButtonElement.mouseup(function (event) {
+                            isToggleButtonDown = false;
+                        });
+
+                        resetButtonElement.mousedown(function (event) {
+                            isResetButtonDown = true;
+                        });
+
+                        resetButtonElement.mouseup(function (event) {
+                            isResetButtonDown = false;
+                        });
+
+                        scope.init({
+                            maInstance: scope.instance
                         });
                     }
-
-                    toggleButtonElement.focusout(function (event) {
-                        onFocusout(event);
-                    });
-
-                    resetButtonElement.focusout(function (event) {
-                        onFocusout(event);
-                    });
-
-                    toggleButtonElement.mousedown(function (event) {
-                        isToggleButtonDown = true;
-                    });
-
-                    toggleButtonElement.mouseup(function (event) {
-                        isToggleButtonDown = false;
-                    });
-
-                    resetButtonElement.mousedown(function (event) {
-                        isResetButtonDown = true;
-                    });
-
-                    resetButtonElement.mouseup(function (event) {
-                        isResetButtonDown = false;
-                    });
-
-                    scope.init({
-                        maInstance: scope.instance
-                    });
                 });
             }
         };
