@@ -238,14 +238,16 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     if (hiddenParent.length === 1) {
                         var parentScope = hiddenParent.scope();
 
-                        parentScope.$watch(hiddenParent.attr('ng-show'), function (isVisible) {
-                            if (isVisible) {
-                                // Wait for the hidden element to appear first.
-                                $timeout(function () {
-                                    resize();
-                                });
-                            }
-                        });
+                        if (parentScope) {
+                            parentScope.$watch(hiddenParent.attr('ng-show'), function (isVisible) {
+                                if (isVisible) {
+                                    // Wait for the hidden element to appear first.
+                                    $timeout(function () {
+                                        resize();
+                                    });
+                                }
+                            });
+                        }
                     }
                 }
             });
