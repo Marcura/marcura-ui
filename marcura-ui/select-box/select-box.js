@@ -951,7 +951,7 @@ angular.module('marcuraUI.components')
 
                 if (!scope.hasAjax) {
                     scope.$watch('items', function (newItems) {
-                        if (areItemsEqual(scope._items, newItems) || !selectData) {
+                        if (areItemsEqual(scope._items, newItems)) {
                             return;
                         }
 
@@ -972,6 +972,10 @@ angular.module('marcuraUI.components')
                         // No need to change Select2 value when in 'add' mode.
                         if (!scope.isAddMode) {
                             $timeout(function () {
+                                if (!selectData) {
+                                    return;
+                                }
+
                                 var itemValue,
                                     item;
 
@@ -1091,22 +1095,21 @@ angular.module('marcuraUI.components')
                     setInternalValue(scope.value);
 
                     selectElement = angular.element(element[0].querySelector('.select2-container'));
+                    selectData = selectElement.data() ? selectElement.data().select2 : null;
+                    labelElement = $('label[for="' + scope.id + '"]');
+                    toggleButtonElement = angular.element(element[0].querySelector('.ma-button-toggle'));
+                    resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset'));
 
-                    if (selectElement.data()) {
-                        selectData = selectElement.data().select2;
-                        labelElement = $('label[for="' + scope.id + '"]');
-                        toggleButtonElement = angular.element(element[0].querySelector('.ma-button-toggle'));
-                        resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset'));
+                    initializeSelect2Value();
 
-                        initializeSelect2Value();
+                    // Focus the component when label is clicked.
+                    if (labelElement.length > 0) {
+                        $($document).on('click', 'label[for="' + scope.id + '"]', function () {
+                            setFocus();
+                        });
+                    }
 
-                        // Focus the component when label is clicked.
-                        if (labelElement.length > 0) {
-                            $($document).on('click', 'label[for="' + scope.id + '"]', function () {
-                                setFocus();
-                            });
-                        }
-
+                    if (selectData) {
                         if (scope.isMultiple) {
                             // Track that the select is hovered to prevent focus lost when a selected item
                             // or selection is clicked.
@@ -1143,35 +1146,35 @@ angular.module('marcuraUI.components')
                                 });
                             });
                         }
-
-                        toggleButtonElement.focusout(function (event) {
-                            onFocusout(event);
-                        });
-
-                        resetButtonElement.focusout(function (event) {
-                            onFocusout(event);
-                        });
-
-                        toggleButtonElement.mousedown(function (event) {
-                            isToggleButtonDown = true;
-                        });
-
-                        toggleButtonElement.mouseup(function (event) {
-                            isToggleButtonDown = false;
-                        });
-
-                        resetButtonElement.mousedown(function (event) {
-                            isResetButtonDown = true;
-                        });
-
-                        resetButtonElement.mouseup(function (event) {
-                            isResetButtonDown = false;
-                        });
-
-                        scope.init({
-                            maInstance: scope.instance
-                        });
                     }
+
+                    toggleButtonElement.focusout(function (event) {
+                        onFocusout(event);
+                    });
+
+                    resetButtonElement.focusout(function (event) {
+                        onFocusout(event);
+                    });
+
+                    toggleButtonElement.mousedown(function (event) {
+                        isToggleButtonDown = true;
+                    });
+
+                    toggleButtonElement.mouseup(function (event) {
+                        isToggleButtonDown = false;
+                    });
+
+                    resetButtonElement.mousedown(function (event) {
+                        isResetButtonDown = true;
+                    });
+
+                    resetButtonElement.mouseup(function (event) {
+                        isResetButtonDown = false;
+                    });
+
+                    scope.init({
+                        maInstance: scope.instance
+                    });
                 });
             }
         };
