@@ -1,8 +1,8 @@
 angular.module('app.controllers').controller('gridPageController', gridPageController);
 
 function gridPageController($scope) {
-    $scope.orderBy1 = '-eta';
-    $scope.orderBy2 = '-eta';
+    $scope.sortProperty1 = '-eta';
+    $scope.sortProperty2 = '-eta';
     $scope.das = [{
         vessel: 'Densa Felcon',
         operation: 'Discharging',

@@ -37,7 +37,7 @@ var paths = {
             'marcura-ui/date-box/date-box.less',
             'marcura-ui/form/form.less',
             'marcura-ui/grid/grid.less',
-            'marcura-ui/grid/grid-order.less',
+            'marcura-ui/grid/sort.less',
             'marcura-ui/label/label.less',
             'marcura-ui/message/message.less',
             'marcura-ui/modal/modal.less',

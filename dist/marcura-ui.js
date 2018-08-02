@@ -4963,98 +4963,16 @@ if (!String.prototype.endsWith) {
             }
         };
     }]);})();
-(function(){angular.module('marcuraUI.components').directive('maGridOrder', ['$timeout', function ($timeout) {
-    return {
-        // maGridOrder should always be located inside maGrid.
-        require: '^^maGrid',
-        restrict: 'E',
-        scope: {
-            orderBy: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-grid-order{{isVisible() ? \' ma-grid-order-\' + direction : \'\'}}"\
-                ng-click="order()">\
-                <i class="fa fa-sort-asc"></i>\
-                <i class="fa fa-sort-desc"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes, grid) {
-            var gridScope,
-                headerColElement = element.closest('.ma-grid-header-col');
-
-            var getGridScope = function () {
-                var gridScope = null,
-                    initialScope = scope.$parent;
-
-                while (initialScope && !gridScope) {
-                    if (initialScope.hasOwnProperty('componentName') && initialScope.componentName === 'maGrid') {
-                        gridScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                return gridScope;
-            };
-
-            scope.order = function () {
-                if (!gridScope) {
-                    return;
-                }
-
-                var isReverse = gridScope.orderBy.charAt(0) === '-';
-                isReverse = !isReverse;
-
-                gridScope.orderBy = isReverse ? '-' + scope.orderBy : scope.orderBy;
-                scope.direction = isReverse ? 'desc' : 'asc';
-
-                // Postpone the event to allow gridScope.orderBy to change first.
-                $timeout(function () {
-                    gridScope.order();
-                });
-            };
-
-            var cleanOrderBy = function (orderBy) {
-                return orderBy.charAt(0) === '-' ? orderBy.substring(1) : orderBy;
-            };
-
-            if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
-                headerColElement.addClass('ma-grid-header-col-sortable');
-            }
-
-            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
-            $timeout(function () {
-                gridScope = getGridScope();
-
-                if (cleanOrderBy(gridScope.orderBy) === scope.orderBy) {
-                    scope.direction = gridScope.orderBy.charAt(0) === '-' ? 'desc' : 'asc';
-                }
-            });
-
-            scope.isVisible = function () {
-                if (!gridScope) {
-                    return false;
-                }
-
-                return cleanOrderBy(gridScope.orderBy) === scope.orderBy;
-            };
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function (MaHelper) {
     return {
         restrict: 'E',
         transclude: true,
         scope: {
-            orderBy: '=',
+            sortBy: '=',
             modifier: '@',
             isResponsive: '=',
             responsiveSize: '@',
-            order: '&'
+            sort: '&'
         },
         replace: true,
         template: function () {
@@ -5144,6 +5062,88 @@ if (!String.prototype.endsWith) {
 
                 setModifier('responsive-size', responsiveSize);
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', function ($timeout) {
+    return {
+        // maGridSort should always be located inside maGrid.
+        require: '^^maGrid',
+        restrict: 'E',
+        scope: {
+            sortBy: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-grid-sort{{isVisible() ? \' ma-grid-sort-\' + direction : \'\'}}"\
+                ng-click="sort()">\
+                <i class="fa fa-sort-asc"></i>\
+                <i class="fa fa-sort-desc"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes, grid) {
+            var gridScope,
+                headerColElement = element.closest('.ma-grid-header-col');
+
+            var getGridScope = function () {
+                var gridScope = null,
+                    initialScope = scope.$parent;
+
+                while (initialScope && !gridScope) {
+                    if (initialScope.hasOwnProperty('componentName') && initialScope.componentName === 'maGrid') {
+                        gridScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                return gridScope;
+            };
+
+            scope.sort = function () {
+                if (!gridScope) {
+                    return;
+                }
+
+                var isReverse = gridScope.sortBy.charAt(0) === '-';
+                isReverse = !isReverse;
+
+                gridScope.sortBy = isReverse ? '-' + scope.sortBy : scope.sortBy;
+                scope.direction = isReverse ? 'desc' : 'asc';
+
+                // Postpone the event to allow gridScope.sortBy to change first.
+                $timeout(function () {
+                    gridScope.sort();
+                });
+            };
+
+            var cleanSortProperty = function (property) {
+                return property.charAt(0) === '-' ? property.substring(1) : property;
+            };
+
+            if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
+                headerColElement.addClass('ma-grid-header-col-sortable');
+            }
+
+            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
+            $timeout(function () {
+                gridScope = getGridScope();
+
+                if (cleanSortProperty(gridScope.sortBy) === scope.sortBy) {
+                    scope.direction = gridScope.sortBy.charAt(0) === '-' ? 'desc' : 'asc';
+                }
+            });
+
+            scope.isVisible = function () {
+                if (!gridScope) {
+                    return false;
+                }
+
+                return cleanSortProperty(gridScope.sortBy) === scope.sortBy;
+            };
         }
     };
 }]);})();
@@ -9347,6 +9347,33 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            isVisible: '=',
+            size: '@',
+            position: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
+                    <div class="ma-pace">\
+                        <div class="ma-pace-activity"></div>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            var size = scope.size ? scope.size : 'xs',
+                position = scope.position ? scope.position : 'center';
+            scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function ($state, MaHelper, $timeout) {
     return {
         restrict: 'E',
@@ -9445,33 +9472,6 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                     }
                 });
             });
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            isVisible: '=',
-            size: '@',
-            position: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-spinner{{cssClass}}" ng-show="isVisible">\
-                    <div class="ma-pace">\
-                        <div class="ma-pace-activity"></div>\
-                    </div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            var size = scope.size ? scope.size : 'xs',
-                position = scope.position ? scope.position : 'center';
-            scope.cssClass = ' ma-spinner-' + size + ' ma-spinner-' + position;
         }
     };
 }]);})();

@@ -1,16 +1,16 @@
-angular.module('marcuraUI.components').directive('maGridOrder', ['$timeout', function ($timeout) {
+angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', function ($timeout) {
     return {
-        // maGridOrder should always be located inside maGrid.
+        // maGridSort should always be located inside maGrid.
         require: '^^maGrid',
         restrict: 'E',
         scope: {
-            orderBy: '@'
+            sortBy: '@'
         },
         replace: true,
         template: function () {
             var html = '\
-            <div class="ma-grid-order{{isVisible() ? \' ma-grid-order-\' + direction : \'\'}}"\
-                ng-click="order()">\
+            <div class="ma-grid-sort{{isVisible() ? \' ma-grid-sort-\' + direction : \'\'}}"\
+                ng-click="sort()">\
                 <i class="fa fa-sort-asc"></i>\
                 <i class="fa fa-sort-desc"></i>\
             </div>';
@@ -36,25 +36,25 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['$timeout', fun
                 return gridScope;
             };
 
-            scope.order = function () {
+            scope.sort = function () {
                 if (!gridScope) {
                     return;
                 }
 
-                var isReverse = gridScope.orderBy.charAt(0) === '-';
+                var isReverse = gridScope.sortBy.charAt(0) === '-';
                 isReverse = !isReverse;
 
-                gridScope.orderBy = isReverse ? '-' + scope.orderBy : scope.orderBy;
+                gridScope.sortBy = isReverse ? '-' + scope.sortBy : scope.sortBy;
                 scope.direction = isReverse ? 'desc' : 'asc';
 
-                // Postpone the event to allow gridScope.orderBy to change first.
+                // Postpone the event to allow gridScope.sortBy to change first.
                 $timeout(function () {
-                    gridScope.order();
+                    gridScope.sort();
                 });
             };
 
-            var cleanOrderBy = function (orderBy) {
-                return orderBy.charAt(0) === '-' ? orderBy.substring(1) : orderBy;
+            var cleanSortProperty = function (property) {
+                return property.charAt(0) === '-' ? property.substring(1) : property;
             };
 
             if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
@@ -65,8 +65,8 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['$timeout', fun
             $timeout(function () {
                 gridScope = getGridScope();
 
-                if (cleanOrderBy(gridScope.orderBy) === scope.orderBy) {
-                    scope.direction = gridScope.orderBy.charAt(0) === '-' ? 'desc' : 'asc';
+                if (cleanSortProperty(gridScope.sortBy) === scope.sortBy) {
+                    scope.direction = gridScope.sortBy.charAt(0) === '-' ? 'desc' : 'asc';
                 }
             });
 
@@ -75,7 +75,7 @@ angular.module('marcuraUI.components').directive('maGridOrder', ['$timeout', fun
                     return false;
                 }
 
-                return cleanOrderBy(gridScope.orderBy) === scope.orderBy;
+                return cleanSortProperty(gridScope.sortBy) === scope.sortBy;
             };
         }
     };

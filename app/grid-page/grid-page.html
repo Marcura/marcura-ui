@@ -12,7 +12,7 @@
         <h2>Basic</h2>
     </div>
     <div class="nodes-item">
-        <ma-grid modifier="das" order-by="orderBy1">
+        <ma-grid modifier="das" sort-by="sortProperty1">
             <div class="ma-grid-top">
                 <div class="ma-grid-title">
                     DAs
@@ -23,7 +23,7 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Vessel</div>
-                            <ma-grid-order order-by="vessel"></ma-grid-order>
+                            <ma-grid-sort sort-by="vessel"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">O</div>
-                            <ma-grid-order order-by="operation"></ma-grid-order>
+                            <ma-grid-sort sort-by="operation"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
@@ -39,7 +39,7 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Commodity</div>
-                            <ma-grid-order order-by="commodity"></ma-grid-order>
+                            <ma-grid-sort sort-by="commodity"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">ETA</div>
-                            <ma-grid-order order-by="eta"></ma-grid-order>
+                            <ma-grid-sort sort-by="eta"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
@@ -55,7 +55,7 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Status</div>
-                            <ma-grid-order order-by="status"></ma-grid-order>
+                            <ma-grid-sort sort-by="status"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
@@ -63,13 +63,13 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Total</div>
-                            <ma-grid-order order-by="total"></ma-grid-order>
+                            <ma-grid-sort sort-by="total"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
-                <div class="ma-grid-row" ng-repeat="da in das | orderBy: [orderBy1, '-total']">
+                <div class="ma-grid-row" ng-repeat="da in das | orderBy: [sortProperty1, '-total']">
                     <div class="ma-grid-row-inner">
                         <div class="ma-grid-col ma-grid-col-xs-25">
                             {{da.vessel}}
@@ -104,7 +104,7 @@
         <h2>Responsive</h2>
     </div>
     <div class="nodes-item">
-        <ma-grid modifier="das" order-by="orderBy2" is-responsive="true">
+        <ma-grid modifier="das" sort-by="sortProperty2" is-responsive="true">
             <div class="ma-grid-top">
                 <div class="ma-grid-title">
                     DAs
@@ -115,7 +115,7 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Vessel</div>
-                            <ma-grid-order order-by="vessel"></ma-grid-order>
+                            <ma-grid-sort sort-by="vessel"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">O</div>
-                            <ma-grid-order order-by="operation"></ma-grid-order>
+                            <ma-grid-sort sort-by="operation"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
@@ -131,7 +131,7 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Commodity</div>
-                            <ma-grid-order order-by="commodity"></ma-grid-order>
+                            <ma-grid-sort sort-by="commodity"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">ETA</div>
-                            <ma-grid-order order-by="eta"></ma-grid-order>
+                            <ma-grid-sort sort-by="eta"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
@@ -147,7 +147,7 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Status</div>
-                            <ma-grid-order order-by="status"></ma-grid-order>
+                            <ma-grid-sort sort-by="status"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
@@ -155,13 +155,13 @@
                     <div class="ma-grid-header-col-inner">
                         <div class="ma-grid-caption">
                             <div class="ma-grid-label">Total</div>
-                            <ma-grid-order order-by="total"></ma-grid-order>
+                            <ma-grid-sort sort-by="total"></ma-grid-sort>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
-                <div class="ma-grid-row" ng-repeat="da in das | orderBy: orderBy2">
+                <div class="ma-grid-row" ng-repeat="da in das | orderBy: sortProperty2">
                     <div class="ma-grid-row-inner">
                         <div class="ma-grid-col ma-grid-col-xs-25">
                             {{da.vessel}}

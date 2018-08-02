@@ -3,11 +3,11 @@ angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function
         restrict: 'E',
         transclude: true,
         scope: {
-            orderBy: '=',
+            sortBy: '=',
             modifier: '@',
             isResponsive: '=',
             responsiveSize: '@',
-            order: '&'
+            sort: '&'
         },
         replace: true,
         template: function () {
