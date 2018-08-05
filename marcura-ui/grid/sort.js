@@ -54,6 +54,10 @@ angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', func
             };
 
             var cleanSortProperty = function (property) {
+                if (!property) {
+                    return '';
+                }
+
                 return property.charAt(0) === '-' ? property.substring(1) : property;
             };
 
