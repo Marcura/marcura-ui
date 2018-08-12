@@ -10,8 +10,6 @@ angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce'
             click: '&',
             mousedown: '&',
             mouseup: '&',
-            focus: '&',
-            blur: '&',
             size: '@',
             modifier: '@',
             isLoading: '='
@@ -23,8 +21,6 @@ angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce'
                     ng-click="onClick()"\
                     ng-mousedown="onMousedown()"\
                     ng-mouseup="onMouseup()"\
-                    ng-focus="onFocus()"\
-                    ng-blur="onBlur()"\
                     ng-disabled="isDisabled"\
                     ng-class="{\
                         \'ma-button-link\': isLink(),\
@@ -58,7 +54,6 @@ angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce'
             scope.hasLeftIcon = scope.leftIcon ? true : false;
             scope.hasRightIcon = scope.rightIcon ? true : false;
             element.addClass('ma-button-' + scope.size);
-            scope.isFocused = false;
 
             var setModifiers = function (oldModifiers) {
                 // Remove previous modifiers first.
@@ -105,24 +100,6 @@ angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce'
                 scope.mouseup();
             };
 
-            scope.onFocus = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                scope.isFocused = true;
-                scope.focus();
-            };
-
-            scope.onBlur = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                scope.isFocused = false;
-                scope.blur();
-            };
-
             scope.isLink = function functionName() {
                 return scope.kind === 'link';
             };
@@ -141,16 +118,6 @@ angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce'
                 }
 
                 setModifiers(oldValue);
-            });
-
-            scope.$watch('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
             });
 
             setModifiers();
