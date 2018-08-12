@@ -5,11 +5,11 @@ function buttonPageController($scope) {
         console.log('click');
     };
 
-    $scope.mousedown = function () {
-        console.log('mousedown');
+    $scope.focus = function () {
+        console.log('focus');
     };
 
-    $scope.mouseup = function () {
-        console.log('mouseup');
+    $scope.blur = function () {
+        console.log('blur');
     };
 }
