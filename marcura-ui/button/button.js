@@ -8,6 +8,8 @@ angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce'
             rightIcon: '@',
             isDisabled: '=',
             click: '&',
+            mousedown: '&',
+            mouseup: '&',
             size: '@',
             modifier: '@',
             isLoading: '='
@@ -17,6 +19,8 @@ angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce'
             var html = '\
                 <button class="ma-button"\
                     ng-click="onClick()"\
+                    ng-mousedown="onMousedown()"\
+                    ng-mouseup="onMouseup()"\
                     ng-disabled="isDisabled"\
                     ng-class="{\
                         \'ma-button-link\': isLink(),\
@@ -78,6 +82,22 @@ angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce'
                 }
 
                 scope.click();
+            };
+
+            scope.onMousedown = function () {
+                if (scope.isDisabled || scope.isLoading) {
+                    return;
+                }
+
+                scope.mousedown();
+            };
+
+            scope.onMouseup = function () {
+                if (scope.isDisabled || scope.isLoading) {
+                    return;
+                }
+
+                scope.mouseup();
             };
 
             scope.isLink = function functionName() {
