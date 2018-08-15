@@ -1,36 +1,30 @@
 @import 'marcura-ui/less.less';
-
 @star-width: 6px;
 @star-width-padding: 4px;
-@star-full-width: @star-width + @star-width-padding;
+@star-full-width: @star-width+@star-width-padding;
 @hint-width: 14px;
 @hint-width-padding: 6px;
-@hint-full-width: @hint-width + @hint-width-padding;
-
+@hint-full-width: @hint-width+@hint-width-padding;
 .ma-label {
     display: inline-block;
     /*Use max-width, not width, only for overflow to work.*/
     max-width: 100%;
     line-height: 20px;
-
     &-is-required {
         .ma-label-text {
-            max-width: ~'calc(100% - @{star-full-width})';
+            max-width:~'calc(100% - @{star-full-width})';
         }
     }
-
     &-has-warning {
         .ma-label-text {
-            max-width: ~'calc(100% - @{hint-full-width})';
+            max-width:~'calc(100% - @{hint-full-width})';
         }
     }
-
     &-is-required.ma-label-has-warning {
         .ma-label-text {
-            max-width: ~'calc(100% - @{star-full-width} - @{hint-full-width})';
+            max-width:~'calc(100% - @{star-full-width} - @{hint-full-width})';
         }
     }
-
     &-has-warning {
         &.ma-label-has-content,
         &.ma-label-is-required {
@@ -39,40 +33,16 @@
             }
         }
     }
-
-    &-has-hint {
-        .ma-label-text {
-            max-width: ~'calc(100% - @{hint-full-width})';
-        }
-    }
-
-    &-is-required.ma-label-has-hint {
-        .ma-label-text {
-            max-width: ~'calc(100% - @{star-full-width} - @{hint-full-width})';
-        }
-    }
-
-    &-has-hint {
-        &.ma-label-has-content,
-        &.ma-label-is-required {
-            .ma-label-hint {
-                width: @hint-full-width;
-            }
-        }
-    }
-
     &-has-content {
         .ma-label-star {
             width: @star-full-width;
         }
     }
-
     &-cut-overflow {
         .ma-label-text {
             .cut-overflow;
         }
     }
-
     &-text {
         .box-sizing(border-box);
         width: 100%;
@@ -82,14 +52,12 @@
         padding: 0;
         font-weight: normal;
     }
-
     &-star {
         position: relative;
         display: inline-block;
         width: @star-width;
         line-height: inherit;
     }
-
     .fa-star {
         color: @color-danger;
         position: absolute;
@@ -100,38 +68,11 @@
         right: 0;
         font-size: 7px;
     }
-
     &-warning {
         display: inline-block;
         width: @hint-width;
         position: relative;
     }
-
-    &-hint {
-        display: inline-block;
-        width: @hint-width;
-        position: relative;
-
-        &-inner {
-            position: absolute;
-            top: 1px;
-            right: 0;
-            background-color: #7d7d87;
-            width: 16px;
-            height: 16px;
-            border-radius: 8px;
-        }
-
-        .fa-question {
-            color: #ffffff;
-            width: @hint-width;
-            position: absolute;
-            left: 4px;
-            top: 3px;
-            font-size: 12px;
-        }
-    }
-
     .fa-exclamation-triangle {
         color: @color-warning;
         width: @hint-width;
