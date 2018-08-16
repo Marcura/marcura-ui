@@ -1,10 +1,8 @@
 @import 'marcura-ui/less.less';
-
 @ma-tooltip-border-color: #000000;
 @ma-tooltip-background-color: #000000;
 @ma-tooltip-inner-padding-left: 10px;
 @ma-tooltip-inner-padding-top: 5px;
-
 .ma-tooltip {
     position: absolute;
     /*Use a lower z-index, so that tooltip doesn't overlap modal that has 1050 z-index.*/
@@ -27,15 +25,12 @@
     word-wrap: normal;
     font-size: 14px;
     opacity: 0;
-
     &.in {
         opacity: 0.9;
     }
-    
     &.top {
         margin-top: -3px;
         padding: 7px 0;
-
         .ma-tooltip-arrow {
             bottom: 0;
             left: 50%;
@@ -44,16 +39,13 @@
             border-top-color: @ma-tooltip-border-color;
         }
     }
-
     &.right {
         margin-left: 3px;
         padding: 0 7px;
-
         .ma-tooltip-close {
             top: 7px;
             right: 15px;
         }
-
         .ma-tooltip-arrow {
             top: 50%;
             left: 0;
@@ -62,11 +54,9 @@
             border-right-color: @ma-tooltip-border-color;
         }
     }
-    
     &.bottom {
         margin-top: 3px;
         padding: 7px 0;
-
         .ma-tooltip-arrow {
             top: 0;
             left: 50%;
@@ -75,16 +65,13 @@
             border-bottom-color: @ma-tooltip-border-color;
         }
     }
-    
     &.left {
         margin-left: -3px;
         padding: 0 7px;
-
         .ma-tooltip-close {
             top: 7px;
             right: 15px;
         }
-
         .ma-tooltip-arrow {
             top: 50%;
             right: 0;
@@ -93,7 +80,6 @@
             border-left-color: @ma-tooltip-border-color;
         }
     }
-
     &-inner {
         max-width: 200px;
         padding: @ma-tooltip-inner-padding-top @ma-tooltip-inner-padding-left;
@@ -102,7 +88,6 @@
         background-color: @ma-tooltip-background-color;
         border-radius: 4px;
     }
-    
     &-arrow {
         position: absolute;
         width: 0;
@@ -110,7 +95,6 @@
         border-color: transparent;
         border-style: solid;
     }
-    
     &.top-left {
         .ma-tooltip-arrow {
             bottom: 0;
@@ -120,7 +104,6 @@
             border-top-color: @ma-tooltip-border-color;
         }
     }
-    
     &.top-right {
         .ma-tooltip-arrow {
             bottom: 0;
@@ -130,27 +113,26 @@
             border-top-color: @ma-tooltip-border-color;
         }
     }
-    
-    &.bottom-left {
+    &.left-bottom {
+        padding-top: 7px;
+        margin-top: 3px;
         .ma-tooltip-arrow {
             top: 0;
-            right: 5px;
-            margin-top: -5px;
-            border-width: 0 5px 5px;
+            right: 8px;
+            border-width: 0 7px 7px;
             border-bottom-color: @ma-tooltip-border-color;
         }
     }
-    
-    &.bottom-right {
+    &.right-bottom {
+        padding-top: 7px;
+        margin-top: 3px;
         .ma-tooltip-arrow {
             top: 0;
-            left: 5px;
-            margin-top: -5px;
-            border-width: 0 5px 5px;
+            left: 8px;
+            border-width: 0 7px 7px;
             border-bottom-color: @ma-tooltip-border-color;
         }
     }
-
     &-close {
         position: absolute;
         top: 14px;
@@ -161,19 +143,16 @@
         font-size: 14px;
         cursor: pointer;
         display: none;
-
         .fa {
             width: 100%;
             height: 100%;
             vertical-align: top;
         }
     }
-
     &-can-close {
         .ma-tooltip-close {
             display: block;
         }
-
         .ma-tooltip-inner {
             padding-right: @ma-tooltip-inner-padding-left + 20px;
         }

@@ -80,19 +80,19 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
          * Provides coordinates for the targetEl in relation to hostEl
          */
         positionElements: function (hostEl, targetEl, positionStr, appendToBody) {
-
             var positionStrParts = positionStr.split('-');
             var pos0 = positionStrParts[0], pos1 = positionStrParts[1] || 'center';
 
             var hostElPos,
                 targetElWidth,
                 targetElHeight,
-                targetElPos;
+                targetElPos,
+                hostElWidth;
 
             hostElPos = appendToBody ? this.offset(hostEl) : this.position(hostEl);
-
             targetElWidth = targetEl.prop('offsetWidth');
             targetElHeight = targetEl.prop('offsetHeight');
+            hostElWidth = hostEl.prop('offsetWidth');
 
             var shiftWidth = {
                 center: function () {
@@ -121,15 +121,27 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
             switch (pos0) {
                 case 'right':
                     targetElPos = {
-                        top: shiftHeight[pos1](),
-                        left: shiftWidth[pos0]()
+                        top: shiftHeight[pos1]()
                     };
+
+                    if (pos1 === 'bottom') {
+                        targetElPos.left = shiftWidth[pos0]() - hostElWidth;
+                    } else {
+                        targetElPos.left = shiftWidth[pos0]();
+                    }
+
                     break;
                 case 'left':
                     targetElPos = {
-                        top: shiftHeight[pos1](),
-                        left: hostElPos.left - targetElWidth
+                        top: shiftHeight[pos1]()
                     };
+
+                    if (pos1 === 'bottom') {
+                        targetElPos.left = hostElPos.left - targetElWidth + hostElWidth;
+                    } else {
+                        targetElPos.left = hostElPos.left - targetElWidth;
+                    }
+
                     break;
                 case 'bottom':
                     targetElPos = {
