@@ -2,20 +2,6 @@ html {
     margin: 0;
 }
 
-strong,
-b {
-    font-weight: bold;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    margin: 0;
-}
-
 h1,
 .h1,
 h2,
@@ -25,40 +11,29 @@ h3,
 h4,
 .h4,
 h5,
-.h5 {
-    font-weight: 100;
+.h5,
+h6 {
     font-family: arial, sans-serif;
-    color: #111111;
+    margin: 0;
+    font-weight: normal;
 }
 
 h1,
 .h1 {
-    font-size: 34px;
-    line-height: 38px;
-}
-
-h2,
-.h2 {
-    font-size: 28px;
-    line-height: 32px;
-}
-
-h3,
-.h3 {
     font-size: 24px;
     line-height: 28px;
 }
 
-h4,
-.h4 {
-    font-size: 20px;
-    line-height: 24px;
+h2,
+.h2 {
+    font-size: 22px;
+    line-height: 26px;
 }
 
-h5,
-.h5 {
-    font-size: 16px;
-    line-height: 20px;
+h3,
+.h3 {
+    font-size: 20px;
+    line-height: 24px;
 }
 
 .app {
@@ -66,8 +41,11 @@ h5,
 }
 
 .app-body {
-    margin: 0;
-    font: 14px arial, sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333333;
+    background-color: #fff;
 }
 
 .app-inner {
@@ -163,6 +141,13 @@ h5,
 }
 
 pre {
-    border: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+    font: inherit;
+    padding: 0;
     margin: 0;
+    display: block;
+    line-height: inherit;
+    color: inherit;
 }

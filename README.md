@@ -16,8 +16,6 @@ https://marcura-ui.herokuapp.com/#/home
 * [Font Awesome](http://fontawesome.io/) (4.4.0)
 
 ## Optional dependencies
-* [Bootstrap](http://getbootstrap.com/) (3.3.4)  
-Required for [Form](../../wiki/form), [Grid](../../wiki/grid).
 * [Angular Sanitize](https://www.npmjs.com/package/angular-sanitize) (1.3.8)  
 Required for [Button](../../wiki/button), [RadioBox](../../wiki/radiobox), [Tooltip](../../wiki/tooltip).
 * [Pikaday](https://github.com/dbushell/Pikaday) (1.3.2)  
@@ -35,7 +33,6 @@ Download it using npm:
 Include third-party dependencies:
 
 ```
-<link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
 <link href="node_modules/pikaday/css/pikaday.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/trix/0.11.4/trix.css" rel="stylesheet">

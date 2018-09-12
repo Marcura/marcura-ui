@@ -28,10 +28,8 @@ angular.module('marcuraUI.components')
          * `options({})` allows global configuration of all tooltips in the
          * application.
          *
-         *   var app = angular.module( 'App', ['ui.bootstrap.tooltip'], function( MaTooltipProvider ) {
-         *     // place tooltips left instead of top by default
-         *     MaTooltipProvider.options( { position: 'left' } );
-         *   });
+         * // place tooltips left instead of top by default
+         * MaTooltipProvider.options( { position: 'left' } );
          */
         this.options = function (value) {
             angular.extend(globalOptions, value);

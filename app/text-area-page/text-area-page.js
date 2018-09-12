@@ -2,10 +2,10 @@ angular.module('app.controllers').controller('textAreaPageController', textAreaP
 
 function textAreaPageController($scope, $timeout, $interval) {
     $scope.text1 = 'Sweet, thanks for posting! Just wanted to add that I was having an issue where removing \
-lines of text wouldnt decrease the height enough (2px at a time, possibly related to using bootstrap). \
+lines of text wouldnt decrease the height enough. \
 I fixed this by setting element[0].style.height in the resize function to 1px first, then setting it to \
 the scrollHeight. Sweet, thanks for posting! Just wanted to add that I was having an issue where removing \
-lines of text wouldnt decrease the height enough (2px at a time, possibly related to using bootstrap). \
+lines of text wouldnt decrease the height enough. \
 I fixed this by setting element[0].style.height in the resize function to 1px first, then setting it to the scrollHeight.';
     $scope.text2 = $scope.text1;
     $scope.text3 = $scope.text1;

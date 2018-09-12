@@ -1,34 +1,27 @@
 @import 'marcura-ui/less.less';
-
 .ma-text-area {
     position: relative;
-
     &-is-focused &-value {
         .box-shadow(@input-shadow-focused);
         border-color: @color-primary;
     }
-
     &-fit-content-height &-value {
         overflow-y: hidden;
     }
-
     &-is-disabled &-value {
         .box-shadow(none);
         background-color: @color-disabled;
         color: @text-color-disabled;
         cursor: default;
     }
-
     &-is-invalid&-is-touched {
         &.ma-text-area-is-focused .ma-text-area-value {
             .box-shadow(@input-shadow-invalid);
         }
-
         .ma-text-area-value {
             border-color: @color-danger;
         }
     }
-
     &-value {
         .input;
         .input-transition;
@@ -39,7 +32,8 @@
         width: 100%;
         max-width: 100%;
         min-width: 100%;
-        font-family: @font-family;
+        font-family: inherit;
+        font-size: inherit;
         background-color: @input-background-color;
         border: 1px solid @border-color;
         line-height: 20px;

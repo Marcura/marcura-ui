@@ -1,23 +1,72 @@
 @import 'marcura-ui/less.less';
+.modal-open {
+    overflow: hidden;
+    .modal {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+}
 
 .modal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1050;
+    display: none;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    outline: 0;
+    &-dialog {
+        position: relative;
+        width: auto;
+        margin: 10px;
+    }
     &-content {
-        border: 0;
-        border-radius: 0;
+        position: relative;
+        background-color: #fff;
+        background-clip: padding-box;
+        outline: 0;
         .box-shadow(0 1px 5px 2px rgba(0, 0, 0, 0.3));
     }
-
     &-backdrop.in {
         opacity: 0.75;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1040;
+        background-color: #000;
+        &.fade {
+            filter: alpha(opacity=0);
+            opacity: 0;
+        }
+        &.in {
+            filter: alpha(opacity=50);
+            opacity: .5;
+        }
+    }
+    &.fade .modal-dialog {
+        transition: transform .3s ease-out;
+        transform: translate(0, -25%);
+    }
+    &.in .modal-dialog {
+        transform: translate(0, 0);
     }
 }
 
 .da-modal {
+    /*So ma-spinner inside the wrapper is positioned correctly.*/
+    &-content-wrapper {
+        position: relative;
+        min-height: 50px;
+    }
     &-is-loading &-content-wrapper {
         position: relative;
         min-height: 100px;
     }
-
     &-header {
         background-color: #ffffff;
         padding: 10px 60px 10px 15px;
@@ -25,14 +74,12 @@
         position: relative;
         box-sizing: content-box;
         .box-shadow(0 1px 3px 0 rgba(0, 0, 0, 0.2));
-
         .ma-button {
             position: absolute;
             top: 10px;
             right: 15px;
         }
     }
-
     &-title {
         font-size: 18px;
         min-height: 30px;
@@ -40,43 +87,57 @@
         padding-top: 5px;
         color: @heading-color;
     }
-
     &-content {
         padding: 15px;
     }
-
     &-footer {
         padding: 10px 15px;
         border-top: solid 1px #979797;
         .display-flex;
-
         &-left {
             width: 50%;
-
             .ma-button {
                 margin-right: 10px;
-
                 &:last-child {
                     margin-right: 0;
                 }
             }
         }
-
-        &-left + &-right {
+        &-left+&-right {
             width: 50%;
         }
-
         &-right {
             width: 100%;
             text-align: right;
-
             .ma-button {
                 margin-right: 10px;
-
                 &:last-child {
                     margin-right: 0;
                 }
             }
+        }
+    }
+}
+
+@media (min-width: @screen-sm) {
+    .modal {
+        &-dialog {
+            width: 600px;
+            margin: 30px auto;
+        }
+        &-content {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+        }
+        &-sm {
+            width: 300px;
+        }
+    }
+}
+
+@media (min-width: @screen-md) {
+    .modal {
+        &-lg {
+            width: 900px;
         }
     }
 }

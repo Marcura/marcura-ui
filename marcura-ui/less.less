@@ -88,11 +88,22 @@ sans-serif;
     display: inline-flex;
 }
 
+.flex-wrap {
+    -webkit-flex-wrap: wrap;
+    -moz-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    -o-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
 .input {
     border: 0;
     padding: 0;
     margin: 0;
     outline: 0;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
     &::-ms-clear,
     &::-ms-reveal {
         display: none;

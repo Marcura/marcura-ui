@@ -1,5 +1,4 @@
 @import 'marcura-ui/less.less';
-
 .ma-button {
     position: relative;
     padding: 8px 20px;
@@ -16,94 +15,75 @@
     cursor: default;
     background-color: @color-primary;
     .user-select(none);
-
     &:not(&-is-loading) {
         cursor: pointer;
     }
-
     &-fillingless:not(&-link) {
         background-color: #ffffff;
         padding: 7px 19px;
         border: @button-fillingless-border-width solid @color-primary;
         color: @color-primary;
-
         &.ma-button-xs {
             padding-top: 3px;
-
             &.ma-button-has-right-icon:not(.ma-button-has-text) {
                 padding-right: 10px - @button-fillingless-border-width;
             }
         }
-
         &.ma-button-has-right-icon {
             padding-right: @button-icon-padding - @button-fillingless-border-width;
         }
-
         &.ma-button-has-left-icon {
             padding-left: @button-icon-padding - @button-fillingless-border-width;
         }
-
         .ma-button-rim {
             border-color: @color-primary;
         }
     }
-
     &-fillingless&-link {
         .ma-button-icon {
             background-color: #ffffff;
             border: @button-fillingless-border-width solid @color-primary;
             color: @color-primary;
-
             .ma-button-rim {
                 border-color: @color-primary;
             }
         }
     }
-
     &:focus {
         outline: 0;
     }
-
     &:focus:not(&-link):not(&-default):not(&-simple):not(&-fillingless),
     &:hover:not(&-link):not(&-default):not(&-simple):not(&-fillingless) {
         text-decoration: none;
         color: #ffffff;
     }
-
     &:focus:not(&-is-disabled):not(&-is-loading) {
         .ma-button-rim {
             display: block;
         }
     }
-
     &-link:focus {
         .ma-button-text {
             text-decoration: underline;
         }
     }
-
     &:not(&-link):not(&-is-disabled):active {
         text-decoration: none;
     }
-
     &:not(&-link):not(&-is-disabled):not(&-default):not(&-simple):not(&-fillingless):active {
         color: #ffffff;
     }
-
     &-default&-link:not(&-is-disabled):not(&-is-loading):hover &-icon,
     &-default:not(&-link):not(&-is-disabled):not(&-is-loading):hover {
         background-color: @background-color-darker-light;
     }
-
     &-danger&-is-disabled:not(&-link),
     &-is-disabled {
         background-color: #c3c3cd;
-        cursor: default;
-        // Don't let disabled button block mouse events from reaching wrapper.
-        // Bootstrap tooltip set on a wrapper element won't work witouht it.
+        cursor: default; // Don't let disabled button block mouse events from reaching wrapper.
+        // Macrura Tooltip set on a wrapper element won't work witouht it.
         pointer-events: none;
     }
-
     &-spinner {
         position: absolute;
         width: 100%;
@@ -115,13 +95,11 @@
         z-index: 1;
         display: block;
     }
-
     &-text {
         // Pass clicks to button itself.
         // This is required for ma-select-box to work correctly, when it uses event.target.
         pointer-events: none;
     }
-
     .ma-pace-activity {
         position: absolute;
         left: 0;
@@ -130,7 +108,6 @@
         top: 0;
         margin: auto;
     }
-
     &-rim {
         display: none;
         position: absolute;
@@ -140,27 +117,22 @@
         right: 1px;
         border: 1px solid #ffffff;
     }
-
     &-xs {
         padding-top: 4px;
         padding-bottom: 5px;
         height: 30px;
-
         &.ma-button-default,
         &.ma-button-simple {
             padding-top: 3px;
             padding-bottom: 4px;
         }
     }
-
     &-xs&-has-right-icon:not(&-has-text) {
         padding-right: 10px;
     }
-
     &-has-text:not(&-link) {
         min-width: 60px;
     }
-
     &-icon {
         font-size: 16px;
         display: block;
@@ -168,75 +140,58 @@
         height: 20px;
         margin-top: -10px;
         position: absolute;
-        top: 50%;
-
-        // Pass clicks to button itself.
+        top: 50%; // Pass clicks to button itself.
         // This is required for ma-select-box to work correctly, when it uses event.target.
         pointer-events: none;
-
         .fa {
             pointer-events: none;
         }
     }
-
     &-icon-left {
         left: 10px;
     }
-
     &-icon-right {
         right: 10px;
     }
-
     &-has-left-icon {
         padding-left: @button-icon-padding;
-
         &:not(.ma-button-has-text) {
             padding-left: 16px;
         }
-
         &:not(.ma-button-has-text) .ma-button-icon-left {
             left: 50%;
             margin-left: -10px;
         }
-
         &.ma-button-has-right-icon:not(.ma-button-has-text) .ma-button-icon-left {
             left: 50%;
             margin-left: -18px;
         }
-
         &.ma-button-has-right-icon:not(.ma-button-has-text) .ma-button-icon-right {
             right: 50%;
             margin-right: -18px;
         }
     }
-
     &-has-right-icon {
         padding-right: @button-icon-padding;
-
         &:not(.ma-button-has-text) .ma-button-icon-right {
             right: 50%;
             margin-right: -10px;
         }
-    }
-
-    // Remove 3D push effect in IE.
+    } // Remove 3D push effect in IE.
     &:active &-text,
     &:focus &-text {
         position: relative;
         top: 0;
         left: 0;
     }
-
     &-link {
         color: @text-color;
         background: none;
         text-decoration: underline;
-
         &:focus,
         &:hover {
             color: @text-color;
         }
-
         .ma-button-icon {
             color: #ffffff;
             width: 30px;
@@ -244,123 +199,96 @@
             margin-top: -15px;
             background-color: @color-primary;
         }
-
         &.ma-button-is-disabled .ma-button-icon {
             background-color: #c3c3cd;
         }
-
         .ma-button-icon-left {
             left: 0;
         }
-
         .ma-button-icon-right {
             right: 0;
         }
-
         .ma-button-icon .fa {
             margin-top: 6px;
         }
-
         &.ma-button-has-left-icon {
             padding-left: 40px;
         }
-
         &.ma-button-has-right-icon {
             padding-right: 40px;
         }
-
         &.ma-button-secondary {
             &.ma-button-link,
             .ma-button-text {
                 color: @text-color-light;
             }
         }
-
         &.ma-button-secondary:not(.ma-button-is-disabled) .ma-button-icon {
             background-color: @text-color-light;
         }
-
         &.ma-button-danger:not(.ma-button-is-disabled) .ma-button-icon {
             background-color: #c9302c;
         }
-
         &.ma-button-default .ma-button-icon {
             background-color: #fafafa;
             border: 1px solid @border-color;
         }
-
         &.ma-button-simple .ma-button-icon {
             background-color: #ffffff;
             border: 1px solid @border-color;
         }
-    }
-
-    // For a button not to collapse vertically, if text is empty, the &nbsp; symbol is used.
+    } // For a button not to collapse vertically, if text is empty, the &nbsp; symbol is used.
     // Extra width created by this symbol is removed with a negative margin.
     // It is not possible to use text-intend instead of &nbsp;,
     // because it creates invisible clickable area outside a button.
     &:not(&-has-text) &-text {
         margin: 0 0 0 -10px;
     }
-
     &-secondary:not(&-link):not(&-is-disabled) {
         background-color: @text-color-light;
     }
-
     &-danger:not(&-link):not(&-is-disabled) {
         background-color: #c9302c;
     }
-
     &-default {
         border-radius: @button-border-radius;
-
         &.ma-button-is-disabled {
             opacity: 0.75;
-
             .ma-button-text {
                 color: @text-color-disabled;
             }
         }
-
         .ma-button-rim {
             border-radius: @button-rim-border-radius;
         }
-
         &.ma-button-link {
             .ma-button-icon {
                 border-radius: @button-border-radius;
             }
         }
     }
-
     &-default,
     &-simple {
         color: @text-color;
         padding-top: 7px;
         padding-bottom: 7px;
-
         &:not(.ma-button-link) {
             background-color: #fafafa;
             border: 1px solid @border-color;
         }
-
         .ma-button-icon {
             color: @text-color;
         }
-
         &.ma-button-xs.ma-button-has-right-icon:not(.ma-button-has-text) {
             padding-right: 8px;
         }
-
         &.ma-button-is-disabled .ma-button-icon {
             color: #c3c3cd;
         }
-
         .ma-button-rim {
             border-color: #66afe9;
         }
     }
-
     &-simple:not(&-link) {
         background-color: #ffffff;
         border: 1px solid @border-color;

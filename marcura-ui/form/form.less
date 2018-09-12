@@ -1,70 +1,46 @@
 @import 'marcura-ui/less.less';
-
 @top-label-margin: 2px;
-
 .form {
-    .form-group::after {
-        display: table;
-        content: ' ';
-    }
-
     &-group {
+        .display-flex;
+        .flex-wrap;
         margin-bottom: 10px;
-
-        &::before {
-            display: table;
-            content: ' ';
-        }
-
-        &::after {
-            clear: both;
-        }
-
         &:last-child {
             margin-bottom: 0;
         }
-
         &>& {
             padding-left: 15px;
             padding-right: 15px;
         }
-
         &-label-top .form-label {
             margin-top: 0;
             margin-bottom: @top-label-margin;
         }
-
         &:not(&-label-top) {
             .form-col-check-box {
                 padding-top: 4px;
             }
-
             .form-col-radio-box {
                 padding-top: 4px;
             }
         }
-
         &-label-right {
             .form-col-label.col-xs-12 {
                 margin-bottom: -8px;
             }
         }
-
         &-editor-text {
             .form-label {
                 margin-top: 0;
                 line-height: 20px;
             }
         }
-
         .form-col:first-child {
             padding-left: 0;
         }
-
         .form-col:last-child {
             padding-right: 0;
         }
-
         &-title {
             font-size: 20px;
             border-bottom: 1px solid @border-color;
@@ -72,62 +48,48 @@
             margin: 0 0 10px;
         }
     }
-
     &-label {
         display: block;
         margin-top: 5px;
         font-weight: normal;
-
         label {
             font-weight: normal;
         }
     }
-
     &-col {
         padding-left: 7px;
         padding-right: 7px;
-
         &-empty {
             display: none;
         }
     }
-
     &-control {
         border-radius: 0;
-
         &[disabled] {
             .box-shadow(none);
             cursor: default;
         }
     }
-
     &-footer {
         margin-top: 10px;
         .display-flex;
-
         &-left {
             width: 50%;
-
             .ma-button {
                 margin-right: 10px;
-
                 &:last-child {
                     margin-right: 0;
                 }
             }
         }
-
         &-left+&-right {
             width: 50%;
         }
-
         &-right {
             width: 100%;
             text-align: right;
-
             .ma-button {
                 margin-right: 10px;
-
                 &:last-child {
                     margin-right: 0;
                 }
@@ -141,15 +103,12 @@
     .select2-container {
         width: 100%;
     }
-
     .ma-text-box {
         width: 100%;
     }
-
     .ma-date-box {
         width: 100%;
     }
-
     .ma-select-box {
         width: 100%;
     }
@@ -161,16 +120,13 @@
             margin-top: 10px;
             padding-left: 0;
             padding-right: 0;
-
             .form-label {
                 margin-top: 0;
             }
         }
-
-        &-label + .form-col-has-editor.col-xs-12 {
+        &-label+.form-col-has-editor.col-xs-12 {
             margin-top: @top-label-margin;
         }
-
         &:first-child {
             margin-top: 0;
         }
@@ -184,60 +140,50 @@
                 padding-top: 5px;
             }
         }
-
         &-group {
             &-label-right .form-label {
                 text-align: right;
             }
-    
             /*Form group with 3 cells per row.*/
             &-sm-cols-3 {
                 .form-col {
                     /*First cell of each row.*/
                     &:nth-child(3n+1) {
                         padding-left: 0;
-    
                         &:last-child {
                             padding-right: 7px;
                         }
                     }
-    
                     /*Second cell of each row.*/
                     &:nth-child(3n+2) {
                         &:last-child {
                             padding-right: 7px;
                         }
                     }
-    
                     /*Last cell of each row.*/
                     &:nth-child(3n+3) {
                         padding-right: 0;
                     }
-    
                     /*All cells starting from the second row.*/
                     &:nth-child(n+4) {
                         margin-top: 10px;
                     }
                 }
             }
-    
             /*Form group with 2 cells per row.*/
             &-sm-cols-2 {
                 .form-col {
                     /*First cell of each row.*/
                     &:nth-child(2n+1) {
                         padding-left: 0;
-    
                         &:last-child {
                             padding-right: 7px;
                         }
                     }
-    
                     /*Last cell of each row.*/
                     &:nth-child(2n+2) {
                         padding-right: 0;
                     }
-    
                     /*All cells starting from the second row.*/
                     &:nth-child(n+3) {
                         margin-top: 10px;
@@ -253,7 +199,6 @@
         &-label-right .form-label {
             text-align: right;
         }
-
         /*Form group with 4 cells per row.*/
         &-lg-cols-4 {
             .form-col {
@@ -262,26 +207,22 @@
                     padding-left: 0;
                     padding-right: 7px;
                 }
-
                 /*Second cell of each row.*/
                 &:nth-child(4n+2) {
                     padding-left: 7px;
                     padding-right: 7px;
                 }
-
                 /*Third cell of each row.*/
                 &:nth-child(4n+3) {
                     padding-left: 7px;
                     padding-right: 7px;
                 }
-
                 /*Last cell of each row.*/
                 &:nth-child(4n+4) {
                     padding-left: 7px;
                     padding-right: 0;
                     margin-top: 0;
                 }
-
                 /*All cells starting from the second row.*/
                 &:nth-child(n+5) {
                     margin-top: 10px;
