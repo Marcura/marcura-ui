@@ -118,12 +118,6 @@ app.config(function ($stateProvider, $urlRouterProvider, maDateBoxConfigurationP
         controller: 'htmlAreaPageController'
     });
 
-    $stateProvider.state('form', {
-        url: '/form',
-        templateUrl: 'form-page/form-page.html',
-        controller: 'formPageController'
-    });
-
     $stateProvider.state('modal', {
         url: '/modal',
         templateUrl: 'modal-page/modal-page.html',

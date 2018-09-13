@@ -38,7 +38,6 @@ var paths = {
             'marcura-ui/check-box/check-box.less',
             'marcura-ui/date-box/date-box.less',
             'marcura-ui/dropdown/dropdown.less',
-            'marcura-ui/form/form.less',
             'marcura-ui/grid/grid.less',
             'marcura-ui/grid/sort.less',
             'marcura-ui/label/label.less',

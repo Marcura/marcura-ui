@@ -5,7 +5,8 @@
     <div class="nodes-item">
         <h1>DateBox</h1>
         <div class="api-documentation">
-            <a href="https://github.com/Marcura/marcura-ui/wiki/datebox">API documentation</a>
+            <a href="https://github.com/Marcura/marcura-ui/wiki/datebox">API
+                documentation</a>
         </div>
     </div>
     <div class="nodes-item">
@@ -42,8 +43,8 @@
         <h2>Date and time in UTC+09:00</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box instance="date4Instance" has-time="true" value="date4" time-zone="'+09:00'"
-            is-disabled="date4Disabled">
+        <ma-date-box instance="date4Instance" has-time="true" value="date4"
+            time-zone="'+09:00'" is-disabled="date4Disabled">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -103,7 +104,8 @@ max: {{date9Max}}</pre>
     </div>
     <div class="nodes-item">
         By default change event fires when the field loses focus.
-        <br/> However, it is also possible to set a timeout for the event. In this case
+        <br /> However, it is also possible to set a timeout for the event. In
+        this case
         timeout is 1 second.
     </div>
     <div class="nodes-item">
@@ -120,39 +122,38 @@ max: {{date9Max}}</pre>
         Start date cannot be greater than end date.
     </div>
     <div class="nodes-item">
-        <form class="form">
-            <div class="form-group form-group-label-top">
-                <div class="form-col col-xs-12 col-sm-3">
-                    <div class="form-label">
-                        <label for="date20">Start</label>
-                    </div>
-                    <ma-date-box id="date20" value="date20" max="date21" can-reset="true" change="change(maValue, 'date20')"
-                        validators="[date20Validator]" instance="date20DateBox">
-                    </ma-date-box>
+        <div class="row">
+            <div class="col-xs-12 col-sm-3">
+                <div>
+                    <label for="date20">Start</label>
                 </div>
-                <div class="form-col col-xs-12 col-sm-3">
-                    <div class="form-label">
-                        <label for="date21">End</label>
-                    </div>
-                    <ma-date-box id="date21" value="date21" can-reset="true">
-                    </ma-date-box>
-                </div>
+                <ma-date-box id="date20" value="date20" max="date21" can-reset="true"
+                    change="change(maValue, 'date20')" validators="[date20Validator]"
+                    instance="date20DateBox">
+                </ma-date-box>
             </div>
-            <div class="form-group">
-                <div class="form-col col-xs-12">
-                    <pre>// Start:
+            <div class="col-xs-12 col-sm-3">
+                <div>
+                    <label for="date21">End</label>
+                </div>
+                <ma-date-box id="date21" value="date21" can-reset="true">
+                </ma-date-box>
+            </div>
+        </div>
+    </div>
+    <div class="nodes-item">
+        <div class="row">
+            <div class="col-xs-12 col-sm-3">
+                <pre>// Start:
 max: {{date21 || 'null'}}
 value: {{date20 || 'null'}}
 failedValidator: {{(date20DateBox.failedValidator() || null) | json}}</pre>
-                </div>
             </div>
-            <div class="form-group">
-                <div class="form-col col-xs-12">
-                    <pre>// End:
+            <div class="col-xs-12 col-sm-3">
+                <pre>// End:
 value: {{date21 || 'null'}}</pre>
-                </div>
             </div>
-        </form>
+        </div>
     </div>
     <div class="nodes-item">
         <h2>Placeholder</h2>
@@ -162,51 +163,38 @@ value: {{date21 || 'null'}}</pre>
         </ma-date-box>
     </div>
     <!-- <div class="nodes-item">
-        <form class="form">
-            <div class="form-group form-group-label-top">
-                <div class="form-col col-xs-12 col-sm-3">
-                    <div class="form-label">
-                        <label for="start">Start</label>
-                    </div>
-                    <ma-date-box
-                        id="start"
-                        value="start"
-                        max="end"
-                        can-reset="true"
-                        change-timeout="1000"
-                        validate="validateStart(maValue)"
-                        instance="startComponent">
-                    </ma-date-box>
+        <div class="row">
+            <div class="col-xs-12 col-sm-3">
+                <div>
+                    <label for="start">Start</label>
                 </div>
-                <div class="form-col col-xs-12 col-sm-3">
-                    <div class="form-label">
-                        <label for="end">End</label>
-                    </div>
-                    <ma-date-box
-                        id="end"
-                        value="end"
-                        min="start"
-                        max="now"
-                        can-reset="true"
-                        change-timeout="1000"
-                        validate="validateEnd(maValue)"
-                        instance="endComponent">
-                    </ma-date-box>
-                </div>
+                <ma-date-box id="start" value="start" max="end" can-reset="true"
+                    change-timeout="1000" validate="validateStart(maValue)"
+                    instance="startComponent">
+                </ma-date-box>
             </div>
-            <div class="form-group">
-                <div class="form-col col-xs-12">
-                    <pre>// Start:
+            <div class="col-xs-12 col-sm-3">
+                <div>
+                    <label for="end">End</label>
+                </div>
+                <ma-date-box id="end" value="end" min="start" max="now"
+                    can-reset="true" change-timeout="1000" validate="validateEnd(maValue)"
+                    instance="endComponent">
+                </ma-date-box>
+            </div>
+        </div>
+    </div>
+    <div class="nodes-item">
+        <div class="row">
+            <div class="col-xs-12 col-sm-3">
+                <pre>// Start:
 max: {{end || 'null'}}
 value: {{start || 'null'}}</pre>
-                </div>
             </div>
-            <div class="form-group">
-                <div class="form-col col-xs-12">
-                    <pre>// End:
+            <div class="col-xs-12 col-sm-3">
+                <pre>// End:
 value: {{end || 'null'}}</pre>
-                </div>
             </div>
-        </form>
+        </div>
     </div> -->
 </div>
