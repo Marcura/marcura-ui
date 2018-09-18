@@ -3,7 +3,7 @@ angular.module('marcuraUI.components').directive('maLabel', [function () {
         restrict: 'E',
         transclude: true,
         scope: {
-            shouldCutOverflow: '=',
+            isCut: '=',
             for: '@',
             isRequired: '=',
             hasWarning: '='
@@ -15,7 +15,7 @@ angular.module('marcuraUI.components').directive('maLabel', [function () {
                     \'ma-label-is-required\': isRequired,\
                     \'ma-label-has-content\': hasContent,\
                     \'ma-label-has-warning\': hasWarning,\
-                    \'ma-label-cut-overflow\': _shouldCutOverflow\
+                    \'ma-label-is-cut\': isCut\
                 }">\
                     <label class="ma-label-text" for="{{for}}"><ng-transclude></ng-transclude></label><!--\
                     --><div class="ma-label-star" ng-if="isRequired">&nbsp;<i class="fa fa-star"></i></div><!--\
@@ -26,7 +26,6 @@ angular.module('marcuraUI.components').directive('maLabel', [function () {
             return html;
         },
         link: function (scope, element) {
-            scope._shouldCutOverflow = scope.shouldCutOverflow !== undefined ? scope.shouldCutOverflow : true;
             scope.hasContent = element.find('span').contents().length > 0;
         }
     };
