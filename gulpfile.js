@@ -29,7 +29,6 @@ var paths = {
         ],
         css: [
             'marcura-ui/bootstrap/bootstrap.css',
-            'marcura-ui/bootstrap/bootstrap-btn.css',
             'marcura-ui/less.less',
             'marcura-ui/pace/pace.less',
             'marcura-ui/button/button-variables.less',
