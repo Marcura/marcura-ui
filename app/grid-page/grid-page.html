@@ -5,14 +5,15 @@
     <div class="nodes-item">
         <h1>Grid</h1>
         <div class="api-documentation">
-            <a href="https://github.com/Marcura/marcura-ui/wiki/grid">API documentation</a>
+            <a href="https://github.com/Marcura/marcura-ui/wiki/grid">API
+                documentation</a>
         </div>
     </div>
     <div class="nodes-item">
         <h2>Basic</h2>
     </div>
     <div class="nodes-item">
-        <ma-grid modifier="das" sort-by="sortProperty1">
+        <ma-grid modifier="das" sort-by="sortField1">
             <div class="ma-grid-top">
                 <div class="ma-grid-title">
                     DAs
@@ -69,7 +70,10 @@
                 </div>
             </div>
             <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
-                <div class="ma-grid-row" ng-repeat="da in das | orderBy: [sortProperty1, '-total']">
+                <div class="ma-grid-row" ng-repeat="da in das | orderBy: [
+                    (sortField1.isAsc ? sortField1.field : '-' + sortField1.field),
+                    '-total'
+                ]">
                     <div class="ma-grid-row-inner">
                         <div class="ma-grid-col ma-grid-col-xs-25">
                             {{da.vessel}}
@@ -104,7 +108,7 @@
         <h2>Responsive</h2>
     </div>
     <div class="nodes-item">
-        <ma-grid modifier="das" sort-by="sortProperty2" is-responsive="true">
+        <ma-grid modifier="das" sort-by="sortField2" is-responsive="true">
             <div class="ma-grid-top">
                 <div class="ma-grid-title">
                     DAs
@@ -161,7 +165,9 @@
                 </div>
             </div>
             <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
-                <div class="ma-grid-row" ng-repeat="da in das | orderBy: sortProperty2">
+                <div class="ma-grid-row" ng-repeat="da in das | orderBy: [
+                    (sortField2.isAsc ? sortField2.field : '-' + sortField2.field)
+                ]">
                     <div class="ma-grid-row-inner">
                         <div class="ma-grid-col ma-grid-col-xs-25">
                             {{da.vessel}}

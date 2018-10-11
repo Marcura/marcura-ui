@@ -41,11 +41,9 @@ angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', func
                     return;
                 }
 
-                var isReverse = gridScope.sortBy.charAt(0) === '-';
-                isReverse = !isReverse;
-
-                gridScope.sortBy = isReverse ? '-' + scope.sortBy : scope.sortBy;
-                scope.direction = isReverse ? 'desc' : 'asc';
+                gridScope.sortBy.isAsc = !gridScope.sortBy.isAsc;
+                gridScope.sortBy.field = scope.sortBy;
+                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
 
                 // Postpone the event to allow gridScope.sortBy to change first.
                 $timeout(function () {
@@ -53,34 +51,24 @@ angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', func
                 });
             };
 
-            var cleanSortProperty = function (property) {
-                if (!property) {
-                    return '';
-                }
-
-                return property.charAt(0) === '-' ? property.substring(1) : property;
-            };
 
             if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
                 headerColElement.addClass('ma-grid-header-col-sortable');
             }
-
-            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
-            $timeout(function () {
-                gridScope = getGridScope();
-
-                if (cleanSortProperty(gridScope.sortBy) === scope.sortBy) {
-                    scope.direction = gridScope.sortBy.charAt(0) === '-' ? 'desc' : 'asc';
-                }
-            });
 
             scope.isVisible = function () {
                 if (!gridScope) {
                     return false;
                 }
 
-                return cleanSortProperty(gridScope.sortBy) === scope.sortBy;
+                return gridScope.sortBy.field === scope.sortBy;
             };
+
+            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
+            $timeout(function () {
+                gridScope = getGridScope();
+                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
+            });
         }
     };
 }]);
