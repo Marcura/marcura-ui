@@ -71,7 +71,7 @@
             </div>
             <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
                 <div class="ma-grid-row" ng-repeat="da in das | orderBy: [
-                    (sortField1.isAsc ? sortField1.field : '-' + sortField1.field),
+                    (sortField1.isAsc ? sortField1.name : '-' + sortField1.name),
                     '-total'
                 ]">
                     <div class="ma-grid-row-inner">
@@ -166,7 +166,7 @@
             </div>
             <div class="ma-grid-content" ng-if="!_.isEmpty(das)">
                 <div class="ma-grid-row" ng-repeat="da in das | orderBy: [
-                    (sortField2.isAsc ? sortField2.field : '-' + sortField2.field)
+                    (sortField2.isAsc ? sortField2.name : '-' + sortField2.name)
                 ]">
                     <div class="ma-grid-row-inner">
                         <div class="ma-grid-col ma-grid-col-xs-25">

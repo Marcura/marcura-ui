@@ -2,11 +2,11 @@ angular.module('app.controllers').controller('gridPageController', gridPageContr
 
 function gridPageController($scope) {
     $scope.sortField1 = {
-        field: 'eta',
+        name: 'eta',
         isAsc: false
     };
     $scope.sortField2 = {
-        field: 'eta',
+        name: 'eta',
         isAsc: false
     };
     $scope.das = [{

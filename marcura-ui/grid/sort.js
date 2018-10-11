@@ -42,7 +42,7 @@ angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', func
                 }
 
                 gridScope.sortBy.isAsc = !gridScope.sortBy.isAsc;
-                gridScope.sortBy.field = scope.sortBy;
+                gridScope.sortBy.name = scope.sortBy;
                 scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
 
                 // Postpone the event to allow gridScope.sortBy to change first.
@@ -61,7 +61,7 @@ angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', func
                     return false;
                 }
 
-                return gridScope.sortBy.field === scope.sortBy;
+                return gridScope.sortBy.name === scope.sortBy;
             };
 
             // Set a timeout before searching for maGrid scope to make sure it's been initialized.
