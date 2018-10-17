@@ -1,118 +1,80 @@
 @import 'marcura-ui/less.less';
-
 .ma-message {
     position: relative;
     line-height: normal;
-
     &-has-icon {
         padding-left: 22px;
     }
-
     &-alert {
         padding: 15px;
-
         &.ma-message-has-icon {
             padding-left: 50px;
         }
-
         .ma-message-icon {
             font-size: 22px;
             top: 12px;
             left: 15px;
         }
-
         &.ma-message-default {
             background-color: @background-color-light;
             padding-left: 15px;
         }
-
         &.ma-message-info {
             background-color: #d9edf7;
         }
-
         &.ma-message-success {
             background-color: #dff0d8;
         }
-
         &.ma-message-danger {
             background-color: #fadfe2;
         }
-
         &.ma-message-warning {
             background-color: #fcf8e3;
-
-            .ma-message-icon {
-                font-size: 20px;
-            }
         }
     }
-
     &-md {
         padding-top: 20px;
         padding-bottom: 20px;
-
         &.ma-message-has-icon {
             padding-left: 56px;
         }
-
         .ma-message-icon {
             font-size: 28px;
             width: 28px;
             height: 28px;
             top: 15px;
         }
-
         .ma-message-text {
             font-size: 18px;
         }
-
         &.ma-message-default {
             padding-left: 15px;
         }
-        
-        &.ma-message-warning {
-            .ma-message-icon {
-                font-size: 24px;
-            }
-        }
     }
-
     &-lg {
         padding-top: 40px;
         padding-bottom: 40px;
-
         &.ma-message-has-icon {
             padding-left: 60px;
         }
-
         .ma-message-icon {
             font-size: 30px;
             width: 30px;
             height: 30px;
             top: 36px;
         }
-
         .ma-message-text {
             font-size: 20px;
         }
-
         &.ma-message-default {
             padding-left: 15px;
         }
-        
-        &.ma-message-warning {
-            .ma-message-icon {
-                font-size: 26px;
-            }
-        }
     }
-
     &-text-align-center {
         .ma-message-text {
             text-align: center;
         }
     }
-
     &-icon {
         position: absolute;
         top: 0;
@@ -120,33 +82,23 @@
         font-size: 18px;
         width: 22px;
         height: 20px;
-
         .fa {
             vertical-align: top;
         }
     }
-
     &-default {
         padding-left: 0;
     }
-
     &-info {
         color: #1b809e;
     }
-
     &-success {
         color: #3c763d;
     }
-
     &-danger {
         color: @color-danger;
     }
-
     &-warning {
         color: @color-warning;
-
-        .ma-message-icon {
-            font-size: 16px;
-        }
     }
 }
