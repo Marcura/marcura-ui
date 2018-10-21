@@ -1,6 +1,6 @@
 angular.module('app.controllers').controller('selectBoxPageController', selectBoxPageController);
 
-function selectBoxPageController($scope, $timeout, $modal, $document, helper, MaHelper) {
+function selectBoxPageController($scope, helper, MaHelper) {
     $scope.MaHelper = MaHelper;
     $scope.ports2 = helper.getPorts();
     $scope.ports1 = [];
@@ -115,19 +115,6 @@ function selectBoxPageController($scope, $timeout, $modal, $document, helper, Ma
     $scope.text1 = 'Tokyo';
     $scope.text2 = 'Tokyo';
     $scope.port20 = [$scope.ports2[1]];
-
-    $scope.openModal = function () {
-        $modal.open({
-            templateUrl: 'select-box-page/modal/modal.html',
-            controller: 'selectBoxPageModalController',
-            size: 'md',
-            resolve: {
-                ports: function () {
-                    return $scope.ports2;
-                }
-            }
-        });
-    };
 
     // $scope.change = function (value, oldValue, property) {
     //     console.log('change');

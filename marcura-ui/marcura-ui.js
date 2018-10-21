@@ -3,26 +3,6 @@ angular.module('marcuraUI.components', ['marcuraUI.services']);
 angular.module('marcuraUI', ['marcuraUI.components']);
 
 angular.element(document).ready(function () {
-    // Override angular-modal hideModal method so it does not remove
-    // 'modal-open' CSS-class from body if there are opened modals.
-    // E.g. when bootbox modal is displayed above angular-modal.
-    if ($.fn.modal) {
-        $.fn.modal.Constructor.prototype.hideModal = function () {
-            var that = this;
-            this.$element.hide();
-            this.backdrop(function () {
-                that.resetAdjustments();
-                that.resetScrollbar();
-                that.$element.trigger('hidden.bs.modal');
-
-                // Remove CSS-class if only there no opened modals.
-                if ($('.modal').length === 0) {
-                    that.$body.removeClass('modal-open');
-                }
-            });
-        };
-    }
-
     if (window.Trix) {
         // Override Trix toolbar in order to add Underline button to it.
         // https://github.com/basecamp/trix/blob/master/src/trix/config/toolbar.coffee

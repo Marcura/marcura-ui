@@ -28,7 +28,6 @@ var paths = {
             'marcura-ui/**/*.js'
         ],
         css: [
-            'marcura-ui/bootstrap/bootstrap.css',
             'marcura-ui/less.less',
             'marcura-ui/pace/pace.less',
             'marcura-ui/button/button-variables.less',
@@ -40,7 +39,6 @@ var paths = {
             'marcura-ui/grid/sort.less',
             'marcura-ui/label/label.less',
             'marcura-ui/message/message.less',
-            'marcura-ui/modal/modal.less',
             'marcura-ui/multi-check-box/multi-check-box.less',
             'marcura-ui/pager/pager.less',
             'marcura-ui/progress/progress.less',

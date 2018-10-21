@@ -2,7 +2,6 @@ angular.module('app.controllers', []);
 angular.module('app.services', []);
 
 var app = angular.module('app', [
-    'ui.bootstrap',
     'ui.router',
     'ngSanitize',
     'marcuraUI',
@@ -116,12 +115,6 @@ app.config(function ($stateProvider, $urlRouterProvider, maDateBoxConfigurationP
         url: '/html-area',
         templateUrl: 'html-area-page/html-area-page.html',
         controller: 'htmlAreaPageController'
-    });
-
-    $stateProvider.state('modal', {
-        url: '/modal',
-        templateUrl: 'modal-page/modal-page.html',
-        controller: 'modalPageController'
     });
 
     $stateProvider.state('pager', {
