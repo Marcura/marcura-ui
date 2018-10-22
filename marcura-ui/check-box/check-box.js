@@ -23,7 +23,6 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
                 ng-class="{\
                     \'ma-check-box-is-checked\': value === true,\
                     \'ma-check-box-is-disabled\': isDisabled,\
-                    \'ma-check-box-has-text\': hasText,\
                     \'ma-check-box-rtl\': rtl,\
                     \'ma-check-box-is-focused\': isFocused,\
                     \'ma-check-box-is-invalid\': !isValid,\
@@ -39,7 +38,8 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
         link: function (scope, element, attributes) {
             var validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
+                hasIsNotEmptyValidator = false,
+                hasText = false;
 
             var setTabindex = function () {
                 if (scope.isDisabled) {
@@ -49,15 +49,26 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
                 }
             };
 
-            var setHasText = function () {
-                scope.hasText = scope.text ? true : false;
-            };
-
             scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-check-box-' + scope._size;
             scope.isFocused = false;
             scope.isValid = true;
             scope.isTouched = false;
+
+            var setHasText = function () {
+                hasText = scope.text ? true : false;
+            };
+
+            var setCssClass = function () {
+                var cssClass = ' ma-check-box-' + scope._size;
+
+                // When angular-animate is enabled ng-class doesn't set has-text CSS class properly
+                // for some reason. Thus we do it manually.
+                if (hasText) {
+                    cssClass += ' ma-check-box-has-text'
+                };
+
+                scope.cssClass = cssClass;
+            };
 
             var getControllerScope = function () {
                 var valuePropertyParts = null,
@@ -168,11 +179,12 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
             });
 
             scope.$watch('text', function (newValue, oldValue) {
-                if (newValue === scope.text) {
+                if (newValue === oldValue) {
                     return;
                 }
 
                 setHasText();
+                setCssClass();
             });
 
             // Set up validators.
@@ -209,10 +221,8 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
             }
 
             setTabindex();
-
-            $timeout(function () {
-                setHasText();
-            });
+            setHasText();
+            setCssClass();
         }
     };
 }]);

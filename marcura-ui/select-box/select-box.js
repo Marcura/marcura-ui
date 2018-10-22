@@ -93,7 +93,7 @@ angular.module('marcuraUI.components')
                         </select>';
                 }
 
-                // Use ng-hide class instead of ngShow attribute to avoid flickering when ng-animate
+                // Use ng-hide class instead of ngShow attribute to avoid flickering when angular-animate
                 // module is enabled.
                 // See https://docs.angularjs.org/guide/animations#how-to-selectively-enable-disable-and-skip-animations.
                 html += '\
