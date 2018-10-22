@@ -93,8 +93,12 @@ angular.module('marcuraUI.components')
                         </select>';
                 }
 
+                // Use ng-hide class instead of ngShow attribute to avoid flickering when ng-animate
+                // module is enabled.
+                // See https://docs.angularjs.org/guide/animations#how-to-selectively-enable-disable-and-skip-animations.
                 html += '\
-                    <input class="ma-select-box-text" type="text" ng-show="isAddMode"\
+                    <input class="ma-select-box-text" type="text"\
+                        ng-class="{ \'ng-hide\': !isAddMode }"\
                         ng-model="text"\
                         ng-disabled="isDisabled"\
                         ng-focus="onFocus(\'text\')"\
