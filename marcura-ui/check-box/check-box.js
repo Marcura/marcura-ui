@@ -64,8 +64,8 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
                 // When angular-animate is enabled ng-class doesn't set has-text CSS class properly
                 // for some reason. Thus we do it manually.
                 if (hasText) {
-                    cssClass += ' ma-check-box-has-text'
-                };
+                    cssClass += ' ma-check-box-has-text';
+                }
 
                 scope.cssClass = cssClass;
             };

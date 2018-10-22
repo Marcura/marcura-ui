@@ -3867,8 +3867,8 @@ if (!String.prototype.endsWith) {
                 // When angular-animate is enabled ng-class doesn't set has-text CSS class properly
                 // for some reason. Thus we do it manually.
                 if (hasText) {
-                    cssClass += ' ma-check-box-has-text'
-                };
+                    cssClass += ' ma-check-box-has-text';
+                }
 
                 scope.cssClass = cssClass;
             };
@@ -4026,368 +4026,6 @@ if (!String.prototype.endsWith) {
             setTabindex();
             setHasText();
             setCssClass();
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function (MaHelper) {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            sortBy: '=',
-            modifier: '@',
-            isResponsive: '=',
-            responsiveSize: '@',
-            sort: '&'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-grid">\
-                <div class="ma-grid-inner"><ng-transclude></ng-transclude></div>\
-            </div>';
-
-            return html;
-        },
-        controller: ['$scope', function (scope) {
-            scope.componentName = 'maGrid';
-        }],
-        link: function (scope, element) {
-            var responsiveSize = scope.responsiveSize ? scope.responsiveSize : 'md';
-
-            var setModifiers = function (oldModifiers) {
-                // Remove previous modifiers first.
-                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
-                    oldModifiers = oldModifiers.split(' ');
-
-                    for (var i = 0; i < oldModifiers.length; i++) {
-                        element.removeClass('ma-grid-' + oldModifiers[i]);
-                    }
-                }
-
-                var modifiers = '';
-
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
-                    modifiers = scope.modifier.split(' ');
-                }
-
-                for (var j = 0; j < modifiers.length; j++) {
-                    element.addClass('ma-grid-' + modifiers[j]);
-                }
-            };
-
-            var setModifier = function (modifierName, modifierValue) {
-                var modifier;
-
-                if (typeof modifierValue === 'boolean') {
-                    modifier = 'ma-grid-' + modifierName;
-
-                    if (modifierValue === true) {
-                        element.addClass(modifier);
-                    } else {
-                        element.removeClass(modifier);
-                    }
-                } else if (modifierValue) {
-                    // Clean existing classes.
-                    element.removeClass(function (index, className) {
-                        return (className.match(RegExp('ma-grid-' + modifierName + '-.+', 'ig')) || []).join(' ');
-                    });
-
-                    element.addClass('ma-grid-' + modifierName + '-' + modifierValue);
-                }
-            };
-
-            scope.$watch('modifier', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setModifiers(oldValue);
-            });
-
-            scope.$watch('isResponsive', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setModifier('is-responsive', scope.isResponsive);
-            });
-
-            setModifiers();
-            setModifier('is-responsive', scope.isResponsive);
-
-            if (scope.isResponsive) {
-                scope.$watch('responsiveSize', function (newValue, oldValue) {
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    responsiveSize = newValue;
-                    setModifier('responsive-size', responsiveSize);
-                });
-
-                setModifier('responsive-size', responsiveSize);
-            }
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', function ($timeout) {
-    return {
-        // maGridSort should always be located inside maGrid.
-        require: '^^maGrid',
-        restrict: 'E',
-        scope: {
-            sortBy: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-grid-sort{{isVisible() ? \' ma-grid-sort-\' + direction : \'\'}}"\
-                ng-click="sort()">\
-                <i class="fa fa-sort-asc"></i>\
-                <i class="fa fa-sort-desc"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes, grid) {
-            var gridScope,
-                headerColElement = element.closest('.ma-grid-header-col');
-
-            var getGridScope = function () {
-                var gridScope = null,
-                    initialScope = scope.$parent;
-
-                while (initialScope && !gridScope) {
-                    if (initialScope.hasOwnProperty('componentName') && initialScope.componentName === 'maGrid') {
-                        gridScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                return gridScope;
-            };
-
-            scope.sort = function () {
-                if (!gridScope) {
-                    return;
-                }
-
-                gridScope.sortBy.isAsc = !gridScope.sortBy.isAsc;
-                gridScope.sortBy.name = scope.sortBy;
-                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
-
-                // Postpone the event to allow gridScope.sortBy to change first.
-                $timeout(function () {
-                    gridScope.sort();
-                });
-            };
-
-
-            if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
-                headerColElement.addClass('ma-grid-header-col-sortable');
-            }
-
-            scope.isVisible = function () {
-                if (!gridScope) {
-                    return false;
-                }
-
-                return gridScope.sortBy.name === scope.sortBy;
-            };
-
-            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
-            $timeout(function () {
-                gridScope = getGridScope();
-                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
-            });
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
-    return {
-        restrict: 'E',
-        scope: {
-            id: '@',
-            value: '=',
-            isDisabled: '=',
-            isRequired: '=',
-            instance: '=',
-            validators: '=',
-            focus: '&',
-            blur: '&',
-            change: '&'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-html-area"\
-                ng-class="{\
-                    \'ma-html-area-is-disabled\': isDisabled,\
-                    \'ma-html-area-is-focused\': isFocused,\
-                    \'ma-html-area-is-invalid\': !isValid,\
-                    \'ma-html-area-is-touched\': isTouched\
-                }">\
-                <trix-editor ng-disabled="isDisabled">\
-                </trix-editor>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            var editorElement = angular.element(element[0].querySelector('.ma-html-area trix-editor')),
-                buttonElements = angular.element(element[0].querySelectorAll('.ma-html-area .trix-button')),
-                editor,
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false,
-                focusValue,
-                isInternalChange = false;
-            scope._value = scope.value || '';
-            scope.isTouched = false;
-
-            var setEditorValue = function (value) {
-                editor.loadHTML(value);
-            };
-
-            var getEditorValue = function () {
-                return editorElement.html();
-            };
-
-            var disableEditor = function () {
-                editorElement[0].contentEditable = !scope.isDisabled;
-
-                if (scope.isDisabled) {
-                    buttonElements.attr('disabled', true);
-                } else {
-                    buttonElements.removeAttr('disabled');
-                }
-            };
-
-            var validate = function () {
-                var value = getEditorValue();
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            editorElement.on('trix-initialize', function () {
-                editor = editorElement[0].editor;
-                disableEditor();
-                setEditorValue(scope.value);
-            });
-
-            editorElement.on('trix-change', function () {
-                validate();
-
-                if (scope.isValid) {
-                    MaHelper.safeApply(function () {
-                        isInternalChange = true;
-                        scope.value = getEditorValue();
-
-                        $timeout(function () {
-                            scope.change({
-                                maValue: scope.value
-                            });
-                        });
-                    });
-                }
-            });
-
-            editorElement.on('trix-focus', function () {
-                MaHelper.safeApply(function () {
-                    scope.isFocused = true;
-                    focusValue = scope.value;
-
-                    scope.focus({
-                        maValue: scope.value
-                    });
-                });
-            });
-
-            editorElement.on('trix-blur', function () {
-                MaHelper.safeApply(function () {
-                    scope.isFocused = false;
-                    scope.isTouched = true;
-
-                    validate();
-
-                    scope.blur({
-                        maValue: scope.value,
-                        maOldValue: focusValue,
-                        maHasValueChanged: focusValue !== scope.value
-                    });
-                });
-            });
-
-            scope.$watch('value', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (isInternalChange) {
-                    isInternalChange = false;
-                    return;
-                }
-
-                scope.isValid = true;
-                setEditorValue(scope.value);
-            });
-
-            scope.$watch('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                disableEditor();
-            });
-
-            $timeout(function () {
-                $('[for="' + scope.id + '"]').on('click', function () {
-                    editorElement.focus();
-                });
-            });
-
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    scope.isTouched = true;
-                    validate();
-                };
-            }
         }
     };
 }]);})();
@@ -5338,6 +4976,368 @@ if (!String.prototype.endsWith) {
             }
         };
     }]);})();
+(function(){angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function (MaHelper) {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            sortBy: '=',
+            modifier: '@',
+            isResponsive: '=',
+            responsiveSize: '@',
+            sort: '&'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-grid">\
+                <div class="ma-grid-inner"><ng-transclude></ng-transclude></div>\
+            </div>';
+
+            return html;
+        },
+        controller: ['$scope', function (scope) {
+            scope.componentName = 'maGrid';
+        }],
+        link: function (scope, element) {
+            var responsiveSize = scope.responsiveSize ? scope.responsiveSize : 'md';
+
+            var setModifiers = function (oldModifiers) {
+                // Remove previous modifiers first.
+                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
+                    oldModifiers = oldModifiers.split(' ');
+
+                    for (var i = 0; i < oldModifiers.length; i++) {
+                        element.removeClass('ma-grid-' + oldModifiers[i]);
+                    }
+                }
+
+                var modifiers = '';
+
+                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
+                    modifiers = scope.modifier.split(' ');
+                }
+
+                for (var j = 0; j < modifiers.length; j++) {
+                    element.addClass('ma-grid-' + modifiers[j]);
+                }
+            };
+
+            var setModifier = function (modifierName, modifierValue) {
+                var modifier;
+
+                if (typeof modifierValue === 'boolean') {
+                    modifier = 'ma-grid-' + modifierName;
+
+                    if (modifierValue === true) {
+                        element.addClass(modifier);
+                    } else {
+                        element.removeClass(modifier);
+                    }
+                } else if (modifierValue) {
+                    // Clean existing classes.
+                    element.removeClass(function (index, className) {
+                        return (className.match(RegExp('ma-grid-' + modifierName + '-.+', 'ig')) || []).join(' ');
+                    });
+
+                    element.addClass('ma-grid-' + modifierName + '-' + modifierValue);
+                }
+            };
+
+            scope.$watch('modifier', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setModifiers(oldValue);
+            });
+
+            scope.$watch('isResponsive', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setModifier('is-responsive', scope.isResponsive);
+            });
+
+            setModifiers();
+            setModifier('is-responsive', scope.isResponsive);
+
+            if (scope.isResponsive) {
+                scope.$watch('responsiveSize', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    responsiveSize = newValue;
+                    setModifier('responsive-size', responsiveSize);
+                });
+
+                setModifier('responsive-size', responsiveSize);
+            }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', function ($timeout) {
+    return {
+        // maGridSort should always be located inside maGrid.
+        require: '^^maGrid',
+        restrict: 'E',
+        scope: {
+            sortBy: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-grid-sort{{isVisible() ? \' ma-grid-sort-\' + direction : \'\'}}"\
+                ng-click="sort()">\
+                <i class="fa fa-sort-asc"></i>\
+                <i class="fa fa-sort-desc"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes, grid) {
+            var gridScope,
+                headerColElement = element.closest('.ma-grid-header-col');
+
+            var getGridScope = function () {
+                var gridScope = null,
+                    initialScope = scope.$parent;
+
+                while (initialScope && !gridScope) {
+                    if (initialScope.hasOwnProperty('componentName') && initialScope.componentName === 'maGrid') {
+                        gridScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                return gridScope;
+            };
+
+            scope.sort = function () {
+                if (!gridScope) {
+                    return;
+                }
+
+                gridScope.sortBy.isAsc = !gridScope.sortBy.isAsc;
+                gridScope.sortBy.name = scope.sortBy;
+                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
+
+                // Postpone the event to allow gridScope.sortBy to change first.
+                $timeout(function () {
+                    gridScope.sort();
+                });
+            };
+
+
+            if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
+                headerColElement.addClass('ma-grid-header-col-sortable');
+            }
+
+            scope.isVisible = function () {
+                if (!gridScope) {
+                    return false;
+                }
+
+                return gridScope.sortBy.name === scope.sortBy;
+            };
+
+            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
+            $timeout(function () {
+                gridScope = getGridScope();
+                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
+            });
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
+    return {
+        restrict: 'E',
+        scope: {
+            id: '@',
+            value: '=',
+            isDisabled: '=',
+            isRequired: '=',
+            instance: '=',
+            validators: '=',
+            focus: '&',
+            blur: '&',
+            change: '&'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-html-area"\
+                ng-class="{\
+                    \'ma-html-area-is-disabled\': isDisabled,\
+                    \'ma-html-area-is-focused\': isFocused,\
+                    \'ma-html-area-is-invalid\': !isValid,\
+                    \'ma-html-area-is-touched\': isTouched\
+                }">\
+                <trix-editor ng-disabled="isDisabled">\
+                </trix-editor>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            var editorElement = angular.element(element[0].querySelector('.ma-html-area trix-editor')),
+                buttonElements = angular.element(element[0].querySelectorAll('.ma-html-area .trix-button')),
+                editor,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false,
+                focusValue,
+                isInternalChange = false;
+            scope._value = scope.value || '';
+            scope.isTouched = false;
+
+            var setEditorValue = function (value) {
+                editor.loadHTML(value);
+            };
+
+            var getEditorValue = function () {
+                return editorElement.html();
+            };
+
+            var disableEditor = function () {
+                editorElement[0].contentEditable = !scope.isDisabled;
+
+                if (scope.isDisabled) {
+                    buttonElements.attr('disabled', true);
+                } else {
+                    buttonElements.removeAttr('disabled');
+                }
+            };
+
+            var validate = function () {
+                var value = getEditorValue();
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            editorElement.on('trix-initialize', function () {
+                editor = editorElement[0].editor;
+                disableEditor();
+                setEditorValue(scope.value);
+            });
+
+            editorElement.on('trix-change', function () {
+                validate();
+
+                if (scope.isValid) {
+                    MaHelper.safeApply(function () {
+                        isInternalChange = true;
+                        scope.value = getEditorValue();
+
+                        $timeout(function () {
+                            scope.change({
+                                maValue: scope.value
+                            });
+                        });
+                    });
+                }
+            });
+
+            editorElement.on('trix-focus', function () {
+                MaHelper.safeApply(function () {
+                    scope.isFocused = true;
+                    focusValue = scope.value;
+
+                    scope.focus({
+                        maValue: scope.value
+                    });
+                });
+            });
+
+            editorElement.on('trix-blur', function () {
+                MaHelper.safeApply(function () {
+                    scope.isFocused = false;
+                    scope.isTouched = true;
+
+                    validate();
+
+                    scope.blur({
+                        maValue: scope.value,
+                        maOldValue: focusValue,
+                        maHasValueChanged: focusValue !== scope.value
+                    });
+                });
+            });
+
+            scope.$watch('value', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (isInternalChange) {
+                    isInternalChange = false;
+                    return;
+                }
+
+                scope.isValid = true;
+                setEditorValue(scope.value);
+            });
+
+            scope.$watch('isDisabled', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                disableEditor();
+            });
+
+            $timeout(function () {
+                $('[for="' + scope.id + '"]').on('click', function () {
+                    editorElement.focus();
+                });
+            });
+
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    scope.isTouched = true;
+                    validate();
+                };
+            }
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
     return {
         restrict: 'E',
