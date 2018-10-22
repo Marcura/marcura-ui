@@ -49,7 +49,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
                 }
             };
 
-            var setText = function () {
+            var setHasText = function () {
                 scope.hasText = scope.text ? true : false;
             };
 
@@ -168,11 +168,11 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
             });
 
             scope.$watch('text', function (newValue, oldValue) {
-                if (newValue === oldValue) {
+                if (newValue === scope.text) {
                     return;
                 }
 
-                setText();
+                setHasText();
             });
 
             // Set up validators.
@@ -209,7 +209,10 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
             }
 
             setTabindex();
-            setText();
+
+            $timeout(function () {
+                setHasText();
+            });
         }
     };
 }]);
