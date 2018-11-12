@@ -1,46 +1,54 @@
 @import 'marcura-ui/less.less';
-
 .ma-select-box {
     position: relative;
     display: inline-block;
     vertical-align: top;
+    min-height: @component-height;
     .input-reset-button;
-
     &-can-add-item,
     &-can-reset {
         padding-right: 29px;
+        .ma-select-box-rendering {
+            right: 29px;
+        }
     }
-
     &-can-add-item&-can-reset {
         padding-right: 58px;
+        .ma-select-box-rendering {
+            right: 58px;
+        }
     }
-
     &-is-text-focused &-text {
         .box-shadow(@input-shadow-focused);
         border-color: @color-primary;
     }
-
     &-is-disabled &-text {
         .box-shadow(none);
         background-color: @color-disabled;
         color: @text-color-disabled;
         cursor: default;
     }
-
     :not( &-is-loading):not( &-is-disabled)&-is-invalid&-is-touched {
         &.ma-select-box-is-text-focused .ma-select-box-text,
         .select2-container-active:not(.select2-dropdown-open) .select2-choice,
         .select2-container-active:not(.select2-dropdown-open) .select2-choices {
             .box-shadow(@input-shadow-invalid);
         }
-
         .ma-select-box-text,
         .select2-container-multi.select2-container:not(.select2-dropdown-open) .select2-choices,
         .select2-container:not(.select2-dropdown-open) .select2-choice {
             border-color: @color-danger;
         }
     }
-
+    &-rendering {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        border: 1px solid @border-color;
+        background-color: #ffffff;
+    }
     .ma-button-toggle {
         position: absolute;
         top: 0;
@@ -48,37 +56,30 @@
         border-left: 0;
         .box-shadow(none);
     }
-
     &-can-add-item&-can-reset {
         .ma-button-toggle {
             right: 29px;
         }
     }
-
     .ma-button-toggle .ma-button-icon {
         font-size: 14px;
         text-shadow: none;
     }
-
     .ma-button-toggle.ma-button-is-disabled {
         background-color: @color-disabled;
-
         .ma-button-icon {
             color: inherit;
             opacity: 0.65;
         }
     }
-
     .ma-button-toggle:not(.ma-button-is-disabled) {
         &:hover {
             background-color: @background-color-darker-light;
         }
     }
-
     &-is-reset-disabled {
         .input-reset-button-disabled;
     }
-
     &-text {
         .input;
         .input-transition;
@@ -93,7 +94,6 @@
         line-height: 20px;
         height: @component-height;
     }
-
     &-spinner {
         position: absolute;
         width: 100%;
@@ -104,7 +104,6 @@
         left: 0;
         z-index: 1;
     }
-
     .ma-pace .ma-pace-activity {
         position: absolute;
         left: 0;
@@ -113,7 +112,6 @@
         top: 0;
         margin: auto;
     }
-   
     /*
     Hide the underlying select as it spoils the appearence for a moment before the component is initialized.
     It also takes up some width which makes horizontal scroll to appear in some layouts.
@@ -121,7 +119,6 @@
     select {
         display: none;
     }
-
     .ma-tooltip {
         min-width: 70px;
     }
@@ -131,22 +128,18 @@
     &-choice {
         outline: none !important;
     }
-
     &-drop {
         padding-top: 3px;
         z-index: 10000;
         border-radius: 0;
-
         &-can-add-item {
             .select2-drop-search-icon {
                 right: 33px;
             }
-
             .select2-search {
                 input {
                     padding-right: 62px;
                 }
-                
                 input+.ma-pace {
                     .ma-pace-activity {
                         right: 66px;
@@ -154,31 +147,24 @@
                 }
             }
         }
-
         input.select2-active+.ma-pace {
             display: block;
         }
-
         &-active {
             border-color: @color-primary;
         }
-
         &-above {
             border-radius: 0 !important;
-
             .select2-drop-search-icon {
                 top: 5px;
             }
-
             .select2-drop-add-item-button {
                 top: 5px;
             }
-
             input.select2-active+.ma-pace .ma-pace-activity {
                 top: 12px;
             }
         }
-
         &-search-icon {
             position: absolute;
             right: 5px;
@@ -186,14 +172,12 @@
             height: 28px;
             width: 23px;
             color: @text-color;
-    
             &:before {
                 position: relative;
                 top: 6px;
                 left: 0;
             }
         }
-
         &-add-item-button {
             position: absolute;
             color: @text-color;
@@ -204,47 +188,39 @@
             top: 1px;
             right: 5px;
             border-left: 1px solid @border-color;
-
             .fa {
                 position: absolute;
                 top: 7px;
                 right: 8px;
             }
-
             &:hover {
                 cursor: pointer;
                 background-color: @background-color-darker-light;
             }
         }
     }
-
     &-container {
         min-width: 60px;
         width: 100%;
-
         &.select2-container-disabled .select2-choice {
             background-color: @color-disabled;
             border-color: @border-color;
             color: @text-color-disabled;
             .box-shadow(none);
-
             .select2-arrow {
                 opacity: 0.65;
                 background-color: transparent;
-
                 &:hover {
                     background-color: transparent;
                 }
             }
         }
-
         &.select2-container-disabled.select2-container-multi .select2-choices {
             background-color: @color-disabled;
             color: @text-color-disabled;
             border-color: @border-color;
             .box-shadow(none);
         }
-
         &.select2-drop-above {
             &.select2-container-multi .select2-choices,
             .select2-choice {
@@ -253,7 +229,6 @@
                 border-radius: 0;
             }
         }
-
         .select2-choice {
             height: @component-height;
             line-height: 28px;
@@ -267,7 +242,6 @@
             .input-transition;
             .box-shadow(@input-shadow);
             .box-sizing(border-box);
-
             .select2-arrow {
                 background-color: transparent;
                 width: 33px;
@@ -276,7 +250,6 @@
                 padding: 7px 10px 0;
                 font-size: 12px;
                 background-image: none;
-
                 b {
                     position: relative;
                     top: -3px;
@@ -289,37 +262,31 @@
                     -moz-osx-font-smoothing: grayscale;
                     background: none !important;
                     text-align: right;
-
                     &::before {
                         content: '\f0dd';
                     }
                 }
             }
         }
-
         .select2-default .select2-arrow b {
             color: @text-color;
         }
-
         &-active .select2-choice {
             border-color: @color-primary;
             outline: 0;
             .box-shadow(@input-shadow-focused);
         }
-
         &-multi {
             &.select2-container-active .select2-choices {
                 border-color: @color-primary;
                 .box-shadow(@input-shadow-focused);
             }
-
             .select2-choices {
                 border-radius: 0;
                 border-color: @border-color;
                 background-image: none;
                 padding-right: 3px;
                 .input-transition;
-
                 .select2-search-field {
                     .select2-input {
                         .input;
@@ -329,10 +296,8 @@
                         box-sizing: border-box;
                         vertical-align: top;
                     }
-
                     .select2-input+.ma-pace {
                         display: none;
-
                         .ma-pace-activity {
                             position: absolute;
                             top: 7px;
@@ -341,16 +306,13 @@
                             margin: 0;
                         }
                     }
-
                     .select2-input.select2-active {
                         background: none !important;
                     }
-
                     .select2-input.select2-active+.ma-pace {
                         display: block;
                     }
                 }
-
                 .select2-search-choice {
                     font-size: 13px;
                     line-height: 14px;
@@ -360,7 +322,6 @@
                     border-color: @border-color;
                     background-color: #f5f5f5;
                     .box-shadow(none);
-
                     &-focus {
                         border-color: @color-primary;
                     }
@@ -368,7 +329,6 @@
             }
         }
     }
-
     &-search {
         input {
             .input;
@@ -377,18 +337,15 @@
             background: none !important;
             border-radius: 0;
             .box-shadow(inset 0 1px 1px rgba(0, 0, 0, .075));
-            height: @component-height !important;
+            height: @component-height  !important;
             padding: 5px 33px 5px 10px;
             line-height: 1.5;
-
             &.select2-active {
                 background: none !important;
             }
         }
-
         input+.ma-pace {
             display: none;
-
             .ma-pace-activity {
                 position: absolute;
                 top: 8px;
@@ -396,41 +353,34 @@
             }
         }
     }
-
     &-dropdown-open {
         .select2-choice {
             border-color: @color-primary;
             border-radius: 0;
             background-color: #fff;
         }
-
         .select2-choices {
             border-color: @color-primary;
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
         }
     }
-
     &-results {
         padding: 0 0 5px;
         margin: 5px 4px 0;
-
         .select2-result-has-items {
             >.select2-result-label {
                 background-color: @background-color-light;
                 cursor: default;
             }
         }
-
         .select2-highlighted {
             background-color: @color-primary;
         }
-
         .select2-result-label {
             padding: 5px 9px;
             line-height: 16px;
         }
-
         .select2-no-results,
         .select2-searching {
             padding: 5px 0 5px 6px;
