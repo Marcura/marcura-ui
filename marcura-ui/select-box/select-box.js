@@ -62,13 +62,15 @@ angular.module('marcuraUI.components')
                             \'ma-select-box-can-reset\': canReset,\
                             \'ma-select-box-is-reset-disabled\': canReset && !isDisabled && !_hasValue,\
                             \'ma-select-box-is-loading\': isLoading,\
-                            \'ma-select-box-has-value\': _hasValue\
+                            \'ma-select-box-has-value\': _hasValue,\
+                            \'ma-select-box-is-rendered\': isRendering\
                         }">\
                         <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
                             <div class="ma-pace">\
                                 <div class="ma-pace-activity"></div>\
                             </div>\
-                        </div>';
+                        </div>\
+                        <div class="ma-select-box-rendering" ng-if="isRendering"></div>';
 
                 if (hasAjax) {
                     html += '<input class="ma-select-box-input" ma-select-box-wrapper="options"' + (isMultiple ? ' multiple' : '') + '\
@@ -258,6 +260,7 @@ angular.module('marcuraUI.components')
                 scope.hasAjax = angular.isObject(scope.ajax);
                 scope._hasValue = false;
                 scope._items = [];
+                scope.isRendering = true;
 
                 var setItems = function (items) {
                     if (scope.hasAjax || !angular.isArray(items)) {
@@ -1088,6 +1091,7 @@ angular.module('marcuraUI.components')
                 setValidators();
 
                 $timeout(function () {
+                    // scope.isRendering = false;
                     // Set initial value.
                     // Value is set inside timeout to ensure that we get the latest value.
                     // If put outside timeout then there could be issues when value is set
