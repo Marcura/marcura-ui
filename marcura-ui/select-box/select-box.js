@@ -1095,7 +1095,8 @@ angular.module('marcuraUI.components')
                 setValidators();
 
                 $timeout(function () {
-                    // scope.isRendering = false;
+                    scope.isRendering = false;
+
                     // Set initial value.
                     // Value is set inside timeout to ensure that we get the latest value.
                     // If put outside timeout then there could be issues when value is set
