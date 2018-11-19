@@ -4482,221 +4482,6 @@ if (!angular.$$csp()) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            value: '=',
-            isDisabled: '=',
-            change: '&',
-            size: '@',
-            rtl: '=',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-check-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-check-box-is-checked\': value === true,\
-                    \'ma-check-box-is-disabled\': isDisabled,\
-                    \'ma-check-box-has-text\': hasText,\
-                    \'ma-check-box-rtl\': rtl,\
-                    \'ma-check-box-is-focused\': isFocused,\
-                    \'ma-check-box-is-invalid\': !isValid,\
-                    \'ma-check-box-is-touched\': isTouched\
-                }">\
-                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
-                <div class="ma-check-box-inner"></div>\
-                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            var validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false;
-
-            var setTabindex = function () {
-                if (scope.isDisabled) {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
-
-            var setText = function () {
-                scope.hasText = scope.text ? true : false;
-            };
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-check-box-' + scope._size;
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var getControllerScope = function () {
-                var valuePropertyParts = null,
-                    controllerScope = null,
-                    initialScope = scope.$parent,
-                    property = attributes.value;
-
-                // In case of a nested property binding like 'company.port.id'.
-                if (property.indexOf('.') !== -1) {
-                    valuePropertyParts = property.split('.');
-                    property = valuePropertyParts[0];
-                }
-
-                while (initialScope && !controllerScope) {
-                    if (initialScope.hasOwnProperty(property)) {
-                        controllerScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                // Use parent scope by default if search is unsuccessful.
-                return controllerScope || scope.$parent;
-            };
-
-            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
-            // as the value will be stored by Angular on ng-if scope.
-            var controllerScope = getControllerScope();
-
-            var validate = function () {
-                scope.isValid = true;
-                scope.isTouched = true;
-
-                // Remove 'false' value for 'IsNotEmpty' to work correctly.
-                var value = scope.value === false ? null : scope.value;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        var validator = validators[i];
-
-                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.onChange = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                // Handle nested properties or function calls with $parse service.
-                // This is related to a case when the component is located inside ng-if,
-                // but it works for other cases as well.
-                var valueGetter = $parse(attributes.value),
-                    valueSetter = valueGetter.assign,
-                    value = !valueGetter(controllerScope);
-
-                scope.value = value;
-                valueSetter(controllerScope, value);
-                validate();
-
-                $timeout(function () {
-                    scope.change({
-                        maValue: scope.value
-                    });
-                });
-            };
-
-            scope.onFocus = function () {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function () {
-                if (scope.isDisabled) {
-                    return;
-                }
-
-                scope.isFocused = false;
-                validate();
-            };
-
-            scope.onKeypress = function (event) {
-                if (event.keyCode === MaHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (!scope.isDisabled) {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            scope.$watch('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            scope.$watch('text', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setText();
-            });
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate();
-                };
-            }
-
-            setTabindex();
-            setText();
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components')
     .provider('maDateBoxConfiguration', function () {
         this.$get = function () {
@@ -5820,6 +5605,192 @@ if (!angular.$$csp()) {
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
+    return {
+        restrict: 'E',
+        scope: {
+            id: '@',
+            value: '=',
+            isDisabled: '=',
+            isRequired: '=',
+            instance: '=',
+            validators: '=',
+            focus: '&',
+            blur: '&',
+            change: '&'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-html-area"\
+                ng-class="{\
+                    \'ma-html-area-is-disabled\': isDisabled,\
+                    \'ma-html-area-is-focused\': isFocused,\
+                    \'ma-html-area-is-invalid\': !isValid,\
+                    \'ma-html-area-is-touched\': isTouched\
+                }">\
+                <trix-editor ng-disabled="isDisabled">\
+                </trix-editor>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            var editorElement = angular.element(element[0].querySelector('.ma-html-area trix-editor')),
+                buttonElements = angular.element(element[0].querySelectorAll('.ma-html-area .trix-button')),
+                editor,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false,
+                focusValue,
+                isInternalChange = false;
+            scope._value = scope.value || '';
+            scope.isTouched = false;
+
+            var setEditorValue = function (value) {
+                editor.loadHTML(value);
+            };
+
+            var getEditorValue = function () {
+                return editorElement.html();
+            };
+
+            var disableEditor = function () {
+                editorElement[0].contentEditable = !scope.isDisabled;
+
+                if (scope.isDisabled) {
+                    buttonElements.attr('disabled', true);
+                } else {
+                    buttonElements.removeAttr('disabled');
+                }
+            };
+
+            var validate = function () {
+                var value = getEditorValue();
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            editorElement.on('trix-initialize', function () {
+                editor = editorElement[0].editor;
+                disableEditor();
+                setEditorValue(scope.value);
+            });
+
+            editorElement.on('trix-change', function () {
+                validate();
+
+                if (scope.isValid) {
+                    MaHelper.safeApply(function () {
+                        isInternalChange = true;
+                        scope.value = getEditorValue();
+
+                        $timeout(function () {
+                            scope.change({
+                                maValue: scope.value
+                            });
+                        });
+                    });
+                }
+            });
+
+            editorElement.on('trix-focus', function () {
+                MaHelper.safeApply(function () {
+                    scope.isFocused = true;
+                    focusValue = scope.value;
+
+                    scope.focus({
+                        maValue: scope.value
+                    });
+                });
+            });
+
+            editorElement.on('trix-blur', function () {
+                MaHelper.safeApply(function () {
+                    scope.isFocused = false;
+                    scope.isTouched = true;
+
+                    validate();
+
+                    scope.blur({
+                        maValue: scope.value,
+                        maOldValue: focusValue,
+                        maHasValueChanged: focusValue !== scope.value
+                    });
+                });
+            });
+
+            scope.$watch('value', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (isInternalChange) {
+                    isInternalChange = false;
+                    return;
+                }
+
+                scope.isValid = true;
+                setEditorValue(scope.value);
+            });
+
+            scope.$watch('isDisabled', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                disableEditor();
+            });
+
+            $timeout(function () {
+                $('[for="' + scope.id + '"]').on('click', function () {
+                    editorElement.focus();
+                });
+            });
+
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    scope.isTouched = true;
+                    validate();
+                };
+            }
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
     return {
         restrict: 'E',
@@ -6382,69 +6353,6 @@ if (!angular.$$csp()) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            scope.calculateLeft = function (stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function () {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function (stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$timeout', '$sce', 'MaValidators', function (MaHelper, $timeout, $sce, MaValidators) {
     var radioBoxes = {};
 
@@ -6779,6 +6687,69 @@ if (!angular.$$csp()) {
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            scope.calculateLeft = function (stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function () {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function (stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
     return {
         restrict: 'E',
@@ -6941,6 +6912,221 @@ if (!angular.$$csp()) {
                     validate(scope.value);
                 };
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
+    return {
+        restrict: 'E',
+        scope: {
+            text: '@',
+            value: '=',
+            isDisabled: '=',
+            change: '&',
+            size: '@',
+            rtl: '=',
+            isRequired: '=',
+            validators: '=',
+            instance: '=',
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-check-box{{cssClass}}"\
+                ng-focus="onFocus()"\
+                ng-blur="onBlur()"\
+                ng-keypress="onKeypress($event)"\
+                ng-click="onChange()"\
+                ng-class="{\
+                    \'ma-check-box-is-checked\': value === true,\
+                    \'ma-check-box-is-disabled\': isDisabled,\
+                    \'ma-check-box-has-text\': hasText,\
+                    \'ma-check-box-rtl\': rtl,\
+                    \'ma-check-box-is-focused\': isFocused,\
+                    \'ma-check-box-is-invalid\': !isValid,\
+                    \'ma-check-box-is-touched\': isTouched\
+                }">\
+                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
+                <div class="ma-check-box-inner"></div>\
+                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            var validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired,
+                hasIsNotEmptyValidator = false;
+
+            var setTabindex = function () {
+                if (scope.isDisabled) {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
+                }
+            };
+
+            var setText = function () {
+                scope.hasText = scope.text ? true : false;
+            };
+
+            scope._size = scope.size ? scope.size : 'xs';
+            scope.cssClass = ' ma-check-box-' + scope._size;
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var getControllerScope = function () {
+                var valuePropertyParts = null,
+                    controllerScope = null,
+                    initialScope = scope.$parent,
+                    property = attributes.value;
+
+                // In case of a nested property binding like 'company.port.id'.
+                if (property.indexOf('.') !== -1) {
+                    valuePropertyParts = property.split('.');
+                    property = valuePropertyParts[0];
+                }
+
+                while (initialScope && !controllerScope) {
+                    if (initialScope.hasOwnProperty(property)) {
+                        controllerScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                // Use parent scope by default if search is unsuccessful.
+                return controllerScope || scope.$parent;
+            };
+
+            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
+            // as the value will be stored by Angular on ng-if scope.
+            var controllerScope = getControllerScope();
+
+            var validate = function () {
+                scope.isValid = true;
+                scope.isTouched = true;
+
+                // Remove 'false' value for 'IsNotEmpty' to work correctly.
+                var value = scope.value === false ? null : scope.value;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        var validator = validators[i];
+
+                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            scope.onChange = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                // Handle nested properties or function calls with $parse service.
+                // This is related to a case when the component is located inside ng-if,
+                // but it works for other cases as well.
+                var valueGetter = $parse(attributes.value),
+                    valueSetter = valueGetter.assign,
+                    value = !valueGetter(controllerScope);
+
+                scope.value = value;
+                valueSetter(controllerScope, value);
+                validate();
+
+                $timeout(function () {
+                    scope.change({
+                        maValue: scope.value
+                    });
+                });
+            };
+
+            scope.onFocus = function () {
+                if (!scope.isDisabled) {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function () {
+                if (scope.isDisabled) {
+                    return;
+                }
+
+                scope.isFocused = false;
+                validate();
+            };
+
+            scope.onKeypress = function (event) {
+                if (event.keyCode === MaHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (!scope.isDisabled) {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            scope.$watch('isDisabled', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
+            });
+
+            scope.$watch('text', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setText();
+            });
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate();
+                };
+            }
+
+            setTabindex();
+            setText();
         }
     };
 }]);})();
@@ -8267,7 +8453,8 @@ angular.module('marcuraUI.components')
                 setValidators();
 
                 $timeout(function () {
-                    // scope.isRendering = false;
+                    scope.isRendering = false;
+
                     // Set initial value.
                     // Value is set inside timeout to ensure that we get the latest value.
                     // If put outside timeout then there could be issues when value is set
@@ -10288,676 +10475,6 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
     };
 }]);})();
 (function(){angular.module('marcuraUI.components')
-    /**
-     * The MaTooltip service creates tooltip- and popover-like directives as well as
-     * houses global options for them.
-     */
-    .provider('MaTooltip', function () {
-        // The default options tooltip and popover.
-        var defaultOptions = {
-            position: 'top',
-            animation: true,
-            delay: 0,
-            // TODO:  It might have something to do with templating and transcluding.
-            // Maybe it can be used later.
-            useContentExp: false
-        };
-
-        // Default hide triggers for each show trigger
-        var triggerMap = {
-            'mouseenter': 'mouseleave',
-            'click': 'click',
-            'focus': 'blur'
-        };
-
-        // The options specified to the provider globally.
-        var globalOptions = {};
-
-        /**
-         * `options({})` allows global configuration of all tooltips in the
-         * application.
-         *
-         * // place tooltips left instead of top by default
-         * MaTooltipProvider.options( { position: 'left' } );
-         */
-        this.options = function (value) {
-            angular.extend(globalOptions, value);
-        };
-
-        /**
-         * Returns the actual instance of the MaTooltip service.
-         * TODO support multiple triggers
-         */
-        this.$get = ['$window', '$compile', '$timeout', '$document', '$interpolate', 'MaPosition', 'MaHelper', function ($window, $compile, $timeout, $document, $interpolate, MaPosition, MaHelper) {
-            return function MaTooltip(defaultTriggerShow, options) {
-                options = angular.extend({}, defaultOptions, globalOptions, options);
-
-                /**
-                 * Returns an object of show and hide triggers.
-                 *
-                 * If a trigger is supplied,
-                 * it is used to show the tooltip; otherwise, it will use the `trigger`
-                 * option passed to the `MaTooltipProvider.options` method; else it will
-                 * default to the trigger supplied to this directive factory.
-                 *
-                 * The hide trigger is based on the show trigger. If t.he `trigger` option
-                 * was passed to the `MaTooltipProvider.options` method, it will use the
-                 * mapped trigger from `triggerMap` or the passed trigger if the map is
-                 * undefined; otherwise, it uses the `triggerMap` value of the show
-                 * trigger; else it will just use the show trigger.
-                 */
-                var getTriggers = function (trigger) {
-                    var show = trigger || options.trigger || defaultTriggerShow,
-                        hide = triggerMap[show] || show;
-
-                    return {
-                        show: show,
-                        hide: hide
-                    };
-                };
-
-                var startSymbol = $interpolate.startSymbol(),
-                    endSymbol = $interpolate.endSymbol();
-
-                var template = '\
-                    <div ma-tooltip-popup\
-                        ' + (options.useContentExp ? 'content-exp="contentExp()" ' : 'content="' + startSymbol + 'content' + endSymbol + '" ') + '\
-                        position="' + startSymbol + 'position' + endSymbol + '"\
-                        popup-class="' + startSymbol + 'popupClass' + endSymbol + '"\
-                        animation="animation"\
-                        is-visible="isVisible"\
-                        can-close="canClose"\
-                        origin-scope="origScope"\
-                        tooltip-scope="getTooltipScope">\
-                    </div>';
-
-                return {
-                    restrict: 'EA',
-                    compile: function (tElem, tAttrs) {
-                        var tooltipLinker = $compile(template);
-
-                        return function link(scope, element, attributes, tooltipController) {
-                            var tooltip,
-                                tooltipLinkedScope,
-                                transitionTimeout,
-                                popupTimeout,
-                                triggers = getTriggers(),
-                                hasIsDisabled = angular.isDefined(attributes.maTooltipIsDisabled),
-                                tooltipScope = scope.$new(true),
-                                animation = scope.$eval(attributes.maTooltipAnimation),
-                                canClose = scope.$eval(attributes.maTooltipCanClose),
-                                delay = parseInt(attributes.maTooltipDelay),
-                                instance = scope.$eval(attributes.maTooltipInstance);
-
-                            tooltipScope.delay = isNaN(delay) ? options.delay : delay;
-                            tooltipScope.popupClass = attributes.maTooltipClass;
-                            tooltipScope.position = attributes.maTooltipPosition ? attributes.maTooltipPosition : options.position;
-                            tooltipScope.animation = animation !== undefined ? !!animation : options.animation;
-                            tooltipScope.isVisible = false;
-                            tooltipScope.canClose = canClose !== undefined ? !!canClose : false;
-                            // Set up the correct scope to allow transclusion later.
-                            tooltipScope.origScope = scope;
-                            tooltipScope.contentExp = function () {
-                                return scope.$eval(attributes.maTooltip);
-                            };
-                            tooltipScope.getTooltipScope = function () {
-                                return tooltipScope;
-                            };
-
-                            var setPosition = function () {
-                                if (!tooltip) {
-                                    return;
-                                }
-
-                                var position = MaPosition.positionElements(element, tooltip, tooltipScope.position, false);
-                                position.top += 'px';
-                                position.left += 'px';
-
-                                // Now set the calculated positioning.
-                                tooltip.css(position);
-                            };
-
-                            var onToggle = function () {
-                                if (tooltipScope.isVisible) {
-                                    hide();
-                                } else {
-                                    if (!tooltipScope.isVisible) {
-                                        show();
-                                    }
-                                }
-                            };
-
-                            var onShow = function () {
-                                if (!tooltipScope.isVisible) {
-                                    show();
-                                }
-                            };
-
-                            // Show the tooltip with delay if specified, otherwise show it immediately.
-                            var show = function () {
-                                if (hasIsDisabled && scope.$eval(attributes.maTooltipIsDisabled)) {
-                                    return;
-                                }
-
-                                if (tooltipScope.delay) {
-                                    // Do nothing if the tooltip was already scheduled to pop-up.
-                                    // This happens if show is triggered multiple times before any hide is triggered.
-                                    if (!popupTimeout) {
-                                        popupTimeout = $timeout(doShow, tooltipScope.delay, false);
-                                        popupTimeout.then(function (reposition) {
-                                            reposition();
-                                        });
-                                    }
-                                } else {
-                                    doShow()();
-                                }
-                            };
-
-                            // Show the tooltip popup element.
-                            var doShow = function () {
-                                popupTimeout = null;
-
-                                // If there is a pending remove transition, we must cancel it, lest the
-                                // tooltip be mysteriously removed.
-                                if (transitionTimeout) {
-                                    $timeout.cancel(transitionTimeout);
-                                    transitionTimeout = null;
-                                }
-
-                                // Don't show empty tooltips.
-                                if (!(options.useContentExp ? tooltipScope.contentExp() : tooltipScope.content)) {
-                                    return angular.noop;
-                                }
-
-                                create();
-
-                                // Set the initial positioning.
-                                tooltip.css({ top: 0, left: 0, display: 'block' });
-
-                                setPosition();
-
-                                // And show the tooltip.
-                                MaHelper.safeApply(function () {
-                                    tooltipScope.isVisible = true;
-                                });
-
-                                // Return positioning function as promise callback for correct
-                                // positioning after draw.
-                                return setPosition;
-                            };
-
-                            // Hide the tooltip popup element.
-                            var hide = function () {
-                                MaHelper.safeApply(function () {
-                                    tooltipScope.isVisible = false;
-
-                                    // If tooltip is going to be shown after delay, we must cancel this.
-                                    $timeout.cancel(popupTimeout);
-                                    popupTimeout = null;
-
-                                    // And now we remove it from the DOM. However, if we have animation, we
-                                    // need to wait for it to expire beforehand.
-                                    // FIXME: this is a placeholder for a port of the transitions library.
-                                    if (tooltipScope.animation) {
-                                        if (!transitionTimeout) {
-                                            transitionTimeout = $timeout(remove, 500);
-                                        }
-                                    } else {
-                                        remove();
-                                    }
-                                });
-                            };
-
-                            tooltipScope.close = function () {
-                                hide();
-                            };
-
-                            var create = function () {
-                                // There can only be one tooltip element per directive shown at once.
-                                if (tooltip) {
-                                    remove();
-                                }
-                                tooltipLinkedScope = tooltipScope.$new();
-                                tooltip = tooltipLinker(tooltipLinkedScope, function (tooltip) {
-                                    element.after(tooltip);
-                                });
-
-                                tooltipLinkedScope.$watch(function () {
-                                    $timeout(setPosition, 0, false);
-                                });
-
-                                if (options.useContentExp) {
-                                    tooltipLinkedScope.$watch('contentExp()', function (val) {
-                                        if (!val && tooltipScope.isVisible) {
-                                            hide();
-                                        }
-                                    });
-                                }
-                            };
-
-                            var remove = function () {
-                                transitionTimeout = null;
-
-                                if (tooltip) {
-                                    tooltip.remove();
-                                    tooltip = null;
-                                }
-
-                                if (tooltipLinkedScope) {
-                                    tooltipLinkedScope.$destroy();
-                                    tooltipLinkedScope = null;
-                                }
-                            };
-
-                            var setTriggers = function () {
-                                removeTriggers();
-                                triggers = getTriggers(attributes.maTooltipOn);
-
-                                if (triggers.show === triggers.hide) {
-                                    element.bind(triggers.show, onToggle);
-                                } else {
-                                    element.bind(triggers.show, onShow);
-
-                                    // Leave it to user to close tooltip.
-                                    if (!tooltipScope.canClose) {
-                                        element.bind(triggers.hide, hide);
-                                    }
-                                }
-                            };
-
-                            var removeTriggers = function () {
-                                element.unbind(triggers.show, onShow);
-                                element.unbind(triggers.hide, hide);
-                            };
-
-                            attributes.$observe('maTooltip', function (content) {
-                                tooltipScope.content = content;
-
-                                if (!content && tooltipScope.isVisible) {
-                                    hide();
-                                }
-                            });
-
-                            if (attributes.maTooltipCanClose) {
-                                scope.$watch(attributes.maTooltipCanClose, function (newValue, oldValue) {
-                                    if (newValue === oldValue) {
-                                        return;
-                                    }
-
-                                    tooltipScope.canClose = newValue;
-                                    setTriggers();
-
-                                    if (!tooltipScope.canClose && tooltipScope.isVisible) {
-                                        hide();
-                                    }
-                                });
-                            }
-
-                            setTriggers();
-
-                            $timeout(function () {
-                                // Check for scope as it might be already destroyed when, for example,
-                                // user switches between router states quickly.
-                                if (tooltipScope && tooltipScope.isVisible) {
-                                    show();
-                                }
-                            });
-
-                            // Prepare API instance.
-                            if (instance) {
-                                instance.isInitialized = true;
-
-                                instance.show = function () {
-                                    if (!tooltipScope.isVisible) {
-                                        show();
-                                    }
-                                };
-
-                                instance.hide = function () {
-                                    if (tooltipScope.isVisible) {
-                                        hide();
-                                    }
-                                };
-                            }
-
-                            // Make sure tooltip is destroyed and removed.
-                            scope.$on('$destroy', function onDestroyTooltip() {
-                                $timeout.cancel(transitionTimeout);
-                                $timeout.cancel(popupTimeout);
-                                removeTriggers();
-                                remove();
-                                tooltipScope = null;
-                            });
-                        };
-                    }
-                };
-            };
-        }];
-    })
-    .directive('maTooltipPopup', ['$sce', function ($sce) {
-        return {
-            restrict: 'EA',
-            replace: true,
-            scope: {
-                content: '@',
-                position: '@',
-                popupClass: '@',
-                animation: '&',
-                isVisible: '&',
-                canClose: '&',
-                tooltipScope: '='
-            },
-            template: function () {
-                var html = '<div class="ma-tooltip" ma-tooltip-animation-class="fade" ma-tooltip-classes\
-                    ng-class="{\
-                        \'in\': isVisible(),\
-                        \'ma-tooltip-can-close\': canClose()\
-                    }">\
-                    <div class="ma-tooltip-arrow"></div>\
-                    <div class="ma-tooltip-inner" ng-bind-html="getContent()"></div>\
-                    <div class="ma-tooltip-close" ng-if="canClose()" ng-click="tooltipScope().close()">\
-                        <i class="fa fa-close"></i>\
-                    </div>\
-                </div>';
-
-                return html;
-            },
-            link: function (scope) {
-                scope.getContent = function () {
-                    return $sce.trustAsHtml(scope.content);
-                };
-            }
-        };
-    }])
-    .directive('maTooltip', ['MaTooltip', function (MaTooltip) {
-        return MaTooltip('mouseenter');
-    }])
-    /**
-     * Note that it's intentional that these classes are *not* applied through $animate.
-     * They must not be animated as they're expected to be present on the tooltip on
-     * initialization.
-     */
-    .directive('maTooltipClasses', function () {
-        return {
-            restrict: 'A',
-            link: function (scope, element, attribites) {
-                if (scope.position) {
-                    element.addClass(scope.position);
-                }
-
-                if (scope.popupClass) {
-                    element.addClass(scope.popupClass);
-                }
-
-                if (scope.animation()) {
-                    element.addClass(attribites.maTooltipAnimationClass);
-                }
-            }
-        };
-    });
-    // This is mostly ngInclude code but with a custom scope
-    // .directive('maTooltipTemplateTransclude', ['$animate', '$sce', '$compile', '$templateRequest',
-    //     function ($animate, $sce, $compile, $templateRequest) {
-    //         return {
-    //             link: function (scope, elem, attributes) {
-    //                 var origScope = scope.$eval(attributes.maTooltipTemplateTranscludeScope),
-    //                     changeCounter = 0,
-    //                     currentScope,
-    //                     previousElement,
-    //                     currentElement;
-
-    //                 var cleanupLastIncludeContent = function () {
-    //                     if (previousElement) {
-    //                         previousElement.remove();
-    //                         previousElement = null;
-    //                     }
-    //                     if (currentScope) {
-    //                         currentScope.$destroy();
-    //                         currentScope = null;
-    //                     }
-    //                     if (currentElement) {
-    //                         $animate.leave(currentElement).then(function () {
-    //                             previousElement = null;
-    //                         });
-    //                         previousElement = currentElement;
-    //                         currentElement = null;
-    //                     }
-    //                 };
-
-    //                 scope.$watch($sce.parseAsResourceUrl(attributes.maTooltipTemplateTransclude), function (src) {
-    //                     var thisChangeId = ++changeCounter;
-
-    //                     if (src) {
-    //                         //set the 2nd param to true to ignore the template request error so that the inner
-    //                         //contents and scope can be cleaned up.
-    //                         $templateRequest(src, true).then(function (response) {
-    //                             if (thisChangeId !== changeCounter) { return; }
-    //                             var newScope = origScope.$new();
-    //                             var template = response;
-
-    //                             var clone = $compile(template)(newScope, function (clone) {
-    //                                 cleanupLastIncludeContent();
-    //                                 $animate.enter(clone, elem);
-    //                             });
-
-    //                             currentScope = newScope;
-    //                             currentElement = clone;
-
-    //                             currentScope.$emit('$includeContentLoaded', src);
-    //                         }, function () {
-    //                             if (thisChangeId === changeCounter) {
-    //                                 cleanupLastIncludeContent();
-    //                                 scope.$emit('$includeContentError', src);
-    //                             }
-    //                         });
-    //                         scope.$emit('$includeContentRequested', src);
-    //                     } else {
-    //                         cleanupLastIncludeContent();
-    //                     }
-    //                 });
-
-    //                 scope.$on('$destroy', cleanupLastIncludeContent);
-    //             }
-    //         };
-    //     }])
-    // .directive('maTooltipTemplate', ['MaTooltip', function (MaTooltip) {
-    //     return MaTooltip('maTooltipTemplate', 'mouseenter', {
-    //         useContentExp: true
-    //     });
-    // }])
-    // .directive('maTooltipHtml', ['MaTooltip', function (MaTooltip) {
-    //     return MaTooltip('maTooltipHtml', 'mouseenter', {
-    //         useContentExp: true
-    //     });
-    // }]);
-})();
-(function(){angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
-    return {
-        restrict: 'E',
-        scope: {
-            id: '@',
-            value: '=',
-            isDisabled: '=',
-            isRequired: '=',
-            instance: '=',
-            validators: '=',
-            focus: '&',
-            blur: '&',
-            change: '&'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-html-area"\
-                ng-class="{\
-                    \'ma-html-area-is-disabled\': isDisabled,\
-                    \'ma-html-area-is-focused\': isFocused,\
-                    \'ma-html-area-is-invalid\': !isValid,\
-                    \'ma-html-area-is-touched\': isTouched\
-                }">\
-                <trix-editor ng-disabled="isDisabled">\
-                </trix-editor>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            var editorElement = angular.element(element[0].querySelector('.ma-html-area trix-editor')),
-                buttonElements = angular.element(element[0].querySelectorAll('.ma-html-area .trix-button')),
-                editor,
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false,
-                focusValue,
-                isInternalChange = false;
-            scope._value = scope.value || '';
-            scope.isTouched = false;
-
-            var setEditorValue = function (value) {
-                editor.loadHTML(value);
-            };
-
-            var getEditorValue = function () {
-                return editorElement.html();
-            };
-
-            var disableEditor = function () {
-                editorElement[0].contentEditable = !scope.isDisabled;
-
-                if (scope.isDisabled) {
-                    buttonElements.attr('disabled', true);
-                } else {
-                    buttonElements.removeAttr('disabled');
-                }
-            };
-
-            var validate = function () {
-                var value = getEditorValue();
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            editorElement.on('trix-initialize', function () {
-                editor = editorElement[0].editor;
-                disableEditor();
-                setEditorValue(scope.value);
-            });
-
-            editorElement.on('trix-change', function () {
-                validate();
-
-                if (scope.isValid) {
-                    MaHelper.safeApply(function () {
-                        isInternalChange = true;
-                        scope.value = getEditorValue();
-
-                        $timeout(function () {
-                            scope.change({
-                                maValue: scope.value
-                            });
-                        });
-                    });
-                }
-            });
-
-            editorElement.on('trix-focus', function () {
-                MaHelper.safeApply(function () {
-                    scope.isFocused = true;
-                    focusValue = scope.value;
-
-                    scope.focus({
-                        maValue: scope.value
-                    });
-                });
-            });
-
-            editorElement.on('trix-blur', function () {
-                MaHelper.safeApply(function () {
-                    scope.isFocused = false;
-                    scope.isTouched = true;
-
-                    validate();
-
-                    scope.blur({
-                        maValue: scope.value,
-                        maOldValue: focusValue,
-                        maHasValueChanged: focusValue !== scope.value
-                    });
-                });
-            });
-
-            scope.$watch('value', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (isInternalChange) {
-                    isInternalChange = false;
-                    return;
-                }
-
-                scope.isValid = true;
-                setEditorValue(scope.value);
-            });
-
-            scope.$watch('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                disableEditor();
-            });
-
-            $timeout(function () {
-                $('[for="' + scope.id + '"]').on('click', function () {
-                    editorElement.focus();
-                });
-            });
-
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    scope.isTouched = true;
-                    validate();
-                };
-            }
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components')
     .provider('maTextBoxConfiguration', function () {
         this.$get = function () {
             return this;
@@ -11713,3 +11230,487 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
             }
         };
     }]);})();
+(function(){angular.module('marcuraUI.components')
+    /**
+     * The MaTooltip service creates tooltip- and popover-like directives as well as
+     * houses global options for them.
+     */
+    .provider('MaTooltip', function () {
+        // The default options tooltip and popover.
+        var defaultOptions = {
+            position: 'top',
+            animation: true,
+            delay: 0,
+            // TODO:  It might have something to do with templating and transcluding.
+            // Maybe it can be used later.
+            useContentExp: false
+        };
+
+        // Default hide triggers for each show trigger
+        var triggerMap = {
+            'mouseenter': 'mouseleave',
+            'click': 'click',
+            'focus': 'blur'
+        };
+
+        // The options specified to the provider globally.
+        var globalOptions = {};
+
+        /**
+         * `options({})` allows global configuration of all tooltips in the
+         * application.
+         *
+         * // place tooltips left instead of top by default
+         * MaTooltipProvider.options( { position: 'left' } );
+         */
+        this.options = function (value) {
+            angular.extend(globalOptions, value);
+        };
+
+        /**
+         * Returns the actual instance of the MaTooltip service.
+         * TODO support multiple triggers
+         */
+        this.$get = ['$window', '$compile', '$timeout', '$document', '$interpolate', 'MaPosition', 'MaHelper', function ($window, $compile, $timeout, $document, $interpolate, MaPosition, MaHelper) {
+            return function MaTooltip(defaultTriggerShow, options) {
+                options = angular.extend({}, defaultOptions, globalOptions, options);
+
+                /**
+                 * Returns an object of show and hide triggers.
+                 *
+                 * If a trigger is supplied,
+                 * it is used to show the tooltip; otherwise, it will use the `trigger`
+                 * option passed to the `MaTooltipProvider.options` method; else it will
+                 * default to the trigger supplied to this directive factory.
+                 *
+                 * The hide trigger is based on the show trigger. If t.he `trigger` option
+                 * was passed to the `MaTooltipProvider.options` method, it will use the
+                 * mapped trigger from `triggerMap` or the passed trigger if the map is
+                 * undefined; otherwise, it uses the `triggerMap` value of the show
+                 * trigger; else it will just use the show trigger.
+                 */
+                var getTriggers = function (trigger) {
+                    var show = trigger || options.trigger || defaultTriggerShow,
+                        hide = triggerMap[show] || show;
+
+                    return {
+                        show: show,
+                        hide: hide
+                    };
+                };
+
+                var startSymbol = $interpolate.startSymbol(),
+                    endSymbol = $interpolate.endSymbol();
+
+                var template = '\
+                    <div ma-tooltip-popup\
+                        ' + (options.useContentExp ? 'content-exp="contentExp()" ' : 'content="' + startSymbol + 'content' + endSymbol + '" ') + '\
+                        position="' + startSymbol + 'position' + endSymbol + '"\
+                        popup-class="' + startSymbol + 'popupClass' + endSymbol + '"\
+                        animation="animation"\
+                        is-visible="isVisible"\
+                        can-close="canClose"\
+                        origin-scope="origScope"\
+                        tooltip-scope="getTooltipScope">\
+                    </div>';
+
+                return {
+                    restrict: 'EA',
+                    compile: function (tElem, tAttrs) {
+                        var tooltipLinker = $compile(template);
+
+                        return function link(scope, element, attributes, tooltipController) {
+                            var tooltip,
+                                tooltipLinkedScope,
+                                transitionTimeout,
+                                popupTimeout,
+                                triggers = getTriggers(),
+                                hasIsDisabled = angular.isDefined(attributes.maTooltipIsDisabled),
+                                tooltipScope = scope.$new(true),
+                                animation = scope.$eval(attributes.maTooltipAnimation),
+                                canClose = scope.$eval(attributes.maTooltipCanClose),
+                                delay = parseInt(attributes.maTooltipDelay),
+                                instance = scope.$eval(attributes.maTooltipInstance);
+
+                            tooltipScope.delay = isNaN(delay) ? options.delay : delay;
+                            tooltipScope.popupClass = attributes.maTooltipClass;
+                            tooltipScope.position = attributes.maTooltipPosition ? attributes.maTooltipPosition : options.position;
+                            tooltipScope.animation = animation !== undefined ? !!animation : options.animation;
+                            tooltipScope.isVisible = false;
+                            tooltipScope.canClose = canClose !== undefined ? !!canClose : false;
+                            // Set up the correct scope to allow transclusion later.
+                            tooltipScope.origScope = scope;
+                            tooltipScope.contentExp = function () {
+                                return scope.$eval(attributes.maTooltip);
+                            };
+                            tooltipScope.getTooltipScope = function () {
+                                return tooltipScope;
+                            };
+
+                            var setPosition = function () {
+                                if (!tooltip) {
+                                    return;
+                                }
+
+                                var position = MaPosition.positionElements(element, tooltip, tooltipScope.position, false);
+                                position.top += 'px';
+                                position.left += 'px';
+
+                                // Now set the calculated positioning.
+                                tooltip.css(position);
+                            };
+
+                            var onToggle = function () {
+                                if (tooltipScope.isVisible) {
+                                    hide();
+                                } else {
+                                    if (!tooltipScope.isVisible) {
+                                        show();
+                                    }
+                                }
+                            };
+
+                            var onShow = function () {
+                                if (!tooltipScope.isVisible) {
+                                    show();
+                                }
+                            };
+
+                            // Show the tooltip with delay if specified, otherwise show it immediately.
+                            var show = function () {
+                                if (hasIsDisabled && scope.$eval(attributes.maTooltipIsDisabled)) {
+                                    return;
+                                }
+
+                                if (tooltipScope.delay) {
+                                    // Do nothing if the tooltip was already scheduled to pop-up.
+                                    // This happens if show is triggered multiple times before any hide is triggered.
+                                    if (!popupTimeout) {
+                                        popupTimeout = $timeout(doShow, tooltipScope.delay, false);
+                                        popupTimeout.then(function (reposition) {
+                                            reposition();
+                                        });
+                                    }
+                                } else {
+                                    doShow()();
+                                }
+                            };
+
+                            // Show the tooltip popup element.
+                            var doShow = function () {
+                                popupTimeout = null;
+
+                                // If there is a pending remove transition, we must cancel it, lest the
+                                // tooltip be mysteriously removed.
+                                if (transitionTimeout) {
+                                    $timeout.cancel(transitionTimeout);
+                                    transitionTimeout = null;
+                                }
+
+                                // Don't show empty tooltips.
+                                if (!(options.useContentExp ? tooltipScope.contentExp() : tooltipScope.content)) {
+                                    return angular.noop;
+                                }
+
+                                create();
+
+                                // Set the initial positioning.
+                                tooltip.css({ top: 0, left: 0, display: 'block' });
+
+                                setPosition();
+
+                                // And show the tooltip.
+                                MaHelper.safeApply(function () {
+                                    tooltipScope.isVisible = true;
+                                });
+
+                                // Return positioning function as promise callback for correct
+                                // positioning after draw.
+                                return setPosition;
+                            };
+
+                            // Hide the tooltip popup element.
+                            var hide = function () {
+                                MaHelper.safeApply(function () {
+                                    tooltipScope.isVisible = false;
+
+                                    // If tooltip is going to be shown after delay, we must cancel this.
+                                    $timeout.cancel(popupTimeout);
+                                    popupTimeout = null;
+
+                                    // And now we remove it from the DOM. However, if we have animation, we
+                                    // need to wait for it to expire beforehand.
+                                    // FIXME: this is a placeholder for a port of the transitions library.
+                                    if (tooltipScope.animation) {
+                                        if (!transitionTimeout) {
+                                            transitionTimeout = $timeout(remove, 500);
+                                        }
+                                    } else {
+                                        remove();
+                                    }
+                                });
+                            };
+
+                            tooltipScope.close = function () {
+                                hide();
+                            };
+
+                            var create = function () {
+                                // There can only be one tooltip element per directive shown at once.
+                                if (tooltip) {
+                                    remove();
+                                }
+                                tooltipLinkedScope = tooltipScope.$new();
+                                tooltip = tooltipLinker(tooltipLinkedScope, function (tooltip) {
+                                    element.after(tooltip);
+                                });
+
+                                tooltipLinkedScope.$watch(function () {
+                                    $timeout(setPosition, 0, false);
+                                });
+
+                                if (options.useContentExp) {
+                                    tooltipLinkedScope.$watch('contentExp()', function (val) {
+                                        if (!val && tooltipScope.isVisible) {
+                                            hide();
+                                        }
+                                    });
+                                }
+                            };
+
+                            var remove = function () {
+                                transitionTimeout = null;
+
+                                if (tooltip) {
+                                    tooltip.remove();
+                                    tooltip = null;
+                                }
+
+                                if (tooltipLinkedScope) {
+                                    tooltipLinkedScope.$destroy();
+                                    tooltipLinkedScope = null;
+                                }
+                            };
+
+                            var setTriggers = function () {
+                                removeTriggers();
+                                triggers = getTriggers(attributes.maTooltipOn);
+
+                                if (triggers.show === triggers.hide) {
+                                    element.bind(triggers.show, onToggle);
+                                } else {
+                                    element.bind(triggers.show, onShow);
+
+                                    // Leave it to user to close tooltip.
+                                    if (!tooltipScope.canClose) {
+                                        element.bind(triggers.hide, hide);
+                                    }
+                                }
+                            };
+
+                            var removeTriggers = function () {
+                                element.unbind(triggers.show, onShow);
+                                element.unbind(triggers.hide, hide);
+                            };
+
+                            attributes.$observe('maTooltip', function (content) {
+                                tooltipScope.content = content;
+
+                                if (!content && tooltipScope.isVisible) {
+                                    hide();
+                                }
+                            });
+
+                            if (attributes.maTooltipCanClose) {
+                                scope.$watch(attributes.maTooltipCanClose, function (newValue, oldValue) {
+                                    if (newValue === oldValue) {
+                                        return;
+                                    }
+
+                                    tooltipScope.canClose = newValue;
+                                    setTriggers();
+
+                                    if (!tooltipScope.canClose && tooltipScope.isVisible) {
+                                        hide();
+                                    }
+                                });
+                            }
+
+                            setTriggers();
+
+                            $timeout(function () {
+                                // Check for scope as it might be already destroyed when, for example,
+                                // user switches between router states quickly.
+                                if (tooltipScope && tooltipScope.isVisible) {
+                                    show();
+                                }
+                            });
+
+                            // Prepare API instance.
+                            if (instance) {
+                                instance.isInitialized = true;
+
+                                instance.show = function () {
+                                    if (!tooltipScope.isVisible) {
+                                        show();
+                                    }
+                                };
+
+                                instance.hide = function () {
+                                    if (tooltipScope.isVisible) {
+                                        hide();
+                                    }
+                                };
+                            }
+
+                            // Make sure tooltip is destroyed and removed.
+                            scope.$on('$destroy', function onDestroyTooltip() {
+                                $timeout.cancel(transitionTimeout);
+                                $timeout.cancel(popupTimeout);
+                                removeTriggers();
+                                remove();
+                                tooltipScope = null;
+                            });
+                        };
+                    }
+                };
+            };
+        }];
+    })
+    .directive('maTooltipPopup', ['$sce', function ($sce) {
+        return {
+            restrict: 'EA',
+            replace: true,
+            scope: {
+                content: '@',
+                position: '@',
+                popupClass: '@',
+                animation: '&',
+                isVisible: '&',
+                canClose: '&',
+                tooltipScope: '='
+            },
+            template: function () {
+                var html = '<div class="ma-tooltip" ma-tooltip-animation-class="fade" ma-tooltip-classes\
+                    ng-class="{\
+                        \'in\': isVisible(),\
+                        \'ma-tooltip-can-close\': canClose()\
+                    }">\
+                    <div class="ma-tooltip-arrow"></div>\
+                    <div class="ma-tooltip-inner" ng-bind-html="getContent()"></div>\
+                    <div class="ma-tooltip-close" ng-if="canClose()" ng-click="tooltipScope().close()">\
+                        <i class="fa fa-close"></i>\
+                    </div>\
+                </div>';
+
+                return html;
+            },
+            link: function (scope) {
+                scope.getContent = function () {
+                    return $sce.trustAsHtml(scope.content);
+                };
+            }
+        };
+    }])
+    .directive('maTooltip', ['MaTooltip', function (MaTooltip) {
+        return MaTooltip('mouseenter');
+    }])
+    /**
+     * Note that it's intentional that these classes are *not* applied through $animate.
+     * They must not be animated as they're expected to be present on the tooltip on
+     * initialization.
+     */
+    .directive('maTooltipClasses', function () {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attribites) {
+                if (scope.position) {
+                    element.addClass(scope.position);
+                }
+
+                if (scope.popupClass) {
+                    element.addClass(scope.popupClass);
+                }
+
+                if (scope.animation()) {
+                    element.addClass(attribites.maTooltipAnimationClass);
+                }
+            }
+        };
+    });
+    // This is mostly ngInclude code but with a custom scope
+    // .directive('maTooltipTemplateTransclude', ['$animate', '$sce', '$compile', '$templateRequest',
+    //     function ($animate, $sce, $compile, $templateRequest) {
+    //         return {
+    //             link: function (scope, elem, attributes) {
+    //                 var origScope = scope.$eval(attributes.maTooltipTemplateTranscludeScope),
+    //                     changeCounter = 0,
+    //                     currentScope,
+    //                     previousElement,
+    //                     currentElement;
+
+    //                 var cleanupLastIncludeContent = function () {
+    //                     if (previousElement) {
+    //                         previousElement.remove();
+    //                         previousElement = null;
+    //                     }
+    //                     if (currentScope) {
+    //                         currentScope.$destroy();
+    //                         currentScope = null;
+    //                     }
+    //                     if (currentElement) {
+    //                         $animate.leave(currentElement).then(function () {
+    //                             previousElement = null;
+    //                         });
+    //                         previousElement = currentElement;
+    //                         currentElement = null;
+    //                     }
+    //                 };
+
+    //                 scope.$watch($sce.parseAsResourceUrl(attributes.maTooltipTemplateTransclude), function (src) {
+    //                     var thisChangeId = ++changeCounter;
+
+    //                     if (src) {
+    //                         //set the 2nd param to true to ignore the template request error so that the inner
+    //                         //contents and scope can be cleaned up.
+    //                         $templateRequest(src, true).then(function (response) {
+    //                             if (thisChangeId !== changeCounter) { return; }
+    //                             var newScope = origScope.$new();
+    //                             var template = response;
+
+    //                             var clone = $compile(template)(newScope, function (clone) {
+    //                                 cleanupLastIncludeContent();
+    //                                 $animate.enter(clone, elem);
+    //                             });
+
+    //                             currentScope = newScope;
+    //                             currentElement = clone;
+
+    //                             currentScope.$emit('$includeContentLoaded', src);
+    //                         }, function () {
+    //                             if (thisChangeId === changeCounter) {
+    //                                 cleanupLastIncludeContent();
+    //                                 scope.$emit('$includeContentError', src);
+    //                             }
+    //                         });
+    //                         scope.$emit('$includeContentRequested', src);
+    //                     } else {
+    //                         cleanupLastIncludeContent();
+    //                     }
+    //                 });
+
+    //                 scope.$on('$destroy', cleanupLastIncludeContent);
+    //             }
+    //         };
+    //     }])
+    // .directive('maTooltipTemplate', ['MaTooltip', function (MaTooltip) {
+    //     return MaTooltip('maTooltipTemplate', 'mouseenter', {
+    //         useContentExp: true
+    //     });
+    // }])
+    // .directive('maTooltipHtml', ['MaTooltip', function (MaTooltip) {
+    //     return MaTooltip('maTooltipHtml', 'mouseenter', {
+    //         useContentExp: true
+    //     });
+    // }]);
+})();
