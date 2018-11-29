@@ -427,7 +427,7 @@ angular.module('marcuraUI.components')
                     }
 
                     if (isFocusLost) {
-                        focusValue = scope.value;
+                        focusValue = valueElement.val();
 
                         scope.focus({
                             maValue: scope.value
@@ -460,7 +460,10 @@ angular.module('marcuraUI.components')
 
                 var onFocusout = function (event, elementName) {
                     var elementTo = angular.element(event.relatedTarget),
-                        value = valueElement.val();
+                        value = valueElement.val(),
+                        hasValueChanged = focusValue !== value;
+
+                    setPreviousValue(scope.value);
 
                     // Trigger blur event when focus goes to an element outside the component.
                     if (scope.canTogglePassword) {
@@ -486,7 +489,11 @@ angular.module('marcuraUI.components')
                             // E.g., value is 0, user types 1, and then removes the value.
                             isInternalChange = true;
                             value = defaultValue;
-                            scope.value = value;
+
+                            if (hasValueChanged) {
+                                scope.value = value;
+                            }
+
                             valueElement.val(formatValue(value));
                         }
 
@@ -508,13 +515,15 @@ angular.module('marcuraUI.components')
                     });
 
                     if (isFocusLost) {
-                        changeValue();
+                        if (hasValueChanged) {
+                            changeValue();
+                        }
 
                         MaHelper.safeApply(function () {
                             scope.blur({
                                 maValue: scope.value,
                                 maOldValue: focusValue,
-                                maHasValueChanged: focusValue !== scope.value
+                                maHasValueChanged: hasValueChanged
                             });
                         });
                     }
