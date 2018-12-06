@@ -358,22 +358,21 @@ the specific language governing permissions and limitations under the Apache Lic
         dest.attr("class", replacements.join(" "));
     }
 
+    // function markMatch(text, term, markup, escapeMarkup) {
+    //     var match = stripDiacritics(text.toUpperCase()).indexOf(stripDiacritics(term.toUpperCase())),
+    //         tl = term.length;
 
-    function markMatch(text, term, markup, escapeMarkup) {
-        var match = stripDiacritics(text.toUpperCase()).indexOf(stripDiacritics(term.toUpperCase())),
-            tl = term.length;
+    //     if (match < 0) {
+    //         markup.push(escapeMarkup(text));
+    //         return;
+    //     }
 
-        if (match < 0) {
-            markup.push(escapeMarkup(text));
-            return;
-        }
-
-        markup.push(escapeMarkup(text.substring(0, match)));
-        markup.push("<span class='select2-match'>");
-        markup.push(escapeMarkup(text.substring(match, match + tl)));
-        markup.push("</span>");
-        markup.push(escapeMarkup(text.substring(match + tl, text.length)));
-    }
+    //     markup.push(escapeMarkup(text.substring(0, match)));
+    //     markup.push("<span class='select2-match'>");
+    //     markup.push(escapeMarkup(text.substring(match, match + tl)));
+    //     markup.push("</span>");
+    //     markup.push(escapeMarkup(text.substring(match + tl, text.length)));
+    // }
 
     function defaultEscapeMarkup(markup) {
         var replace_map = {
@@ -3526,9 +3525,10 @@ the specific language governing permissions and limitations under the Apache Lic
         containerCssClass: "",
         dropdownCssClass: "",
         formatResult: function (result, container, query, escapeMarkup) {
-            var markup = [];
-            markMatch(result.text, query.term, markup, escapeMarkup);
-            return markup.join("");
+            // var markup = [];
+            // markMatch(result.text, query.term, markup, escapeMarkup);
+            // return markup.join("");
+            return escapeMarkup(result.text);
         },
         formatSelection: function (data, container, escapeMarkup) {
             return data && data.text !== undefined ? escapeMarkup(data.text) : undefined;
@@ -3608,7 +3608,7 @@ the specific language governing permissions and limitations under the Apache Lic
             tags: tags
         }, util: {
             debounce: debounce,
-            markMatch: markMatch,
+            // markMatch: markMatch,
             escapeMarkup: defaultEscapeMarkup,
             stripDiacritics: stripDiacritics
         }, "class": {
