@@ -744,8 +744,12 @@ angular.module('marcuraUI.components')
                     };
 
                     // User typed value, that hasn't gone through validation.
-                    scope.instance.rawValue = function () {
-                        return getValue();
+                    scope.instance.rawValue = function (value) {
+                        if (arguments.length === 1) {
+                            valueElement.val(value);
+                        } else {
+                            return getValue();
+                        }
                     };
 
                     scope.instance.clear = function () {

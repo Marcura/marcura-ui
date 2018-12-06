@@ -941,6 +941,15 @@ angular.module('marcuraUI.components')
                         setDisplayDate(date);
                         validate(date, false);
                     };
+
+                    // User typed value, that hasn't gone through validation.
+                    scope.instance.rawValue = function (value) {
+                        if (arguments.length === 1) {
+                            dateElement.val(value);
+                        } else {
+                            return dateElement.val();
+                        }
+                    };
                 }
             }
         };
