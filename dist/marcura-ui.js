@@ -4753,13 +4753,11 @@ if (!String.prototype.endsWith) {
                 if (scope.value) {
                     var date = parseDate(scope.value);
 
-                    if (date.isEmpty()) {
-                        return;
+                    if (!date.isEmpty()) {
+                        setDisplayDate(date);
+                        previousDate = date;
+                        initialDateOffset = date.offset();
                     }
-
-                    setDisplayDate(date);
-                    previousDate = date;
-                    initialDateOffset = date.offset();
                 }
 
                 addFocusEvent();
@@ -4936,6 +4934,7 @@ if (!String.prototype.endsWith) {
 
                 // Prepare API instance.
                 if (scope.instance) {
+                    console.log('instance:', scope.instance);
                     scope.instance.isInitialized = true;
 
                     scope.instance.isEditor = function () {
@@ -4975,7 +4974,9 @@ if (!String.prototype.endsWith) {
 
                     // User typed value, that hasn't gone through validation.
                     scope.instance.rawValue = function (value) {
+                        console.log('value:', value);
                         if (arguments.length === 1) {
+                            console.log('value:', value);
                             dateElement.val(value);
                         } else {
                             return dateElement.val();
