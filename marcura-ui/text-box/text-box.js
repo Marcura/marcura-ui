@@ -512,6 +512,7 @@ angular.module('marcuraUI.components')
                     // Use safeApply to avoid apply error when Reset icon is clicked.
                     MaHelper.safeApply(function () {
                         scope.isValueFocused = false;
+                        scope.isTouched = true;
                     });
 
                     if (isFocusLost) {
