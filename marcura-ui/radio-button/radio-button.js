@@ -30,9 +30,9 @@ angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', '
                         <ma-button\
                             class="ma-button-radio"\
                             text="{{getItemText(item)}}"\
-                            modifier="simple"\
+                            simple\
                             size="xs"\
-                            is-disabled="isDisabled"\
+                            is-disabled="{{isDisabled}}"\
                             click="onChange(item)">\
                         </ma-button>\
                     </div>\

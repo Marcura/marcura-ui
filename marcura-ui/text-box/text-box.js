@@ -61,18 +61,18 @@ angular.module('marcuraUI.components')
                     ng-keydown="onKeydown($event)"\
                     ng-disabled="isDisabled"/>\
                 <ma-button class="ma-button-toggle-password"\
-                    ng-show="canTogglePassword" size="xs" modifier="simple"\
+                    ng-show="canTogglePassword" size="xs" simple\
                     right-icon="{{isPasswordVisible ? \'eye-slash\' : \'eye\'}}"\
                     click="togglePassword()"\
                     ng-focus="onFocus()"\
-                    is-disabled="!isTogglePasswordEnabled()">\
+                    is-disabled="{{!isTogglePasswordEnabled()}}">\
                 </ma-button>\
                 <ma-button class="ma-button-reset"\
-                    ng-show="canReset" size="xs" modifier="simple"\
+                    ng-show="canReset" size="xs" simple\
                     right-icon="times-circle"\
                     click="onReset()"\
                     ng-focus="onFocus()"\
-                    is-disabled="!isResetEnabled()">\
+                    is-disabled="{{!isResetEnabled()}}">\
                 </ma-button>\
             </div>';
 

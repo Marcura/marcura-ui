@@ -20,7 +20,7 @@ angular.module('marcuraUI.components').directive('maLabel', [function () {
             return html;
         },
         link: function (scope, element) {
-            scope.hasContent = element.find('span').contents().length > 0;
+            scope.hasContent = element.find('ng-transclude').contents().length > 0;
         }
     };
 }]);

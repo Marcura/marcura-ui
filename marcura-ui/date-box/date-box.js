@@ -68,10 +68,10 @@ angular.module('marcuraUI.components')
                         <i class="ma-date-box-icon fa fa-calendar"></i>\
                     </div>\
                     <ma-button class="ma-button-reset"\
-                        ng-show="canReset" size="xs" modifier="simple"\
+                        ng-show="canReset" size="xs" simple\
                         right-icon="times-circle"\
                         click="onReset()"\
-                        is-disabled="!isResetEnabled()">\
+                        is-disabled="{{!isResetEnabled()}}">\
                     </ma-button>\
                     <div class="ma-date-box-spinner" ng-if="isLoading && !isDisabled">\
                         <div class="ma-pace">\
@@ -903,7 +903,6 @@ angular.module('marcuraUI.components')
 
                 // Prepare API instance.
                 if (scope.instance) {
-                    console.log('instance:', scope.instance);
                     scope.instance.isInitialized = true;
 
                     scope.instance.isEditor = function () {
@@ -943,9 +942,7 @@ angular.module('marcuraUI.components')
 
                     // User typed value, that hasn't gone through validation.
                     scope.instance.rawValue = function (value) {
-                        console.log('value:', value);
                         if (arguments.length === 1) {
-                            console.log('value:', value);
                             dateElement.val(value);
                         } else {
                             return dateElement.val();

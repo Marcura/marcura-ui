@@ -106,20 +106,20 @@ angular.module('marcuraUI.components')
                         ng-focus="onFocus(\'text\')"\
                         placeholder="{{textPlaceholder}}"/>\
                     <ma-button class="ma-button-toggle"\
-                        ng-show="canAddItem" size="xs" modifier="simple"\
+                        ng-show="canAddItem" size="xs" simple\
                         ma-tooltip="{{_addItemTooltip}}"\
                         ma-tooltip-is-disabled="!canAddItem"\
                         right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
                         click="changeMode()"\
                         ng-focus="onFocus(\'toggle\')"\
-                        is-disabled="isDisabled">\
+                        is-disabled="{{isDisabled}}">\
                     </ma-button>\
                     <ma-button class="ma-button-reset"\
-                        ng-show="canReset" size="xs" modifier="simple"\
+                        ng-show="canReset" size="xs" simple\
                         right-icon="times-circle"\
                         click="onReset()"\
                         ng-focus="onFocus(\'reset\')"\
-                        is-disabled="isDisabled || !_hasValue">\
+                        is-disabled="{{isDisabled || !_hasValue}}">\
                     </ma-button>\
                 </div>';
 

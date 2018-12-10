@@ -29,16 +29,16 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                             class="ma-button-first"\
                             text="First"\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="firstClick()"\
-                            is-disabled="_page <= 1"\
+                            is-disabled="{{_page <= 1}}"\
                         ></ma-button><ma-button\
                             class="ma-button-previous"\
                             text="Previous"\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="previousClick()"\
-                            is-disabled="_page <= 1">\
+                            is-disabled="{{_page <= 1}}">\
                         </ma-button>\
                     </div\
                     ><div class="ma-pager-middle">\
@@ -46,23 +46,24 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                             class="ma-button-previous-range"\
                             text="..."\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="previousRangeClick()"\
-                            is-disabled="isFirstRange"\
+                            is-disabled="{{isFirstRange}}"\
                         ></ma-button><div class="ma-pager-pages"><ma-button\
                             ng-repeat="rangePage in rangePages"\
                             class="ma-button-page"\
                             text="{{rangePage}}"\
                             size="xs"\
-                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
+                            ng-attr-selected="{{_page === rangePage || undefined}}"\
+                            ng-attr-default="{{_page !== rangePage || undefined}}"\
                             click="pageClick(rangePage)"></div></ma-button\
                         ><ma-button\
                             class="ma-button-next-range"\
                             text="..."\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="nextRangeClick()"\
-                            is-disabled="isLastRange"\
+                            is-disabled="{{isLastRange}}"\
                         ></ma-button>\
                     </div\
                     ><div class="ma-pager-end">\
@@ -70,16 +71,16 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                             class="ma-button-next"\
                             text="Next"\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="nextClick()"\
-                            is-disabled="_page >= totalPages"\
+                            is-disabled="{{_page >= totalPages}}"\
                         ></ma-button><ma-button\
                             class="ma-button-last"\
                             text="Last"\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="lastClick()"\
-                            is-disabled="_page >= totalPages">\
+                            is-disabled="{{_page >= totalPages}}">\
                         </ma-button>\
                     </div>\
                 </div>\
