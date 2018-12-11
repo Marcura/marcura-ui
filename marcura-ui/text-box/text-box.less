@@ -25,7 +25,7 @@
             border-color: @color-danger;
         }
     }
-    &-danger:not(&-is-disabled) {
+    &[danger='true']:not(&-is-disabled) {
         &.ma-text-box-is-focused .ma-text-box-value {
             .box-shadow(@input-shadow-invalid);
         }

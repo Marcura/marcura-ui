@@ -5,7 +5,8 @@
     <div class="nodes-item">
         <h1>TextBox</h1>
         <div class="api-documentation">
-            <a href="https://github.com/Marcura/marcura-ui/wiki/textbox">API documentation</a>
+            <a href="https://github.com/Marcura/marcura-ui/wiki/textbox">API
+                documentation</a>
         </div>
     </div>
     <div class="nodes-item">
@@ -43,11 +44,13 @@
     </div>
     <div class="nodes-item">
         By default change event fires when value is changed.
-        <br/> However, it is also possible to set a timeout for the event. In this case
+        <br /> However, it is also possible to set a timeout for the event. In
+        this case
         timeout is 1 second.
     </div>
     <div class="nodes-item">
-        <ma-text-box value="text4" change="change(maValue, maOldValue, 'text4')" change-timeout="1000">
+        <ma-text-box value="text4" change="change(maValue, maOldValue, 'text4')"
+            change-timeout="1000">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -84,7 +87,8 @@
         <h2>Number min and max</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box value="number2" type="number" min="number2Min" max="number2Max" can-reset="true">
+        <ma-text-box value="number2" type="number" min="{{number2Min}}" max="{{number2Max}}"
+            can-reset="true">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -98,7 +102,8 @@ max: {{number2Max}}</pre>
         <h2>Text min and max</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box value="text10" min="text10Min" max="text10Max" is-required="true" can-reset="true">
+        <ma-text-box value="text10" min="{{text10Min}}" max="{{text10Max}}"
+            is-required="true" can-reset="true">
         </ma-text-box>
     </div>
     <div class="nodes-item">
@@ -112,13 +117,14 @@ max: {{text10Max}}</pre>
         <h2>Number with default value</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box value="number3" type="number" can-reset="true" reset="reset()" default-value="0"
-            is-required="true" change="change(maValue, maOldValue, 'number3')" blur="blur(maValue, maOldValue, maHasValueChanged, 'number3')"
+        <ma-text-box value="number3" type="number" can-reset="true" reset="reset()"
+            default-value="3" is-required="true" change="change(maValue, maOldValue, 'number3')"
+            blur="blur(maValue, maOldValue, maHasValueChanged, 'number3')"
             focus="focus(maValue, 'number3')">
         </ma-text-box>
     </div>
     <div class="nodes-item">
-        <pre>defaultValue: 0</pre>
+        <pre>defaultValue: 3</pre>
     </div>
     <div class="nodes-item">
         <pre>{{(number3) | json}}</pre>
@@ -127,8 +133,9 @@ max: {{text10Max}}</pre>
         <h2>Number without format</h2>
     </div>
     <div class="nodes-item">
-        <ma-text-box value="number4" type="number" can-reset="true" reset="reset()" default-value="0"
-            is-required="true" change="change(maValue, maOldValue, 'number4')" blur="blur(maValue, maOldValue, maHasValueChanged, 'number4')"
+        <ma-text-box value="number4" type="number" can-reset="true" reset="reset()"
+            default-value="0" is-required="true" change="change(maValue, maOldValue, 'number4')"
+            blur="blur(maValue, maOldValue, maHasValueChanged, 'number4')"
             focus="focus(maValue, 'number4')" use-format="false">
         </ma-text-box>
     </div>

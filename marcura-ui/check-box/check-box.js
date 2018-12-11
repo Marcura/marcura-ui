@@ -5,10 +5,10 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
             text: '@',
             size: '@',
             rtl: '@',
+            isDisabled: '@',
+            isRequired: '@',
             change: '&',
             value: '=',
-            isDisabled: '=',
-            isRequired: '=',
             validators: '=',
             instance: '='
         },
@@ -35,7 +35,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
                     ng-click="onChange()"\
                     ng-class="{\
                         \'ma-check-box-is-checked\': value === true,\
-                        \'ma-check-box-is-disabled\': isDisabled,\
+                        \'ma-check-box-is-disabled\': isDisabled === \'true\',\
                         \'ma-check-box-is-focused\': isFocused,\
                         \'ma-check-box-is-invalid\': !isValid,\
                         \'ma-check-box-is-touched\': isTouched\
@@ -49,11 +49,11 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
         },
         link: function (scope, element, attributes) {
             var validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
+                isRequired = scope.isRequired === 'true',
                 hasIsNotEmptyValidator = false;
 
             var setTabindex = function () {
-                if (scope.isDisabled) {
+                if (scope.isDisabled === 'true') {
                     element.removeAttr('tabindex');
                 } else {
                     element.attr('tabindex', '0');
@@ -112,7 +112,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
             };
 
             scope.onChange = function () {
-                if (scope.isDisabled) {
+                if (scope.isDisabled === 'true') {
                     return;
                 }
 
@@ -135,13 +135,13 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
             };
 
             scope.onFocus = function () {
-                if (!scope.isDisabled) {
+                if (scope.isDisabled !== 'true') {
                     scope.isFocused = true;
                 }
             };
 
             scope.onBlur = function () {
-                if (scope.isDisabled) {
+                if (scope.isDisabled === 'true') {
                     return;
                 }
 
@@ -154,13 +154,13 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
                     // Prevent page from scrolling down.
                     event.preventDefault();
 
-                    if (!scope.isDisabled) {
+                    if (scope.isDisabled !== 'true') {
                         scope.onChange();
                     }
                 }
             };
 
-            scope.$watch('isDisabled', function (newValue, oldValue) {
+            attributes.$observe('isDisabled', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }

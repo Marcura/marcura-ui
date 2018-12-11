@@ -26,7 +26,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
                         <ma-check-box\
                             size="sm"\
                             value="getItemMetadata(item).isSelected"\
-                            is-disabled="isDisabled">\
+                            is-disabled="{{isDisabled}}">\
                         </ma-check-box><div class="ma-multi-check-box-text">{{getItemText(item)}}</div>\
                     </div>\
                 </div>';

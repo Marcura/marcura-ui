@@ -6,7 +6,7 @@
  * This change is so that you do not have to do an additional query yourself on top of Select2 own query.
  */
 angular.module('marcuraUI.components').directive('maSelectBoxWrapper', ['$timeout', 'MaHelper', function ($timeout, MaHelper) {
-    // The configuration options passed to $.fn.select2(). See http://select2.github.io/select2/#documentation.
+    // The options passed to $.fn.select2(). See http://select2.github.io/select2/#documentation.
     var options = {};
 
     return {
