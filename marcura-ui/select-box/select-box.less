@@ -28,7 +28,7 @@
         color: @text-color-disabled;
         cursor: default;
     }
-    :not( &-is-loading):not( &-is-disabled)&-is-invalid&-is-touched {
+    :not(&-is-loading):not(&-is-disabled)&-is-invalid&-is-touched {
         &.ma-select-box-is-text-focused .ma-select-box-text,
         .select2-container-active:not(.select2-dropdown-open) .select2-choice,
         .select2-container-active:not(.select2-dropdown-open) .select2-choices {
@@ -103,6 +103,7 @@
         top: 0;
         left: 0;
         z-index: 1;
+        display: none;
     }
     .ma-pace .ma-pace-activity {
         position: absolute;
@@ -121,6 +122,11 @@
     }
     .ma-tooltip {
         min-width: 70px;
+    }
+    &-is-loading:not(&-is-disabled) {
+        .ma-select-box-spinner {
+            display: block;
+        }
     }
 }
 

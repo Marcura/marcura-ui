@@ -28,22 +28,32 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
         },
         replace: true,
         template: function (element, attributes) {
-            var type = attributes.type === 'password' ? 'password' : 'text';
+            var type = attributes.type === 'password' ? 'password' : 'text',
+                canReset = attributes.canReset === 'true',
+                hasShowPasswordButton = attributes.hasShowPasswordButton === 'false' ? false : true,
+                canTogglePassword = type === 'password' && hasShowPasswordButton !== false,
+                cssClass = 'ma-text-box';
+
+            if (canReset) {
+                cssClass += ' ma-text-box-can-reset';
+            }
+
+            if (canTogglePassword) {
+                cssClass += ' ma-text-box-can-toggle-password';
+            }
 
             if (type === 'number' || type === 'email') {
                 type = 'text';
             }
 
             var html = '\
-                <div class="ma-text-box"\
+                <div class="'+ cssClass + '"\
                     ng-class="{\
                         \'ma-text-box-is-disabled\': isDisabled === \'true\',\
                         \'ma-text-box-is-focused\': isValueFocused,\
                         \'ma-text-box-is-invalid\': !isValid,\
                         \'ma-text-box-is-touched\': isTouched,\
-                        \'ma-text-box-can-reset\': canReset === \'true\',\
                         \'ma-text-box-is-reset-disabled\': canReset === \'true\' && isDisabled !== \'true\' && !isResetEnabled(),\
-                        \'ma-text-box-can-toggle-password\': canTogglePassword,\
                         \'ma-text-box-is-toggle-password-disabled\': canTogglePassword && isDisabled !== \'true\' && !isTogglePasswordEnabled(),\
                         \'ma-text-box-has-value\': hasValue()\
                     }">\
@@ -52,22 +62,29 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
                         placeholder="{{placeholder}}"\
                         ng-focus="onFocus(\'value\')"\
                         ng-keydown="onKeydown($event)"\
-                        ng-disabled="isDisabled === \'true\'"/>\
-                    <ma-button class="ma-button-toggle-password"\
-                        ng-show="canTogglePassword" size="xs" simple\
-                        right-icon="{{isPasswordVisible ? \'eye-slash\' : \'eye\'}}"\
-                        click="togglePassword()"\
-                        ng-focus="onFocus()"\
-                        is-disabled="{{!isTogglePasswordEnabled()}}">\
-                    </ma-button>\
-                    <ma-button class="ma-button-reset"\
-                        ng-show="canReset === \'true\'" size="xs" simple\
-                        right-icon="times-circle"\
-                        click="onReset()"\
-                        ng-focus="onFocus()"\
-                        is-disabled="{{!isResetEnabled()}}">\
-                    </ma-button>\
-                </div>';
+                        ng-disabled="isDisabled === \'true\'"/>';
+
+            if (canTogglePassword) {
+                html += '<ma-button class="ma-button-toggle-password"\
+                    size="xs" simple\
+                    right-icon="{{isPasswordVisible ? \'eye-slash\' : \'eye\'}}"\
+                    click="togglePassword()"\
+                    ng-focus="onFocus()"\
+                    is-disabled="{{!isTogglePasswordEnabled()}}">\
+                </ma-button>';
+            }
+
+            if (canReset) {
+                html += '<ma-button class="ma-button-reset"\
+                    size="xs" simple\
+                    right-icon="times-circle"\
+                    click="onReset()"\
+                    ng-focus="onFocus()"\
+                    is-disabled="{{!isResetEnabled()}}">\
+                </ma-button>';
+            }
+
+            html += '</div>';
 
             return html;
         },
@@ -97,7 +114,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
                 max = hasMax ? Number(scope.max) : null,
                 useFormat = scope.useFormat === 'false' ? false : true,
                 changeWhenIsInvalid = scope.changeWhenIsInvalid === 'true' ? true : false,
-                hasShowPasswordButton = scope.hasShowPasswordButton === 'true' ? true : false,
+                hasShowPasswordButton = scope.hasShowPasswordButton === 'false' ? false : true,
                 minMaxObserverRunCount = 0;
 
             if (scope.type === 'number') {
@@ -320,12 +337,8 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
             setValidators();
             scope.isValueFocused = false;
             scope.isTouched = false;
-            scope.canTogglePassword = false;
+            scope.canTogglePassword = scope.type === 'password' && hasShowPasswordButton;
             scope.isPasswordVisible = false;
-
-            if (scope.type === 'password') {
-                scope.canTogglePassword = hasShowPasswordButton !== false;
-            }
 
             scope.hasValue = function () {
                 if (scope.type === 'number') {
