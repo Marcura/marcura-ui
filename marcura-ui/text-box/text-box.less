@@ -1,60 +1,48 @@
 @import 'marcura-ui/less.less';
-
 .ma-text-box {
     position: relative;
     display: inline-block;
     vertical-align: top;
     .input-reset-button;
-
     &-is-reset-disabled {
         .input-reset-button-disabled;
     }
-
     &-is-focused &-value {
         .box-shadow(@input-shadow-focused);
         border-color: @color-primary;
     }
-
     &-is-disabled &-value {
         .box-shadow(none);
         background-color: @color-disabled;
         cursor: default;
         color: @text-color-disabled;
     }
-
     &-is-invalid&-is-touched:not(&-is-disabled) {
         &.ma-text-box-is-focused .ma-text-box-value {
             .box-shadow(@input-shadow-invalid);
         }
-
         .ma-text-box-value {
             border-color: @color-danger;
         }
     }
-
     &-danger:not(&-is-disabled) {
         &.ma-text-box-is-focused .ma-text-box-value {
             .box-shadow(@input-shadow-invalid);
         }
-
         .ma-text-box-value {
             border-color: @color-danger;
         }
     }
-
     &-can-reset,
     &-can-toggle-password {
         padding-right: 29px;
     }
-
     &-can-reset&-can-toggle-password {
         padding-right: 58px;
-
         .ma-button.ma-button-toggle-password {
             right: 29px;
         }
     }
-
     &-value {
         .input;
         .box-shadow(@input-shadow);
@@ -71,37 +59,30 @@
         border: 1px solid @border-color;
         background-color: @input-background-color;
     }
-
     .ma-button.ma-button-toggle-password {
         position: absolute;
         top: 0;
         right: 0;
         border-left: 0;
         .box-shadow(none);
-
         &:hover {
             background-color: @background-color-darker-light;
         }
     }
-
     .ma-button-toggle-password .ma-button-icon {
         font-size: 20px;
         text-shadow: none;
     }
-
-    .ma-button-toggle-password.ma-button-is-disabled {
+    .ma-button-toggle-password[is-disabled='true'] {
         background-color: @color-disabled;
     }
-
-    .ma-button-toggle-password.ma-button-is-disabled .ma-button-icon {
+    .ma-button-toggle-password[is-disabled='true'] .ma-button-icon {
         color: inherit;
         opacity: 0.45;
     }
-
     &-is-toggle-password-disabled {
-        .ma-button-toggle-password.ma-button-is-disabled {
+        .ma-button-toggle-password[is-disabled='true'] {
             background-color: #ffffff;
-
             .ma-button-icon {
                 opacity: 0.15;
             }

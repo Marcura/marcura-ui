@@ -3794,43 +3794,54 @@ if (!String.prototype.endsWith) {
         restrict: 'E',
         scope: {
             text: '@',
+            size: '@',
+            rtl: '@',
+            change: '&',
             value: '=',
             isDisabled: '=',
-            change: '&',
-            size: '@',
-            rtl: '=',
             isRequired: '=',
             validators: '=',
-            instance: '=',
+            instance: '='
         },
         replace: true,
-        template: function () {
+        template: function (element, attributes) {
+            var isRtl = attributes.rtl === 'true',
+                size = attributes.size || 'xs',
+                hasText = !!attributes.text,
+                cssClass = 'ma-check-box ma-check-box-' + size;
+
+            if (isRtl) {
+                cssClass += ' ma-check-box-rtl';
+            }
+
+            if (hasText) {
+                cssClass += ' ma-check-box-has-text';
+            }
+
             var html = '\
-            <div class="ma-check-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-check-box-is-checked\': value === true,\
-                    \'ma-check-box-is-disabled\': isDisabled,\
-                    \'ma-check-box-rtl\': rtl,\
-                    \'ma-check-box-is-focused\': isFocused,\
-                    \'ma-check-box-is-invalid\': !isValid,\
-                    \'ma-check-box-is-touched\': isTouched\
-                }">\
-                <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
-                <div class="ma-check-box-inner"></div>\
-                <i class="ma-check-box-icon fa fa-check" ng-show="value === true"></i>\
-            </div>';
+                <div class="'+ cssClass + '"\
+                    ng-focus="onFocus()"\
+                    ng-blur="onBlur()"\
+                    ng-keypress="onKeypress($event)"\
+                    ng-click="onChange()"\
+                    ng-class="{\
+                        \'ma-check-box-is-checked\': value === true,\
+                        \'ma-check-box-is-disabled\': isDisabled,\
+                        \'ma-check-box-is-focused\': isFocused,\
+                        \'ma-check-box-is-invalid\': !isValid,\
+                        \'ma-check-box-is-touched\': isTouched\
+                    }">\
+                    <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
+                    <div class="ma-check-box-inner"></div>\
+                    <i class="ma-check-box-icon fa fa-check"></i>\
+                </div>';
 
             return html;
         },
         link: function (scope, element, attributes) {
             var validators = scope.validators ? angular.copy(scope.validators) : [],
                 isRequired = scope.isRequired,
-                hasIsNotEmptyValidator = false,
-                hasText = false;
+                hasIsNotEmptyValidator = false;
 
             var setTabindex = function () {
                 if (scope.isDisabled) {
@@ -3840,26 +3851,9 @@ if (!String.prototype.endsWith) {
                 }
             };
 
-            scope._size = scope.size ? scope.size : 'xs';
             scope.isFocused = false;
             scope.isValid = true;
             scope.isTouched = false;
-
-            var setHasText = function () {
-                hasText = scope.text ? true : false;
-            };
-
-            var setCssClass = function () {
-                var cssClass = ' ma-check-box-' + scope._size;
-
-                // When angular-animate is enabled ng-class doesn't set has-text CSS class properly
-                // for some reason. Thus we do it manually.
-                if (hasText) {
-                    cssClass += ' ma-check-box-has-text';
-                }
-
-                scope.cssClass = cssClass;
-            };
 
             var getControllerScope = function () {
                 var valuePropertyParts = null,
@@ -3969,15 +3963,6 @@ if (!String.prototype.endsWith) {
                 setTabindex();
             });
 
-            scope.$watch('text', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setHasText();
-                setCssClass();
-            });
-
             // Set up validators.
             for (var i = 0; i < validators.length; i++) {
                 if (validators[i].name === 'IsNotEmpty') {
@@ -4012,8 +3997,6 @@ if (!String.prototype.endsWith) {
             }
 
             setTabindex();
-            setHasText();
-            setCssClass();
         }
     };
 }]);})();
@@ -4971,182 +4954,6 @@ if (!String.prototype.endsWith) {
             }
         };
     }]);})();
-(function(){angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function (MaHelper) {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            sortBy: '=',
-            modifier: '@',
-            isResponsive: '=',
-            responsiveSize: '@',
-            sort: '&'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-grid">\
-                <div class="ma-grid-inner"><ng-transclude></ng-transclude></div>\
-            </div>';
-
-            return html;
-        },
-        controller: ['$scope', function (scope) {
-            scope.componentName = 'maGrid';
-        }],
-        link: function (scope, element) {
-            var responsiveSize = scope.responsiveSize ? scope.responsiveSize : 'md';
-
-            var setModifiers = function (oldModifiers) {
-                // Remove previous modifiers first.
-                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
-                    oldModifiers = oldModifiers.split(' ');
-
-                    for (var i = 0; i < oldModifiers.length; i++) {
-                        element.removeClass('ma-grid-' + oldModifiers[i]);
-                    }
-                }
-
-                var modifiers = '';
-
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
-                    modifiers = scope.modifier.split(' ');
-                }
-
-                for (var j = 0; j < modifiers.length; j++) {
-                    element.addClass('ma-grid-' + modifiers[j]);
-                }
-            };
-
-            var setModifier = function (modifierName, modifierValue) {
-                var modifier;
-
-                if (typeof modifierValue === 'boolean') {
-                    modifier = 'ma-grid-' + modifierName;
-
-                    if (modifierValue === true) {
-                        element.addClass(modifier);
-                    } else {
-                        element.removeClass(modifier);
-                    }
-                } else if (modifierValue) {
-                    // Clean existing classes.
-                    element.removeClass(function (index, className) {
-                        return (className.match(RegExp('ma-grid-' + modifierName + '-.+', 'ig')) || []).join(' ');
-                    });
-
-                    element.addClass('ma-grid-' + modifierName + '-' + modifierValue);
-                }
-            };
-
-            scope.$watch('modifier', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setModifiers(oldValue);
-            });
-
-            scope.$watch('isResponsive', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setModifier('is-responsive', scope.isResponsive);
-            });
-
-            setModifiers();
-            setModifier('is-responsive', scope.isResponsive);
-
-            if (scope.isResponsive) {
-                scope.$watch('responsiveSize', function (newValue, oldValue) {
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    responsiveSize = newValue;
-                    setModifier('responsive-size', responsiveSize);
-                });
-
-                setModifier('responsive-size', responsiveSize);
-            }
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', function ($timeout) {
-    return {
-        // maGridSort should always be located inside maGrid.
-        require: '^^maGrid',
-        restrict: 'E',
-        scope: {
-            sortBy: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-grid-sort{{isVisible() ? \' ma-grid-sort-\' + direction : \'\'}}"\
-                ng-click="sort()">\
-                <i class="fa fa-sort-asc"></i>\
-                <i class="fa fa-sort-desc"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes, grid) {
-            var gridScope,
-                headerColElement = element.closest('.ma-grid-header-col');
-
-            var getGridScope = function () {
-                var gridScope = null,
-                    initialScope = scope.$parent;
-
-                while (initialScope && !gridScope) {
-                    if (initialScope.hasOwnProperty('componentName') && initialScope.componentName === 'maGrid') {
-                        gridScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                return gridScope;
-            };
-
-            scope.sort = function () {
-                if (!gridScope) {
-                    return;
-                }
-
-                gridScope.sortBy.isAsc = !gridScope.sortBy.isAsc;
-                gridScope.sortBy.name = scope.sortBy;
-                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
-
-                // Postpone the event to allow gridScope.sortBy to change first.
-                $timeout(function () {
-                    gridScope.sort();
-                });
-            };
-
-
-            if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
-                headerColElement.addClass('ma-grid-header-col-sortable');
-            }
-
-            scope.isVisible = function () {
-                if (!gridScope) {
-                    return false;
-                }
-
-                return gridScope.sortBy.name === scope.sortBy;
-            };
-
-            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
-            $timeout(function () {
-                gridScope = getGridScope();
-                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
-            });
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
     return {
         restrict: 'E',
@@ -5330,6 +5137,182 @@ if (!String.prototype.endsWith) {
                     validate();
                 };
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function (MaHelper) {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            sortBy: '=',
+            modifier: '@',
+            isResponsive: '=',
+            responsiveSize: '@',
+            sort: '&'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-grid">\
+                <div class="ma-grid-inner"><ng-transclude></ng-transclude></div>\
+            </div>';
+
+            return html;
+        },
+        controller: ['$scope', function (scope) {
+            scope.componentName = 'maGrid';
+        }],
+        link: function (scope, element) {
+            var responsiveSize = scope.responsiveSize ? scope.responsiveSize : 'md';
+
+            var setModifiers = function (oldModifiers) {
+                // Remove previous modifiers first.
+                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
+                    oldModifiers = oldModifiers.split(' ');
+
+                    for (var i = 0; i < oldModifiers.length; i++) {
+                        element.removeClass('ma-grid-' + oldModifiers[i]);
+                    }
+                }
+
+                var modifiers = '';
+
+                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
+                    modifiers = scope.modifier.split(' ');
+                }
+
+                for (var j = 0; j < modifiers.length; j++) {
+                    element.addClass('ma-grid-' + modifiers[j]);
+                }
+            };
+
+            var setModifier = function (modifierName, modifierValue) {
+                var modifier;
+
+                if (typeof modifierValue === 'boolean') {
+                    modifier = 'ma-grid-' + modifierName;
+
+                    if (modifierValue === true) {
+                        element.addClass(modifier);
+                    } else {
+                        element.removeClass(modifier);
+                    }
+                } else if (modifierValue) {
+                    // Clean existing classes.
+                    element.removeClass(function (index, className) {
+                        return (className.match(RegExp('ma-grid-' + modifierName + '-.+', 'ig')) || []).join(' ');
+                    });
+
+                    element.addClass('ma-grid-' + modifierName + '-' + modifierValue);
+                }
+            };
+
+            scope.$watch('modifier', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setModifiers(oldValue);
+            });
+
+            scope.$watch('isResponsive', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setModifier('is-responsive', scope.isResponsive);
+            });
+
+            setModifiers();
+            setModifier('is-responsive', scope.isResponsive);
+
+            if (scope.isResponsive) {
+                scope.$watch('responsiveSize', function (newValue, oldValue) {
+                    if (newValue === oldValue) {
+                        return;
+                    }
+
+                    responsiveSize = newValue;
+                    setModifier('responsive-size', responsiveSize);
+                });
+
+                setModifier('responsive-size', responsiveSize);
+            }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', function ($timeout) {
+    return {
+        // maGridSort should always be located inside maGrid.
+        require: '^^maGrid',
+        restrict: 'E',
+        scope: {
+            sortBy: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-grid-sort{{isVisible() ? \' ma-grid-sort-\' + direction : \'\'}}"\
+                ng-click="sort()">\
+                <i class="fa fa-sort-asc"></i>\
+                <i class="fa fa-sort-desc"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes, grid) {
+            var gridScope,
+                headerColElement = element.closest('.ma-grid-header-col');
+
+            var getGridScope = function () {
+                var gridScope = null,
+                    initialScope = scope.$parent;
+
+                while (initialScope && !gridScope) {
+                    if (initialScope.hasOwnProperty('componentName') && initialScope.componentName === 'maGrid') {
+                        gridScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                return gridScope;
+            };
+
+            scope.sort = function () {
+                if (!gridScope) {
+                    return;
+                }
+
+                gridScope.sortBy.isAsc = !gridScope.sortBy.isAsc;
+                gridScope.sortBy.name = scope.sortBy;
+                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
+
+                // Postpone the event to allow gridScope.sortBy to change first.
+                $timeout(function () {
+                    gridScope.sort();
+                });
+            };
+
+
+            if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
+                headerColElement.addClass('ma-grid-header-col-sortable');
+            }
+
+            scope.isVisible = function () {
+                if (!gridScope) {
+                    return false;
+                }
+
+                return gridScope.sortBy.name === scope.sortBy;
+            };
+
+            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
+            $timeout(function () {
+                gridScope = getGridScope();
+                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
+            });
         }
     };
 }]);})();
@@ -5596,6 +5579,69 @@ if (!String.prototype.endsWith) {
                     validate(scope.value);
                 };
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
+    return {
+        restrict: 'E',
+        scope: {
+            steps: '=',
+            currentStep: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-progress">\
+                <div class="ma-progress-inner">\
+                    <div class="ma-progress-background"></div>\
+                    <div class="ma-progress-bar" ng-style="{\
+                        width: (calculateProgress() + \'%\')\
+                    }">\
+                    </div>\
+                    <div class="ma-progress-steps">\
+                        <div class="ma-progress-step"\
+                            ng-style="{\
+                                left: (calculateLeft($index) + \'%\')\
+                            }"\
+                            ng-repeat="step in steps"\
+                            ng-class="{\
+                                \'ma-progress-step-is-current\': isCurrentStep($index)\
+                            }">\
+                            <div class="ma-progress-text">{{$index + 1}}</div>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="ma-progress-labels">\
+                    <div ng-repeat="step in steps"\
+                        class="ma-progress-label">\
+                        {{step.text}}\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope) {
+            scope.calculateLeft = function (stepIndex) {
+                return 100 / (scope.steps.length - 1) * stepIndex;
+            };
+
+            scope.calculateProgress = function () {
+                if (!scope.currentStep) {
+                    return 0;
+                }
+
+                if (scope.currentStep > scope.steps.length) {
+                    return 100;
+                }
+
+                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
+            };
+
+            scope.isCurrentStep = function (stepIndex) {
+                return (stepIndex + 1) <= scope.currentStep;
+            };
         }
     };
 }]);})();
@@ -5887,69 +5933,6 @@ if (!String.prototype.endsWith) {
             setTotalPages();
             setRangePages();
             setHasPager();
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maProgress', [function () {
-    return {
-        restrict: 'E',
-        scope: {
-            steps: '=',
-            currentStep: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-progress">\
-                <div class="ma-progress-inner">\
-                    <div class="ma-progress-background"></div>\
-                    <div class="ma-progress-bar" ng-style="{\
-                        width: (calculateProgress() + \'%\')\
-                    }">\
-                    </div>\
-                    <div class="ma-progress-steps">\
-                        <div class="ma-progress-step"\
-                            ng-style="{\
-                                left: (calculateLeft($index) + \'%\')\
-                            }"\
-                            ng-repeat="step in steps"\
-                            ng-class="{\
-                                \'ma-progress-step-is-current\': isCurrentStep($index)\
-                            }">\
-                            <div class="ma-progress-text">{{$index + 1}}</div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="ma-progress-labels">\
-                    <div ng-repeat="step in steps"\
-                        class="ma-progress-label">\
-                        {{step.text}}\
-                    </div>\
-                </div>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope) {
-            scope.calculateLeft = function (stepIndex) {
-                return 100 / (scope.steps.length - 1) * stepIndex;
-            };
-
-            scope.calculateProgress = function () {
-                if (!scope.currentStep) {
-                    return 0;
-                }
-
-                if (scope.currentStep > scope.steps.length) {
-                    return 100;
-                }
-
-                return 100 / (scope.steps.length - 1) * (scope.currentStep - 1);
-            };
-
-            scope.isCurrentStep = function (stepIndex) {
-                return (stepIndex + 1) <= scope.currentStep;
-            };
         }
     };
 }]);})();

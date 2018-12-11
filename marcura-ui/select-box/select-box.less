@@ -65,14 +65,14 @@
         font-size: 14px;
         text-shadow: none;
     }
-    .ma-button-toggle.ma-button-is-disabled {
+    .ma-button-toggle[is-disabled='true'] {
         background-color: @color-disabled;
         .ma-button-icon {
             color: inherit;
             opacity: 0.65;
         }
     }
-    .ma-button-toggle:not(.ma-button-is-disabled) {
+    .ma-button-toggle:not([is-disabled='true']) {
         &:hover {
             background-color: @background-color-darker-light;
         }
