@@ -5,18 +5,22 @@
     <div class="nodes-item">
         <h1>RadioBox</h1>
         <div class="api-documentation">
-            <a href="https://github.com/Marcura/marcura-ui/wiki/radiobox">API documentation</a>
+            <a href="https://github.com/Marcura/marcura-ui/wiki/radiobox">API
+                documentation</a>
         </div>
     </div>
     <div class="nodes-item">
         <h2>Items as strings</h2>
     </div>
     <div class="nodes-item">
-        <ma-radio-box item="ports1[0]" value="port1" modifier="horizontal" change="change1(maValue)">
+        <ma-radio-box item="ports1[0]" value="port1" is-horizontal="true"
+            change="change1(maValue)">
         </ma-radio-box>
-        <ma-radio-box item="ports1[1]" value="port1" modifier="horizontal" change="change1(maValue)">
+        <ma-radio-box item="ports1[1]" value="port1" is-horizontal="true"
+            change="change1(maValue)">
         </ma-radio-box>
-        <ma-radio-box item="ports1[2]" value="port1" modifier="horizontal" change="change1(maValue)">
+        <ma-radio-box item="ports1[2]" value="port1" is-horizontal="true"
+            change="change1(maValue)">
         </ma-radio-box>
     </div>
     <div class="nodes-item">
@@ -26,14 +30,14 @@
         <h2>Items as objects</h2>
     </div>
     <div class="nodes-item">
-        <ma-radio-box item="ports2[0]" item-text-field="name" item-value-field="id" value="port2"
-            modifier="horizontal" change="change2(maValue)">
+        <ma-radio-box item="ports2[0]" item-text-field="name" item-value-field="id"
+            value="port2" is-horizontal="true" change="change2(maValue)">
         </ma-radio-box>
-        <ma-radio-box item="ports2[1]" item-text-field="name" item-value-field="id" value="port2"
-            modifier="horizontal" change="change2(maValue)">
+        <ma-radio-box item="ports2[1]" item-text-field="name" item-value-field="id"
+            value="port2" is-horizontal="true" change="change2(maValue)">
         </ma-radio-box>
-        <ma-radio-box item="ports2[2]" item-text-field="name" item-value-field="id" value="port2"
-            modifier="horizontal" change="change2(maValue)">
+        <ma-radio-box item="ports2[2]" item-text-field="name" item-value-field="id"
+            value="port2" is-horizontal="true" change="change2(maValue)">
         </ma-radio-box>
     </div>
     <div class="nodes-item">
@@ -43,14 +47,14 @@
         <h2>Disabled</h2>
     </div>
     <div class="nodes-item">
-        <ma-radio-box item="ports1[0]" value="port3" is-disabled="true" modifier="horizontal"
-            change="change1(maValue)">
+        <ma-radio-box item="ports1[0]" value="port3" is-disabled="true"
+            is-horizontal="true" change="change1(maValue)">
         </ma-radio-box>
-        <ma-radio-box item="ports1[1]" value="port3" is-disabled="true" modifier="horizontal"
-            change="change1(maValue)">
+        <ma-radio-box item="ports1[1]" value="port3" is-disabled="true"
+            is-horizontal="true" change="change1(maValue)">
         </ma-radio-box>
-        <ma-radio-box item="ports1[2]" value="port3" is-disabled="true" modifier="horizontal"
-            change="change1(maValue)">
+        <ma-radio-box item="ports1[2]" value="port3" is-disabled="true"
+            is-horizontal="true" change="change1(maValue)">
         </ma-radio-box>
     </div>
     <div class="nodes-item">
@@ -60,24 +64,24 @@
         <h2>Large size</h2>
     </div>
     <div class="nodes-item">
-        <ma-radio-box item="ports1[0]" value="port4" modifier="horizontal" size="sm">
+        <ma-radio-box item="ports1[0]" value="port4" is-horizontal="true" size="sm">
         </ma-radio-box>
-        <ma-radio-box item="ports1[1]" value="port4" modifier="horizontal" size="sm">
+        <ma-radio-box item="ports1[1]" value="port4" is-horizontal="true" size="sm">
         </ma-radio-box>
-        <ma-radio-box item="ports1[2]" value="port4" modifier="horizontal" size="sm">
+        <ma-radio-box item="ports1[2]" value="port4" is-horizontal="true" size="sm">
         </ma-radio-box>
     </div>
     <div class="nodes-item">
         <h2>Without text</h2>
     </div>
     <div class="nodes-item">
-        <ma-radio-box item="ports1[0]" value="port6" hide-text="true" modifier="horizontal"
+        <ma-radio-box item="ports1[0]" value="port6" is-horizontal="true"
             change="change6(maValue)">
         </ma-radio-box>
-        <ma-radio-box item="ports1[1]" value="port6" hide-text="true" modifier="horizontal"
+        <ma-radio-box item="ports1[1]" value="port6" is-horizontal="true"
             change="change6(maValue)">
         </ma-radio-box>
-        <ma-radio-box item="ports1[2]" value="port6" hide-text="true" modifier="horizontal"
+        <ma-radio-box item="ports1[2]" value="port6" is-horizontal="true"
             change="change6(maValue)">
         </ma-radio-box>
     </div>
@@ -88,14 +92,14 @@
         <h2>A custom template for item (HTML is supported)</h2>
     </div>
     <div class="nodes-item">
-        <ma-radio-box item="ports2[0]" item-text-field="name" item-value-field="id" modifier="horizontal"
-            value="port7">
+        <ma-radio-box item="ports2[0]" item-text-field="name" item-value-field="id"
+            is-horizontal="true" value="port7">
         </ma-radio-box>
-        <ma-radio-box item="ports2[1]" item-template="port7ItemTemplate" item-value-field="id"
-            modifier="horizontal" value="port7">
+        <ma-radio-box item="ports2[1]" item-template="port7ItemTemplate"
+            item-value-field="id" is-horizontal="true" value="port7">
         </ma-radio-box>
-        <ma-radio-box item="ports2[2]" item-text-field="name" item-value-field="id" modifier="horizontal"
-            value="port7">
+        <ma-radio-box item="ports2[2]" item-text-field="name" item-value-field="id"
+            is-horizontal="true" value="port7">
         </ma-radio-box>
     </div>
     <div class="nodes-item">
@@ -106,8 +110,8 @@
     </div>
     <div class="nodes-item">
         <div ng-repeat="port in ports2">
-            <ma-radio-box item="port" item-text-field="name" item-value-field="id" value="port5"
-                change="change5(maValue, maOldValue)">
+            <ma-radio-box item="port" item-text-field="name" item-value-field="id"
+                value="port5" change="change5(maValue, maOldValue)">
             </ma-radio-box>
         </div>
     </div>
@@ -118,11 +122,14 @@
         <h2>Required</h2>
     </div>
     <div class="nodes-item">
-        <ma-radio-box id="port8" item="ports1[0]" value="port8" modifier="horizontal" is-required="true">
+        <ma-radio-box id="port8" item="ports1[0]" value="port8" is-horizontal="true"
+            is-required="true">
         </ma-radio-box>
-        <ma-radio-box id="port8" item="ports1[1]" value="port8" modifier="horizontal" is-required="true">
+        <ma-radio-box id="port8" item="ports1[1]" value="port8" is-horizontal="true"
+            is-required="true">
         </ma-radio-box>
-        <ma-radio-box id="port8" item="ports1[2]" value="port8" modifier="horizontal" is-required="true">
+        <ma-radio-box id="port8" item="ports1[2]" value="port8" is-horizontal="true"
+            is-required="true">
         </ma-radio-box>
     </div>
     <div class="nodes-item">

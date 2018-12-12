@@ -4,41 +4,48 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$ti
     return {
         restrict: 'E',
         scope: {
-            item: '=',
-            itemTemplate: '=',
             itemTextField: '@',
             itemValueField: '@',
-            value: '=',
-            isDisabled: '=',
-            hideText: '=',
-            change: '&',
             size: '@',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
             id: '@',
-            modifier: '@'
+            isHorizontal: '@',
+            isDisabled: '@',
+            isRequired: '@',
+            change: '&',
+            item: '=',
+            itemTemplate: '=',
+            value: '=',
+            validators: '=',
+            instance: '='
         },
         replace: true,
-        template: function () {
+        template: function (element, attributes) {
+            var size = attributes.size || 'xs',
+                isHorizontal = attributes.isHorizontal === 'true',
+                cssClass = 'ma-radio-box ma-radio-box-' + size;
+
+            if (isHorizontal) {
+                cssClass += ' ma-radio-box-is-horizontal';
+            }
+
             var html = '\
-            <div class="ma-radio-box{{cssClass}}"\
-                ng-focus="onFocus()"\
-                ng-blur="onBlur()"\
-                ng-keypress="onKeypress($event)"\
-                ng-click="onChange()"\
-                ng-class="{\
-                    \'ma-radio-box-is-checked\': isChecked(),\
-                    \'ma-radio-box-is-disabled\': isDisabled,\
-                    \'ma-radio-box-has-text\': hasText(),\
-                    \'ma-radio-box-is-focused\': isFocused,\
-                    \'ma-radio-box-is-invalid\': !isValid,\
-                    \'ma-radio-box-is-touched\': isTouched\
-                }">\
-                <span class="ma-radio-box-text" ng-bind-html="getItemText()"></span>\
-                <div class="ma-radio-box-inner"></div>\
-                <i class="ma-radio-box-icon" ng-show="isChecked()"></i>\
-            </div>';
+                <div class="'+ cssClass + '"\
+                    ng-focus="onFocus()"\
+                    ng-blur="onBlur()"\
+                    ng-keypress="onKeypress($event)"\
+                    ng-click="onChange()"\
+                    ng-class="{\
+                        \'ma-radio-box-is-checked\': isChecked(),\
+                        \'ma-radio-box-is-disabled\': isDisabled === \'true\',\
+                        \'ma-radio-box-has-text\': hasText(),\
+                        \'ma-radio-box-is-focused\': isFocused,\
+                        \'ma-radio-box-is-invalid\': !isValid,\
+                        \'ma-radio-box-is-touched\': isTouched\
+                    }">\
+                    <span class="ma-radio-box-text" ng-bind-html="getItemText()"></span>\
+                    <div class="ma-radio-box-inner"></div>\
+                    <i class="ma-radio-box-icon"></i>\
+                </div>';
 
             return html;
         },
@@ -46,32 +53,11 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$ti
             var valuePropertyParts = null,
                 isStringArray = !scope.itemTextField && !scope.itemValueField,
                 validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
+                isRequired = scope.isRequired === 'true',
                 hasIsNotEmptyValidator = false;
 
-            var setModifiers = function (oldModifiers) {
-                // Remove previous modifiers first.
-                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
-                    oldModifiers = oldModifiers.split(' ');
-
-                    for (var i = 0; i < oldModifiers.length; i++) {
-                        element.removeClass('ma-radio-box-' + oldModifiers[i]);
-                    }
-                }
-
-                var modifiers = '';
-
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
-                    modifiers = scope.modifier.split(' ');
-                }
-
-                for (var j = 0; j < modifiers.length; j++) {
-                    element.addClass('ma-radio-box-' + modifiers[j]);
-                }
-            };
-
             var setTabindex = function () {
-                if (scope.isDisabled) {
+                if (scope.isDisabled === 'true') {
                     element.removeAttr('tabindex');
                 } else {
                     element.attr('tabindex', '0');
@@ -101,9 +87,6 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$ti
             };
 
             var controllerScope = getControllerScope();
-
-            scope._size = scope.size ? scope.size : 'xs';
-            scope.cssClass = ' ma-radio-box-' + scope._size;
             scope.isFocused = false;
             scope.isValid = true;
             scope.isTouched = false;
@@ -145,10 +128,6 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$ti
             };
 
             scope.getItemText = function () {
-                if (scope.hideText) {
-                    return MaHelper.html.nbsp;
-                }
-
                 var text;
 
                 if (scope.itemTemplate) {
@@ -182,7 +161,7 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$ti
             };
 
             scope.onChange = function () {
-                if (scope.isDisabled) {
+                if (scope.isDisabled === 'true') {
                     return;
                 }
 
@@ -240,13 +219,15 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$ti
             };
 
             scope.onFocus = function () {
-                if (!scope.isDisabled) {
-                    scope.isFocused = true;
+                if (scope.isDisabled === 'true') {
+                    return;
                 }
+
+                scope.isFocused = true;
             };
 
             scope.onBlur = function () {
-                if (scope.isDisabled) {
+                if (scope.isDisabled === 'true') {
                     return;
                 }
 
@@ -260,13 +241,13 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$ti
                     // Prevent page from scrolling down.
                     event.preventDefault();
 
-                    if (!scope.isDisabled && !scope.isChecked()) {
+                    if (scope.isDisabled !== 'true' && !scope.isChecked()) {
                         scope.onChange();
                     }
                 }
             };
 
-            scope.$watch('isDisabled', function (newValue, oldValue) {
+            attributes.$observe('isDisabled', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }
@@ -276,14 +257,6 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$ti
                 }
 
                 setTabindex();
-            });
-
-            scope.$watch('modifier', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setModifiers(oldValue);
             });
 
             // Set up validators.
@@ -319,13 +292,11 @@ angular.module('marcuraUI.components').directive('maRadioBox', ['MaHelper', '$ti
                 };
             }
 
-            $timeout(function () {
-                // Now id is used only for grouping radioBoxes, so remove it from the element.
+            window.setTimeout(function () {
+                // Id is used only for grouping radioBoxes, so remove it from the element.
                 if (scope.id) {
                     element.removeAttr('id');
                 }
-
-                setModifiers();
             });
 
             setTabindex();
