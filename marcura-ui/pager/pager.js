@@ -2,12 +2,12 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
     return {
         restrict: 'E',
         scope: {
+            itemsPerPageText: '@',
             page: '=',
             totalItems: '=',
             visiblePages: '=',
             showItemsPerPage: '=',
             itemsPerPageNumbers: '=',
-            itemsPerPageText: '@',
             itemsPerPage: '=',
             change: '&'
         },
