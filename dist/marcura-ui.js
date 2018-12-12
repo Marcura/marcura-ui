@@ -5569,19 +5569,17 @@ if (!String.prototype.endsWith) {
         restrict: 'E',
         scope: {
             itemsPerPageText: '@',
+            showItemsPerPage: '@',
+            visiblePages: '@',
+            change: '&',
             page: '=',
             totalItems: '=',
-            visiblePages: '=',
-            showItemsPerPage: '=',
             itemsPerPageNumbers: '=',
-            itemsPerPage: '=',
-            change: '&'
+            itemsPerPage: '='
         },
         replace: true,
         template: function () {
-            var html = '<div class="ma-pager" ng-class="{\
-                \'ma-pager-has-pager\': _hasPager\
-            }">\
+            var html = '<div class="ma-pager">\
                 <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
                     <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
                         type="number"\
@@ -5654,9 +5652,9 @@ if (!String.prototype.endsWith) {
 
             return html;
         },
-        link: function (scope) {
+        link: function (scope, element, attributes) {
             scope._page = scope.page;
-            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
+            scope._showItemsPerPage = scope.showItemsPerPage === 'false' ? false : true;
             scope._itemsPerPageNumbers = [25, 50, 75, 100];
             scope._itemsPerPage = 25;
             scope.hasItemsPerPageChanged = false;
@@ -5685,7 +5683,8 @@ if (!String.prototype.endsWith) {
             };
 
             var setRangePages = function () {
-                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
+                var visiblePages = Number(scope.visiblePages);
+                scope._visiblePages = visiblePages > 1 ? visiblePages : 5;
 
                 if (scope.totalPages < scope._visiblePages) {
                     scope._visiblePages = scope.totalPages || 1;
@@ -5703,7 +5702,14 @@ if (!String.prototype.endsWith) {
             };
 
             var setHasPager = function () {
-                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * scope._itemsPerPage > scope._itemsPerPage);
+                var hasPager = !scope._showItemsPerPage || (scope.totalPages * scope._itemsPerPage > scope._itemsPerPage),
+                    cssClass = 'ma-pager';
+
+                if (hasPager) {
+                    cssClass += ' ma-pager-has-pager';
+                }
+
+                element.attr('class', cssClass);
             };
 
             var onChange = function () {
@@ -5802,7 +5808,7 @@ if (!String.prototype.endsWith) {
                 setHasPager();
             });
 
-            scope.$watch('visiblePages', function (newValue, oldValue) {
+            attributes.$observe('visiblePages', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }
