@@ -216,19 +216,19 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
     // }, 9000);
 
     // Loading.
-    $timeout(function () {
-        $scope.isLoading = true;
-    }, 3000);
+    // $timeout(function () {
+    //     $scope.isLoading = true;
+    // }, 3000);
 
-    $timeout(function () {
-        $scope.isLoading = false;
-    }, 6000);
+    // $timeout(function () {
+    //     $scope.isLoading = false;
+    // }, 6000);
 
-    $timeout(function () {
-        $scope.isLoading = true;
-    }, 9000);
+    // $timeout(function () {
+    //     $scope.isLoading = true;
+    // }, 9000);
 
-    $timeout(function () {
-        $scope.isLoading = false;
-    }, 12000);
+    // $timeout(function () {
+    //     $scope.isLoading = false;
+    // }, 12000);
 }

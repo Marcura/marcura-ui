@@ -66,15 +66,14 @@ angular.module('marcuraUI.components')
                             \'ma-select-box-mode-select\': !isAddMode,\
                             \'ma-select-box-is-reset-disabled\': canReset === \'true\' && isDisabled !== \'true\' && !_hasValue,\
                             \'ma-select-box-is-loading\': isLoading === \'true\',\
-                            \'ma-select-box-has-value\': _hasValue,\
-                            \'ma-select-box-is-rendered\': isRendering\
+                            \'ma-select-box-has-value\': _hasValue\
                         }">\
                         <div class="ma-select-box-spinner">\
                             <div class="ma-pace">\
                                 <div class="ma-pace-activity"></div>\
                             </div>\
                         </div>\
-                        <div class="ma-select-box-rendering" ng-if="isRendering"></div>';
+                        <div class="ma-select-box-rendering"></div>';
 
                 if (hasAjax) {
                     html += '<input class="ma-select-box-input" ma-select-box-wrapper="options"' + (isMultiple ? ' multiple' : '') + '\
@@ -270,7 +269,6 @@ angular.module('marcuraUI.components')
                 scope.hasAjax = angular.isObject(scope.ajax);
                 scope._hasValue = false;
                 scope._items = [];
-                scope.isRendering = true;
 
                 var setItems = function (items) {
                     if (scope.hasAjax || !angular.isArray(items)) {
@@ -1079,7 +1077,8 @@ angular.module('marcuraUI.components')
                 setValidators();
 
                 $timeout(function () {
-                    scope.isRendering = false;
+                    angular.element(element[0].querySelector('.ma-select-box-rendering')).remove();
+
 
                     // Set initial value.
                     // Value is set inside timeout to ensure that we get the latest value.
