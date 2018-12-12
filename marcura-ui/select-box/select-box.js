@@ -27,6 +27,7 @@ angular.module('marcuraUI.components')
                 isRequired: '@',
                 canReset: '@',
                 isMultiple: '@',
+                minSearchCharacters: '@',
                 change: '&',
                 blur: '&',
                 focus: '&',
@@ -139,6 +140,7 @@ angular.module('marcuraUI.components')
                 var isMultiple = scope.isMultiple === 'true';
                 scope._type = scope.type ? scope.type : 'object';
                 scope._itemValueField = scope.itemValueField ? scope.itemValueField : 'id';
+                scope._minSearchCharacters = scope.minSearchCharacters ? Number(scope.minSearchCharacters) : 1;
 
                 // Always return string value for compatibility reasons with select2,
                 // as it only supports string identifiers.
@@ -220,6 +222,7 @@ angular.module('marcuraUI.components')
                 // AJAX options.
                 if (scope.ajax) {
                     scope.options.ajax = scope.ajax;
+                    scope.options.minimumInputLength = scope._minSearchCharacters;
                     scope.options.escapeMarkup = function (markup) {
                         return markup;
                     };
