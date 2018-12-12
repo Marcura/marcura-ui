@@ -45,29 +45,32 @@ angular.module('marcuraUI.components')
                     isMultiple = attributes.isMultiple === 'true',
                     canAddItem = attributes.canAddItem === 'true',
                     canReset = attributes.canReset === 'true',
-                    cssClass = 'ma-select-box';
+                    cssClass = 'ma-select-box',
+                    ngClass = 'ng-class="{\
+                        \'ma-select-box-is-text-focused\': isTextFocused,\
+                        \'ma-select-box-is-disabled\': isDisabled === \'true\',\
+                        \'ma-select-box-is-invalid\': !isValid,\
+                        \'ma-select-box-is-touched\': isTouched,\
+                        \'ma-select-box-is-loading\': isLoading === \'true\',\
+                        \'ma-select-box-has-value\': _hasValue';
 
                 if (canAddItem) {
                     cssClass += ' ma-select-box-can-add-item';
+                    ngClass += ',\'ma-select-box-mode-add\': isAddMode';
+                    ngClass += ',\'ma-select-box-mode-select\': !isAddMode';
+                } else {
+                    cssClass += ' ma-select-box-mode-select';
                 }
 
                 if (canReset) {
                     cssClass += ' ma-select-box-can-reset';
+                    ngClass += ',\'ma-select-box-is-reset-disabled\': canReset === \'true\' && isDisabled !== \'true\' && !_hasValue';
                 }
 
+                ngClass += '}"';
+
                 var html = '\
-                    <div class="'+ cssClass + '"\
-                        ng-class="{\
-                            \'ma-select-box-is-text-focused\': isTextFocused,\
-                            \'ma-select-box-is-disabled\': isDisabled === \'true\',\
-                            \'ma-select-box-is-invalid\': !isValid,\
-                            \'ma-select-box-is-touched\': isTouched,\
-                            \'ma-select-box-mode-add\': isAddMode,\
-                            \'ma-select-box-mode-select\': !isAddMode,\
-                            \'ma-select-box-is-reset-disabled\': canReset === \'true\' && isDisabled !== \'true\' && !_hasValue,\
-                            \'ma-select-box-is-loading\': isLoading === \'true\',\
-                            \'ma-select-box-has-value\': _hasValue\
-                        }">\
+                    <div class="'+ cssClass + '"' + ngClass + '>\
                         <div class="ma-select-box-spinner">\
                             <div class="ma-pace">\
                                 <div class="ma-pace-activity"></div>\

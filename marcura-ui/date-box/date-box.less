@@ -1,12 +1,10 @@
 @import 'marcura-ui/less.less';
-
 .ma-date-box {
     font-family: @font-family;
     width: 100%;
     display: inline-block;
     position: relative;
     .input-reset-button;
-
     .ma-pace .ma-pace-activity {
         position: absolute;
         left: 0;
@@ -15,7 +13,6 @@
         top: 0;
         margin: auto;
     }
-
     &-spinner {
         position: absolute;
         width: 100%;
@@ -25,18 +22,16 @@
         top: 0;
         left: 0;
         z-index: 1;
+        display: none;
     }
-
     &-is-reset-disabled {
         .input-reset-button-disabled;
     }
-
     &-is-disabled {
         .ma-date-box-inner {
             background-color: @color-disabled;
             .box-shadow(none);
         }
-
         .ma-date-box-date,
         .ma-date-box-hour,
         .ma-date-box-minute {
@@ -44,56 +39,46 @@
             color: @text-color-disabled;
             cursor: default;
         }
-
         .ma-date-box-colon {
             cursor: default;
         }
-
         .ma-date-box-icon {
             opacity: 0.65;
             cursor: default;
         }
     }
-
     &-is-focused {
         .ma-date-box-inner {
             .box-shadow(@input-shadow-focused);
             border-color: @color-primary;
         }
     }
-
     &-can-reset {
         padding-right: 29px;
     }
-
     &-warning {
         .ma-date-box-inner {
             border-color: @color-warning;
         }
-
         &.ma-date-box-is-focused {
             .ma-date-box-inner {
                 box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #efaf53;
             }
         }
     }
-
     :not(&-is-loading)&-is-invalid&-is-touched {
         &.ma-date-box-is-focused .ma-date-box-inner {
             .box-shadow(@input-shadow-invalid);
         }
-
         .ma-date-box-inner {
             border-color: @color-danger;
         }
     }
-
     &-has-time {
         .ma-date-box-inner {
             padding-right: 86px;
         }
     }
-
     &-inner {
         height: 30px;
         position: relative;
@@ -104,7 +89,6 @@
         .input-transition;
         .box-sizing(border-box);
     }
-
     &-date,
     &-hour,
     &-minute {
@@ -116,12 +100,10 @@
         font-family: @font-family;
         line-height: normal;
     }
-
     &-date {
         width: 100%;
         text-overflow: ellipsis;
     }
-
     &-hour {
         width: 22px;
         text-align: center;
@@ -129,7 +111,6 @@
         top: 5px;
         right: 59px;
     }
-
     &-minute {
         width: 22px;
         text-align: center;
@@ -137,7 +118,6 @@
         top: 5px;
         right: 35px;
     }
-
     &-colon {
         display: inline-block;
         font-size: 14px;
@@ -149,7 +129,6 @@
         right: 58px;
         line-height: normal;
     }
-
     &-icon {
         position: absolute;
         display: inline-block;
@@ -162,64 +141,57 @@
         margin-right: -1px;
         text-align: center;
         cursor: pointer;
-
         &::before {
             top: 7px;
             position: relative;
+        }
+    }
+    &-is-loading:not(&-is-disabled) {
+        .ma-date-box-spinner {
+            display: block;
         }
     }
 }
 
 .pika-single {
     border-color: @border-color;
-
     .is-selected .pika-button {
         .box-shadow(none);
         background: @color-primary;
     }
-
     .is-disabled .pika-button {
         color: #666;
         background: none;
     }
-
     .is-disabled.has-event .pika-button {
         background: #bebebe;
         opacity: 1;
         color: #ffffff;
     }
-
     .has-event .pika-button {
         .box-shadow(none);
     }
-
     .is-today .pika-button {
         color: @color-primary;
         font-weight: bold;
     }
-
     td:not(.is-disabled):not(.has-event):not(.is-today):not(.is-selected) .pika-button:hover {
         color: inherit;
         background: @background-color-darker-light;
     }
-
     .is-today:not(.is-disabled):not(.has-event):not(.is-selected) .pika-button:hover {
         background: @background-color-darker-light;
     }
-
-    .is-today.is-selected .pika-button{
+    .is-today.is-selected .pika-button {
         color: #ffffff;
     }
-
     .has-event .pika-button:hover {
         background: #005da9;
     }
-
     .pika {
         &-button {
             border-radius: 0;
         }
-
         &-table abbr {
             cursor: default;
         }
