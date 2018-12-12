@@ -12,7 +12,7 @@ function tooltipPageController($scope) {
         $scope.tooltipComponent.hide();
     };
 
-    $scope.close = function () {
+    $scope.toggleClose = function () {
         $scope.canClose = !$scope.canClose;
     };
 }

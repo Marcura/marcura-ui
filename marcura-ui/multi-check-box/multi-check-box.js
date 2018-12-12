@@ -2,14 +2,14 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
     return {
         restrict: 'E',
         scope: {
-            items: '=',
-            itemTemplate: '=',
             itemTextField: '@',
             itemValueField: '@',
-            value: '=',
+            isDisabled: '@',
+            isRequired: '@',
             change: '&',
-            isDisabled: '=',
-            isRequired: '=',
+            items: '=',
+            itemTemplate: '=',
+            value: '=',
             validators: '=',
             instance: '='
         },
@@ -17,7 +17,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
         template: function () {
             var html = '\
                 <div class="ma-multi-check-box" ng-class="{\
-                        \'ma-multi-check-box-is-disabled\': isDisabled,\
+                        \'ma-multi-check-box-is-disabled\': isDisabled === \'true\',\
                         \'ma-multi-check-box-is-invalid\': !isValid,\
                         \'ma-multi-check-box-is-touched\': isTouched\
                     }">\
@@ -26,7 +26,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
                         <ma-check-box\
                             size="sm"\
                             value="getItemMetadata(item).isSelected"\
-                            is-disabled="isDisabled">\
+                            is-disabled="{{isDisabled === \'true\'}}">\
                         </ma-check-box><div class="ma-multi-check-box-text">{{getItemText(item)}}</div>\
                     </div>\
                 </div>';
@@ -36,7 +36,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
         link: function (scope, element) {
             var isObjectArray = scope.itemTextField || scope.itemValueField,
                 validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
+                isRequired = scope.isRequired === 'true',
                 hasIsNotEmptyValidator = false,
                 itemsMetadata = {};
 
@@ -97,7 +97,7 @@ angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout',
             };
 
             scope.onChange = function (item) {
-                if (scope.isDisabled) {
+                if (scope.isDisabled === 'true') {
                     return;
                 }
 

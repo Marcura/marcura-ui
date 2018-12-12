@@ -13,7 +13,7 @@
         <h2>Date in UTC</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box value="date1" change="change(maValue, 'date1')" modifier="has-warning">
+        <ma-date-box value="date1" change="change(maValue, 'date1')">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -23,7 +23,7 @@
         <h2>Date in UTC+09:00</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box value="date2" time-zone="'+09:00'" change="change(maValue, 'date2')">
+        <ma-date-box value="date2" time-zone="+09:00" change="change(maValue, 'date2')">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -44,7 +44,7 @@
     </div>
     <div class="nodes-item">
         <ma-date-box instance="date4Instance" has-time="true" value="date4"
-            time-zone="'+09:00'" is-disabled="date4Disabled">
+            time-zone="+09:00" is-disabled="{{date4Disabled}}">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -54,7 +54,7 @@
         <h2>Disabled</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box has-time="true" value="date6" is-disabled="true" time-zone="'+09:00'"
+        <ma-date-box has-time="true" value="date6" is-disabled="true" time-zone="+09:00"
             can-reset="true">
         </ma-date-box>
     </div>
@@ -123,7 +123,7 @@ max: {{date9Max}}</pre>
     </div>
     <div class="nodes-item">
         <div class="row">
-            <div class="col-xs-12 col-sm-3">
+            <div class="col-xs-12 col-sm-4">
                 <div>
                     <label for="date20">Start</label>
                 </div>
@@ -132,7 +132,7 @@ max: {{date9Max}}</pre>
                     instance="date20DateBox">
                 </ma-date-box>
             </div>
-            <div class="col-xs-12 col-sm-3">
+            <div class="col-xs-12 col-sm-4">
                 <div>
                     <label for="date21">End</label>
                 </div>
@@ -143,13 +143,13 @@ max: {{date9Max}}</pre>
     </div>
     <div class="nodes-item">
         <div class="row">
-            <div class="col-xs-12 col-sm-3">
+            <div class="col-xs-12 col-sm-4">
                 <pre>// Start:
 max: {{date21 || 'null'}}
 value: {{date20 || 'null'}}
 failedValidator: {{(date20DateBox.failedValidator() || null) | json}}</pre>
             </div>
-            <div class="col-xs-12 col-sm-3">
+            <div class="col-xs-12 col-sm-4">
                 <pre>// End:
 value: {{date21 || 'null'}}</pre>
             </div>
@@ -164,7 +164,7 @@ value: {{date21 || 'null'}}</pre>
     </div>
     <!-- <div class="nodes-item">
         <div class="row">
-            <div class="col-xs-12 col-sm-3">
+            <div class="col-xs-12 col-sm-4">
                 <div>
                     <label for="start">Start</label>
                 </div>
@@ -173,7 +173,7 @@ value: {{date21 || 'null'}}</pre>
                     instance="startComponent">
                 </ma-date-box>
             </div>
-            <div class="col-xs-12 col-sm-3">
+            <div class="col-xs-12 col-sm-4">
                 <div>
                     <label for="end">End</label>
                 </div>
@@ -186,12 +186,12 @@ value: {{date21 || 'null'}}</pre>
     </div>
     <div class="nodes-item">
         <div class="row">
-            <div class="col-xs-12 col-sm-3">
+            <div class="col-xs-12 col-sm-4">
                 <pre>// Start:
 max: {{end || 'null'}}
 value: {{start || 'null'}}</pre>
             </div>
-            <div class="col-xs-12 col-sm-3">
+            <div class="col-xs-12 col-sm-4">
                 <pre>// End:
 value: {{end || 'null'}}</pre>
             </div>

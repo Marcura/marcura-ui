@@ -15,67 +15,73 @@ angular.module('marcuraUI.components')
             restrict: 'E',
             scope: {
                 id: '@',
-                items: '=',
-                value: '=',
-                isLoading: '=',
+                itemTextField: '@',
+                itemValueField: '@',
+                placeholder: '@',
+                textPlaceholder: '@',
+                type: '@',
+                noItemsFoundText: '@',
+                isLoading: '@',
+                isDisabled: '@',
+                canAddItem: '@',
+                isRequired: '@',
+                canReset: '@',
+                isMultiple: '@',
                 change: '&',
                 blur: '&',
                 focus: '&',
                 init: '&',
                 validate: '&',
-                modeToggle: '&',
+                items: '=',
+                value: '=',
                 itemTemplate: '=',
-                itemTextField: '@',
-                itemValueField: '@',
-                isDisabled: '=',
-                isRequired: '=',
                 validators: '=',
-                canAddItem: '=',
-                selectItemTooltip: '@',
-                addItemTooltip: '@',
-                showAddItemTooltip: '=',
                 instance: '=',
-                ajax: '=',
-                canReset: '=',
-                placeholder: '@',
-                textPlaceholder: '@',
-                isMultiple: '=',
-                type: '@',
-                minSearchCharacters: '=',
-                noItemsFoundText: '@'
+                ajax: '='
             },
             replace: true,
             template: function (element, attributes) {
                 var hasAjax = !MaHelper.isNullOrWhiteSpace(attributes.ajax),
-                    isMultiple = attributes.isMultiple === 'true';
+                    isMultiple = attributes.isMultiple === 'true',
+                    canAddItem = attributes.canAddItem === 'true',
+                    canReset = attributes.canReset === 'true',
+                    cssClass = 'ma-select-box',
+                    ngClass = 'ng-class="{\
+                        \'ma-select-box-is-text-focused\': isTextFocused,\
+                        \'ma-select-box-is-disabled\': isDisabled === \'true\',\
+                        \'ma-select-box-is-invalid\': !isValid,\
+                        \'ma-select-box-is-touched\': isTouched,\
+                        \'ma-select-box-is-loading\': isLoading === \'true\',\
+                        \'ma-select-box-has-value\': _hasValue';
+
+                if (canAddItem) {
+                    cssClass += ' ma-select-box-can-add-item';
+                    ngClass += ',\'ma-select-box-mode-add\': isAddMode';
+                    ngClass += ',\'ma-select-box-mode-select\': !isAddMode';
+                } else {
+                    cssClass += ' ma-select-box-mode-select';
+                }
+
+                if (canReset) {
+                    cssClass += ' ma-select-box-can-reset';
+                    ngClass += ',\'ma-select-box-is-reset-disabled\': canReset === \'true\' && isDisabled !== \'true\' && !_hasValue';
+                }
+
+                ngClass += '}"';
 
                 var html = '\
-                    <div class="ma-select-box"\
-                        ng-class="{\
-                            \'ma-select-box-can-add-item\': canAddItem,\
-                            \'ma-select-box-is-text-focused\': isTextFocused,\
-                            \'ma-select-box-is-disabled\': isDisabled,\
-                            \'ma-select-box-is-invalid\': !isValid,\
-                            \'ma-select-box-is-touched\': isTouched,\
-                            \'ma-select-box-mode-add\': isAddMode,\
-                            \'ma-select-box-mode-select\': !isAddMode,\
-                            \'ma-select-box-can-reset\': canReset,\
-                            \'ma-select-box-is-reset-disabled\': canReset && !isDisabled && !_hasValue,\
-                            \'ma-select-box-is-loading\': isLoading,\
-                            \'ma-select-box-has-value\': _hasValue,\
-                            \'ma-select-box-is-rendered\': isRendering\
-                        }">\
-                        <div class="ma-select-box-spinner" ng-if="isLoading && !isDisabled">\
+                    <div class="'+ cssClass + '"' + ngClass + '>\
+                        <div class="ma-select-box-spinner">\
                             <div class="ma-pace">\
                                 <div class="ma-pace-activity"></div>\
                             </div>\
                         </div>\
-                        <div class="ma-select-box-rendering" ng-if="isRendering"></div>';
+                        <div class="ma-select-box-rendering"></div>';
 
                 if (hasAjax) {
                     html += '<input class="ma-select-box-input" ma-select-box-wrapper="options"' + (isMultiple ? ' multiple' : '') + '\
                         ng-show="!isAddMode"\
-                        ng-disabled="isDisabled"\
+                        ng-disabled="isDisabled === \'true\'"\
                         ng-change="onChange()"\
                         ng-model="selectedItem"/>';
                 } else {
@@ -84,7 +90,7 @@ angular.module('marcuraUI.components')
                     html += '\
                         <select ma-select-box-wrapper="options"' + (isMultiple ? ' multiple' : '') + '\
                             ng-show="!isAddMode"\
-                            ng-disabled="isDisabled"\
+                            ng-disabled="isDisabled === \'true\'"\
                             ng-model="selectedItem"\
                             ng-change="onChange()"\
                             placeholder="{{placeholder}}">\
@@ -95,40 +101,44 @@ angular.module('marcuraUI.components')
                         </select>';
                 }
 
-                // Use ng-hide class instead of ngShow attribute to avoid flickering when angular-animate
-                // module is enabled.
-                // See https://docs.angularjs.org/guide/animations#how-to-selectively-enable-disable-and-skip-animations.
-                html += '\
-                    <input class="ma-select-box-text" type="text"\
-                        ng-class="{ \'ng-hide\': !isAddMode }"\
-                        ng-model="text"\
-                        ng-disabled="isDisabled"\
-                        ng-focus="onFocus(\'text\')"\
-                        placeholder="{{textPlaceholder}}"/>\
-                    <ma-button class="ma-button-toggle"\
-                        ng-show="canAddItem" size="xs" modifier="simple"\
-                        ma-tooltip="{{_addItemTooltip}}"\
-                        ma-tooltip-is-disabled="!canAddItem"\
-                        right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
-                        click="changeMode()"\
-                        ng-focus="onFocus(\'toggle\')"\
-                        is-disabled="isDisabled">\
-                    </ma-button>\
-                    <ma-button class="ma-button-reset"\
-                        ng-show="canReset" size="xs" modifier="simple"\
+                if (canAddItem) {
+                    // Use ng-hide class instead of ngShow attribute to avoid flickering when angular-animate
+                    // module is enabled.
+                    // See https://docs.angularjs.org/guide/animations#how-to-selectively-enable-disable-and-skip-animations.
+                    html += '\
+                        <input class="ma-select-box-text" type="text"\
+                            ng-class="{ \'ng-hide\': !isAddMode }"\
+                            ng-model="text"\
+                            ng-disabled="isDisabled === \'true\'"\
+                            ng-focus="onFocus(\'text\')"\
+                            placeholder="{{textPlaceholder}}"/>\
+                        <ma-button class="ma-button-toggle"\
+                            size="xs" simple\
+                            right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
+                            click="changeMode()"\
+                            ng-focus="onFocus(\'toggle\')"\
+                            is-disabled="{{isDisabled === \'true\'}}">\
+                        </ma-button>';
+                }
+
+                if (canReset) {
+                    html += '<ma-button class="ma-button-reset"\
+                        size="xs" simple\
                         right-icon="times-circle"\
                         click="onReset()"\
                         ng-focus="onFocus(\'reset\')"\
-                        is-disabled="isDisabled || !_hasValue">\
-                    </ma-button>\
-                </div>';
+                        is-disabled="{{isDisabled === \'true\' || !_hasValue}}">\
+                    </ma-button>';
+                }
+
+                html += '</div>';
 
                 return html;
             },
             controller: ['$scope', function (scope) {
+                var isMultiple = scope.isMultiple === 'true';
                 scope._type = scope.type ? scope.type : 'object';
                 scope._itemValueField = scope.itemValueField ? scope.itemValueField : 'id';
-                scope._minSearchCharacters = scope.minSearchCharacters > 0 ? scope.minSearchCharacters : 1;
 
                 // Always return string value for compatibility reasons with select2,
                 // as it only supports string identifiers.
@@ -198,7 +208,7 @@ angular.module('marcuraUI.components')
 
                 // Setting Select2 options does not work from link function, so they are set here.
                 scope.options = {};
-                scope.options.canAddItem = !!scope.canAddItem;
+                scope.options.canAddItem = scope.canAddItem === 'true';
                 scope.options.instance = {};
 
                 if (scope.noItemsFoundText) {
@@ -210,7 +220,6 @@ angular.module('marcuraUI.components')
                 // AJAX options.
                 if (scope.ajax) {
                     scope.options.ajax = scope.ajax;
-                    scope.options.minimumInputLength = scope._minSearchCharacters;
                     scope.options.escapeMarkup = function (markup) {
                         return markup;
                     };
@@ -231,14 +240,14 @@ angular.module('marcuraUI.components')
                         scope.runInitSelection = false;
                     };
 
-                    if (scope.isMultiple) {
+                    if (isMultiple) {
                         scope.options.formatSelection = function (item) {
                             return scope.getItemText(item);
                         };
                     }
                 }
             }],
-            link: function (scope, element, attrs) {
+            link: function (scope, element, attributes) {
                 var textElement = angular.element(element[0].querySelector('.ma-select-box-text')),
                     previousAddedItem = null,
                     toggleButtonElement,
@@ -250,11 +259,10 @@ angular.module('marcuraUI.components')
                     isMultiselectHovered = false,
                     isToggleButtonDown = false,
                     isResetButtonDown = false,
-                    showAddItemTooltip = scope.showAddItemTooltip === false ? false : true,
                     validators = scope.validators ? angular.copy(scope.validators) : [],
                     previousValue,
-                    unicodeNbsp = '\u00A0',
-                    failedValidator = null;
+                    failedValidator = null,
+                    isMultiple = scope.isMultiple === 'true';
 
                 scope.previousSelectedItem = scope.previousSelectedItem || null;
                 scope.isAddMode = false;
@@ -264,7 +272,6 @@ angular.module('marcuraUI.components')
                 scope.hasAjax = angular.isObject(scope.ajax);
                 scope._hasValue = false;
                 scope._items = [];
-                scope.isRendering = true;
 
                 var setItems = function (items) {
                     if (scope.hasAjax || !angular.isArray(items)) {
@@ -310,7 +317,7 @@ angular.module('marcuraUI.components')
                 var isNotEmptyAndInListValidator = {
                     name: 'IsNotEmpty',
                     validate: function (value) {
-                        if (scope.isMultiple && angular.isArray(value)) {
+                        if (isMultiple && angular.isArray(value)) {
                             return value.length > 0;
                         }
 
@@ -344,9 +351,9 @@ angular.module('marcuraUI.components')
                         }
                     }
 
-                    if (emptyValidatorIndex === null && scope.isRequired) {
+                    if (emptyValidatorIndex === null && scope.isRequired === 'true') {
                         validators.unshift(isNotEmptyAndInListValidator);
-                    } else if (emptyValidatorIndex !== null && !scope.isRequired) {
+                    } else if (emptyValidatorIndex !== null && scope.isRequired !== 'true') {
                         validators.splice(emptyValidatorIndex, 1);
                     }
                 };
@@ -413,7 +420,7 @@ angular.module('marcuraUI.components')
                 };
 
                 var setInternalValue = function (item) {
-                    if (scope.isMultiple) {
+                    if (isMultiple) {
                         var items = [],
                             i;
 
@@ -437,12 +444,11 @@ angular.module('marcuraUI.components')
                         scope.selectedItem = items;
                         validate(item);
                     } else {
-                        if (scope.canAddItem && item) {
+                        if (scope.canAddItem === 'true' && item) {
                             // Toggle mode depending on whether provided item exists in the list.
                             // This allows the component to be displayed in correct mode, let's say, in add mode,
                             // when scope.value is initially a custom value not presented in the list.
                             scope.isAddMode = !isExistingItem(item);
-                            setAddItemTooltip();
                         }
 
                         validate(item);
@@ -468,8 +474,6 @@ angular.module('marcuraUI.components')
                             scope.previousSelectedItem = item;
                             scope.toggleMode('select');
                         }
-
-                        setAddItemTooltip();
                     }
 
                     setHasValue();
@@ -485,7 +489,7 @@ angular.module('marcuraUI.components')
                     var cleanItem = angular.copy(item);
 
                     if (scope._type === 'object') {
-                        if (scope.isMultiple) {
+                        if (isMultiple) {
                             for (var i = 0; i < cleanItem.length; i++) {
                                 delete cleanItem[i].text;
                             }
@@ -500,7 +504,7 @@ angular.module('marcuraUI.components')
                 var onFocusout = function (event, elementName) {
                     var elementTo = angular.element(event.relatedTarget || event.toElement),
                         toResetButton = elementTo[0] === resetButtonElement[0] ? true : false,
-                        toSelect = scope.isMultiple ? false : selectData.focusser[0] === elementTo[0],
+                        toSelect = isMultiple ? false : selectData.focusser[0] === elementTo[0],
                         fromToggleButton = event.target === toggleButtonElement[0],
                         fromResetButton = event.target === resetButtonElement[0];
                     scope.isTextFocused = false;
@@ -576,7 +580,7 @@ angular.module('marcuraUI.components')
                             elementTo[0] !== selectData.search[0];
                     }
 
-                    if (scope.isMultiple) {
+                    if (isMultiple) {
                         var inputElement = angular.element(event.target);
 
                         if (inputElement.hasClass('select2-input') && inputElement.hasClass('select2-default')) {
@@ -623,22 +627,12 @@ angular.module('marcuraUI.components')
                 };
 
                 var setHasValue = function () {
-                    if (scope.isMultiple) {
+                    if (isMultiple) {
                         scope._hasValue = !MaHelper.isNullOrUndefined(scope.value) && scope.value.length;
                     } else if (scope.isAddMode) {
                         scope._hasValue = !MaHelper.isNullOrWhiteSpace(scope.text);
                     } else {
-                        scope._hasValue = !MaHelper.isNullOrUndefined(scope.value) && !scope.isLoading;
-                    }
-                };
-
-                var setAddItemTooltip = function () {
-                    if (!showAddItemTooltip || !scope.canAddItem) {
-                        scope._addItemTooltip = '';
-                    } else if (scope.isAddMode) {
-                        scope._addItemTooltip = scope.selectItemTooltip ? scope.selectItemTooltip : 'Select' + unicodeNbsp + 'item';
-                    } else {
-                        scope._addItemTooltip = scope.addItemTooltip ? scope.addItemTooltip : 'Add' + unicodeNbsp + 'item';
+                        scope._hasValue = !MaHelper.isNullOrUndefined(scope.value) && scope.isLoading !== 'true';
                     }
                 };
 
@@ -685,18 +679,11 @@ angular.module('marcuraUI.components')
 
                 scope.changeMode = function () {
                     scope.toggleMode(null, null, true);
-
-                    $timeout(function () {
-                        scope.modeToggle({
-                            maValue: scope.value,
-                            maOldValue: previousValue
-                        });
-                    });
                 };
 
                 scope.reset = function () {
                     previousValue = scope.value;
-                    scope.value = scope.isMultiple ? [] : null;
+                    scope.value = isMultiple ? [] : null;
                     setHasValue();
                 };
 
@@ -740,7 +727,7 @@ angular.module('marcuraUI.components')
                 });
 
                 scope.toggleMode = function (mode, triggerChange, touch) {
-                    if (!scope.canAddItem) {
+                    if (scope.canAddItem !== 'true') {
                         return;
                     }
 
@@ -766,8 +753,6 @@ angular.module('marcuraUI.components')
                     if (typeof triggerChange === 'boolean') {
                         _triggerChange = triggerChange;
                     }
-
-                    setAddItemTooltip();
 
                     // Restore previously selected or added item.
                     if (scope.isAddMode) {
@@ -834,7 +819,7 @@ angular.module('marcuraUI.components')
                 scope.onChange = function () {
                     var item;
 
-                    if (scope.isMultiple) {
+                    if (isMultiple) {
                         var itemsValues = scope.selectedItem,
                             items = [];
 
@@ -989,7 +974,7 @@ angular.module('marcuraUI.components')
                                 if (MaHelper.isNullOrWhiteSpace(scope.value)) {
                                     selectData.data(null);
                                 } else if (angular.isObject(scope.value)) {
-                                    if (scope.isMultiple && angular.isArray(scope.value)) {
+                                    if (isMultiple && angular.isArray(scope.value)) {
                                         var items = [];
 
                                         for (var i = 0; i < scope.value.length; i++) {
@@ -1041,7 +1026,7 @@ angular.module('marcuraUI.components')
                     validate(scope._type === 'object' ? getNewItem(newValue) : newValue);
                 });
 
-                scope.$watch('isRequired', function (newValue, oldValue) {
+                attributes.$observe('isRequired', function (newValue, oldValue) {
                     if (newValue === oldValue) {
                         return;
                     }
@@ -1095,7 +1080,8 @@ angular.module('marcuraUI.components')
                 setValidators();
 
                 $timeout(function () {
-                    scope.isRendering = false;
+                    angular.element(element[0].querySelector('.ma-select-box-rendering')).remove();
+
 
                     // Set initial value.
                     // Value is set inside timeout to ensure that we get the latest value.
@@ -1119,7 +1105,7 @@ angular.module('marcuraUI.components')
                     }
 
                     if (selectData) {
-                        if (scope.isMultiple) {
+                        if (isMultiple) {
                             // Track that the select is hovered to prevent focus lost when a selected item
                             // or selection is clicked.
                             selectData.selection.on('mouseenter', function () {
@@ -1146,12 +1132,6 @@ angular.module('marcuraUI.components')
                             selectData.addItemButton.on('click', function () {
                                 scope.$apply(function () {
                                     scope.toggleMode('add', true, true);
-                                    $timeout(function () {
-                                        scope.modeToggle({
-                                            maValue: scope.value,
-                                            maOldValue: previousValue
-                                        });
-                                    });
                                 });
                             });
                         }

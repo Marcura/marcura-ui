@@ -15,12 +15,7 @@ function checkBoxPageController($scope, $timeout, helper) {
     };
 
     $scope.change = function (value) {
-        console.log('event:', value);
-    };
-
-    $scope.change1 = function (value) {
-        console.log('scope:', $scope.value1);
-        console.log('event:', value);
+        console.log('change:', value);
     };
 
     $scope.portChange = function (port) {

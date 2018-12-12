@@ -13,7 +13,7 @@
         <h2>Items as strings</h2>
     </div>
     <div class="nodes-item">
-        <ma-select-box type="string" items="ports1" value="port1" is-loading="isLoading"
+        <ma-select-box type="string" items="ports1" value="port1" is-loading="{{isLoading}}"
             focus="focus(maValue, 'port1')" blur="blur(maValue, 'port1')"
             change="change(maValue, maOldValue, 'port1')">
         </ma-select-box>
@@ -77,7 +77,7 @@
         <ma-select-box items="ports2" value="port3" item-text-field="name"
             item-value-field="id" can-add-item="true" focus="focus(maValue, 'port3')"
             blur="blur(maValue, 'port3')" change="change(maValue, maOldValue, 'port3')"
-            instance="port3Component" can-reset="true" mode-toggle="modeToggle(maValue, maOldValue, 'port3')">
+            instance="port3Component" can-reset="true">
         </ma-select-box>
     </div>
     <div class="nodes-item">
@@ -88,7 +88,7 @@
     </div>
     <div class="nodes-item">
         <ma-select-box items="ports2" value="port4" item-text-field="name"
-            item-value-field="id" is-loading="isLoading" is-disabled="true">
+            item-value-field="id" is-loading="{{isLoading}}" is-disabled="true">
         </ma-select-box>
     </div>
     <div class="nodes-item">

@@ -1,65 +1,53 @@
 @import 'marcura-ui/less.less';
-
 .ma-radio-button {
     .display-flex;
-
     &-is-disabled {
         .ma-button {
             background-color: @color-disabled;
         }
     }
-
     &:not(&-can-unselect):not(&-is-disabled) &-item-is-selected {
         .ma-button {
             &:hover {
                 cursor: default;
             }
-
             &:active {
                 .box-shadow(@input-shadow-focused);
             }
         }
     }
-
     &-item {
         display: inline-block;
-
         &-is-selected {
-            .ma-button {
+            .ma-button[simple] {
                 background-color: @background-color-darker-light;
             }
         }
-
         &:not(&-is-selected) {
-            .ma-button:not(.ma-button-is-disabled) {
+            .ma-button:not([is-disabled='true']) {
                 &:hover {
                     background-color: #fafafa;
                 }
-
                 &:active {
                     .box-shadow(none);
                 }
             }
         }
-
         &:first-child {
-            .ma-button {
+            .ma-button[simple] {
                 border-top-left-radius: @button-border-radius;
                 border-bottom-left-radius: @button-border-radius;
                 border-left-width: 1px;
-
                 &:focus .ma-button-rim {
                     display: none;
                 }
             }
         }
-
         &:last-child .ma-button {
             border-top-right-radius: @button-border-radius;
             border-bottom-right-radius: @button-border-radius;
         }
-
-        .ma-button {
+        .ma-button[simple] {
             .cut-overflow;
             .box-shadow(none);
             border-left-width: 0;
@@ -67,25 +55,22 @@
             padding-left: 10px;
             padding-right: 10px;
             width: 100%;
-
             &-text {
                 font-size: 14px;
                 font-weight: normal;
             }
-        }
-
-        .ma-button:focus {
-            .box-shadow(@input-shadow-focused);
-            border-color: @color-primary;
-
-            .ma-button-rim {
-                width: 1px;
-                left: -1px;
-                right: auto;
-                top: 0;
-                bottom: 0;
-                border: 0;
-                background-color: @color-primary;
+            &:focus {
+                .box-shadow(@input-shadow-focused);
+                border-color: @color-primary;
+                .ma-button-rim {
+                    width: 1px;
+                    left: -1px;
+                    right: auto;
+                    top: 0;
+                    bottom: 0;
+                    border: 0;
+                    background-color: @color-primary;
+                }
             }
         }
     }

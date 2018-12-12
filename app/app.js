@@ -9,9 +9,7 @@ var app = angular.module('app', [
     'app.controllers'
 ]);
 
-app.config(function ($stateProvider, $urlRouterProvider, maDateBoxConfigurationProvider) {
-    maDateBoxConfigurationProvider.displayFormat = 'dd MMM yy';
-
+app.config(function ($stateProvider, $urlRouterProvider) {
     $stateProvider.state('home', {
         url: '/home',
         templateUrl: 'home/home.html',

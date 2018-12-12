@@ -1,6 +1,6 @@
 angular.module('app.controllers').controller('selectBoxPageController', selectBoxPageController);
 
-function selectBoxPageController($scope, helper, MaHelper) {
+function selectBoxPageController($scope, $timeout, helper, MaHelper) {
     $scope.MaHelper = MaHelper;
     $scope.ports2 = helper.getPorts();
     $scope.ports1 = [];
@@ -140,14 +140,6 @@ function selectBoxPageController($scope, helper, MaHelper) {
     //     console.log('---');
     // };
 
-    // $scope.modeToggle = function (value, oldValue, property) {
-    //     console.log('modeToggle');
-    //     console.log('event:', value);
-    //     console.log('scope:', $scope[property]);
-    //     console.log('old:  ', oldValue);
-    //     console.log('---');
-    // };
-
     // Test placeholder in AJAX mode.
     // $timeout(function () {
     //     $scope.port10 = null;
@@ -224,19 +216,19 @@ function selectBoxPageController($scope, helper, MaHelper) {
     // }, 9000);
 
     // Loading.
-    // $timeout(function() {
+    // $timeout(function () {
     //     $scope.isLoading = true;
     // }, 3000);
-    //
-    // $timeout(function() {
+
+    // $timeout(function () {
     //     $scope.isLoading = false;
     // }, 6000);
-    //
-    // $timeout(function() {
+
+    // $timeout(function () {
     //     $scope.isLoading = true;
     // }, 9000);
-    //
-    // $timeout(function() {
+
+    // $timeout(function () {
     //     $scope.isLoading = false;
     // }, 12000);
 }

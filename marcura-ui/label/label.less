@@ -10,51 +10,14 @@
     /*Use max-width, not width, only for overflow to work.*/
     max-width: 100%;
     line-height: 20px;
-    &-is-required {
-        .ma-label-text {
-            max-width:~'calc(100% - @{star-full-width})';
-        }
-    }
-    &-has-warning {
-        .ma-label-text {
-            max-width:~'calc(100% - @{hint-full-width})';
-        }
-    }
-    &-is-required.ma-label-has-warning {
-        .ma-label-text {
-            max-width:~'calc(100% - @{star-full-width} - @{hint-full-width})';
-        }
-    }
-    &-has-warning {
-        &.ma-label-has-content,
-        &.ma-label-is-required {
-            .ma-label-warning {
-                width: @hint-full-width;
-            }
-        }
-    }
-    &-has-content {
-        .ma-label-star {
-            width: @star-full-width;
-        }
-    }
-    &-is-cut {
-        .ma-label-text {
-            .cut-overflow;
-        }
-    }
-    &-text {
-        .box-sizing(border-box);
-        width: 100%;
-        display: inline-block;
-        vertical-align: top;
-        margin: 0;
-        padding: 0;
-        font-weight: normal;
+    &-warning {
+        display: none;
+        width: @hint-width;
+        position: relative;
     }
     &-star {
         position: relative;
-        display: inline-block;
+        display: none;
         width: @star-width;
         line-height: inherit;
     }
@@ -68,10 +31,49 @@
         right: 0;
         font-size: 7px;
     }
-    &-warning {
+    &[is-required='true'] {
+        .ma-label-star {
+            display: inline-block;
+        }
+        .ma-label-text {
+            max-width:~'calc(100% - @{star-full-width})';
+        }
+    }
+    &[has-warning='true'] {
+        .ma-label-warning {
+            display: inline-block;
+        }
+        .ma-label-text {
+            max-width:~'calc(100% - @{hint-full-width})';
+        }
+        &[is-required='true'] {
+            .ma-label-text {
+                max-width:~'calc(100% - @{star-full-width} - @{hint-full-width})';
+            }
+        }
+        &.ma-label-has-content,
+        &[is-required='true'] {
+            .ma-label-warning {
+                width: @hint-full-width;
+            }
+        }
+    }
+    &-has-content {
+        .ma-label-star {
+            width: @star-full-width;
+        }
+    }
+    &[is-cut='true'] .ma-label-text {
+        .cut-overflow;
+    }
+    &-text {
+        .box-sizing(border-box);
+        width: 100%;
         display: inline-block;
-        width: @hint-width;
-        position: relative;
+        vertical-align: top;
+        margin: 0;
+        padding: 0;
+        font-weight: normal;
     }
     .fa-exclamation-triangle {
         color: @color-warning;

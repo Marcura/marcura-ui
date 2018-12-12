@@ -2,20 +2,18 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
     return {
         restrict: 'E',
         scope: {
+            itemsPerPageText: '@',
+            showItemsPerPage: '@',
+            visiblePages: '@',
+            change: '&',
             page: '=',
             totalItems: '=',
-            visiblePages: '=',
-            showItemsPerPage: '=',
             itemsPerPageNumbers: '=',
-            itemsPerPageText: '@',
-            itemsPerPage: '=',
-            change: '&'
+            itemsPerPage: '='
         },
         replace: true,
         template: function () {
-            var html = '<div class="ma-pager" ng-class="{\
-                \'ma-pager-has-pager\': _hasPager\
-            }">\
+            var html = '<div class="ma-pager">\
                 <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
                     <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
                         type="number"\
@@ -29,16 +27,16 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                             class="ma-button-first"\
                             text="First"\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="firstClick()"\
-                            is-disabled="_page <= 1"\
+                            is-disabled="{{_page <= 1}}"\
                         ></ma-button><ma-button\
                             class="ma-button-previous"\
                             text="Previous"\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="previousClick()"\
-                            is-disabled="_page <= 1">\
+                            is-disabled="{{_page <= 1}}">\
                         </ma-button>\
                     </div\
                     ><div class="ma-pager-middle">\
@@ -46,23 +44,24 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                             class="ma-button-previous-range"\
                             text="..."\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="previousRangeClick()"\
-                            is-disabled="isFirstRange"\
+                            is-disabled="{{isFirstRange}}"\
                         ></ma-button><div class="ma-pager-pages"><ma-button\
                             ng-repeat="rangePage in rangePages"\
                             class="ma-button-page"\
                             text="{{rangePage}}"\
                             size="xs"\
-                            modifier="{{_page === rangePage ? \'selected\' : \'default\'}}"\
+                            ng-attr-selected="{{_page === rangePage || undefined}}"\
+                            ng-attr-default="{{_page !== rangePage || undefined}}"\
                             click="pageClick(rangePage)"></div></ma-button\
                         ><ma-button\
                             class="ma-button-next-range"\
                             text="..."\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="nextRangeClick()"\
-                            is-disabled="isLastRange"\
+                            is-disabled="{{isLastRange}}"\
                         ></ma-button>\
                     </div\
                     ><div class="ma-pager-end">\
@@ -70,16 +69,16 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                             class="ma-button-next"\
                             text="Next"\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="nextClick()"\
-                            is-disabled="_page >= totalPages"\
+                            is-disabled="{{_page >= totalPages}}"\
                         ></ma-button><ma-button\
                             class="ma-button-last"\
                             text="Last"\
                             size="xs"\
-                            modifier="default"\
+                            default\
                             click="lastClick()"\
-                            is-disabled="_page >= totalPages">\
+                            is-disabled="{{_page >= totalPages}}">\
                         </ma-button>\
                     </div>\
                 </div>\
@@ -87,9 +86,9 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
 
             return html;
         },
-        link: function (scope) {
+        link: function (scope, element, attributes) {
             scope._page = scope.page;
-            scope._showItemsPerPage = scope.showItemsPerPage === false ? false : true;
+            scope._showItemsPerPage = scope.showItemsPerPage === 'false' ? false : true;
             scope._itemsPerPageNumbers = [25, 50, 75, 100];
             scope._itemsPerPage = 25;
             scope.hasItemsPerPageChanged = false;
@@ -118,7 +117,8 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
             };
 
             var setRangePages = function () {
-                scope._visiblePages = scope.visiblePages > 1 ? scope.visiblePages : 5;
+                var visiblePages = Number(scope.visiblePages);
+                scope._visiblePages = visiblePages > 1 ? visiblePages : 5;
 
                 if (scope.totalPages < scope._visiblePages) {
                     scope._visiblePages = scope.totalPages || 1;
@@ -136,7 +136,14 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
             };
 
             var setHasPager = function () {
-                scope._hasPager = !scope._showItemsPerPage || (scope.totalPages * scope._itemsPerPage > scope._itemsPerPage);
+                var hasPager = !scope._showItemsPerPage || (scope.totalPages * scope._itemsPerPage > scope._itemsPerPage),
+                    cssClass = 'ma-pager';
+
+                if (hasPager) {
+                    cssClass += ' ma-pager-has-pager';
+                }
+
+                element.attr('class', cssClass);
             };
 
             var onChange = function () {
@@ -235,7 +242,7 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 setHasPager();
             });
 
-            scope.$watch('visiblePages', function (newValue, oldValue) {
+            attributes.$observe('visiblePages', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }

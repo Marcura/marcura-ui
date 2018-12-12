@@ -3,44 +3,52 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
         restrict: 'E',
         scope: {
             id: '@',
-            value: '=',
-            isDisabled: '=',
-            fitContentHeight: '=',
-            isResizable: '=',
-            isRequired: '=',
-            validators: '=',
-            instance: '=',
+            isDisabled: '@',
+            fitContentHeight: '@',
+            isResizable: '@',
+            isRequired: '@',
             change: '&',
             blur: '&',
-            focus: '&'
+            focus: '&',
+            value: '=',
+            validators: '=',
+            instance: '='
         },
         replace: true,
-        template: function () {
+        template: function (element, attributes) {
+            var fitContentHeight = attributes.fitContentHeight === 'true',
+                cssClass = 'ma-text-area';
+
+            if (fitContentHeight) {
+                cssClass += ' ma-text-area-fit-content-height';
+            }
+
             var html = '\
-            <div class="ma-text-area"\
-                ng-class="{\
-                    \'ma-text-area-is-disabled\': isDisabled,\
-                    \'ma-text-area-is-focused\': isFocused,\
-                    \'ma-text-area-fit-content-height\': fitContentHeight,\
-                    \'ma-text-area-is-invalid\': !isValid,\
-                    \'ma-text-area-is-touched\': isTouched\
-                }">\
-                <textarea class="ma-text-area-value"\
-                    type="text"\
-                    ng-focus="onFocus()"\
-                    ng-blur="onBlur()"\
-                    ng-keydown="onKeydown($event)"\
-                    ng-keyup="onKeyup($event)"\
-                    ng-disabled="isDisabled">\
-                </textarea>\
-            </div>';
+                <div class="'+ cssClass + '"\
+                    ng-class="{\
+                        \'ma-text-area-is-disabled\': isDisabled === \'true\',\
+                        \'ma-text-area-is-focused\': isFocused,\
+                        \'ma-text-area-is-invalid\': !isValid,\
+                        \'ma-text-area-is-touched\': isTouched\
+                    }">\
+                    <textarea class="ma-text-area-value"\
+                        type="text"\
+                        ng-focus="onFocus()"\
+                        ng-blur="onBlur()"\
+                        ng-keydown="onKeydown($event)"\
+                        ng-keyup="onKeyup($event)"\
+                        ng-disabled="isDisabled === \'true\'">\
+                    </textarea>\
+                </div>';
 
             return html;
         },
         link: function (scope, element) {
             var valueElement = angular.element(element[0].querySelector('.ma-text-area-value')),
                 validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired,
+                isRequired = scope.isRequired === 'true',
+                fitContentHeight = scope.fitContentHeight === 'true',
+                isResizable = scope.isResizable === 'false' ? false : true,
                 hasIsNotEmptyValidator = false,
                 // Variables keydownValue and keyupValue help track touched state.
                 keydownValue,
@@ -53,7 +61,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             // Set initial height to avoid jumping.
             valueElement[0].style.height = '30px';
 
-            if (scope.isResizable === false) {
+            if (!isResizable) {
                 valueElement.css('resize', 'none');
             }
 
@@ -93,7 +101,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             };
 
             var resize = function () {
-                if (!scope.fitContentHeight) {
+                if (!fitContentHeight) {
                     return;
                 }
 
@@ -222,7 +230,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
             $timeout(function () {
                 resize();
 
-                if (scope.isResizable === false) {
+                if (!isResizable) {
                     valueElement.css('resize', 'none');
                 }
 
@@ -232,7 +240,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
 
                 // If TextArea is hidden initially with ng-show then after appearing
                 // it's height is calculated incorectly. This code fixes the issue.
-                if (scope.fitContentHeight) {
+                if (fitContentHeight) {
                     var hiddenParent = $(element[0]).closest('.ng-hide[ng-show]');
 
                     if (hiddenParent.length === 1) {

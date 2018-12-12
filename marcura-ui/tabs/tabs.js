@@ -2,9 +2,9 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper'
     return {
         restrict: 'E',
         scope: {
-            items: '=',
+            useState: '@',
             select: '&',
-            useState: '='
+            items: '='
         },
         replace: true,
         template: function () {
@@ -31,8 +31,7 @@ angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper'
             return html;
         },
         link: function (scope, element, attributes) {
-            scope.$state = $state;
-            var useState = scope.useState === false ? false : true;
+            var useState = scope.useState === 'false' ? false : true;
 
             scope.isItemSelected = function (item) {
                 if (item.selector) {
