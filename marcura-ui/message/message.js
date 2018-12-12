@@ -7,56 +7,74 @@ angular.module('marcuraUI.components').directive('maMessage', [function () {
             state: '@',
             size: '@',
             textAlign: '@',
-            hasIcon: '='
+            hasIcon: '@'
         },
         replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-message{{cssClass}}">\
-                    <div class="ma-message-icon" ng-if="_hasIcon">\
-                        <i class="fa" ng-class="{\
-                            \'fa-info-circle\': _state === \'info\',\
-                            \'fa-check-circle\': _state === \'success\',\
-                            \'fa-exclamation-circle\': _state === \'warning\',\
-                            \'fa-times-circle\': _state === \'danger\'\
-                        }"></i>\
-                    </div>\
-                    <div class="ma-message-text"><ng-transclude></ng-transclude></div>\
+        template: function (element, attributes) {
+            var hasIcon = attributes.hasIcon === 'false' ? false : true;
+
+            if (!attributes.state || attributes.state === 'default') {
+                hasIcon = false;
+            }
+
+            var html = '<div class="ma-message">';
+
+            if (hasIcon) {
+                html += '<div class="ma-message-icon">\
+                    <i class="fa"></i>\
+                </div>';
+            }
+
+            html += '<div class="ma-message-text"><ng-transclude></ng-transclude></div>\
                 </div>';
 
             return html;
         },
-        link: function (scope) {
-            var type = scope.type || 'message',
-                size = scope.size ? scope.size : 'sm';
-            scope._hasIcon = scope.hasIcon === false ? false : true;
-
-            var setState = function () {
-                scope._state = scope.state || 'default';
-            };
+        link: function (scope, element, attributes) {
+            var iconElement = angular.element(element[0].querySelector('.ma-message-icon .fa'));
 
             var setCssClass = function () {
-                scope.cssClass = ' ma-message-' + type + ' ma-message-' + scope._state + ' ma-message-' + size;
+                var size = scope.size || 'sm',
+                    state = scope.state || 'default',
+                    hasIcon = scope.hasIcon === 'false' ? false : true,
+                    type = scope.type || 'message',
+                    cssClass = 'ma-message ma-message-' + size + ' ma-message-' + state + ' ma-message-' + type,
+                    iconCssClass = 'fa';
+
+                if (state === 'default') {
+                    hasIcon = false;
+                }
+
+                if (hasIcon) {
+                    cssClass += ' ma-message-has-icon';
+                }
 
                 if (scope.textAlign) {
-                    scope.cssClass += ' ma-message-text-align-' + scope.textAlign;
+                    cssClass += ' ma-message-text-align-' + scope.textAlign;
                 }
 
-                if (scope._hasIcon) {
-                    scope.cssClass += ' ma-message-has-icon';
+                if (state === 'info') {
+                    iconCssClass += ' fa-info-circle';
+                } else if (state === 'success') {
+                    iconCssClass += ' fa-check-circle';
+                } else if (state === 'warning') {
+                    iconCssClass += ' fa-exclamation-circle';
+                } else if (state === 'danger') {
+                    iconCssClass += ' fa-times-circle';
                 }
+
+                element.attr('class', cssClass);
+                iconElement.attr('class', iconCssClass);
             };
 
-            scope.$watch('state', function (newValue, oldValue) {
+            attributes.$observe('state', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }
 
-                setState();
                 setCssClass();
             });
 
-            setState();
             setCssClass();
         }
     };
