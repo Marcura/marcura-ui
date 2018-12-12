@@ -1,123 +1,95 @@
 @import 'marcura-ui/less.less';
-
 .ma-grid {
     &-top {
         padding-bottom: 5px;
     }
-
     &-title {
         font-size: 20px;
     }
-
     &-has-spinner {
         position: relative;
     }
-
     /*The spinner makes horizontal bar appear on the table - hide it.*/
     &-is-loading {
         overflow: hidden;
     }
-
     &-is-responsive:not(&-is-loading) {
         overflow-x: initial;
     }
-
     &-col-xs,
     &-header-col-xs {
         &-5 {
             width: 5%;
         }
-
         &-10 {
             width: 10%;
         }
-
         &-15 {
             width: 15%;
         }
-
         &-20 {
             width: 20%;
         }
-
         &-25 {
             width: 25%;
         }
-
         &-30 {
             width: 30%;
         }
-
         &-35 {
             width: 35%;
         }
-
         &-40 {
             width: 40%;
         }
-
         &-45 {
             width: 45%;
         }
-
         &-50 {
             width: 50%;
         }
-
         &-55 {
             width: 55%;
         }
-
         &-60 {
             width: 60%;
         }
-
         &-65 {
             width: 65%;
         }
-
         &-70 {
             width: 70%;
         }
-
         &-75 {
             width: 75%;
         }
-
         &-80 {
             width: 80%;
         }
-
         &-85 {
             width: 85%;
         }
-
         &-90 {
             width: 90%;
         }
-
         &-95 {
             width: 95%;
         }
-
         &-100 {
             width: 100%;
         }
     }
-
     &-header {
         border-top: 1px solid #979797;
         border-bottom: 1px solid #c3c3cd;
         background-color: @background-color-dark;
         .display-flex;
-
         &-col {
             font-weight: bold;
             color: #4a4a4a;
             border-right: 1px solid #c3c3cd;
             padding: 10px;
             cursor: default;
-
             &-sortable {
                 .ma-grid-caption {
                     cursor: pointer;
@@ -125,16 +97,13 @@
                     padding-right: 16px;
                 }
             }
-
             &:last-child {
                 border-right-width: 0;
             }
-
             &:not(&-vertical-align-none) {
                 .ma-grid-header-col-inner {
                     display: flex;
                     height: 100%;
-
                     .ma-grid-caption,
                     /*
                         ma-grid-captions is a wrapper for multiple captions (when a single heading column contains more then one caption).
@@ -147,39 +116,32 @@
             }
         }
     }
-
     &-content {
         color: #4a4a4a;
         border-bottom: 1px solid #e0e0dc;
     }
-
     &-caption {
         display: inline-block;
         .user-select(none);
         /*Use a normal line-height for correct allignment of .ma-grid-label and .ma-grid-order.*/
         line-height: normal;
     }
-
     &-col {
         padding: 10px;
         border-right: solid 1px #f0f0f0;
         border-top: 1px solid #f0f0f0;
-
         &:last-child {
             border-right-width: 0;
         }
     }
-
     &-row {
         &-inner {
             .display-flex;
         }
-
         &:first-child .ma-grid-col {
             border-top-width: 0;
         }
     }
-
     &-empty {
         margin-top: 10px;
     }
@@ -189,15 +151,12 @@
     .ma-grid-is-responsive {
         overflow-y: hidden;
         border-bottom: 1px solid #e0e0dc;
-
         &.ma-grid-responsive-size-sm .ma-grid-inner {
             width: @screen-sm;
         }
-
         &.ma-grid-responsive-size-md .ma-grid-inner {
             width: @screen-md;
         }
-
         &.ma-grid-responsive-size-lg .ma-grid-inner {
             width: @screen-lg;
         }
@@ -211,79 +170,60 @@
             &-5 {
                 width: 5%;
             }
-
             &-10 {
                 width: 10%;
             }
-
             &-15 {
                 width: 15%;
             }
-
             &-20 {
                 width: 20%;
             }
-
             &-25 {
                 width: 25%;
             }
-
             &-30 {
                 width: 30%;
             }
-
             &-35 {
                 width: 35%;
             }
-
             &-40 {
                 width: 40%;
             }
-
             &-45 {
                 width: 45%;
             }
-
             &-50 {
                 width: 50%;
             }
-
             &-55 {
                 width: 55%;
             }
-
             &-60 {
                 width: 60%;
             }
-
             &-65 {
                 width: 65%;
             }
-
             &-70 {
                 width: 70%;
             }
-
             &-75 {
                 width: 75%;
             }
-
             &-80 {
                 width: 80%;
             }
-
             &-85 {
                 width: 85%;
             }
-
             &-90 {
                 width: 90%;
             }
-
             &-95 {
                 width: 95%;
             }
-
             &-100 {
                 width: 100%;
             }

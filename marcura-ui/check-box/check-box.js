@@ -14,12 +14,11 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
         },
         replace: true,
         template: function (element, attributes) {
-            var isRtl = attributes.rtl === 'true',
-                size = attributes.size || 'xs',
+            var size = attributes.size || 'xs',
                 hasText = !!attributes.text,
                 cssClass = 'ma-check-box ma-check-box-' + size;
 
-            if (isRtl) {
+            if (attributes.rtl === 'true') {
                 cssClass += ' ma-check-box-rtl';
             }
 

@@ -904,7 +904,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 }
             }, true);
 
-            setModifiers();
             setEventDates();
 
             // Prepare API instance.

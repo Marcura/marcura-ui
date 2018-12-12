@@ -3,27 +3,32 @@ angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function
         restrict: 'E',
         transclude: true,
         scope: {
-            sortBy: '=',
             modifier: '@',
-            isResponsive: '=',
+            isResponsive: '@',
             responsiveSize: '@',
-            sort: '&'
+            sort: '&',
+            sortBy: '=',
         },
         replace: true,
-        template: function () {
+        template: function (element, attributes) {
+            var cssClass = 'ma-grid';
+
+            if (attributes.isResponsive === 'true') {
+                cssClass += ' ma-grid-is-responsive';
+                cssClass += ' ma-grid-responsive-size-' + (attributes.responsiveSize || 'md');
+            }
+
             var html = '\
-            <div class="ma-grid">\
-                <div class="ma-grid-inner"><ng-transclude></ng-transclude></div>\
-            </div>';
+                <div class="'+ cssClass + '">\
+                    <div class="ma-grid-inner"><ng-transclude></ng-transclude></div>\
+                </div>';
 
             return html;
         },
         controller: ['$scope', function (scope) {
             scope.componentName = 'maGrid';
         }],
-        link: function (scope, element) {
-            var responsiveSize = scope.responsiveSize ? scope.responsiveSize : 'md';
-
+        link: function (scope, element, attributes) {
             var setModifiers = function (oldModifiers) {
                 // Remove previous modifiers first.
                 if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
@@ -45,58 +50,13 @@ angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function
                 }
             };
 
-            var setModifier = function (modifierName, modifierValue) {
-                var modifier;
-
-                if (typeof modifierValue === 'boolean') {
-                    modifier = 'ma-grid-' + modifierName;
-
-                    if (modifierValue === true) {
-                        element.addClass(modifier);
-                    } else {
-                        element.removeClass(modifier);
-                    }
-                } else if (modifierValue) {
-                    // Clean existing classes.
-                    element.removeClass(function (index, className) {
-                        return (className.match(RegExp('ma-grid-' + modifierName + '-.+', 'ig')) || []).join(' ');
-                    });
-
-                    element.addClass('ma-grid-' + modifierName + '-' + modifierValue);
-                }
-            };
-
-            scope.$watch('modifier', function (newValue, oldValue) {
+            attributes.$observe('modifier', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }
 
                 setModifiers(oldValue);
             });
-
-            scope.$watch('isResponsive', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setModifier('is-responsive', scope.isResponsive);
-            });
-
-            setModifiers();
-            setModifier('is-responsive', scope.isResponsive);
-
-            if (scope.isResponsive) {
-                scope.$watch('responsiveSize', function (newValue, oldValue) {
-                    if (newValue === oldValue) {
-                        return;
-                    }
-
-                    responsiveSize = newValue;
-                    setModifier('responsive-size', responsiveSize);
-                });
-
-                setModifier('responsive-size', responsiveSize);
-            }
         }
     };
 }]);
