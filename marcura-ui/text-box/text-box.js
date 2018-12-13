@@ -673,15 +673,19 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
             };
 
             if (hasMin) {
-                attributes.$observe('min', function (newValue, oldValue) {
+                attributes.$observe('min', function (newValue) {
+                    var oldValue = min;
                     min = Number(newValue);
+
                     minMaxObserver(newValue, oldValue);
                 });
             }
 
             if (hasMax) {
-                attributes.$observe('max', function (newValue, oldValue) {
+                attributes.$observe('max', function (newValue) {
+                    var oldValue = max;
                     max = Number(newValue);
+
                     minMaxObserver(newValue, oldValue);
                 });
             }

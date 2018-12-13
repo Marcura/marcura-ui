@@ -4125,7 +4125,10 @@ if (!String.prototype.endsWith) {
                 isHourFocused,
                 isMinuteFocused,
                 eventDates = [],
-                isDisabledObserverFirstRun = true;
+                isDisabledObserverFirstRun = true,
+                _modifier,
+                _min,
+                _max;
 
             var hasDateChanged = function (date) {
                 if (previousDate.isEqual(date)) {
@@ -4311,8 +4314,8 @@ if (!String.prototype.endsWith) {
             var initializePikaday = function () {
                 var theme = 'ma-pika';
 
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
-                    var modifiers = scope.modifier.split(' ');
+                if (!MaHelper.isNullOrWhiteSpace(_modifier)) {
+                    var modifiers = _modifier.split(' ');
 
                     for (var i = 0; i < modifiers.length; i++) {
                         theme += ' ma-pika-' + modifiers[i];
@@ -4600,7 +4603,7 @@ if (!String.prototype.endsWith) {
                 }
             };
 
-            var setModifiers = function (oldModifiers) {
+            var setModifiers = function (oldModifiers, newModifiers) {
                 // Remove previous modifiers first.
                 if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
                     oldModifiers = oldModifiers.split(' ');
@@ -4612,7 +4615,7 @@ if (!String.prototype.endsWith) {
 
                 var modifiers = '';
 
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
+                if (!MaHelper.isNullOrWhiteSpace(newModifiers)) {
                     modifiers = scope.modifier.split(' ');
                 }
 
@@ -4873,20 +4876,29 @@ if (!String.prototype.endsWith) {
                 }
             };
 
-            attributes.$observe('min', function (newValue, oldValue) {
+            attributes.$observe('min', function (newValue) {
+                var oldValue = _min;
+                _min = newValue;
+
                 minMaxDateWatcher(newValue, oldValue, 'min');
             });
 
-            attributes.$observe('max', function (newValue, oldValue) {
+            attributes.$observe('max', function (newValue) {
+                var oldValue = _max;
+                _max = newValue;
+
                 minMaxDateWatcher(newValue, oldValue, 'max');
             });
 
-            attributes.$observe('modifier', function (newValue, oldValue) {
+            attributes.$observe('modifier', function (newValue) {
+                var oldValue = _modifier;
+
                 if (newValue === oldValue) {
                     return;
                 }
 
-                setModifiers(oldValue);
+                _modifier = newValue;
+                setModifiers(oldValue, _modifier);
             });
 
             scope.$watch('eventDates', function (newValue, oldValue) {
@@ -5021,7 +5033,9 @@ if (!String.prototype.endsWith) {
             scope.componentName = 'maGrid';
         }],
         link: function (scope, element, attributes) {
-            var setModifiers = function (oldModifiers) {
+            var _modifier;
+
+            var setModifiers = function (oldModifiers, newModifiers) {
                 // Remove previous modifiers first.
                 if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
                     oldModifiers = oldModifiers.split(' ');
@@ -5033,8 +5047,8 @@ if (!String.prototype.endsWith) {
 
                 var modifiers = '';
 
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
-                    modifiers = scope.modifier.split(' ');
+                if (!MaHelper.isNullOrWhiteSpace(newModifiers)) {
+                    modifiers = newModifiers.split(' ');
                 }
 
                 for (var j = 0; j < modifiers.length; j++) {
@@ -5042,12 +5056,15 @@ if (!String.prototype.endsWith) {
                 }
             };
 
-            attributes.$observe('modifier', function (newValue, oldValue) {
+            attributes.$observe('modifier', function (newValue) {
+                var oldValue = _modifier;
+
                 if (newValue === oldValue) {
                     return;
                 }
 
-                setModifiers(oldValue);
+                _modifier = newValue;
+                setModifiers(oldValue, _modifier);
             });
         }
     };
@@ -5123,6 +5140,32 @@ if (!String.prototype.endsWith) {
                 gridScope = getGridScope();
                 scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
             });
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            for: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-label" ng-class="{\
+                    \'ma-label-has-content\': hasContent\
+                }">\
+                    <label class="ma-label-text" for="{{::for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star">&nbsp;<i class="fa fa-star"></i></div><!--\
+                    --><div class="ma-label-warning">&nbsp;\
+                    <i class="fa fa-exclamation-triangle"></i></div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            scope.hasContent = element.find('ng-transclude').contents().length > 0;
         }
     };
 }]);})();
@@ -5309,32 +5352,6 @@ if (!String.prototype.endsWith) {
                     validate();
                 };
             }
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            for: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-label" ng-class="{\
-                    \'ma-label-has-content\': hasContent\
-                }">\
-                    <label class="ma-label-text" for="{{::for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star">&nbsp;<i class="fa fa-star"></i></div><!--\
-                    --><div class="ma-label-warning">&nbsp;\
-                    <i class="fa fa-exclamation-triangle"></i></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            scope.hasContent = element.find('ng-transclude').contents().length > 0;
         }
     };
 }]);})();
@@ -5691,6 +5708,7 @@ if (!String.prototype.endsWith) {
             scope._itemsPerPage = 25;
             scope.hasItemsPerPageChanged = false;
             scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
+            var _visiblePages;
 
             var setTotalPages = function () {
                 scope.totalPages = Math.ceil(scope._totalItems / scope._itemsPerPage);
@@ -5840,11 +5858,14 @@ if (!String.prototype.endsWith) {
                 setHasPager();
             });
 
-            attributes.$observe('visiblePages', function (newValue, oldValue) {
+            attributes.$observe('visiblePages', function (newValue) {
+                var oldValue = _visiblePages;
+
                 if (newValue === oldValue) {
                     return;
                 }
 
+                _visiblePages = newValue;
                 setRangePages();
             });
 
@@ -10452,15 +10473,19 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
             };
 
             if (hasMin) {
-                attributes.$observe('min', function (newValue, oldValue) {
+                attributes.$observe('min', function (newValue) {
+                    var oldValue = min;
                     min = Number(newValue);
+
                     minMaxObserver(newValue, oldValue);
                 });
             }
 
             if (hasMax) {
-                attributes.$observe('max', function (newValue, oldValue) {
+                attributes.$observe('max', function (newValue) {
+                    var oldValue = max;
                     max = Number(newValue);
+
                     minMaxObserver(newValue, oldValue);
                 });
             }

@@ -124,7 +124,10 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 isHourFocused,
                 isMinuteFocused,
                 eventDates = [],
-                isDisabledObserverFirstRun = true;
+                isDisabledObserverFirstRun = true,
+                _modifier,
+                _min,
+                _max;
 
             var hasDateChanged = function (date) {
                 if (previousDate.isEqual(date)) {
@@ -310,8 +313,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
             var initializePikaday = function () {
                 var theme = 'ma-pika';
 
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
-                    var modifiers = scope.modifier.split(' ');
+                if (!MaHelper.isNullOrWhiteSpace(_modifier)) {
+                    var modifiers = _modifier.split(' ');
 
                     for (var i = 0; i < modifiers.length; i++) {
                         theme += ' ma-pika-' + modifiers[i];
@@ -599,7 +602,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 }
             };
 
-            var setModifiers = function (oldModifiers) {
+            var setModifiers = function (oldModifiers, newModifiers) {
                 // Remove previous modifiers first.
                 if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
                     oldModifiers = oldModifiers.split(' ');
@@ -611,7 +614,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
 
                 var modifiers = '';
 
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
+                if (!MaHelper.isNullOrWhiteSpace(newModifiers)) {
                     modifiers = scope.modifier.split(' ');
                 }
 
@@ -872,20 +875,29 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 }
             };
 
-            attributes.$observe('min', function (newValue, oldValue) {
+            attributes.$observe('min', function (newValue) {
+                var oldValue = _min;
+                _min = newValue;
+
                 minMaxDateWatcher(newValue, oldValue, 'min');
             });
 
-            attributes.$observe('max', function (newValue, oldValue) {
+            attributes.$observe('max', function (newValue) {
+                var oldValue = _max;
+                _max = newValue;
+
                 minMaxDateWatcher(newValue, oldValue, 'max');
             });
 
-            attributes.$observe('modifier', function (newValue, oldValue) {
+            attributes.$observe('modifier', function (newValue) {
+                var oldValue = _modifier;
+
                 if (newValue === oldValue) {
                     return;
                 }
 
-                setModifiers(oldValue);
+                _modifier = newValue;
+                setModifiers(oldValue, _modifier);
             });
 
             scope.$watch('eventDates', function (newValue, oldValue) {

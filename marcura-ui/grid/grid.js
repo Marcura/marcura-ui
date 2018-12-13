@@ -29,7 +29,9 @@ angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function
             scope.componentName = 'maGrid';
         }],
         link: function (scope, element, attributes) {
-            var setModifiers = function (oldModifiers) {
+            var _modifier;
+
+            var setModifiers = function (oldModifiers, newModifiers) {
                 // Remove previous modifiers first.
                 if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
                     oldModifiers = oldModifiers.split(' ');
@@ -41,8 +43,8 @@ angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function
 
                 var modifiers = '';
 
-                if (!MaHelper.isNullOrWhiteSpace(scope.modifier)) {
-                    modifiers = scope.modifier.split(' ');
+                if (!MaHelper.isNullOrWhiteSpace(newModifiers)) {
+                    modifiers = newModifiers.split(' ');
                 }
 
                 for (var j = 0; j < modifiers.length; j++) {
@@ -50,12 +52,15 @@ angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function
                 }
             };
 
-            attributes.$observe('modifier', function (newValue, oldValue) {
+            attributes.$observe('modifier', function (newValue) {
+                var oldValue = _modifier;
+
                 if (newValue === oldValue) {
                     return;
                 }
 
-                setModifiers(oldValue);
+                _modifier = newValue;
+                setModifiers(oldValue, _modifier);
             });
         }
     };

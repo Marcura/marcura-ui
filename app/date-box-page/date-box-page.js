@@ -20,7 +20,6 @@ function dateBoxPageController($scope, $timeout, MaDate) {
     $scope.date20DateBox = {};
     $scope.date20Validator = {
         validate: function (date) {
-            console.log('validate:', date);
             return true;
         }
     };

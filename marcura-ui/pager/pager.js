@@ -93,6 +93,7 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
             scope._itemsPerPage = 25;
             scope.hasItemsPerPageChanged = false;
             scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
+            var _visiblePages;
 
             var setTotalPages = function () {
                 scope.totalPages = Math.ceil(scope._totalItems / scope._itemsPerPage);
@@ -242,11 +243,14 @@ angular.module('marcuraUI.components').directive('maPager', ['$timeout', functio
                 setHasPager();
             });
 
-            attributes.$observe('visiblePages', function (newValue, oldValue) {
+            attributes.$observe('visiblePages', function (newValue) {
+                var oldValue = _visiblePages;
+
                 if (newValue === oldValue) {
                     return;
                 }
 
+                _visiblePages = newValue;
                 setRangePages();
             });
 
