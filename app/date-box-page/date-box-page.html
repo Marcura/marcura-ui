@@ -79,7 +79,7 @@
         <h2>Min and max dates</h2>
     </div>
     <div class="nodes-item">
-        <ma-date-box value="date9" min="date9Min" max="date9Max" change="change(maValue, 'date9')">
+        <ma-date-box value="date9" min="{{date9Min}}" max="{{date9Max}}" change="change(maValue, 'date9')">
         </ma-date-box>
     </div>
     <div class="nodes-item">
@@ -127,9 +127,9 @@ max: {{date9Max}}</pre>
                 <div>
                     <label for="date20">Start</label>
                 </div>
-                <ma-date-box id="date20" value="date20" max="date21" can-reset="true"
-                    change="change(maValue, 'date20')" validators="[date20Validator]"
-                    instance="date20DateBox">
+                <ma-date-box id="date20" value="date20" max="{{date21}}"
+                    can-reset="true" change="change(maValue, 'date20')"
+                    validators="[date20Validator]" instance="date20DateBox">
                 </ma-date-box>
             </div>
             <div class="col-xs-12 col-sm-4">
@@ -168,7 +168,7 @@ value: {{date21 || 'null'}}</pre>
                 <div>
                     <label for="start">Start</label>
                 </div>
-                <ma-date-box id="start" value="start" max="end" can-reset="true"
+                <ma-date-box id="start" value="start" max="{{end}}" can-reset="true"
                     change-timeout="1000" validate="validateStart(maValue)"
                     instance="startComponent">
                 </ma-date-box>
@@ -177,7 +177,7 @@ value: {{date21 || 'null'}}</pre>
                 <div>
                     <label for="end">End</label>
                 </div>
-                <ma-date-box id="end" value="end" min="start" max="now"
+                <ma-date-box id="end" value="end" min="{{start}}" max="{{now}}"
                     can-reset="true" change-timeout="1000" validate="validateEnd(maValue)"
                     instance="endComponent">
                 </ma-date-box>

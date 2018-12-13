@@ -90,9 +90,9 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
             return html;
         },
         link: function (scope, element, attributes) {
-            var valueElement = angular.element(element[0].querySelector('.ma-text-box-value')),
-                resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset')),
-                togglePasswordButtonElement = angular.element(element[0].querySelector('.ma-button-toggle-password')),
+            var canReset = scope.canReset === 'true',
+                valueElement = angular.element(element[0].querySelector('.ma-text-box-value')),
+                resetButtonElement = canReset ? angular.element(element[0].querySelector('.ma-button-reset')) : null,
                 validators = [],
                 // Variables keydownValue and keyupValue help track touched state.
                 keydownValue,
@@ -117,6 +117,9 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
                 changeWhenIsInvalid = scope.changeWhenIsInvalid === 'true' ? true : false,
                 hasShowPasswordButton = scope.hasShowPasswordButton === 'false' ? false : true,
                 minMaxObserverFirstRun = true;
+            scope.canTogglePassword = scope.type === 'password' && hasShowPasswordButton;
+            var togglePasswordButtonElement = scope.canTogglePassword ?
+                angular.element(element[0].querySelector('.ma-button-toggle-password')) : null;
 
             if (scope.type === 'number') {
                 defaultValue = MaHelper.isNumber(scope.defaultValue) ? Number(scope.defaultValue) : null;
@@ -338,7 +341,6 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
             setValidators();
             scope.isValueFocused = false;
             scope.isTouched = false;
-            scope.canTogglePassword = scope.type === 'password' && hasShowPasswordButton;
             scope.isPasswordVisible = false;
 
             scope.hasValue = function () {
@@ -421,13 +423,17 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
                 onFocusout(event, 'value');
             });
 
-            resetButtonElement.focusout(function (event) {
-                onFocusout(event);
-            });
+            if (canReset) {
+                resetButtonElement.focusout(function (event) {
+                    onFocusout(event);
+                });
+            }
 
-            togglePasswordButtonElement.focusout(function (event) {
-                onFocusout(event);
-            });
+            if (scope.canTogglePassword) {
+                togglePasswordButtonElement.focusout(function (event) {
+                    onFocusout(event);
+                });
+            }
 
             scope.togglePassword = function () {
                 scope.isPasswordVisible = !scope.isPasswordVisible;
@@ -446,13 +452,18 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
                 setPreviousValue(scope.value);
 
                 // Trigger blur event when focus goes to an element outside the component.
-                if (scope.canTogglePassword) {
+                if (canReset && scope.canTogglePassword) {
                     isFocusLost = elementTo[0] !== valueElement[0] &&
                         elementTo[0] !== togglePasswordButtonElement[0] &&
                         elementTo[0] !== resetButtonElement[0];
-                } else {
+                } else if (canReset) {
                     isFocusLost = elementTo[0] !== valueElement[0] &&
                         elementTo[0] !== resetButtonElement[0];
+                } else if (scope.canTogglePassword) {
+                    isFocusLost = elementTo[0] !== valueElement[0] &&
+                        elementTo[0] !== togglePasswordButtonElement[0];
+                } else {
+                    isFocusLost = elementTo[0] !== valueElement[0];
                 }
 
                 // Cancel change if it is already in process to prevent the event from firing twice.
@@ -477,7 +488,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
                         valueElement.val(formatValue(value));
                     }
 
-                    if (!scope.isResetEnabled() && elementTo[0] === resetButtonElement[0]) {
+                    if (canReset && (!scope.isResetEnabled() && elementTo[0] === resetButtonElement[0])) {
                         isFocusLost = true;
                     }
 

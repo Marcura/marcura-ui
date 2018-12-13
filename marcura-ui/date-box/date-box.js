@@ -101,8 +101,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 format = (scope.format || 'yyyy-MM-ddTHH:mm:ssZ').replace(/Y/g, 'y').replace(/D/g, 'd'),
                 timeZone = (scope.timeZone || 'Z').replace(/GMT/g, ''),
                 dateElement = angular.element(element[0].querySelector('.ma-date-box-date')),
-                hourElement = angular.element(element[0].querySelector('.ma-date-box-hour')),
-                minuteElement = angular.element(element[0].querySelector('.ma-date-box-minute')),
+                hourElement = hasTime ? angular.element(element[0].querySelector('.ma-date-box-hour')) : null,
+                minuteElement = hasTime ? angular.element(element[0].querySelector('.ma-date-box-minute')) : null,
                 previousDate = MaDate.createEmpty(),
                 timeZoneOffset = MaDate.parseTimeZone(timeZone),
                 initialDisplayDate,
@@ -140,8 +140,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
             var getDisplayDate = function () {
                 var displayDate = dateElement.val().trim(),
                     isEmpty = displayDate === '',
-                    hour = Number(hourElement.val()),
-                    minute = Number(minuteElement.val()),
+                    hour = hasTime ? Number(hourElement.val()) : 0,
+                    minute = hasTime ? Number(minuteElement.val()) : 0,
                     date = MaDate.createEmpty();
 
                 if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
@@ -173,16 +173,22 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                     // Adjust display date offset.
                     displayDate = date.copy().toUtc().add(timeZoneOffset, 'minute');
                     dateElement.val(displayDate.format(displayFormat));
-                    hourElement.val(displayDate.format('HH'));
-                    minuteElement.val(displayDate.format('mm'));
+
+                    if (hasTime) {
+                        hourElement.val(displayDate.format('HH'));
+                        minuteElement.val(displayDate.format('mm'));
+                    }
 
                     if (!initialDisplayDate) {
                         initialDisplayDate = dateElement.val();
                     }
                 } else {
                     dateElement.val('');
-                    hourElement.val('00');
-                    minuteElement.val('00');
+
+                    if (hasTime) {
+                        hourElement.val('00');
+                        minuteElement.val('00');
+                    }
                 }
 
                 // Restore caret position if the component has focus.
@@ -200,18 +206,20 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                         });
                     }
 
-                    if (isHourFocused) {
-                        hourElement.prop({
-                            selectionStart: hourCaretPosition,
-                            selectionEnd: hourCaretPosition
-                        });
-                    }
+                    if (hasTime) {
+                        if (isHourFocused) {
+                            hourElement.prop({
+                                selectionStart: hourCaretPosition,
+                                selectionEnd: hourCaretPosition
+                            });
+                        }
 
-                    if (isMinuteFocused) {
-                        minuteElement.prop({
-                            selectionStart: minuteCaretPosition,
-                            selectionEnd: minuteCaretPosition
-                        });
+                        if (isMinuteFocused) {
+                            minuteElement.prop({
+                                selectionStart: minuteCaretPosition,
+                                selectionEnd: minuteCaretPosition
+                            });
+                        }
                     }
 
                     $timeout(function () {
@@ -271,8 +279,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
             };
 
             var setDateTime = function (date) {
-                date.hour(Number(hourElement.val()))
-                    .minute(Number(minuteElement.val()))
+                date.hour(hasTime ? Number(hourElement.val()) : 0)
+                    .minute(hasTime ? Number(minuteElement.val()) : 0)
                     .second(0);
             };
 
@@ -451,8 +459,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
 
                 var displayDate = dateElement.val().trim(),
                     isEmpty = displayDate === '',
-                    hour = Number(hourElement.val()),
-                    minute = Number(minuteElement.val()),
+                    hour = hasTime ? Number(hourElement.val()) : 0,
+                    minute = hasTime ? Number(minuteElement.val()) : 0,
                     date = MaDate.createEmpty();
 
                 // Check time.
@@ -555,28 +563,40 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 // Remove the event in case it exists.
                 removeFocusEvent();
                 $('.ma-date-box-date', element).on('focus', focusDate);
-                $('.ma-date-box-hour', element).on('focus', focusHour);
-                $('.ma-date-box-minute', element).on('focus', focusMinute);
+
+                if (hasTime) {
+                    $('.ma-date-box-hour', element).on('focus', focusHour);
+                    $('.ma-date-box-minute', element).on('focus', focusMinute);
+                }
             };
 
             var removeFocusEvent = function () {
                 $('.ma-date-box-date', element).off('focus', focusDate);
-                $('.ma-date-box-hour', element).off('focus', focusHour);
-                $('.ma-date-box-minute', element).off('focus', focusMinute);
+
+                if (hasTime) {
+                    $('.ma-date-box-hour', element).off('focus', focusHour);
+                    $('.ma-date-box-minute', element).off('focus', focusMinute);
+                }
             };
 
             var addBlurEvent = function () {
                 // Remove the event in case it exists.
                 removeBlurEvent();
                 $('.ma-date-box-date', element).on('blur', blurDate);
-                $('.ma-date-box-hour', element).on('blur', blurHour);
-                $('.ma-date-box-minute', element).on('blur', blurMinute);
+
+                if (hasTime) {
+                    $('.ma-date-box-hour', element).on('blur', blurHour);
+                    $('.ma-date-box-minute', element).on('blur', blurMinute);
+                }
             };
 
             var removeBlurEvent = function () {
                 $('.ma-date-box-date', element).off('blur', blurDate);
-                $('.ma-date-box-hour', element).off('blur', blurHour);
-                $('.ma-date-box-minute', element).off('blur', blurMinute);
+
+                if (hasTime) {
+                    $('.ma-date-box-hour', element).off('blur', blurHour);
+                    $('.ma-date-box-minute', element).off('blur', blurMinute);
+                }
             };
 
             var setModifiers = function (oldModifiers) {
@@ -623,13 +643,21 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
             scope.isTouched = false;
 
             scope.hasValue = function () {
-                return (dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00') &&
-                    !scope.isLoading;
+                if (hasTime) {
+                    return (dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00') &&
+                        !scope.isLoading;
+                }
+
+                return dateElement.val() && !scope.isLoading;
             };
 
             scope.isResetEnabled = function () {
-                return scope.isDisabled !== 'true' &&
-                    (dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00');
+                if (hasTime) {
+                    return scope.isDisabled !== 'true' &&
+                        (dateElement.val() || hourElement.val() !== '00' || minuteElement.val() !== '00');
+                }
+
+                return scope.isDisabled !== 'true' && dateElement.val();
             };
 
             scope.onFocus = function () {
@@ -678,8 +706,11 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 // Change value after a timeout while the user is typing.
                 if (hasValueChanged && changeTimeout > 0) {
                     dateCaretPosition = dateElement.prop('selectionStart');
-                    hourCaretPosition = hourElement.prop('selectionStart');
-                    minuteCaretPosition = minuteElement.prop('selectionStart');
+
+                    if (hasTime) {
+                        hourCaretPosition = hourElement.prop('selectionStart');
+                        minuteCaretPosition = minuteElement.prop('selectionStart');
+                    }
 
                     if (changePromise) {
                         $timeout.cancel(changePromise);
@@ -789,6 +820,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 if (newValue === oldValue) {
                     return;
                 }
+                console.log('minMaxDateWatcher');
 
                 var date = parseDate(dateElement.val().trim());
                 date.offset(timeZoneOffset);

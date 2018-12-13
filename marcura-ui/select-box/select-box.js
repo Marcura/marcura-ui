@@ -265,7 +265,9 @@ angular.module('marcuraUI.components')
                     validators = scope.validators ? angular.copy(scope.validators) : [],
                     previousValue,
                     failedValidator = null,
-                    isMultiple = scope.isMultiple === 'true';
+                    isMultiple = scope.isMultiple === 'true',
+                    canReset = scope.canReset === 'true',
+                    canAddItem = scope.canAddItem === 'true';
 
                 scope.previousSelectedItem = scope.previousSelectedItem || null;
                 scope.isAddMode = false;
@@ -447,7 +449,7 @@ angular.module('marcuraUI.components')
                         scope.selectedItem = items;
                         validate(item);
                     } else {
-                        if (scope.canAddItem === 'true' && item) {
+                        if (canAddItem && item) {
                             // Toggle mode depending on whether provided item exists in the list.
                             // This allows the component to be displayed in correct mode, let's say, in add mode,
                             // when scope.value is initially a custom value not presented in the list.
@@ -506,10 +508,10 @@ angular.module('marcuraUI.components')
 
                 var onFocusout = function (event, elementName) {
                     var elementTo = angular.element(event.relatedTarget || event.toElement),
-                        toResetButton = elementTo[0] === resetButtonElement[0] ? true : false,
+                        toResetButton = canReset && elementTo[0] === resetButtonElement[0],
                         toSelect = isMultiple ? false : selectData.focusser[0] === elementTo[0],
-                        fromToggleButton = event.target === toggleButtonElement[0],
-                        fromResetButton = event.target === resetButtonElement[0];
+                        fromToggleButton = canAddItem && event.target === toggleButtonElement[0],
+                        fromResetButton = canReset && event.target === resetButtonElement[0];
                     scope.isTextFocused = false;
 
                     // Trigger change event for text element.
@@ -576,11 +578,18 @@ angular.module('marcuraUI.components')
                     } else {
                         // Use isToggleButtonDown/isResetButtonDown for IE, because event.toElement isn't supported.
                         // We need it in such cases when user clicks Toggle/Reset button while dropdown is open.
-                        isFocusLost = !isToggleButtonDown && !isResetButtonDown &&
-                            elementTo[0] !== toggleButtonElement[0] &&
-                            !toResetButton &&
-                            elementTo[0] !== textElement[0] &&
-                            elementTo[0] !== selectData.search[0];
+                        if (canAddItem) {
+                            isFocusLost = !isToggleButtonDown && !isResetButtonDown &&
+                                elementTo[0] !== toggleButtonElement[0] &&
+                                !toResetButton &&
+                                elementTo[0] !== textElement[0] &&
+                                elementTo[0] !== selectData.search[0];
+                        } else {
+                            isFocusLost = !isToggleButtonDown && !isResetButtonDown &&
+                                !toResetButton &&
+                                elementTo[0] !== textElement[0] &&
+                                elementTo[0] !== selectData.search[0];
+                        }
                     }
 
                     if (isMultiple) {
@@ -730,7 +739,7 @@ angular.module('marcuraUI.components')
                 });
 
                 scope.toggleMode = function (mode, triggerChange, touch) {
-                    if (scope.canAddItem !== 'true') {
+                    if (!canAddItem) {
                         return;
                     }
 
@@ -1096,7 +1105,7 @@ angular.module('marcuraUI.components')
                     selectData = selectElement.data() ? selectElement.data().select2 : null;
                     labelElement = $('label[for="' + scope.id + '"]');
                     toggleButtonElement = angular.element(element[0].querySelector('.ma-button-toggle'));
-                    resetButtonElement = angular.element(element[0].querySelector('.ma-button-reset'));
+                    resetButtonElement = canReset ? angular.element(element[0].querySelector('.ma-button-reset')) : null;
 
                     initializeSelect2Value();
 
@@ -1140,29 +1149,33 @@ angular.module('marcuraUI.components')
                         }
                     }
 
-                    toggleButtonElement.focusout(function (event) {
-                        onFocusout(event);
-                    });
+                    if (canAddItem) {
+                        toggleButtonElement.focusout(function (event) {
+                            onFocusout(event);
+                        });
 
-                    resetButtonElement.focusout(function (event) {
-                        onFocusout(event);
-                    });
+                        toggleButtonElement.mousedown(function (event) {
+                            isToggleButtonDown = true;
+                        });
 
-                    toggleButtonElement.mousedown(function (event) {
-                        isToggleButtonDown = true;
-                    });
+                        toggleButtonElement.mouseup(function (event) {
+                            isToggleButtonDown = false;
+                        });
+                    }
 
-                    toggleButtonElement.mouseup(function (event) {
-                        isToggleButtonDown = false;
-                    });
+                    if (canReset) {
+                        resetButtonElement.focusout(function (event) {
+                            onFocusout(event);
+                        });
 
-                    resetButtonElement.mousedown(function (event) {
-                        isResetButtonDown = true;
-                    });
+                        resetButtonElement.mousedown(function (event) {
+                            isResetButtonDown = true;
+                        });
 
-                    resetButtonElement.mouseup(function (event) {
-                        isResetButtonDown = false;
-                    });
+                        resetButtonElement.mouseup(function (event) {
+                            isResetButtonDown = false;
+                        });
+                    }
 
                     scope.init({
                         maInstance: scope.instance
