@@ -787,14 +787,15 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                     setDisplayDate(null);
                 }
 
+                // Validate date to make it valid in case it was invalid before or vice versa.
+                // Pass false as second parameter to avoid loop from triggering validate event.
+                validate(date, false);
+
                 if (!hasDateChanged(date)) {
                     setDisplayDate(date);
                     return;
                 }
 
-                // Validate date to make it valid in case it was invalid before or vice versa.
-                // Pass false as second parameter to avoid loop from triggering validate event.
-                validate(date, false);
                 setDisplayDate(date);
                 previousDate = date;
                 initialDateOffset = date.offset();
