@@ -820,7 +820,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 if (newValue === oldValue) {
                     return;
                 }
-                console.log('minMaxDateWatcher');
 
                 var date = parseDate(dateElement.val().trim());
                 date.offset(timeZoneOffset);
