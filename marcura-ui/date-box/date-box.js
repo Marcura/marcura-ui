@@ -820,7 +820,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 isDisabledObserverFirstRun = false;
             });
 
-            var minMaxDateWatcher = function (newValue, oldValue, dateName) {
+            var minMaxDateObserver = function (newValue, oldValue, dateName) {
                 if (newValue === oldValue) {
                     return;
                 }
@@ -879,14 +879,14 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 var oldValue = _min;
                 _min = newValue;
 
-                minMaxDateWatcher(newValue, oldValue, 'min');
+                minMaxDateObserver(_min, oldValue, 'min');
             });
 
             attributes.$observe('max', function (newValue) {
                 var oldValue = _max;
                 _max = newValue;
 
-                minMaxDateWatcher(newValue, oldValue, 'max');
+                minMaxDateObserver(_max, oldValue, 'max');
             });
 
             attributes.$observe('modifier', function (newValue) {

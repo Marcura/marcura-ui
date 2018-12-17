@@ -4821,7 +4821,7 @@ if (!String.prototype.endsWith) {
                 isDisabledObserverFirstRun = false;
             });
 
-            var minMaxDateWatcher = function (newValue, oldValue, dateName) {
+            var minMaxDateObserver = function (newValue, oldValue, dateName) {
                 if (newValue === oldValue) {
                     return;
                 }
@@ -4880,14 +4880,14 @@ if (!String.prototype.endsWith) {
                 var oldValue = _min;
                 _min = newValue;
 
-                minMaxDateWatcher(newValue, oldValue, 'min');
+                minMaxDateObserver(_min, oldValue, 'min');
             });
 
             attributes.$observe('max', function (newValue) {
                 var oldValue = _max;
                 _max = newValue;
 
-                minMaxDateWatcher(newValue, oldValue, 'max');
+                minMaxDateObserver(_max, oldValue, 'max');
             });
 
             attributes.$observe('modifier', function (newValue) {
@@ -5143,32 +5143,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            for: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-label" ng-class="{\
-                    \'ma-label-has-content\': hasContent\
-                }">\
-                    <label class="ma-label-text" for="{{::for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star">&nbsp;<i class="fa fa-star"></i></div><!--\
-                    --><div class="ma-label-warning">&nbsp;\
-                    <i class="fa fa-exclamation-triangle"></i></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            scope.hasContent = element.find('ng-transclude').contents().length > 0;
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
     return {
         restrict: 'E',
@@ -5352,6 +5326,32 @@ if (!String.prototype.endsWith) {
                     validate();
                 };
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            for: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-label" ng-class="{\
+                    \'ma-label-has-content\': hasContent\
+                }">\
+                    <label class="ma-label-text" for="{{::for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star">&nbsp;<i class="fa fa-star"></i></div><!--\
+                    --><div class="ma-label-warning">&nbsp;\
+                    <i class="fa fa-exclamation-triangle"></i></div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            scope.hasContent = element.find('ng-transclude').contents().length > 0;
         }
     };
 }]);})();
@@ -10477,7 +10477,7 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                     var oldValue = min;
                     min = Number(newValue);
 
-                    minMaxObserver(newValue, oldValue);
+                    minMaxObserver(min, oldValue);
                 });
             }
 
@@ -10486,7 +10486,7 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                     var oldValue = max;
                     max = Number(newValue);
 
-                    minMaxObserver(newValue, oldValue);
+                    minMaxObserver(max, oldValue);
                 });
             }
 
