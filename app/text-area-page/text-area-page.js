@@ -53,4 +53,21 @@ I fixed this by setting element[0].style.height in the resize function to 1px fi
     // $interval(function() {
     //     console.log('isValid:', $scope.textBox7.isValid());
     // }, 2000);
+
+    // $scope.isDisabled1 = true;
+
+    // $timeout(function () {
+    //     $scope.isDisabled1 = false;
+    //     console.log('disable');
+    // }, 3000);
+
+    // $timeout(function () {
+    //     console.log('enable');
+    //     $scope.isDisabled1 = true;
+    // }, 6000);
+
+    // $timeout(function () {
+    //     console.log('disable');
+    //     $scope.isDisabled1 = false;
+    // }, 9000);
 }
