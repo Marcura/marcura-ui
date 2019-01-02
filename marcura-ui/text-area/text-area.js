@@ -29,6 +29,7 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                     <textarea class="ma-text-area-value"\
                         type="text"\
                         ng-focus="onFocus()"\
+                        ng-blur="onBlur()"\
                         ng-disabled="isDisabled === \'true\'">\
                     </textarea>\
                 </div>';
@@ -172,21 +173,17 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                 });
             };
 
-            valueElement.on('focusout', function (event) {
-                MaHelper.safeApply(function () {
-                    isInternalChange = true;
-                    scope.value = getValue();
-                    setIsFocused(false);
-                    setIsTouched(true);
-                    validate();
-                });
+            scope.onBlur = function () {
+                setIsFocused(false);
+                setIsTouched(true);
+                validate();
 
                 scope.blur({
                     maValue: scope.value,
                     maOldValue: focusValue,
                     maHasValueChanged: focusValue !== getValue()
                 });
-            });
+            };
 
             valueElement.on('keydown', function (event) {
                 // Ignore tab key.
@@ -239,10 +236,12 @@ angular.module('marcuraUI.components').directive('maTextArea', ['$timeout', '$wi
                         scope.$apply(function () {
                             scope.value = getValue();
 
-                            // $timeout is required here to apply scope changes, even if changeTimeout is 0.
-                            scope.change({
-                                maValue: scope.value,
-                                maOldValue: previousValue
+                            // $timeout is required here for scope.value and event value to match.
+                            $timeout(function () {
+                                scope.change({
+                                    maValue: scope.value,
+                                    maOldValue: previousValue
+                                });
                             });
                         });
                     }, changeTimeout);

@@ -3789,216 +3789,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
-    return {
-        restrict: 'E',
-        scope: {
-            text: '@',
-            size: '@',
-            rtl: '@',
-            isDisabled: '@',
-            isRequired: '@',
-            change: '&',
-            value: '=',
-            validators: '=',
-            instance: '='
-        },
-        replace: true,
-        template: function (element, attributes) {
-            var size = attributes.size || 'xs',
-                hasText = !!attributes.text,
-                cssClass = 'ma-check-box ma-check-box-' + size;
-
-            if (attributes.rtl === 'true') {
-                cssClass += ' ma-check-box-rtl';
-            }
-
-            if (hasText) {
-                cssClass += ' ma-check-box-has-text';
-            }
-
-            var html = '\
-                <div class="'+ cssClass + '"\
-                    ng-focus="onFocus()"\
-                    ng-blur="onBlur()"\
-                    ng-keypress="onKeypress($event)"\
-                    ng-click="onChange()"\
-                    ng-class="{\
-                        \'ma-check-box-is-checked\': value === true,\
-                        \'ma-check-box-is-disabled\': isDisabled === \'true\',\
-                        \'ma-check-box-is-focused\': isFocused,\
-                        \'ma-check-box-is-invalid\': !isValid,\
-                        \'ma-check-box-is-touched\': isTouched\
-                    }">\
-                    <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
-                    <div class="ma-check-box-inner"></div>\
-                    <i class="ma-check-box-icon fa fa-check"></i>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes) {
-            var validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired === 'true',
-                hasIsNotEmptyValidator = false;
-
-            var setTabindex = function () {
-                if (scope.isDisabled === 'true') {
-                    element.removeAttr('tabindex');
-                } else {
-                    element.attr('tabindex', '0');
-                }
-            };
-
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var getControllerScope = function () {
-                var valuePropertyParts = null,
-                    controllerScope = null,
-                    initialScope = scope.$parent,
-                    property = attributes.value;
-
-                // In case of a nested property binding like 'company.port.id'.
-                if (property.indexOf('.') !== -1) {
-                    valuePropertyParts = property.split('.');
-                    property = valuePropertyParts[0];
-                }
-
-                while (initialScope && !controllerScope) {
-                    if (initialScope.hasOwnProperty(property)) {
-                        controllerScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                // Use parent scope by default if search is unsuccessful.
-                return controllerScope || scope.$parent;
-            };
-
-            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
-            // as the value will be stored by Angular on ng-if scope.
-            var controllerScope = getControllerScope();
-
-            var validate = function () {
-                scope.isValid = true;
-                scope.isTouched = true;
-
-                // Remove 'false' value for 'IsNotEmpty' to work correctly.
-                var value = scope.value === false ? null : scope.value;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        var validator = validators[i];
-
-                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.onChange = function () {
-                if (scope.isDisabled === 'true') {
-                    return;
-                }
-
-                // Handle nested properties or function calls with $parse service.
-                // This is related to a case when the component is located inside ng-if,
-                // but it works for other cases as well.
-                var valueGetter = $parse(attributes.value),
-                    valueSetter = valueGetter.assign,
-                    value = !valueGetter(controllerScope);
-
-                scope.value = value;
-                valueSetter(controllerScope, value);
-                validate();
-
-                $timeout(function () {
-                    scope.change({
-                        maValue: scope.value
-                    });
-                });
-            };
-
-            scope.onFocus = function () {
-                if (scope.isDisabled !== 'true') {
-                    scope.isFocused = true;
-                }
-            };
-
-            scope.onBlur = function () {
-                if (scope.isDisabled === 'true') {
-                    return;
-                }
-
-                scope.isFocused = false;
-                validate();
-            };
-
-            scope.onKeypress = function (event) {
-                if (event.keyCode === MaHelper.keyCode.space) {
-                    // Prevent page from scrolling down.
-                    event.preventDefault();
-
-                    if (scope.isDisabled !== 'true') {
-                        scope.onChange();
-                    }
-                }
-            };
-
-            attributes.$observe('isDisabled', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                if (newValue) {
-                    scope.isFocused = false;
-                }
-
-                setTabindex();
-            });
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate();
-                };
-            }
-
-            setTabindex();
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDate', 'MaHelper', 'MaValidators', function ($timeout, MaDate, MaHelper, MaValidators) {
     return {
         restrict: 'E',
@@ -5329,110 +5119,213 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
+(function(){angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$timeout', '$parse', 'MaValidators', function (MaHelper, $timeout, $parse, MaValidators) {
     return {
         restrict: 'E',
-        transclude: true,
         scope: {
-            for: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-label" ng-class="{\
-                    \'ma-label-has-content\': hasContent\
-                }">\
-                    <label class="ma-label-text" for="{{::for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star">&nbsp;<i class="fa fa-star"></i></div><!--\
-                    --><div class="ma-label-warning">&nbsp;\
-                    <i class="fa fa-exclamation-triangle"></i></div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            scope.hasContent = element.find('ng-transclude').contents().length > 0;
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maMessage', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            type: '@',
-            state: '@',
+            text: '@',
             size: '@',
-            textAlign: '@',
-            hasIcon: '@'
+            rtl: '@',
+            isDisabled: '@',
+            isRequired: '@',
+            change: '&',
+            value: '=',
+            validators: '=',
+            instance: '='
         },
         replace: true,
         template: function (element, attributes) {
-            var hasIcon = attributes.hasIcon === 'false' ? false : true;
+            var size = attributes.size || 'xs',
+                hasText = !!attributes.text,
+                cssClass = 'ma-check-box ma-check-box-' + size;
 
-            if (!attributes.state || attributes.state === 'default') {
-                hasIcon = false;
+            if (attributes.rtl === 'true') {
+                cssClass += ' ma-check-box-rtl';
             }
 
-            var html = '<div class="ma-message">';
-
-            if (hasIcon) {
-                html += '<div class="ma-message-icon">\
-                    <i class="fa"></i>\
-                </div>';
+            if (hasText) {
+                cssClass += ' ma-check-box-has-text';
             }
 
-            html += '<div class="ma-message-text"><ng-transclude></ng-transclude></div>\
+            var html = '\
+                <div class="'+ cssClass + '"\
+                    ng-focus="onFocus()"\
+                    ng-blur="onBlur()"\
+                    ng-keypress="onKeypress($event)"\
+                    ng-click="onChange()"\
+                    ng-class="{\
+                        \'ma-check-box-is-checked\': value === true,\
+                        \'ma-check-box-is-disabled\': isDisabled === \'true\',\
+                        \'ma-check-box-is-focused\': isFocused,\
+                        \'ma-check-box-is-invalid\': !isValid,\
+                        \'ma-check-box-is-touched\': isTouched\
+                    }">\
+                    <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
+                    <div class="ma-check-box-inner"></div>\
+                    <i class="ma-check-box-icon fa fa-check"></i>\
                 </div>';
 
             return html;
         },
         link: function (scope, element, attributes) {
-            var iconElement = angular.element(element[0].querySelector('.ma-message-icon .fa'));
+            var validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired === 'true',
+                hasIsNotEmptyValidator = false;
 
-            var setCssClass = function () {
-                var size = scope.size || 'sm',
-                    state = scope.state || 'default',
-                    hasIcon = scope.hasIcon === 'false' ? false : true,
-                    type = scope.type || 'message',
-                    cssClass = 'ma-message ma-message-' + size + ' ma-message-' + state + ' ma-message-' + type,
-                    iconCssClass = 'fa';
-
-                if (state === 'default') {
-                    hasIcon = false;
+            var setTabindex = function () {
+                if (scope.isDisabled === 'true') {
+                    element.removeAttr('tabindex');
+                } else {
+                    element.attr('tabindex', '0');
                 }
-
-                if (hasIcon) {
-                    cssClass += ' ma-message-has-icon';
-                }
-
-                if (scope.textAlign) {
-                    cssClass += ' ma-message-text-align-' + scope.textAlign;
-                }
-
-                if (state === 'info') {
-                    iconCssClass += ' fa-info-circle';
-                } else if (state === 'success') {
-                    iconCssClass += ' fa-check-circle';
-                } else if (state === 'warning') {
-                    iconCssClass += ' fa-exclamation-circle';
-                } else if (state === 'danger') {
-                    iconCssClass += ' fa-times-circle';
-                }
-
-                element.attr('class', cssClass);
-                iconElement.attr('class', iconCssClass);
             };
 
-            attributes.$observe('state', function (newValue, oldValue) {
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var getControllerScope = function () {
+                var valuePropertyParts = null,
+                    controllerScope = null,
+                    initialScope = scope.$parent,
+                    property = attributes.value;
+
+                // In case of a nested property binding like 'company.port.id'.
+                if (property.indexOf('.') !== -1) {
+                    valuePropertyParts = property.split('.');
+                    property = valuePropertyParts[0];
+                }
+
+                while (initialScope && !controllerScope) {
+                    if (initialScope.hasOwnProperty(property)) {
+                        controllerScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                // Use parent scope by default if search is unsuccessful.
+                return controllerScope || scope.$parent;
+            };
+
+            // When the component is inside ng-if, a normal binding like value="isEnabled" won't work,
+            // as the value will be stored by Angular on ng-if scope.
+            var controllerScope = getControllerScope();
+
+            var validate = function () {
+                scope.isValid = true;
+                scope.isTouched = true;
+
+                // Remove 'false' value for 'IsNotEmpty' to work correctly.
+                var value = scope.value === false ? null : scope.value;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        var validator = validators[i];
+
+                        if (!validator.validate(validator.name === 'IsNotEmpty' ? value : scope.value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            scope.onChange = function () {
+                if (scope.isDisabled === 'true') {
+                    return;
+                }
+
+                // Handle nested properties or function calls with $parse service.
+                // This is related to a case when the component is located inside ng-if,
+                // but it works for other cases as well.
+                var valueGetter = $parse(attributes.value),
+                    valueSetter = valueGetter.assign,
+                    value = !valueGetter(controllerScope);
+
+                scope.value = value;
+                valueSetter(controllerScope, value);
+                validate();
+
+                $timeout(function () {
+                    scope.change({
+                        maValue: scope.value
+                    });
+                });
+            };
+
+            scope.onFocus = function () {
+                if (scope.isDisabled !== 'true') {
+                    scope.isFocused = true;
+                }
+            };
+
+            scope.onBlur = function () {
+                if (scope.isDisabled === 'true') {
+                    return;
+                }
+
+                scope.isFocused = false;
+                validate();
+            };
+
+            scope.onKeypress = function (event) {
+                if (event.keyCode === MaHelper.keyCode.space) {
+                    // Prevent page from scrolling down.
+                    event.preventDefault();
+
+                    if (scope.isDisabled !== 'true') {
+                        scope.onChange();
+                    }
+                }
+            };
+
+            attributes.$observe('isDisabled', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }
 
-                setCssClass();
+                if (newValue) {
+                    scope.isFocused = false;
+                }
+
+                setTabindex();
             });
 
-            setCssClass();
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate();
+                };
+            }
+
+            setTabindex();
         }
     };
 }]);})();
@@ -5613,304 +5506,110 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
+(function(){angular.module('marcuraUI.components').directive('maLabel', [function () {
     return {
         restrict: 'E',
+        transclude: true,
         scope: {
-            itemsPerPageText: '@',
-            showItemsPerPage: '@',
-            visiblePages: '@',
-            change: '&',
-            page: '=',
-            totalItems: '=',
-            itemsPerPageNumbers: '=',
-            itemsPerPage: '='
+            for: '@'
         },
         replace: true,
         template: function () {
-            var html = '<div class="ma-pager">\
-                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
-                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
-                        type="number"\
-                        items="_itemsPerPageNumbers"\
-                        value="_itemsPerPage"\
-                        change="itemsPerPageChange(maValue, maOldValue)">\
-                    </ma-select-box>\
-                </div><div class="ma-pager-pager">\
-                    <div class="ma-pager-start">\
-                        <ma-button\
-                            class="ma-button-first"\
-                            text="First"\
-                            size="xs"\
-                            default\
-                            click="firstClick()"\
-                            is-disabled="{{_page <= 1}}"\
-                        ></ma-button><ma-button\
-                            class="ma-button-previous"\
-                            text="Previous"\
-                            size="xs"\
-                            default\
-                            click="previousClick()"\
-                            is-disabled="{{_page <= 1}}">\
-                        </ma-button>\
-                    </div\
-                    ><div class="ma-pager-middle">\
-                        <ma-button\
-                            class="ma-button-previous-range"\
-                            text="..."\
-                            size="xs"\
-                            default\
-                            click="previousRangeClick()"\
-                            is-disabled="{{isFirstRange}}"\
-                        ></ma-button><div class="ma-pager-pages"><ma-button\
-                            ng-repeat="rangePage in rangePages"\
-                            class="ma-button-page"\
-                            text="{{rangePage}}"\
-                            size="xs"\
-                            ng-attr-selected="{{_page === rangePage || undefined}}"\
-                            ng-attr-default="{{_page !== rangePage || undefined}}"\
-                            click="pageClick(rangePage)"></div></ma-button\
-                        ><ma-button\
-                            class="ma-button-next-range"\
-                            text="..."\
-                            size="xs"\
-                            default\
-                            click="nextRangeClick()"\
-                            is-disabled="{{isLastRange}}"\
-                        ></ma-button>\
-                    </div\
-                    ><div class="ma-pager-end">\
-                        <ma-button\
-                            class="ma-button-next"\
-                            text="Next"\
-                            size="xs"\
-                            default\
-                            click="nextClick()"\
-                            is-disabled="{{_page >= totalPages}}"\
-                        ></ma-button><ma-button\
-                            class="ma-button-last"\
-                            text="Last"\
-                            size="xs"\
-                            default\
-                            click="lastClick()"\
-                            is-disabled="{{_page >= totalPages}}">\
-                        </ma-button>\
-                    </div>\
-                </div>\
-            </div>';
+            var html = '\
+                <div class="ma-label" ng-class="{\
+                    \'ma-label-has-content\': hasContent\
+                }">\
+                    <label class="ma-label-text" for="{{::for}}"><ng-transclude></ng-transclude></label><!--\
+                    --><div class="ma-label-star">&nbsp;<i class="fa fa-star"></i></div><!--\
+                    --><div class="ma-label-warning">&nbsp;\
+                    <i class="fa fa-exclamation-triangle"></i></div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            scope.hasContent = element.find('ng-transclude').contents().length > 0;
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maMessage', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            type: '@',
+            state: '@',
+            size: '@',
+            textAlign: '@',
+            hasIcon: '@'
+        },
+        replace: true,
+        template: function (element, attributes) {
+            var hasIcon = attributes.hasIcon === 'false' ? false : true;
+
+            if (!attributes.state || attributes.state === 'default') {
+                hasIcon = false;
+            }
+
+            var html = '<div class="ma-message">';
+
+            if (hasIcon) {
+                html += '<div class="ma-message-icon">\
+                    <i class="fa"></i>\
+                </div>';
+            }
+
+            html += '<div class="ma-message-text"><ng-transclude></ng-transclude></div>\
+                </div>';
 
             return html;
         },
         link: function (scope, element, attributes) {
-            scope._page = scope.page;
-            scope._showItemsPerPage = scope.showItemsPerPage === 'false' ? false : true;
-            scope._itemsPerPageNumbers = [25, 50, 75, 100];
-            scope._itemsPerPage = 25;
-            scope.hasItemsPerPageChanged = false;
-            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
-            var _visiblePages;
+            var iconElement = angular.element(element[0].querySelector('.ma-message-icon .fa'));
 
-            var setTotalPages = function () {
-                scope.totalPages = Math.ceil(scope._totalItems / scope._itemsPerPage);
-            };
+            var setCssClass = function () {
+                var size = scope.size || 'sm',
+                    state = scope.state || 'default',
+                    hasIcon = scope.hasIcon === 'false' ? false : true,
+                    type = scope.type || 'message',
+                    cssClass = 'ma-message ma-message-' + size + ' ma-message-' + state + ' ma-message-' + type,
+                    iconCssClass = 'fa';
 
-            var setItemsPerPage = function () {
-                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
-                    return;
+                if (state === 'default') {
+                    hasIcon = false;
                 }
 
-                scope._itemsPerPage = scope.itemsPerPage;
-            };
-
-            var setItemsPerPageNumbers = function () {
-                if (!scope._showItemsPerPage) {
-                    return;
+                if (hasIcon) {
+                    cssClass += ' ma-message-has-icon';
                 }
 
-                if (angular.isArray(scope.itemsPerPageNumbers)) {
-                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
-                }
-            };
-
-            var setRangePages = function () {
-                var visiblePages = Number(scope.visiblePages);
-                scope._visiblePages = visiblePages > 1 ? visiblePages : 5;
-
-                if (scope.totalPages < scope._visiblePages) {
-                    scope._visiblePages = scope.totalPages || 1;
+                if (scope.textAlign) {
+                    cssClass += ' ma-message-text-align-' + scope.textAlign;
                 }
 
-                scope.rangePages = [];
-                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
-                scope.isFirstRange = scope.range === 0;
-                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
-                var startPage = scope.range * scope._visiblePages;
-
-                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
-                    scope.rangePages.push(startPage + visiblePage);
-                }
-            };
-
-            var setHasPager = function () {
-                var hasPager = !scope._showItemsPerPage || (scope.totalPages * scope._itemsPerPage > scope._itemsPerPage),
-                    cssClass = 'ma-pager';
-
-                if (hasPager) {
-                    cssClass += ' ma-pager-has-pager';
+                if (state === 'info') {
+                    iconCssClass += ' fa-info-circle';
+                } else if (state === 'success') {
+                    iconCssClass += ' fa-check-circle';
+                } else if (state === 'warning') {
+                    iconCssClass += ' fa-exclamation-circle';
+                } else if (state === 'danger') {
+                    iconCssClass += ' fa-times-circle';
                 }
 
                 element.attr('class', cssClass);
+                iconElement.attr('class', iconCssClass);
             };
 
-            var onChange = function () {
-                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
-                    return;
-                }
-
-                scope.page = scope._page || null;
-                setRangePages();
-
-                var value = {
-                    maPage: scope.page
-                };
-
-                if (scope._showItemsPerPage) {
-                    value.maItemsPerPage = scope._itemsPerPage;
-                    scope.hasItemsPerPageChanged = false;
-
-                    // If itemsPerPage is set update its value.
-                    if (scope.itemsPerPage !== undefined) {
-                        scope.itemsPerPage = value.maItemsPerPage;
-                    }
-                }
-
-                // Postpone change event for $apply (which is being invoked by $timeout)
-                // to have time to take effect and update scope.page.
-                $timeout(function () {
-                    scope.change(value);
-                });
-            };
-
-            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
-                scope._itemsPerPage = itemsPerPage;
-                scope.hasItemsPerPageChanged = true;
-                var oldTotalPages = scope.totalPages;
-                scope.totalPages = Math.ceil(scope._totalItems / scope._itemsPerPage);
-                var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
-                scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
-
-                setHasPager();
-                onChange();
-            };
-
-            scope.firstClick = function () {
-                scope._page = 1;
-                onChange();
-            };
-
-            scope.previousClick = function () {
-                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
-                onChange();
-            };
-
-            scope.nextClick = function () {
-                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
-                onChange();
-            };
-
-            scope.lastClick = function () {
-                scope._page = scope.totalPages;
-                onChange();
-            };
-
-            scope.pageClick = function (page) {
-                scope._page = page;
-                onChange();
-            };
-
-            scope.previousRangeClick = function () {
-                scope._page = scope.range * scope._visiblePages;
-                onChange();
-            };
-
-            scope.nextRangeClick = function () {
-                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
-                onChange();
-            };
-
-            scope.$watch('totalItems', function (newValue, oldValue) {
+            attributes.$observe('state', function (newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }
 
-                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
-                setTotalPages();
-
-                // Correct the page and trigger change.
-                if (scope._totalItems === 0 || scope._totalItems <= scope._itemsPerPage) {
-                    scope._page = 1;
-                    onChange();
-                    setHasPager();
-                    return;
-                }
-
-                setRangePages();
-                setHasPager();
+                setCssClass();
             });
 
-            attributes.$observe('visiblePages', function (newValue) {
-                var oldValue = _visiblePages;
-
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                _visiblePages = newValue;
-                setRangePages();
-            });
-
-            scope.$watch('page', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                var page = scope.page;
-
-                // Correct page.
-                if (page < 1) {
-                    page = 1;
-                } else if (page > scope.totalPages) {
-                    page = scope.totalPages;
-                }
-
-                // Correct page to 1 in case totalPages is 0 and page is 0.
-                scope._page = page || 1;
-                setRangePages();
-                setHasPager();
-            });
-
-            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
-                if (angular.equals(newValue, oldValue)) {
-                    return;
-                }
-
-                setItemsPerPageNumbers();
-            });
-
-            scope.$watch('itemsPerPage', function (newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                setItemsPerPage();
-                setHasPager();
-            });
-
-            setItemsPerPageNumbers();
-            setItemsPerPage();
-            setTotalPages();
-            setRangePages();
-            setHasPager();
+            setCssClass();
         }
     };
 }]);})();
@@ -9510,6 +9209,7 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                     <textarea class="ma-text-area-value"\
                         type="text"\
                         ng-focus="onFocus()"\
+                        ng-blur="onBlur()"\
                         ng-disabled="isDisabled === \'true\'">\
                     </textarea>\
                 </div>';
@@ -9653,21 +9353,17 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                 });
             };
 
-            valueElement.on('focusout', function (event) {
-                MaHelper.safeApply(function () {
-                    isInternalChange = true;
-                    scope.value = getValue();
-                    setIsFocused(false);
-                    setIsTouched(true);
-                    validate();
-                });
+            scope.onBlur = function () {
+                setIsFocused(false);
+                setIsTouched(true);
+                validate();
 
                 scope.blur({
                     maValue: scope.value,
                     maOldValue: focusValue,
                     maHasValueChanged: focusValue !== getValue()
                 });
-            });
+            };
 
             valueElement.on('keydown', function (event) {
                 // Ignore tab key.
@@ -9720,10 +9416,12 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                         scope.$apply(function () {
                             scope.value = getValue();
 
-                            // $timeout is required here to apply scope changes, even if changeTimeout is 0.
-                            scope.change({
-                                maValue: scope.value,
-                                maOldValue: previousValue
+                            // $timeout is required here for scope.value and event value to match.
+                            $timeout(function () {
+                                scope.change({
+                                    maValue: scope.value,
+                                    maOldValue: previousValue
+                                });
                             });
                         });
                     }, changeTimeout);
@@ -11090,3 +10788,304 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
     //     });
     // }]);
 })();
+(function(){angular.module('marcuraUI.components').directive('maPager', ['$timeout', function ($timeout) {
+    return {
+        restrict: 'E',
+        scope: {
+            itemsPerPageText: '@',
+            showItemsPerPage: '@',
+            visiblePages: '@',
+            change: '&',
+            page: '=',
+            totalItems: '=',
+            itemsPerPageNumbers: '=',
+            itemsPerPage: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '<div class="ma-pager">\
+                <div class="ma-pager-items-per-page" ng-if="_showItemsPerPage">\
+                    <div class="ma-pager-items-per-page-text" ng-show="itemsPerPageText">{{itemsPerPageText}}</div><ma-select-box\
+                        type="number"\
+                        items="_itemsPerPageNumbers"\
+                        value="_itemsPerPage"\
+                        change="itemsPerPageChange(maValue, maOldValue)">\
+                    </ma-select-box>\
+                </div><div class="ma-pager-pager">\
+                    <div class="ma-pager-start">\
+                        <ma-button\
+                            class="ma-button-first"\
+                            text="First"\
+                            size="xs"\
+                            default\
+                            click="firstClick()"\
+                            is-disabled="{{_page <= 1}}"\
+                        ></ma-button><ma-button\
+                            class="ma-button-previous"\
+                            text="Previous"\
+                            size="xs"\
+                            default\
+                            click="previousClick()"\
+                            is-disabled="{{_page <= 1}}">\
+                        </ma-button>\
+                    </div\
+                    ><div class="ma-pager-middle">\
+                        <ma-button\
+                            class="ma-button-previous-range"\
+                            text="..."\
+                            size="xs"\
+                            default\
+                            click="previousRangeClick()"\
+                            is-disabled="{{isFirstRange}}"\
+                        ></ma-button><div class="ma-pager-pages"><ma-button\
+                            ng-repeat="rangePage in rangePages"\
+                            class="ma-button-page"\
+                            text="{{rangePage}}"\
+                            size="xs"\
+                            ng-attr-selected="{{_page === rangePage || undefined}}"\
+                            ng-attr-default="{{_page !== rangePage || undefined}}"\
+                            click="pageClick(rangePage)"></div></ma-button\
+                        ><ma-button\
+                            class="ma-button-next-range"\
+                            text="..."\
+                            size="xs"\
+                            default\
+                            click="nextRangeClick()"\
+                            is-disabled="{{isLastRange}}"\
+                        ></ma-button>\
+                    </div\
+                    ><div class="ma-pager-end">\
+                        <ma-button\
+                            class="ma-button-next"\
+                            text="Next"\
+                            size="xs"\
+                            default\
+                            click="nextClick()"\
+                            is-disabled="{{_page >= totalPages}}"\
+                        ></ma-button><ma-button\
+                            class="ma-button-last"\
+                            text="Last"\
+                            size="xs"\
+                            default\
+                            click="lastClick()"\
+                            is-disabled="{{_page >= totalPages}}">\
+                        </ma-button>\
+                    </div>\
+                </div>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes) {
+            scope._page = scope.page;
+            scope._showItemsPerPage = scope.showItemsPerPage === 'false' ? false : true;
+            scope._itemsPerPageNumbers = [25, 50, 75, 100];
+            scope._itemsPerPage = 25;
+            scope.hasItemsPerPageChanged = false;
+            scope._totalItems = scope.totalItems >= 0 ? scope.totalItems : 0;
+            var _visiblePages;
+
+            var setTotalPages = function () {
+                scope.totalPages = Math.ceil(scope._totalItems / scope._itemsPerPage);
+            };
+
+            var setItemsPerPage = function () {
+                if (!scope._showItemsPerPage || !scope.itemsPerPage) {
+                    return;
+                }
+
+                scope._itemsPerPage = scope.itemsPerPage;
+            };
+
+            var setItemsPerPageNumbers = function () {
+                if (!scope._showItemsPerPage) {
+                    return;
+                }
+
+                if (angular.isArray(scope.itemsPerPageNumbers)) {
+                    scope._itemsPerPageNumbers = scope.itemsPerPageNumbers;
+                }
+            };
+
+            var setRangePages = function () {
+                var visiblePages = Number(scope.visiblePages);
+                scope._visiblePages = visiblePages > 1 ? visiblePages : 5;
+
+                if (scope.totalPages < scope._visiblePages) {
+                    scope._visiblePages = scope.totalPages || 1;
+                }
+
+                scope.rangePages = [];
+                scope.range = Math.ceil(scope._page / scope._visiblePages) - 1;
+                scope.isFirstRange = scope.range === 0;
+                scope.isLastRange = scope.range === Math.ceil(scope.totalPages / scope._visiblePages) - 1;
+                var startPage = scope.range * scope._visiblePages;
+
+                for (var visiblePage = 1; visiblePage <= scope._visiblePages && startPage + visiblePage <= scope.totalPages; visiblePage++) {
+                    scope.rangePages.push(startPage + visiblePage);
+                }
+            };
+
+            var setHasPager = function () {
+                var hasPager = !scope._showItemsPerPage || (scope.totalPages * scope._itemsPerPage > scope._itemsPerPage),
+                    cssClass = 'ma-pager';
+
+                if (hasPager) {
+                    cssClass += ' ma-pager-has-pager';
+                }
+
+                element.attr('class', cssClass);
+            };
+
+            var onChange = function () {
+                if (scope.page === scope._page && !scope.hasItemsPerPageChanged) {
+                    return;
+                }
+
+                scope.page = scope._page || null;
+                setRangePages();
+
+                var value = {
+                    maPage: scope.page
+                };
+
+                if (scope._showItemsPerPage) {
+                    value.maItemsPerPage = scope._itemsPerPage;
+                    scope.hasItemsPerPageChanged = false;
+
+                    // If itemsPerPage is set update its value.
+                    if (scope.itemsPerPage !== undefined) {
+                        scope.itemsPerPage = value.maItemsPerPage;
+                    }
+                }
+
+                // Postpone change event for $apply (which is being invoked by $timeout)
+                // to have time to take effect and update scope.page.
+                $timeout(function () {
+                    scope.change(value);
+                });
+            };
+
+            scope.itemsPerPageChange = function (itemsPerPage, oldItemsPerPage) {
+                scope._itemsPerPage = itemsPerPage;
+                scope.hasItemsPerPageChanged = true;
+                var oldTotalPages = scope.totalPages;
+                scope.totalPages = Math.ceil(scope._totalItems / scope._itemsPerPage);
+                var firstVisibleItem = (oldItemsPerPage * scope.page) - oldItemsPerPage + 1;
+                scope._page = Math.ceil(firstVisibleItem / itemsPerPage);
+
+                setHasPager();
+                onChange();
+            };
+
+            scope.firstClick = function () {
+                scope._page = 1;
+                onChange();
+            };
+
+            scope.previousClick = function () {
+                scope._page = scope._page <= 1 ? 1 : scope._page - 1;
+                onChange();
+            };
+
+            scope.nextClick = function () {
+                scope._page = scope._page >= scope.totalPages ? 1 : scope._page + 1;
+                onChange();
+            };
+
+            scope.lastClick = function () {
+                scope._page = scope.totalPages;
+                onChange();
+            };
+
+            scope.pageClick = function (page) {
+                scope._page = page;
+                onChange();
+            };
+
+            scope.previousRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages;
+                onChange();
+            };
+
+            scope.nextRangeClick = function () {
+                scope._page = scope.range * scope._visiblePages + scope._visiblePages + 1;
+                onChange();
+            };
+
+            scope.$watch('totalItems', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                scope._totalItems = scope.totalItems < 0 ? 0 : scope.totalItems;
+                setTotalPages();
+
+                // Correct the page and trigger change.
+                if (scope._totalItems === 0 || scope._totalItems <= scope._itemsPerPage) {
+                    scope._page = 1;
+                    onChange();
+                    setHasPager();
+                    return;
+                }
+
+                setRangePages();
+                setHasPager();
+            });
+
+            attributes.$observe('visiblePages', function (newValue) {
+                var oldValue = _visiblePages;
+
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                _visiblePages = newValue;
+                setRangePages();
+            });
+
+            scope.$watch('page', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                var page = scope.page;
+
+                // Correct page.
+                if (page < 1) {
+                    page = 1;
+                } else if (page > scope.totalPages) {
+                    page = scope.totalPages;
+                }
+
+                // Correct page to 1 in case totalPages is 0 and page is 0.
+                scope._page = page || 1;
+                setRangePages();
+                setHasPager();
+            });
+
+            scope.$watch('itemsPerPageNumbers', function (newValue, oldValue) {
+                if (angular.equals(newValue, oldValue)) {
+                    return;
+                }
+
+                setItemsPerPageNumbers();
+            });
+
+            scope.$watch('itemsPerPage', function (newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                setItemsPerPage();
+                setHasPager();
+            });
+
+            setItemsPerPageNumbers();
+            setItemsPerPage();
+            setTotalPages();
+            setRangePages();
+            setHasPager();
+        }
+    };
+}]);})();
