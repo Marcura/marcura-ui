@@ -48,7 +48,6 @@ angular.module('marcuraUI.components')
                     canReset = attributes.canReset === 'true',
                     cssClass = 'ma-select-box',
                     ngClass = 'ng-class="{\
-                        \'ma-select-box-is-text-focused\': isTextFocused,\
                         \'ma-select-box-is-disabled\': isDisabled === \'true\',\
                         \'ma-select-box-is-invalid\': !isValid,\
                         \'ma-select-box-is-touched\': isTouched,\
@@ -111,13 +110,11 @@ angular.module('marcuraUI.components')
                             ng-class="{ \'ng-hide\': !isAddMode }"\
                             ng-model="text"\
                             ng-disabled="isDisabled === \'true\'"\
-                            ng-focus="onFocus(\'text\')"\
                             placeholder="{{textPlaceholder}}"/>\
                         <ma-button class="ma-button-toggle"\
                             size="xs" simple\
                             right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
                             click="changeMode()"\
-                            ng-focus="onFocus(\'toggle\')"\
                             is-disabled="{{isDisabled === \'true\'}}">\
                         </ma-button>';
                 }
@@ -127,7 +124,6 @@ angular.module('marcuraUI.components')
                         size="xs" simple\
                         right-icon="times-circle"\
                         click="onReset()"\
-                        ng-focus="onFocus(\'reset\')"\
                         is-disabled="{{isDisabled === \'true\' || !_hasValue}}">\
                     </ma-button>';
                 }
@@ -271,12 +267,12 @@ angular.module('marcuraUI.components')
 
                 scope.previousSelectedItem = scope.previousSelectedItem || null;
                 scope.isAddMode = false;
-                scope.isTextFocused = false;
                 scope.isValid = true;
                 scope.isTouched = false;
                 scope.hasAjax = angular.isObject(scope.ajax);
                 scope._hasValue = false;
                 scope._items = [];
+                var isTextFocused = false;
 
                 var setItems = function (items) {
                     if (scope.hasAjax || !angular.isArray(items)) {
@@ -506,13 +502,33 @@ angular.module('marcuraUI.components')
                     return cleanItem;
                 };
 
+                var setIsTextFocused = function (_setIsTextFocused) {
+                    isTextFocused = _setIsTextFocused;
+                    element.toggleClass('ma-select-box-is-text-focused', isTextFocused);
+                };
+
+                var onFocus = function (event, elementName) {
+                    if (elementName === 'text') {
+                        setIsTextFocused(true);
+                    }
+
+                    if (isFocusLost) {
+                        scope.focus({
+                            maValue: scope.value
+                        });
+                    }
+
+                    isFocusLost = false;
+                };
+
                 var onFocusout = function (event, elementName) {
                     var elementTo = angular.element(event.relatedTarget || event.toElement),
                         toResetButton = canReset && elementTo[0] === resetButtonElement[0],
                         toSelect = isMultiple ? false : selectData.focusser[0] === elementTo[0],
                         fromToggleButton = canAddItem && event.target === toggleButtonElement[0],
                         fromResetButton = canReset && event.target === resetButtonElement[0];
-                    scope.isTextFocused = false;
+
+                    setIsTextFocused(false);
 
                     // Trigger change event for text element.
                     if (elementName === 'text') {
@@ -632,7 +648,12 @@ angular.module('marcuraUI.components')
 
                 var setFocus = function () {
                     if (scope.isAddMode) {
-                        textElement.focus();
+                        $timeout(function () {
+                            // When using marcura-ui in a hybrid Angular/AngularJS app, focus
+                            // on this element doesn't work without a delay for some reason.
+                            textElement.focus();
+                        }, 50);
+                        onFocus(null, 'text');
                     } else {
                         selectElement.select2('focus');
                     }
@@ -712,27 +733,17 @@ angular.module('marcuraUI.components')
                     });
                 };
 
-                scope.onFocus = function (elementName, event) {
-                    if (elementName === 'text') {
-                        scope.isTextFocused = true;
-                    }
-
-                    if (isFocusLost) {
-                        scope.focus({
-                            maValue: scope.value
-                        });
-                    }
-
-                    isFocusLost = false;
-                };
-
                 scope.options.instance.focus = function () {
-                    scope.onFocus();
+                    onFocus();
                 };
 
                 scope.options.instance.blur = function (event) {
                     onFocusout(event, 'select');
                 };
+
+                textElement.focus(function (event) {
+                    onFocus(event, 'text');
+                });
 
                 textElement.focusout(function (event) {
                     onFocusout(event, 'text');
@@ -1150,6 +1161,10 @@ angular.module('marcuraUI.components')
                     }
 
                     if (canAddItem) {
+                        toggleButtonElement.focus(function (event) {
+                            onFocus(event, 'toggle');
+                        });
+
                         toggleButtonElement.focusout(function (event) {
                             onFocusout(event);
                         });
@@ -1164,6 +1179,10 @@ angular.module('marcuraUI.components')
                     }
 
                     if (canReset) {
+                        resetButtonElement.focus(function (event) {
+                            onFocus(event, 'reset');
+                        });
+
                         resetButtonElement.focusout(function (event) {
                             onFocusout(event);
                         });

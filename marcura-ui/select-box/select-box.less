@@ -54,6 +54,16 @@
             right: 29px;
         }
     }
+    &-mode-add {
+        .ma-select-box-text {
+            display: block;
+        }
+    }
+    &-mode-select {
+        .ma-select-box-text {
+            display: none;
+        }
+    }
     .ma-button-toggle {
         position: absolute;
         top: 0;
@@ -84,7 +94,7 @@
         .input;
         .input-transition;
         .box-shadow(@input-shadow);
-        display: block;
+        display: none;
         padding: 4px 10px;
         box-sizing: border-box;
         width: 100%;

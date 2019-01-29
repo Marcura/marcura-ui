@@ -116,29 +116,29 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
     $scope.text2 = 'Tokyo';
     $scope.port20 = [$scope.ports2[1]];
 
-    // $scope.change = function (value, oldValue, property) {
-    //     console.log('change');
-    //     console.log('event:', value);
-    //     console.log('scope:', $scope[property]);
-    //     console.log('old:  ', oldValue);
-    //     console.log('---');
-    // };
+    $scope.change = function (value, oldValue, property) {
+        console.log('change');
+        console.log('event:', value);
+        console.log('scope:', $scope[property]);
+        console.log('old:  ', oldValue);
+        console.log('---');
+    };
 
-    // $scope.blur = function (value, property, component) {
-    //     var eventName = 'blur ' + property;
-    //     console.log(eventName);
-    //     console.log('event:', value);
-    //     console.log('scope:', $scope[property]);
-    //     console.log('---');
-    // };
+    $scope.blur = function (value, property, component) {
+        var eventName = 'blur ' + property;
+        console.log(eventName);
+        console.log('event:', value);
+        console.log('scope:', $scope[property]);
+        console.log('---');
+    };
 
-    // $scope.focus = function (value, property, component) {
-    //     var eventName = 'focus ' + property;
-    //     console.log(eventName);
-    //     console.log('event:', value);
-    //     console.log('scope:', $scope[property]);
-    //     console.log('---');
-    // };
+    $scope.focus = function (value, property, component) {
+        var eventName = 'focus ' + property;
+        console.log(eventName);
+        console.log('event:', value);
+        console.log('scope:', $scope[property]);
+        console.log('---');
+    };
 
     // Test placeholder in AJAX mode.
     // $timeout(function () {
