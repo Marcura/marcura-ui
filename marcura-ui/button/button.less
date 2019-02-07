@@ -15,6 +15,7 @@
     cursor: pointer;
     background-color: @color-primary;
     .user-select(none);
+    border-radius: @button-border-radius;
     &[fillingless]:not([link]) {
         background-color: #ffffff;
         padding: 7px 19px;
@@ -132,6 +133,7 @@
         left: 1px;
         right: 1px;
         border: 1px solid #ffffff;
+        border-radius: @button-border-radius;
     }
     &-has-text:not([link]) {
         min-width: 60px;
@@ -205,6 +207,7 @@
             height: 30px;
             margin-top: -15px;
             background-color: @color-primary;
+            border-radius: @button-border-radius;
         }
         &[is-disabled='true'] .ma-button-icon {
             background-color: #c3c3cd;
@@ -262,7 +265,6 @@
         background-color: #c9302c;
     }
     &[default] {
-        border-radius: @button-border-radius;
         &[is-disabled='true'] {
             opacity: 0.75;
             .ma-button-text {
@@ -270,7 +272,7 @@
             }
         }
         .ma-button-rim {
-            border-radius: @button-rim-border-radius;
+            border-radius: @button-border-radius;
         }
         &[link] {
             .ma-button-icon {
