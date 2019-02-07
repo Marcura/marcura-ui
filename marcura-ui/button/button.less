@@ -1,7 +1,7 @@
 @import 'marcura-ui/less.less';
 .ma-button {
     position: relative;
-    padding: 8px 20px;
+    padding: 8px 10px;
     font-size: 14px;
     line-height: 20px;
     text-decoration: none;
@@ -16,9 +16,10 @@
     background-color: @color-primary;
     .user-select(none);
     border-radius: @button-border-radius;
+    min-width: 30px;
     &[fillingless]:not([link]) {
         background-color: #ffffff;
-        padding: 7px 19px;
+        padding: 7px 9px;
         border: @button-fillingless-border-width solid @color-primary;
         color: @color-primary;
         &.ma-button-xs {
