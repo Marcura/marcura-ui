@@ -508,7 +508,13 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
 
                 if (isFocusLost) {
                     if (hasValueChanged) {
-                        changeValue();
+                        // Make sure that scope value has changed.
+                        // It works okay in AngularJS without an apply, but
+                        // in a hybrid Angular/AngularJS it doesn't because changeValue happens
+                        // after blur.
+                        MaHelper.safeApply(function () {
+                            changeValue();
+                        });
                     }
 
                     MaHelper.safeApply(function () {
