@@ -723,9 +723,21 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
                     // In case value validity depends on side factors, we need to set scope value
                     // when validation has passed.
                     if (scope.isValid) {
-                        var value = getValue();
+                        var value = getValue(),
+                            _hasValueChanged = false;
 
-                        if (hasValueChanged(value)) {
+                        if (scope.type === 'number') {
+                            // Trancate to decimals before comparing, as scope value
+                            // initially might contain more decimals then is set.
+                            // E.g. we display percantage with 2 decimals, but we keep the whole
+                            // value on scope unless changed by user.
+                            var trimmedScopeValue = parseFloat((scope.value || 0).toFixed(decimals));
+                            _hasValueChanged = trimmedScopeValue !== value;
+                        } else {
+                            _hasValueChanged = hasValueChanged(value);
+                        }
+
+                        if (_hasValueChanged) {
                             scope.value = value;
                         }
                     }
