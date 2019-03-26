@@ -21,7 +21,7 @@ angular.module('marcuraUI.components').directive('maMessage', [function () {
 
             if (hasIcon) {
                 html += '<div class="ma-message-icon">\
-                    <i class="fa"></i>\
+                    <i class="fas"></i>\
                 </div>';
             }
 
@@ -31,7 +31,7 @@ angular.module('marcuraUI.components').directive('maMessage', [function () {
             return html;
         },
         link: function (scope, element, attributes) {
-            var iconElement = angular.element(element[0].querySelector('.ma-message-icon .fa'));
+            var iconElement = angular.element(element[0].querySelector('.ma-message-icon .fas'));
 
             var setCssClass = function () {
                 var size = scope.size || 'sm',
@@ -39,7 +39,7 @@ angular.module('marcuraUI.components').directive('maMessage', [function () {
                     hasIcon = scope.hasIcon === 'false' ? false : true,
                     type = scope.type || 'message',
                     cssClass = 'ma-message ma-message-' + size + ' ma-message-' + state + ' ma-message-' + type,
-                    iconCssClass = 'fa';
+                    iconCssClass = 'fas';
 
                 if (state === 'default') {
                     hasIcon = false;

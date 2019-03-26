@@ -183,7 +183,11 @@ angular.module('marcuraUI.components')
                                 create();
 
                                 // Set the initial positioning.
-                                tooltip.css({ top: 0, left: 0, display: 'block' });
+                                tooltip.css({
+                                    top: 0,
+                                    left: 0,
+                                    display: 'block'
+                                });
 
                                 setPosition();
 
@@ -367,7 +371,7 @@ angular.module('marcuraUI.components')
                     <div class="ma-tooltip-arrow"></div>\
                     <div class="ma-tooltip-inner" ng-bind-html="getContent()"></div>\
                     <div class="ma-tooltip-close" ng-if="canClose()" ng-click="tooltipScope().close()">\
-                        <i class="fa fa-times"></i>\
+                        <i class="fas fa-times"></i>\
                     </div>\
                 </div>';
 
@@ -406,78 +410,3 @@ angular.module('marcuraUI.components')
             }
         };
     });
-    // This is mostly ngInclude code but with a custom scope
-    // .directive('maTooltipTemplateTransclude', ['$animate', '$sce', '$compile', '$templateRequest',
-    //     function ($animate, $sce, $compile, $templateRequest) {
-    //         return {
-    //             link: function (scope, elem, attributes) {
-    //                 var origScope = scope.$eval(attributes.maTooltipTemplateTranscludeScope),
-    //                     changeCounter = 0,
-    //                     currentScope,
-    //                     previousElement,
-    //                     currentElement;
-
-    //                 var cleanupLastIncludeContent = function () {
-    //                     if (previousElement) {
-    //                         previousElement.remove();
-    //                         previousElement = null;
-    //                     }
-    //                     if (currentScope) {
-    //                         currentScope.$destroy();
-    //                         currentScope = null;
-    //                     }
-    //                     if (currentElement) {
-    //                         $animate.leave(currentElement).then(function () {
-    //                             previousElement = null;
-    //                         });
-    //                         previousElement = currentElement;
-    //                         currentElement = null;
-    //                     }
-    //                 };
-
-    //                 scope.$watch($sce.parseAsResourceUrl(attributes.maTooltipTemplateTransclude), function (src) {
-    //                     var thisChangeId = ++changeCounter;
-
-    //                     if (src) {
-    //                         //set the 2nd param to true to ignore the template request error so that the inner
-    //                         //contents and scope can be cleaned up.
-    //                         $templateRequest(src, true).then(function (response) {
-    //                             if (thisChangeId !== changeCounter) { return; }
-    //                             var newScope = origScope.$new();
-    //                             var template = response;
-
-    //                             var clone = $compile(template)(newScope, function (clone) {
-    //                                 cleanupLastIncludeContent();
-    //                                 $animate.enter(clone, elem);
-    //                             });
-
-    //                             currentScope = newScope;
-    //                             currentElement = clone;
-
-    //                             currentScope.$emit('$includeContentLoaded', src);
-    //                         }, function () {
-    //                             if (thisChangeId === changeCounter) {
-    //                                 cleanupLastIncludeContent();
-    //                                 scope.$emit('$includeContentError', src);
-    //                             }
-    //                         });
-    //                         scope.$emit('$includeContentRequested', src);
-    //                     } else {
-    //                         cleanupLastIncludeContent();
-    //                     }
-    //                 });
-
-    //                 scope.$on('$destroy', cleanupLastIncludeContent);
-    //             }
-    //         };
-    //     }])
-    // .directive('maTooltipTemplate', ['MaTooltip', function (MaTooltip) {
-    //     return MaTooltip('maTooltipTemplate', 'mouseenter', {
-    //         useContentExp: true
-    //     });
-    // }])
-    // .directive('maTooltipHtml', ['MaTooltip', function (MaTooltip) {
-    //     return MaTooltip('maTooltipHtml', 'mouseenter', {
-    //         useContentExp: true
-    //     });
-    // }]);

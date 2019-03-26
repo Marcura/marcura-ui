@@ -11,8 +11,8 @@ angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', func
             var html = '\
             <div class="ma-grid-sort{{isVisible() ? \' ma-grid-sort-\' + direction : \'\'}}"\
                 ng-click="sort()">\
-                <i class="fa fas fa-sort-up"></i>\
-                <i class="fa fas fa-sort-down"></i>\
+                <i class="fas fa-sort-up"></i>\
+                <i class="fas fa-sort-down"></i>\
             </div>';
 
             return html;

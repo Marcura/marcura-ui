@@ -12,9 +12,9 @@ angular.module('marcuraUI.components').directive('maLabel', [function () {
                     \'ma-label-has-content\': hasContent\
                 }">\
                     <label class="ma-label-text" for="{{::for}}"><ng-transclude></ng-transclude></label><!--\
-                    --><div class="ma-label-star">&nbsp;<i class="fa fa-star"></i></div><!--\
+                    --><div class="ma-label-star">&nbsp;<i class="fas fa-star"></i></div><!--\
                     --><div class="ma-label-warning">&nbsp;\
-                    <i class="fa fa-exclamation-triangle"></i></div>\
+                    <i class="fas fa-exclamation-triangle"></i></div>\
                 </div>';
 
             return html;

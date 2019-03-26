@@ -70,7 +70,7 @@ angular.module('marcuraUI.components')
                 ngClass += '}"';
 
                 var html = '\
-                    <div class="'+ cssClass + '"' + ngClass + '>\
+                    <div class="' + cssClass + '"' + ngClass + '>\
                         <div class="ma-select-box-spinner">\
                             <div class="ma-pace">\
                                 <div class="ma-pace-activity"></div>\
@@ -113,7 +113,7 @@ angular.module('marcuraUI.components')
                             placeholder="{{textPlaceholder}}"/>\
                         <ma-button class="ma-button-toggle"\
                             size="xs" simple\
-                            right-icon="fa fa-{{isAddMode ? \'bars\' : \'plus\'}}"\
+                            right-icon="fas fa-{{isAddMode ? \'bars\' : \'plus\'}}"\
                             click="changeMode()"\
                             is-disabled="{{isDisabled === \'true\'}}">\
                         </ma-button>';
@@ -122,7 +122,7 @@ angular.module('marcuraUI.components')
                 if (canReset) {
                     html += '<ma-button class="ma-button-reset"\
                         size="xs" simple\
-                        right-icon="fa fa-times-circle"\
+                        right-icon="fas fa-times-circle"\
                         click="onReset()"\
                         is-disabled="{{isDisabled === \'true\' || !_hasValue}}">\
                     </ma-button>';

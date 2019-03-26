@@ -57,7 +57,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
             ngClass += '}"';
 
             var html = '\
-                <div class="'+ cssClass + '"' + ngClass + '>\
+                <div class="' + cssClass + '"' + ngClass + '>\
                     <input class="ma-text-box-value" type="' + type + '" id="{{::id}}"\
                         autocomplete="off"\
                         placeholder="{{placeholder}}"\
@@ -78,7 +78,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
             if (canReset) {
                 html += '<ma-button class="ma-button-reset"\
                     size="xs" simple\
-                    right-icon="fa fa-times-circle"\
+                    right-icon="fas fa-times-circle"\
                     click="onReset()"\
                     ng-focus="onFocus()"\
                     is-disabled="{{!isResetEnabled()}}">\

@@ -51,7 +51,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
             ngClass += '}"';
 
             var html = '\
-                <div class="'+ cssClass + '"' + ngClass + '>\
+                <div class="' + cssClass + '"' + ngClass + '>\
                     <div class="ma-date-box-inner">\
                         <input class="ma-date-box-date" type="text" id="{{::id}}"\
                             placeholder="{{placeholder}}"\
@@ -79,7 +79,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
             if (canReset) {
                 html += '<ma-button class="ma-button-reset"\
                     size="xs" simple\
-                    right-icon="fa fa-times-circle"\
+                    right-icon="fas fa-times-circle"\
                     click="onReset()"\
                     is-disabled="{{!isResetEnabled()}}">\
                 </ma-button>';
