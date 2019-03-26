@@ -1,4 +1,5 @@
 @import 'marcura-ui/less.less';
+
 .ma-button {
     position: relative;
     padding: 8px 10px;
@@ -17,60 +18,74 @@
     .user-select(none);
     border-radius: @button-border-radius;
     min-width: 30px;
+
     &[fillingless]:not([link]) {
         background-color: #ffffff;
         padding: 7px 9px;
         border: @button-fillingless-border-width solid @color-primary;
         color: @color-primary;
+
         &.ma-button-xs {
             padding-top: 3px;
+
             &.ma-button-has-right-icon:not(.ma-button-has-text) {
                 padding-right: 10px - @button-fillingless-border-width;
             }
         }
+
         &.ma-button-has-right-icon {
             padding-right: @button-icon-padding - @button-fillingless-border-width;
         }
+
         &.ma-button-has-left-icon {
             padding-left: @button-icon-padding - @button-fillingless-border-width;
         }
+
         .ma-button-rim {
             border-color: @color-primary;
         }
     }
+
     &[fillingless][link] {
         .ma-button-icon {
             background-color: #ffffff;
             border: @button-fillingless-border-width solid @color-primary;
             color: @color-primary;
+
             .ma-button-rim {
                 border-color: @color-primary;
             }
         }
     }
+
     &:focus {
         outline: 0;
     }
+
     &:focus:not([link]):not(&[default]):not(&[simple]):not(&[fillingless]),
     &:hover:not([link]):not(&[default]):not(&[simple]):not(&[fillingless]) {
         text-decoration: none;
         color: #ffffff;
     }
+
     &:focus:not([link]):not([is-disabled='true']):not([is-loading='true']) {
         >.ma-button-rim {
             display: block;
         }
     }
+
     &[link]:focus:not([is-disabled='true']):not([is-loading='true']) {
         .ma-button-icon .ma-button-rim {
             display: block;
         }
     }
+
     &[link]:focus {
         .ma-button-text {
             text-decoration: underline;
         }
     }
+
     &-spinner {
         position: absolute;
         width: 100%;
@@ -82,25 +97,32 @@
         z-index: 1;
         display: none;
     }
+
     &[is-loading='true'] {
         cursor: default;
+
         .ma-button-spinner {
             display: block;
         }
     }
+
     &[is-disabled='true'] {
         cursor: default;
     }
+
     &:not([link]):not([is-disabled='true']):active {
         text-decoration: none;
     }
+
     &:not([link]):not([is-disabled='true']):not(&[default]):not(&-simple):not(&[fillingless]):active {
         color: #ffffff;
     }
+
     &[default][link]:not([is-disabled='true']):not([is-loading='true']):hover &-icon,
     &[default]:not([link]):not([is-disabled='true']):not([is-loading='true']):hover {
         background-color: @background-color-darker-light;
     }
+
     &[danger][is-disabled='true']:not([link]),
     &[is-disabled='true']:not([link]) {
         background-color: #c3c3cd;
@@ -111,6 +133,7 @@
         */
         pointer-events: none;
     }
+
     &-text {
         /*
             Pass clicks to button itself.
@@ -118,6 +141,7 @@
         */
         pointer-events: none;
     }
+
     .ma-pace-activity {
         position: absolute;
         left: 0;
@@ -126,6 +150,7 @@
         top: 0;
         margin: auto;
     }
+
     &-rim {
         display: none;
         position: absolute;
@@ -136,9 +161,11 @@
         border: 1px solid #ffffff;
         border-radius: @button-border-radius;
     }
+
     &-has-text:not([link]) {
         min-width: 60px;
     }
+
     &-icon {
         font-size: 16px;
         display: block;
@@ -152,41 +179,52 @@
             This is required for ma-select-box to work correctly, when it uses event.target.
         */
         pointer-events: none;
-        .fa {
+
+        &-fa {
             pointer-events: none;
         }
     }
+
     &-icon-left {
         left: 10px;
     }
+
     &-icon-right {
         right: 10px;
     }
+
     &-has-left-icon {
         padding-left: @button-icon-padding;
+
         &:not(.ma-button-has-text) {
             padding-left: 16px;
         }
+
         &:not(.ma-button-has-text) .ma-button-icon-left {
             left: 50%;
             margin-left: -10px;
         }
+
         &.ma-button-has-right-icon:not(.ma-button-has-text) .ma-button-icon-left {
             left: 50%;
             margin-left: -18px;
         }
+
         &.ma-button-has-right-icon:not(.ma-button-has-text) .ma-button-icon-right {
             right: 50%;
             margin-right: -18px;
         }
     }
+
     &-has-right-icon {
         padding-right: @button-icon-padding;
+
         &:not(.ma-button-has-text) .ma-button-icon-right {
             right: 50%;
             margin-right: -10px;
         }
     }
+
     /* Remove 3D push effect in IE. */
     &:active &-text,
     &:focus &-text {
@@ -194,14 +232,17 @@
         top: 0;
         left: 0;
     }
+
     &[link] {
         color: @text-color;
         background: none;
         text-decoration: underline;
+
         &:focus,
         &:hover {
             color: @text-color;
         }
+
         .ma-button-icon {
             color: #ffffff;
             width: 30px;
@@ -210,45 +251,58 @@
             background-color: @color-primary;
             border-radius: @button-border-radius;
         }
+
         &[is-disabled='true'] .ma-button-icon {
             background-color: #c3c3cd;
         }
+
         .ma-button-icon-left {
             left: 0;
         }
+
         .ma-button-icon-right {
             right: 0;
         }
+
         .ma-button-icon .fa {
             margin-top: 6px;
         }
+
         &.ma-button-has-left-icon {
             padding-left: 40px;
         }
+
         &.ma-button-has-right-icon {
             padding-right: 40px;
         }
+
         &[secondary] {
+
             &[link],
             .ma-button-text {
                 color: @text-color-light;
             }
         }
+
         &[secondary]:not([is-disabled='true']) .ma-button-icon {
             background-color: @text-color-light;
         }
+
         &[danger]:not([is-disabled='true']) .ma-button-icon {
             background-color: #c9302c;
         }
+
         &[default] .ma-button-icon {
             background-color: #fafafa;
             border: 1px solid @border-color;
         }
+
         &[simple] .ma-button-icon {
             background-color: #ffffff;
             border: 1px solid @border-color;
         }
     }
+
     /*
         For a button not to collapse vertically,
         if text is empty,
@@ -259,64 +313,80 @@
     &:not(&-has-text) &-text {
         margin: 0 0 0 -10px;
     }
+
     &[secondary]:not([link]):not([is-disabled='true']) {
         background-color: @text-color-light;
     }
+
     &[danger]:not([link]):not([is-disabled='true']) {
         background-color: #c9302c;
     }
+
     &[default] {
         &[is-disabled='true'] {
             opacity: 0.75;
+
             .ma-button-text {
                 color: @text-color-disabled;
             }
         }
+
         .ma-button-rim {
             border-radius: @button-border-radius;
         }
+
         &[link] {
             .ma-button-icon {
                 border-radius: @button-border-radius;
             }
         }
     }
+
     &[default],
     &[simple] {
         color: @text-color;
         padding-top: 7px;
         padding-bottom: 7px;
+
         &:not([link]) {
             background-color: #fafafa;
             border: 1px solid @border-color;
         }
+
         .ma-button-icon {
             color: @text-color;
         }
+
         &.ma-button-xs.ma-button-has-right-icon:not(.ma-button-has-text) {
             padding-right: 8px;
         }
+
         &[is-disabled='true'] .ma-button-icon {
             color: #c3c3cd;
         }
+
         .ma-button-rim {
             border-color: #66afe9;
         }
     }
+
     &[simple]:not([link]) {
         background-color: #ffffff;
         border: 1px solid @border-color;
     }
+
     &-xs {
         padding-top: 4px;
         padding-bottom: 5px;
         height: 30px;
+
         &[default],
         &[simple] {
             padding-top: 3px;
             padding-bottom: 4px;
         }
     }
+
     &-xs&-has-right-icon:not(&-has-text) {
         padding-right: 10px;
     }

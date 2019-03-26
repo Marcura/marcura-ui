@@ -11,9 +11,9 @@
 https://marcura-ui.herokuapp.com/#/home
 
 ## Dependencies
-* [jQuery](https://jquery.com/) (2.2.0)
-* [Angular](https://angularjs.org/) (1.3.8)
-* [Font Awesome](http://fontawesome.io/) (4.4.0)
+* [jQuery](https://jquery.com/) (>=2.2.0)
+* [Angular](https://angularjs.org/) (>=1.3.8)
+* [Font Awesome](http://fontawesome.io/) (5.8.1)
 
 ## Optional dependencies
 * [Angular Sanitize](https://www.npmjs.com/package/angular-sanitize) (1.3.8)  

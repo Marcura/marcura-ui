@@ -113,7 +113,7 @@ angular.module('marcuraUI.components')
                             placeholder="{{textPlaceholder}}"/>\
                         <ma-button class="ma-button-toggle"\
                             size="xs" simple\
-                            right-icon="{{isAddMode ? \'bars\' : \'plus\'}}"\
+                            right-icon="fa fa-{{isAddMode ? \'bars\' : \'plus\'}}"\
                             click="changeMode()"\
                             is-disabled="{{isDisabled === \'true\'}}">\
                         </ma-button>';
@@ -122,7 +122,7 @@ angular.module('marcuraUI.components')
                 if (canReset) {
                     html += '<ma-button class="ma-button-reset"\
                         size="xs" simple\
-                        right-icon="times-circle"\
+                        right-icon="fa fa-times-circle"\
                         click="onReset()"\
                         is-disabled="{{isDisabled === \'true\' || !_hasValue}}">\
                     </ma-button>';

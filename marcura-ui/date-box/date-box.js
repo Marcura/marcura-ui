@@ -73,13 +73,13 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                     ng-keydown="onTimeKeydown($event)"/>';
             }
 
-            html += '<i class="ma-date-box-icon fa fa-calendar"></i>\
+            html += '<i class="ma-date-box-icon far fa-calendar-alt"></i>\
                     </div>';
 
             if (canReset) {
                 html += '<ma-button class="ma-button-reset"\
                     size="xs" simple\
-                    right-icon="times-circle"\
+                    right-icon="fa fa-times-circle"\
                     click="onReset()"\
                     is-disabled="{{!isResetEnabled()}}">\
                 </ma-button>';

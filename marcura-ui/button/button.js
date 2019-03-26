@@ -54,7 +54,7 @@ angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce'
 
             if (hasLeftIcon) {
                 html += '<span class="ma-button-icon ma-button-icon-left">\
-                    <i class="fa fa-{{leftIcon}}"></i>\
+                    <i class="ma-button-icon-fa {{leftIcon}}"></i>\
                     <span class="ma-button-rim"></span>\
                 </span>';
             }
@@ -63,7 +63,7 @@ angular.module('marcuraUI.components').directive('maButton', ['MaHelper', '$sce'
 
             if (hasRightIcon) {
                 html += '<span class="ma-button-icon ma-button-icon-right">\
-                    <i class="fa fa-{{rightIcon}}"></i>\
+                    <i class="ma-button-icon-fa {{rightIcon}}"></i>\
                     <span class="ma-button-rim"></span>\
                 </span>';
             }

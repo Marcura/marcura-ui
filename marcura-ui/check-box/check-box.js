@@ -41,7 +41,7 @@ angular.module('marcuraUI.components').directive('maCheckBox', ['MaHelper', '$ti
                     }">\
                     <span class="ma-check-box-text">{{text || \'&nbsp;\'}}</span>\
                     <div class="ma-check-box-inner"></div>\
-                    <i class="ma-check-box-icon fa fa-check"></i>\
+                    <i class="ma-check-box-icon fas fa-check"></i>\
                 </div>';
 
             return html;

@@ -68,7 +68,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
             if (canTogglePassword) {
                 html += '<ma-button class="ma-button-toggle-password"\
                     size="xs" simple\
-                    right-icon="{{isPasswordVisible ? \'eye-slash\' : \'eye\'}}"\
+                    right-icon="far fa-{{isPasswordVisible ? \'eye-slash\' : \'eye\'}}"\
                     click="togglePassword()"\
                     ng-focus="onFocus()"\
                     is-disabled="{{!isTogglePasswordEnabled()}}">\
@@ -78,7 +78,7 @@ angular.module('marcuraUI.components').directive('maTextBox', ['$timeout', 'MaHe
             if (canReset) {
                 html += '<ma-button class="ma-button-reset"\
                     size="xs" simple\
-                    right-icon="times-circle"\
+                    right-icon="fa fa-times-circle"\
                     click="onReset()"\
                     ng-focus="onFocus()"\
                     is-disabled="{{!isResetEnabled()}}">\

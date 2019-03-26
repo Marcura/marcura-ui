@@ -367,7 +367,7 @@ angular.module('marcuraUI.components')
                     <div class="ma-tooltip-arrow"></div>\
                     <div class="ma-tooltip-inner" ng-bind-html="getContent()"></div>\
                     <div class="ma-tooltip-close" ng-if="canClose()" ng-click="tooltipScope().close()">\
-                        <i class="fa fa-close"></i>\
+                        <i class="fa fa-times"></i>\
                     </div>\
                 </div>';
 
