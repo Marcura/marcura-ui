@@ -63,10 +63,10 @@ a:focus {
 }
 
 .app-body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: Roboto, sans-serif;
     font-size: 14px;
     line-height: 1.42857143;
-    color: #333333;
+    color: #323232;
     background-color: #fff;
 }
 
