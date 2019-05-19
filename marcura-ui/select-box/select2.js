@@ -1557,7 +1557,7 @@ the specific language governing permissions and limitations under the Apache Lic
      * @param methods
      */
     function clazz(SuperClass, methods) {
-        var constructor = function () {};
+        var constructor = function () { };
         constructor.prototype = new SuperClass();
         constructor.prototype.constructor = constructor;
         constructor.prototype.parent = SuperClass.prototype;
@@ -1595,9 +1595,9 @@ the specific language governing permissions and limitations under the Apache Lic
             this.container = this.createContainer();
 
             this.liveRegion = $("<span>", {
-                    role: "status",
-                    "aria-live": "polite"
-                })
+                role: "status",
+                "aria-live": "polite"
+            })
                 .addClass("select2-hidden-accessible")
                 .appendTo(document.body);
 
@@ -1942,9 +1942,9 @@ the specific language governing permissions and limitations under the Apache Lic
             if (select) {
                 opts.query = this.bind(function (query) {
                     var data = {
-                            results: [],
-                            more: false
-                        },
+                        results: [],
+                        more: false
+                    },
                         term = query.term,
                         items, placeholderOption, process;
 
@@ -2011,9 +2011,9 @@ the specific language governing permissions and limitations under the Apache Lic
                                 var data = [];
                                 $(splitVal(element.val(), opts.separator)).each(function () {
                                     var obj = {
-                                            id: this,
-                                            text: this
-                                        },
+                                        id: this,
+                                        text: this
+                                    },
                                         tags = opts.tags;
                                     if ($.isFunction(tags)) tags = tags();
                                     $(tags).each(function () {
@@ -2790,9 +2790,9 @@ the specific language governing permissions and limitations under the Apache Lic
                         def = this.opts.createSearchChoice.call(self, search.val(), data.results);
                         if (def !== undefined && def !== null && self.id(def) !== undefined && self.id(def) !== null) {
                             if ($(data.results).filter(
-                                    function () {
-                                        return equal(self.id(this), self.id(def));
-                                    }).length === 0) {
+                                function () {
+                                    return equal(self.id(this), self.id(def));
+                                }).length === 0) {
                                 this.opts.createSearchChoicePosition(data.results, def);
                             }
                         }
@@ -2970,7 +2970,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 "<div class='select2-drop select2-display-none" + (this.opts.canAddItem ? " select2-drop-can-add-item" : "") + "'>",
                 "   <div class='select2-search'>",
                 "       <label for='' class='select2-offscreen'></label>",
-                "       <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input' role='combobox' aria-expanded='true'",
+                "       <input type='text' autocomplete='disabled' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input' role='combobox' aria-expanded='true'",
                 "       aria-autocomplete='list' />",
                 "       <div class='ma-pace'><div class='ma-pace-activity'></div></div>",
                 "       <i class='select2-drop-search-icon fas fa-search'></i>",
@@ -3334,7 +3334,7 @@ the specific language governing permissions and limitations under the Apache Lic
             var placeholderOption;
             if (this.getPlaceholder() === undefined) return false; // no placeholder specified so no option should be considered
             return ((placeholderOption = this.getPlaceholderOption()) !== undefined &&
-                    placeholderOption.prop("selected")) ||
+                placeholderOption.prop("selected")) ||
                 (this.opts.element.val() === "") ||
                 (this.opts.element.val() === undefined) ||
                 (this.opts.element.val() === null);
@@ -3631,7 +3631,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 "<ul class='select2-choices'>",
                 "  <li class='select2-search-field'>",
                 "    <label for='' class='select2-offscreen'></label>",
-                "    <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input'>",
+                "    <input type='text' autocomplete='disabled' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input'>",
                 "    <div class='ma-pace'><div class='ma-pace-activity'></div></div>",
                 "  </li>",
                 "</ul>",
@@ -3808,7 +3808,7 @@ the specific language governing permissions and limitations under the Apache Lic
                     }
                     return;
                 } else if (((e.which === KEY.BACKSPACE && this.keydowns == 1) ||
-                        e.which == KEY.LEFT) && (pos.offset == 0 && !pos.length)) {
+                    e.which == KEY.LEFT) && (pos.offset == 0 && !pos.length)) {
 
                     this.selectChoice(selection.find(".select2-search-choice:not(.select2-locked)").last());
                     killEvent(e);

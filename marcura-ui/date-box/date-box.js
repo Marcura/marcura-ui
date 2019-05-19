@@ -54,6 +54,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 <div class="' + cssClass + '"' + ngClass + '>\
                     <div class="ma-date-box-inner">\
                         <input class="ma-date-box-date" type="text" id="{{::id}}"\
+                            autocomplete="disabled"\
                             placeholder="{{placeholder}}"\
                             ng-disabled="isDisabled === \'true\'"\
                             ng-keydown="onKeydown($event)"\
@@ -62,11 +63,12 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
             if (hasTime) {
                 html += '<input class="ma-date-box-hour"\
                     maxlength="2"\
+                    autocomplete="disabled"\
                     ng-disabled="isDisabled === \'true\'"\
                     ng-keyup="onKeyup($event)"\
                     ng-keydown="onTimeKeydown($event)"\
                     /><div class="ma-date-box-colon">:</div><input \
-                    class="ma-date-box-minute" type="text"\
+                    class="ma-date-box-minute" type="text" autocomplete="disabled"\
                     maxlength="2"\
                     ng-disabled="isDisabled === \'true\'"\
                     ng-keyup="onKeyup($event)"\
