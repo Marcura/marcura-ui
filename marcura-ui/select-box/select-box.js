@@ -36,6 +36,7 @@ angular.module('marcuraUI.components')
                 items: '=',
                 value: '=',
                 itemTemplate: '=',
+                valueTemplate: '=',
                 validators: '=',
                 instance: '=',
                 ajax: '='
@@ -202,6 +203,27 @@ angular.module('marcuraUI.components')
                     return scope.itemTextField ? item[scope.itemTextField] : item.toString();
                 };
 
+                scope.getItemValueText = function (item) {
+                    if (!scope.valueTemplate) {
+                        return scope.getItemText(item);
+                    }
+
+                    if (scope.valueTemplate) {
+                        return scope.valueTemplate(scope.convertItemValue(item));
+                    }
+
+                    if (!item) {
+                        return '';
+                    }
+
+                    if (scope._type !== 'object') {
+                        // Primitive types are converted to an object where id becomes item itself.
+                        return item[scope._itemValueField];
+                    }
+
+                    return scope.itemTextField ? item[scope.itemTextField] : item.toString();
+                };
+
                 scope.runInitSelection = true;
 
                 // Setting Select2 options does not work from link function, so they are set here.
@@ -226,7 +248,8 @@ angular.module('marcuraUI.components')
                         // Run init function only when it is required to update Select2 value.
                         if (scope.runInitSelection && scope.getItemValue(scope.value)) {
                             var item = angular.copy(scope.value);
-                            item.text = scope.getItemText(item);
+                            item.text = scope.getItemValueText(item);
+
                             // We shouldn't convert item id to string here, because it can be of any type,
                             // e.g. number, and later will be saved to scope.value.
                             item[scope._itemValueField] = scope.getItemValue(item, scope._type === 'object' ? false : true);
@@ -241,7 +264,7 @@ angular.module('marcuraUI.components')
 
                     if (isMultiple) {
                         scope.options.formatSelection = function (item) {
-                            return scope.getItemText(item);
+                            return scope.getItemValueText(item);
                         };
                     }
                 }
