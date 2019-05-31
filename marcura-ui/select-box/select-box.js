@@ -233,14 +233,14 @@ angular.module('marcuraUI.components')
                 scope.options.itemValueField = scope.itemValueField;
                 scope.options.items = scope.items || [];
 
-                var hasValuetemplate = true;
+                var hasValueTemplate = true;
 
                 if (scope.isMultiple === 'true' && !scope.ajax) {
                     // Not implemented for this case.
-                    hasValuetemplate = false;
+                    hasValueTemplate = false;
                 }
 
-                if (hasValuetemplate) {
+                if (hasValueTemplate) {
                     scope.options.formatSelection = function (item) {
                         return scope.getItemValueText(item);
                     };

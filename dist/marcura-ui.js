@@ -3509,7 +3509,6 @@ the specific language governing permissions and limitations under the Apache Lic
             container.empty();
 
             if (data) {
-                console.log('data:', data);
                 formatted = this.opts.formatSelection(data.item || data, container, this.opts.escapeMarkup);
             }
 
@@ -3559,11 +3558,10 @@ the specific language governing permissions and limitations under the Apache Lic
                     });
 
                 if (this._items && this._items.length && this.opts.itemValueField && data) {
-                    var itemValueField = (data[this.opts.itemValueField] + '').toString(),
+                    var itemValueField = (data.id + '').toString(),
                         item = null;
 
                     if (itemValueField) {
-
                         for (var i = 0; i < this._items.length; i++) {
                             var _item = this._items[i];
 
@@ -5090,6 +5088,147 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function (MaHelper) {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            modifier: '@',
+            isResponsive: '@',
+            responsiveSize: '@',
+            sort: '&',
+            sortBy: '=',
+        },
+        replace: true,
+        template: function (element, attributes) {
+            var cssClass = 'ma-grid';
+
+            if (attributes.isResponsive === 'true') {
+                cssClass += ' ma-grid-is-responsive';
+                cssClass += ' ma-grid-responsive-size-' + (attributes.responsiveSize || 'md');
+            }
+
+            var html = '\
+                <div class="'+ cssClass + '">\
+                    <div class="ma-grid-inner"><ng-transclude></ng-transclude></div>\
+                </div>';
+
+            return html;
+        },
+        controller: ['$scope', function (scope) {
+            scope.componentName = 'maGrid';
+        }],
+        link: function (scope, element, attributes) {
+            var _modifier;
+
+            var setModifiers = function (oldModifiers, newModifiers) {
+                // Remove previous modifiers first.
+                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
+                    oldModifiers = oldModifiers.split(' ');
+
+                    for (var i = 0; i < oldModifiers.length; i++) {
+                        element.removeClass('ma-grid-' + oldModifiers[i]);
+                    }
+                }
+
+                var modifiers = '';
+
+                if (!MaHelper.isNullOrWhiteSpace(newModifiers)) {
+                    modifiers = newModifiers.split(' ');
+                }
+
+                for (var j = 0; j < modifiers.length; j++) {
+                    element.addClass('ma-grid-' + modifiers[j]);
+                }
+            };
+
+            attributes.$observe('modifier', function (newValue) {
+                var oldValue = _modifier;
+
+                if (newValue === oldValue) {
+                    return;
+                }
+
+                _modifier = newValue;
+                setModifiers(oldValue, _modifier);
+            });
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', function ($timeout) {
+    return {
+        // maGridSort should always be located inside maGrid.
+        require: '^^maGrid',
+        restrict: 'E',
+        scope: {
+            sortBy: '@'
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+            <div class="ma-grid-sort{{isVisible() ? \' ma-grid-sort-\' + direction : \'\'}}"\
+                ng-click="sort()">\
+                <i class="fas fa-sort-up"></i>\
+                <i class="fas fa-sort-down"></i>\
+            </div>';
+
+            return html;
+        },
+        link: function (scope, element, attributes, grid) {
+            var gridScope,
+                headerColElement = element.closest('.ma-grid-header-col');
+
+            var getGridScope = function () {
+                var gridScope = null,
+                    initialScope = scope.$parent;
+
+                while (initialScope && !gridScope) {
+                    if (initialScope.hasOwnProperty('componentName') && initialScope.componentName === 'maGrid') {
+                        gridScope = initialScope;
+                    } else {
+                        initialScope = initialScope.$parent;
+                    }
+                }
+
+                return gridScope;
+            };
+
+            scope.sort = function () {
+                if (!gridScope) {
+                    return;
+                }
+
+                gridScope.sortBy.isAsc = !gridScope.sortBy.isAsc;
+                gridScope.sortBy.name = scope.sortBy;
+                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
+
+                // Postpone the event to allow gridScope.sortBy to change first.
+                $timeout(function () {
+                    gridScope.sort();
+                });
+            };
+
+
+            if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
+                headerColElement.addClass('ma-grid-header-col-sortable');
+            }
+
+            scope.isVisible = function () {
+                if (!gridScope) {
+                    return false;
+                }
+
+                return gridScope.sortBy.name === scope.sortBy;
+            };
+
+            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
+            $timeout(function () {
+                gridScope = getGridScope();
+                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
+            });
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDate', 'MaHelper', 'MaValidators', function ($timeout, MaDate, MaHelper, MaValidators) {
     return {
         restrict: 'E',
@@ -6095,147 +6234,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maGrid', ['MaHelper', function (MaHelper) {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            modifier: '@',
-            isResponsive: '@',
-            responsiveSize: '@',
-            sort: '&',
-            sortBy: '=',
-        },
-        replace: true,
-        template: function (element, attributes) {
-            var cssClass = 'ma-grid';
-
-            if (attributes.isResponsive === 'true') {
-                cssClass += ' ma-grid-is-responsive';
-                cssClass += ' ma-grid-responsive-size-' + (attributes.responsiveSize || 'md');
-            }
-
-            var html = '\
-                <div class="'+ cssClass + '">\
-                    <div class="ma-grid-inner"><ng-transclude></ng-transclude></div>\
-                </div>';
-
-            return html;
-        },
-        controller: ['$scope', function (scope) {
-            scope.componentName = 'maGrid';
-        }],
-        link: function (scope, element, attributes) {
-            var _modifier;
-
-            var setModifiers = function (oldModifiers, newModifiers) {
-                // Remove previous modifiers first.
-                if (!MaHelper.isNullOrWhiteSpace(oldModifiers)) {
-                    oldModifiers = oldModifiers.split(' ');
-
-                    for (var i = 0; i < oldModifiers.length; i++) {
-                        element.removeClass('ma-grid-' + oldModifiers[i]);
-                    }
-                }
-
-                var modifiers = '';
-
-                if (!MaHelper.isNullOrWhiteSpace(newModifiers)) {
-                    modifiers = newModifiers.split(' ');
-                }
-
-                for (var j = 0; j < modifiers.length; j++) {
-                    element.addClass('ma-grid-' + modifiers[j]);
-                }
-            };
-
-            attributes.$observe('modifier', function (newValue) {
-                var oldValue = _modifier;
-
-                if (newValue === oldValue) {
-                    return;
-                }
-
-                _modifier = newValue;
-                setModifiers(oldValue, _modifier);
-            });
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maGridSort', ['$timeout', function ($timeout) {
-    return {
-        // maGridSort should always be located inside maGrid.
-        require: '^^maGrid',
-        restrict: 'E',
-        scope: {
-            sortBy: '@'
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-            <div class="ma-grid-sort{{isVisible() ? \' ma-grid-sort-\' + direction : \'\'}}"\
-                ng-click="sort()">\
-                <i class="fas fa-sort-up"></i>\
-                <i class="fas fa-sort-down"></i>\
-            </div>';
-
-            return html;
-        },
-        link: function (scope, element, attributes, grid) {
-            var gridScope,
-                headerColElement = element.closest('.ma-grid-header-col');
-
-            var getGridScope = function () {
-                var gridScope = null,
-                    initialScope = scope.$parent;
-
-                while (initialScope && !gridScope) {
-                    if (initialScope.hasOwnProperty('componentName') && initialScope.componentName === 'maGrid') {
-                        gridScope = initialScope;
-                    } else {
-                        initialScope = initialScope.$parent;
-                    }
-                }
-
-                return gridScope;
-            };
-
-            scope.sort = function () {
-                if (!gridScope) {
-                    return;
-                }
-
-                gridScope.sortBy.isAsc = !gridScope.sortBy.isAsc;
-                gridScope.sortBy.name = scope.sortBy;
-                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
-
-                // Postpone the event to allow gridScope.sortBy to change first.
-                $timeout(function () {
-                    gridScope.sort();
-                });
-            };
-
-
-            if (!headerColElement.hasClass('ma-grid-header-col-sortable')) {
-                headerColElement.addClass('ma-grid-header-col-sortable');
-            }
-
-            scope.isVisible = function () {
-                if (!gridScope) {
-                    return false;
-                }
-
-                return gridScope.sortBy.name === scope.sortBy;
-            };
-
-            // Set a timeout before searching for maGrid scope to make sure it's been initialized.
-            $timeout(function () {
-                gridScope = getGridScope();
-                scope.direction = gridScope.sortBy.isAsc ? 'asc' : 'desc';
-            });
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maHtmlArea', ['$timeout', 'MaHelper', 'MaValidators', function ($timeout, MaHelper, MaValidators) {
     return {
         restrict: 'E',
@@ -6526,183 +6524,6 @@ if (!String.prototype.endsWith) {
             });
 
             setCssClass();
-        }
-    };
-}]);})();
-(function(){angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout', 'MaValidators', function ($timeout, MaValidators) {
-    return {
-        restrict: 'E',
-        scope: {
-            itemTextField: '@',
-            itemValueField: '@',
-            isDisabled: '@',
-            isRequired: '@',
-            change: '&',
-            items: '=',
-            itemTemplate: '=',
-            value: '=',
-            validators: '=',
-            instance: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-multi-check-box" ng-class="{\
-                        \'ma-multi-check-box-is-disabled\': isDisabled === \'true\',\
-                        \'ma-multi-check-box-is-invalid\': !isValid,\
-                        \'ma-multi-check-box-is-touched\': isTouched\
-                    }">\
-                    <div class="ma-multi-check-box-item" ng-repeat="item in items">\
-                        <div class="ma-multi-check-box-background" ng-click="onChange(item)"></div>\
-                        <ma-check-box\
-                            size="sm"\
-                            value="getItemMetadata(item).isSelected"\
-                            is-disabled="{{isDisabled === \'true\'}}">\
-                        </ma-check-box><div class="ma-multi-check-box-text">{{getItemText(item)}}</div>\
-                    </div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            var isObjectArray = scope.itemTextField || scope.itemValueField,
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired === 'true',
-                hasIsNotEmptyValidator = false,
-                itemsMetadata = {};
-
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var validate = function (value) {
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            var setSelectedItems = function () {
-                if (scope.value && scope.value.length && scope.items && scope.items.length) {
-                    for (var j = 0; j < scope.value.length; j++) {
-                        for (var k = 0; k < scope.items.length; k++) {
-                            if (!isObjectArray) {
-                                if (scope.items[k] === scope.value[j]) {
-                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
-                                }
-                            } else if (scope.itemValueField) {
-                                if (scope.items[k][scope.itemValueField] === scope.value[j][scope.itemValueField]) {
-                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            scope.getItemMetadata = function (item) {
-                var itemValue = isObjectArray ? item[scope.itemValueField] : item;
-
-                if (!itemsMetadata[itemValue]) {
-                    itemsMetadata[itemValue] = {};
-                    itemsMetadata[itemValue].item = item;
-                }
-
-                return itemsMetadata[itemValue];
-            };
-
-            scope.getItemText = function (item) {
-                if (scope.itemTemplate) {
-                    return scope.itemTemplate(item);
-                } else if (!isObjectArray) {
-                    return item;
-                } else if (scope.itemTextField) {
-                    return item[scope.itemTextField];
-                }
-            };
-
-            scope.onChange = function (item) {
-                if (scope.isDisabled === 'true') {
-                    return;
-                }
-
-                var oldValue = scope.value,
-                    value = [],
-                    itemMetadata = scope.getItemMetadata(item);
-
-                itemMetadata.isSelected = !itemMetadata.isSelected;
-
-                for (var itemValue in itemsMetadata) {
-                    if (itemsMetadata.hasOwnProperty(itemValue)) {
-                        if (itemsMetadata[itemValue].isSelected) {
-                            value.push(itemsMetadata[itemValue].item);
-                        }
-                    }
-                }
-
-                scope.value = value.length ? value : null;
-
-                $timeout(function () {
-                    validate(scope.value);
-
-                    scope.change({
-                        maValue: scope.value,
-                        maOldValue: oldValue
-                    });
-                });
-            };
-
-            scope.$watch('value', function (newValue, oldValue) {
-                if (angular.equals(newValue, oldValue)) {
-                    return;
-                }
-
-                setSelectedItems();
-            });
-
-            // Set initial value.
-            $timeout(function () {
-                setSelectedItems();
-            });
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate(scope.value);
-                };
-            }
         }
     };
 }]);})();
@@ -7375,172 +7196,6 @@ if (!String.prototype.endsWith) {
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
-    return {
-        restrict: 'E',
-        scope: {
-            itemTextField: '@',
-            itemValueField: '@',
-            isDisabled: '@',
-            isRequired: '@',
-            canUnselect: '@',
-            change: '&',
-            items: '=',
-            itemTemplate: '=',
-            value: '=',
-            validators: '=',
-            instance: '='
-        },
-        replace: true,
-        template: function () {
-            var html = '\
-                <div class="ma-radio-button" ng-class="{\
-                        \'ma-radio-button-is-disabled\': isDisabled === \'true\',\
-                        \'ma-radio-button-is-invalid\': !isValid,\
-                        \'ma-radio-button-is-touched\': isTouched,\
-                        \'ma-radio-button-can-unselect\': canUnselect === \'true\'\
-                    }">\
-                    <div class="ma-radio-button-item" ng-class="{\
-                            \'ma-radio-button-item-is-selected\': isItemSelected(item)\
-                        }" ng-style="{ width: (100 / items.length) + \'%\' }"\
-                        ng-repeat="item in items">\
-                        <ma-button\
-                            class="ma-button-radio"\
-                            text="{{getItemText(item)}}"\
-                            simple\
-                            size="xs"\
-                            is-disabled="{{isDisabled === \'true\'}}"\
-                            click="onChange(item)">\
-                        </ma-button>\
-                    </div>\
-                </div>';
-
-            return html;
-        },
-        link: function (scope, element) {
-            var isObjectArray = scope.itemTextField || scope.itemValueField,
-                validators = scope.validators ? angular.copy(scope.validators) : [],
-                isRequired = scope.isRequired === 'true',
-                canUnselect = scope.canUnselect === 'true',
-                hasIsNotEmptyValidator = false;
-
-            scope.isFocused = false;
-            scope.isValid = true;
-            scope.isTouched = false;
-
-            var validate = function (value) {
-                scope.isValid = true;
-
-                if (validators && validators.length) {
-                    for (var i = 0; i < validators.length; i++) {
-                        if (!validators[i].validate(value)) {
-                            scope.isValid = false;
-                            break;
-                        }
-                    }
-                }
-            };
-
-            scope.getItemText = function (item) {
-                if (scope.itemTemplate) {
-                    return scope.itemTemplate(item);
-                } else if (!isObjectArray) {
-                    return item;
-                } else if (scope.itemTextField) {
-                    return item[scope.itemTextField];
-                }
-            };
-
-            scope.isItemSelected = function (item) {
-                if (!isObjectArray) {
-                    return item === scope.value;
-                } else if (scope.itemValueField) {
-                    return item && scope.value &&
-                        item[scope.itemValueField] === scope.value[scope.itemValueField];
-                }
-
-                return false;
-            };
-
-            scope.onChange = function (item) {
-                if (scope.isDisabled === 'true') {
-                    return;
-                }
-
-                var oldValue = scope.value,
-                    hasChanged = true;
-                scope.value = item;
-
-                // Check that value has changed.
-                if (!isObjectArray) {
-                    hasChanged = oldValue !== item;
-                } else if (scope.itemValueField) {
-                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item[scope.itemValueField])) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
-                    }
-                } else {
-                    // Compare objects if itemValueField is not provided.
-                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item)) {
-                        hasChanged = true;
-                    } else {
-                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
-                    }
-                }
-
-                // Remove selection if the same item is selected.
-                if (canUnselect && !hasChanged) {
-                    scope.value = null;
-                }
-
-                if (hasChanged || (canUnselect && !hasChanged)) {
-                    $timeout(function () {
-                        validate(scope.value);
-
-                        scope.change({
-                            maValue: scope.value,
-                            maOldValue: oldValue
-                        });
-                    });
-                }
-            };
-
-            // Set up validators.
-            for (var i = 0; i < validators.length; i++) {
-                if (validators[i].name === 'IsNotEmpty') {
-                    hasIsNotEmptyValidator = true;
-                    break;
-                }
-            }
-
-            if (!hasIsNotEmptyValidator && isRequired) {
-                validators.unshift(MaValidators.isNotEmpty());
-            }
-
-            if (hasIsNotEmptyValidator) {
-                isRequired = true;
-            }
-
-            // Prepare API instance.
-            if (scope.instance) {
-                scope.instance.isInitialized = true;
-
-                scope.instance.isEditor = function () {
-                    return true;
-                };
-
-                scope.instance.isValid = function () {
-                    return scope.isValid;
-                };
-
-                scope.instance.validate = function () {
-                    validate(scope.value);
-                };
-            }
-        }
-    };
-}]);})();
 (function(){/**
  * This is a clone of https://www.npmjs.com/package/angular-ui-select2 package, which is no longer maintained.
  * It was copied so we can maintain it ourselves.
@@ -8006,14 +7661,14 @@ angular.module('marcuraUI.components')
                 scope.options.itemValueField = scope.itemValueField;
                 scope.options.items = scope.items || [];
 
-                var hasValuetemplate = true;
+                var hasValueTemplate = true;
 
                 if (scope.isMultiple === 'true' && !scope.ajax) {
                     // Not implemented for this case.
-                    hasValuetemplate = false;
+                    hasValueTemplate = false;
                 }
 
-                if (hasValuetemplate) {
+                if (hasValueTemplate) {
                     scope.options.formatSelection = function (item) {
                         return scope.getItemValueText(item);
                     };
@@ -10501,6 +10156,32 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
         }
     };
 }]);})();
+(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            isVisible: '@',
+            size: '@',
+            position: '@'
+        },
+        replace: true,
+        template: function (element, attributes) {
+            var size = attributes.size || 'xs',
+                position = attributes.position || 'center',
+                cssClass = 'ma-spinner ma-spinner-' + size + ' ma-spinner-' + position;
+
+            var html = '\
+                <div class="'+ cssClass + '">\
+                    <div class="ma-pace">\
+                        <div class="ma-pace-activity"></div>\
+                    </div>\
+                </div>';
+
+            return html;
+        }
+    };
+}]);})();
 (function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function ($state, MaHelper, $timeout) {
     return {
         restrict: 'E',
@@ -11745,32 +11426,6 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            isVisible: '@',
-            size: '@',
-            position: '@'
-        },
-        replace: true,
-        template: function (element, attributes) {
-            var size = attributes.size || 'xs',
-                position = attributes.position || 'center',
-                cssClass = 'ma-spinner ma-spinner-' + size + ' ma-spinner-' + position;
-
-            var html = '\
-                <div class="'+ cssClass + '">\
-                    <div class="ma-pace">\
-                        <div class="ma-pace-activity"></div>\
-                    </div>\
-                </div>';
-
-            return html;
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components')
     /**
      * The MaTooltip service creates tooltip- and popover-like directives as well as
@@ -12183,3 +11838,346 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
             }
         };
     });})();
+(function(){angular.module('marcuraUI.components').directive('maMultiCheckBox', ['$timeout', 'MaValidators', function ($timeout, MaValidators) {
+    return {
+        restrict: 'E',
+        scope: {
+            itemTextField: '@',
+            itemValueField: '@',
+            isDisabled: '@',
+            isRequired: '@',
+            change: '&',
+            items: '=',
+            itemTemplate: '=',
+            value: '=',
+            validators: '=',
+            instance: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-multi-check-box" ng-class="{\
+                        \'ma-multi-check-box-is-disabled\': isDisabled === \'true\',\
+                        \'ma-multi-check-box-is-invalid\': !isValid,\
+                        \'ma-multi-check-box-is-touched\': isTouched\
+                    }">\
+                    <div class="ma-multi-check-box-item" ng-repeat="item in items">\
+                        <div class="ma-multi-check-box-background" ng-click="onChange(item)"></div>\
+                        <ma-check-box\
+                            size="sm"\
+                            value="getItemMetadata(item).isSelected"\
+                            is-disabled="{{isDisabled === \'true\'}}">\
+                        </ma-check-box><div class="ma-multi-check-box-text">{{getItemText(item)}}</div>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            var isObjectArray = scope.itemTextField || scope.itemValueField,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired === 'true',
+                hasIsNotEmptyValidator = false,
+                itemsMetadata = {};
+
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var validate = function (value) {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            var setSelectedItems = function () {
+                if (scope.value && scope.value.length && scope.items && scope.items.length) {
+                    for (var j = 0; j < scope.value.length; j++) {
+                        for (var k = 0; k < scope.items.length; k++) {
+                            if (!isObjectArray) {
+                                if (scope.items[k] === scope.value[j]) {
+                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
+                                }
+                            } else if (scope.itemValueField) {
+                                if (scope.items[k][scope.itemValueField] === scope.value[j][scope.itemValueField]) {
+                                    scope.getItemMetadata(scope.items[k]).isSelected = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            scope.getItemMetadata = function (item) {
+                var itemValue = isObjectArray ? item[scope.itemValueField] : item;
+
+                if (!itemsMetadata[itemValue]) {
+                    itemsMetadata[itemValue] = {};
+                    itemsMetadata[itemValue].item = item;
+                }
+
+                return itemsMetadata[itemValue];
+            };
+
+            scope.getItemText = function (item) {
+                if (scope.itemTemplate) {
+                    return scope.itemTemplate(item);
+                } else if (!isObjectArray) {
+                    return item;
+                } else if (scope.itemTextField) {
+                    return item[scope.itemTextField];
+                }
+            };
+
+            scope.onChange = function (item) {
+                if (scope.isDisabled === 'true') {
+                    return;
+                }
+
+                var oldValue = scope.value,
+                    value = [],
+                    itemMetadata = scope.getItemMetadata(item);
+
+                itemMetadata.isSelected = !itemMetadata.isSelected;
+
+                for (var itemValue in itemsMetadata) {
+                    if (itemsMetadata.hasOwnProperty(itemValue)) {
+                        if (itemsMetadata[itemValue].isSelected) {
+                            value.push(itemsMetadata[itemValue].item);
+                        }
+                    }
+                }
+
+                scope.value = value.length ? value : null;
+
+                $timeout(function () {
+                    validate(scope.value);
+
+                    scope.change({
+                        maValue: scope.value,
+                        maOldValue: oldValue
+                    });
+                });
+            };
+
+            scope.$watch('value', function (newValue, oldValue) {
+                if (angular.equals(newValue, oldValue)) {
+                    return;
+                }
+
+                setSelectedItems();
+            });
+
+            // Set initial value.
+            $timeout(function () {
+                setSelectedItems();
+            });
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate(scope.value);
+                };
+            }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maRadioButton', ['$timeout', 'MaValidators', 'MaHelper', function ($timeout, MaValidators, MaHelper) {
+    return {
+        restrict: 'E',
+        scope: {
+            itemTextField: '@',
+            itemValueField: '@',
+            isDisabled: '@',
+            isRequired: '@',
+            canUnselect: '@',
+            change: '&',
+            items: '=',
+            itemTemplate: '=',
+            value: '=',
+            validators: '=',
+            instance: '='
+        },
+        replace: true,
+        template: function () {
+            var html = '\
+                <div class="ma-radio-button" ng-class="{\
+                        \'ma-radio-button-is-disabled\': isDisabled === \'true\',\
+                        \'ma-radio-button-is-invalid\': !isValid,\
+                        \'ma-radio-button-is-touched\': isTouched,\
+                        \'ma-radio-button-can-unselect\': canUnselect === \'true\'\
+                    }">\
+                    <div class="ma-radio-button-item" ng-class="{\
+                            \'ma-radio-button-item-is-selected\': isItemSelected(item)\
+                        }" ng-style="{ width: (100 / items.length) + \'%\' }"\
+                        ng-repeat="item in items">\
+                        <ma-button\
+                            class="ma-button-radio"\
+                            text="{{getItemText(item)}}"\
+                            simple\
+                            size="xs"\
+                            is-disabled="{{isDisabled === \'true\'}}"\
+                            click="onChange(item)">\
+                        </ma-button>\
+                    </div>\
+                </div>';
+
+            return html;
+        },
+        link: function (scope, element) {
+            var isObjectArray = scope.itemTextField || scope.itemValueField,
+                validators = scope.validators ? angular.copy(scope.validators) : [],
+                isRequired = scope.isRequired === 'true',
+                canUnselect = scope.canUnselect === 'true',
+                hasIsNotEmptyValidator = false;
+
+            scope.isFocused = false;
+            scope.isValid = true;
+            scope.isTouched = false;
+
+            var validate = function (value) {
+                scope.isValid = true;
+
+                if (validators && validators.length) {
+                    for (var i = 0; i < validators.length; i++) {
+                        if (!validators[i].validate(value)) {
+                            scope.isValid = false;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            scope.getItemText = function (item) {
+                if (scope.itemTemplate) {
+                    return scope.itemTemplate(item);
+                } else if (!isObjectArray) {
+                    return item;
+                } else if (scope.itemTextField) {
+                    return item[scope.itemTextField];
+                }
+            };
+
+            scope.isItemSelected = function (item) {
+                if (!isObjectArray) {
+                    return item === scope.value;
+                } else if (scope.itemValueField) {
+                    return item && scope.value &&
+                        item[scope.itemValueField] === scope.value[scope.itemValueField];
+                }
+
+                return false;
+            };
+
+            scope.onChange = function (item) {
+                if (scope.isDisabled === 'true') {
+                    return;
+                }
+
+                var oldValue = scope.value,
+                    hasChanged = true;
+                scope.value = item;
+
+                // Check that value has changed.
+                if (!isObjectArray) {
+                    hasChanged = oldValue !== item;
+                } else if (scope.itemValueField) {
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item[scope.itemValueField])) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = oldValue[scope.itemValueField] !== item[scope.itemValueField];
+                    }
+                } else {
+                    // Compare objects if itemValueField is not provided.
+                    if (MaHelper.isNullOrUndefined(oldValue) && !MaHelper.isNullOrUndefined(item)) {
+                        hasChanged = true;
+                    } else {
+                        hasChanged = JSON.stringify(oldValue) === JSON.stringify(item);
+                    }
+                }
+
+                // Remove selection if the same item is selected.
+                if (canUnselect && !hasChanged) {
+                    scope.value = null;
+                }
+
+                if (hasChanged || (canUnselect && !hasChanged)) {
+                    $timeout(function () {
+                        validate(scope.value);
+
+                        scope.change({
+                            maValue: scope.value,
+                            maOldValue: oldValue
+                        });
+                    });
+                }
+            };
+
+            // Set up validators.
+            for (var i = 0; i < validators.length; i++) {
+                if (validators[i].name === 'IsNotEmpty') {
+                    hasIsNotEmptyValidator = true;
+                    break;
+                }
+            }
+
+            if (!hasIsNotEmptyValidator && isRequired) {
+                validators.unshift(MaValidators.isNotEmpty());
+            }
+
+            if (hasIsNotEmptyValidator) {
+                isRequired = true;
+            }
+
+            // Prepare API instance.
+            if (scope.instance) {
+                scope.instance.isInitialized = true;
+
+                scope.instance.isEditor = function () {
+                    return true;
+                };
+
+                scope.instance.isValid = function () {
+                    return scope.isValid;
+                };
+
+                scope.instance.validate = function () {
+                    validate(scope.value);
+                };
+            }
+        }
+    };
+}]);})();

@@ -14,6 +14,7 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
     };
 
     $scope.portValueTemplate = function (port) {
+        console.log('port:', port);
         return port.name;
     };
 

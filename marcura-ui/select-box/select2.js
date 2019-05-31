@@ -3558,11 +3558,10 @@ the specific language governing permissions and limitations under the Apache Lic
                     });
 
                 if (this._items && this._items.length && this.opts.itemValueField && data) {
-                    var itemValueField = (data[this.opts.itemValueField] + '').toString(),
+                    var itemValueField = (data.id + '').toString(),
                         item = null;
 
                     if (itemValueField) {
-
                         for (var i = 0; i < this._items.length; i++) {
                             var _item = this._items[i];
 
