@@ -1568,6 +1568,15 @@ the specific language governing permissions and limitations under the Apache Lic
     AbstractSelect2 = clazz(Object, {
         isMultiple: false,
         preventBlur: false,
+        _items: [],
+
+        items: function (items) {
+            if (items) {
+                this._items = items;
+            } else {
+                return this._items;
+            }
+        },
 
         // abstract
         bind: function (func) {
@@ -1841,6 +1850,7 @@ the specific language governing permissions and limitations under the Apache Lic
         // abstract
         prepareOpts: function (opts) {
             var element, select, idKey, ajaxUrl, self = this;
+            this._items = opts.items || [];
 
             element = opts.element;
 
@@ -3498,8 +3508,9 @@ the specific language governing permissions and limitations under the Apache Lic
             this.selection.data("select2-data", data);
             container.empty();
 
-            if (data !== null) {
-                formatted = this.opts.formatSelection(data, container, this.opts.escapeMarkup);
+            if (data) {
+                console.log('data:', data);
+                formatted = this.opts.formatSelection(data.item || data, container, this.opts.escapeMarkup);
             }
 
             if (formatted !== undefined) {
@@ -3547,8 +3558,29 @@ the specific language governing permissions and limitations under the Apache Lic
                         return false;
                     });
 
+                if (this._items && this._items.length && this.opts.itemValueField && data) {
+                    var itemValueField = (data[this.opts.itemValueField] + '').toString(),
+                        item = null;
+
+                    if (itemValueField) {
+
+                        for (var i = 0; i < this._items.length; i++) {
+                            var _item = this._items[i];
+
+                            if ((_item[this.opts.itemValueField] + '').toString() === itemValueField) {
+                                item = _item;
+                            }
+                        }
+                    }
+
+                    if (item && data) {
+                        data.item = item;
+                    }
+                }
+
                 this.updateSelection(data);
                 this.setPlaceholder();
+
                 if (triggerChange) {
                     this.triggerChange({
                         added: data,
@@ -7971,6 +8003,21 @@ angular.module('marcuraUI.components')
                 scope.options = {};
                 scope.options.canAddItem = scope.canAddItem === 'true';
                 scope.options.instance = {};
+                scope.options.itemValueField = scope.itemValueField;
+                scope.options.items = scope.items || [];
+
+                var hasValuetemplate = true;
+
+                if (scope.isMultiple === 'true' && !scope.ajax) {
+                    // Not implemented for this case.
+                    hasValuetemplate = false;
+                }
+
+                if (hasValuetemplate) {
+                    scope.options.formatSelection = function (item) {
+                        return scope.getItemValueText(item);
+                    };
+                }
 
                 if (scope.noItemsFoundText) {
                     scope.options.formatNoMatches = function () {
@@ -8002,12 +8049,6 @@ angular.module('marcuraUI.components')
 
                         scope.runInitSelection = false;
                     };
-
-                    if (isMultiple) {
-                        scope.options.formatSelection = function (item) {
-                            return scope.getItemValueText(item);
-                        };
-                    }
                 }
             }],
             link: function (scope, element, attributes) {
@@ -8073,6 +8114,10 @@ angular.module('marcuraUI.components')
 
                     // Push new items to the array.
                     Array.prototype.push.apply(scope._items, newItems);
+
+                    if (selectData) {
+                        selectData.items(scope._items);
+                    }
                 };
 
                 setItems(scope.items);
@@ -10456,32 +10501,6 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
         }
     };
 }]);})();
-(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
-    return {
-        restrict: 'E',
-        transclude: true,
-        scope: {
-            isVisible: '@',
-            size: '@',
-            position: '@'
-        },
-        replace: true,
-        template: function (element, attributes) {
-            var size = attributes.size || 'xs',
-                position = attributes.position || 'center',
-                cssClass = 'ma-spinner ma-spinner-' + size + ' ma-spinner-' + position;
-
-            var html = '\
-                <div class="'+ cssClass + '">\
-                    <div class="ma-pace">\
-                        <div class="ma-pace-activity"></div>\
-                    </div>\
-                </div>';
-
-            return html;
-        }
-    };
-}]);})();
 (function(){angular.module('marcuraUI.components').directive('maTabs', ['$state', 'MaHelper', '$timeout', function ($state, MaHelper, $timeout) {
     return {
         restrict: 'E',
@@ -11723,6 +11742,32 @@ angular.module('marcuraUI.services').factory('MaPosition', ['$document', '$windo
                     return scope.isTouched;
                 };
             }
+        }
+    };
+}]);})();
+(function(){angular.module('marcuraUI.components').directive('maSpinner', [function () {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            isVisible: '@',
+            size: '@',
+            position: '@'
+        },
+        replace: true,
+        template: function (element, attributes) {
+            var size = attributes.size || 'xs',
+                position = attributes.position || 'center',
+                cssClass = 'ma-spinner ma-spinner-' + size + ' ma-spinner-' + position;
+
+            var html = '\
+                <div class="'+ cssClass + '">\
+                    <div class="ma-pace">\
+                        <div class="ma-pace-activity"></div>\
+                    </div>\
+                </div>';
+
+            return html;
         }
     };
 }]);})();

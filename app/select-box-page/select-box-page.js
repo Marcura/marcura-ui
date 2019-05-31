@@ -13,6 +13,10 @@ function selectBoxPageController($scope, $timeout, helper, MaHelper) {
         return port.name + ' (' + port.country.name + ')';
     };
 
+    $scope.portValueTemplate = function (port) {
+        return port.name;
+    };
+
     var getPortsRequest = function () {
         return {
             url: '/api/ports',

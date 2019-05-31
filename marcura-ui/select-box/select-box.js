@@ -230,6 +230,21 @@ angular.module('marcuraUI.components')
                 scope.options = {};
                 scope.options.canAddItem = scope.canAddItem === 'true';
                 scope.options.instance = {};
+                scope.options.itemValueField = scope.itemValueField;
+                scope.options.items = scope.items || [];
+
+                var hasValuetemplate = true;
+
+                if (scope.isMultiple === 'true' && !scope.ajax) {
+                    // Not implemented for this case.
+                    hasValuetemplate = false;
+                }
+
+                if (hasValuetemplate) {
+                    scope.options.formatSelection = function (item) {
+                        return scope.getItemValueText(item);
+                    };
+                }
 
                 if (scope.noItemsFoundText) {
                     scope.options.formatNoMatches = function () {
@@ -261,12 +276,6 @@ angular.module('marcuraUI.components')
 
                         scope.runInitSelection = false;
                     };
-
-                    if (isMultiple) {
-                        scope.options.formatSelection = function (item) {
-                            return scope.getItemValueText(item);
-                        };
-                    }
                 }
             }],
             link: function (scope, element, attributes) {
@@ -332,6 +341,10 @@ angular.module('marcuraUI.components')
 
                     // Push new items to the array.
                     Array.prototype.push.apply(scope._items, newItems);
+
+                    if (selectData) {
+                        selectData.items(scope._items);
+                    }
                 };
 
                 setItems(scope.items);

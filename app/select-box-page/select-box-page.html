@@ -52,6 +52,7 @@
     </div>
     <div class="nodes-item">
         <ma-select-box items="ports2" value="port2" item-text-field="name"
+            item-template="portItemTemplate" value-template="portValueTemplate"
             item-value-field="id" focus="focus(maValue, 'port2')"
             blur="blur(maValue, 'port2')"
             change="change(maValue, maOldValue, 'port2')">

@@ -1568,6 +1568,15 @@ the specific language governing permissions and limitations under the Apache Lic
     AbstractSelect2 = clazz(Object, {
         isMultiple: false,
         preventBlur: false,
+        _items: [],
+
+        items: function (items) {
+            if (items) {
+                this._items = items;
+            } else {
+                return this._items;
+            }
+        },
 
         // abstract
         bind: function (func) {
@@ -1841,6 +1850,7 @@ the specific language governing permissions and limitations under the Apache Lic
         // abstract
         prepareOpts: function (opts) {
             var element, select, idKey, ajaxUrl, self = this;
+            this._items = opts.items || [];
 
             element = opts.element;
 
@@ -3498,8 +3508,8 @@ the specific language governing permissions and limitations under the Apache Lic
             this.selection.data("select2-data", data);
             container.empty();
 
-            if (data !== null) {
-                formatted = this.opts.formatSelection(data, container, this.opts.escapeMarkup);
+            if (data) {
+                formatted = this.opts.formatSelection(data.item || data, container, this.opts.escapeMarkup);
             }
 
             if (formatted !== undefined) {
@@ -3547,8 +3557,29 @@ the specific language governing permissions and limitations under the Apache Lic
                         return false;
                     });
 
+                if (this._items && this._items.length && this.opts.itemValueField && data) {
+                    var itemValueField = (data[this.opts.itemValueField] + '').toString(),
+                        item = null;
+
+                    if (itemValueField) {
+
+                        for (var i = 0; i < this._items.length; i++) {
+                            var _item = this._items[i];
+
+                            if ((_item[this.opts.itemValueField] + '').toString() === itemValueField) {
+                                item = _item;
+                            }
+                        }
+                    }
+
+                    if (item && data) {
+                        data.item = item;
+                    }
+                }
+
                 this.updateSelection(data);
                 this.setPlaceholder();
+
                 if (triggerChange) {
                     this.triggerChange({
                         added: data,
