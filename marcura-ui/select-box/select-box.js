@@ -494,7 +494,7 @@ angular.module('marcuraUI.components')
                             if (MaHelper.isNullOrWhiteSpace(item)) {
                                 scope.text = null;
                             } else if (scope._type === 'object') {
-                                scope.text = item[scope.itemTextField].toString();
+                                scope.text = item[scope.itemTextField] ? item[scope.itemTextField].toString() : '';
                             } else {
                                 scope.text = item;
                             }
