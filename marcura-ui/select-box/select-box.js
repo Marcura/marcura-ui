@@ -17,6 +17,7 @@ angular.module('marcuraUI.components')
                 id: '@',
                 itemTextField: '@',
                 itemValueField: '@',
+                itemValueFieldType: '@',
                 placeholder: '@',
                 textPlaceholder: '@',
                 type: '@',
@@ -925,7 +926,7 @@ angular.module('marcuraUI.components')
 
                         // In case if JSON.parse has parsed string to a number.
                         // This can happen when items is an array of numbers.
-                        if (typeof item === 'number' && scope._type === 'string') {
+                        if (typeof item === 'number' && (scope._type === 'string' || scope.itemValueFieldType === 'string')) {
                             item = scope.selectedItem;
                         }
 
