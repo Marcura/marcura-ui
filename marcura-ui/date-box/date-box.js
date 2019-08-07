@@ -12,6 +12,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
             isRequired: '@',
             format: '@',
             hasTime: '@',
+            // Used together with hasTime to maintain the time but not to show it.
+            shouldShowTime: '@',
             placeholder: '@',
             modifier: '@',
             message: '@',
@@ -30,6 +32,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
         template: function (element, attributes) {
             var canReset = attributes.canReset === 'true',
                 hasTime = attributes.hasTime === 'true',
+                shouldShowTime = attributes.shouldShowTime === 'false' ? false : true,
                 cssClass = 'ma-date-box',
                 ngClass = 'ng-class="{\
                     \'ma-date-box-is-invalid\': !isValid,\
@@ -46,6 +49,10 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
 
             if (hasTime) {
                 cssClass += ' ma-date-box-has-time';
+
+                if (shouldShowTime) {
+                    cssClass += ' ma-date-box-should-show-time';
+                }
             }
 
             ngClass += '}"';
@@ -116,7 +123,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 maxDate = new MaDate(scope.max),
                 failedValidator = null,
                 changePromise,
-                changeTimeout = Number(scope.changeTimeout) || 0,
+                changeTimeout = Number(scope.changeTimeout) || 100,
                 dateCaretPosition = 0,
                 hourCaretPosition = 0,
                 minuteCaretPosition = 0,
@@ -250,7 +257,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                     maxDate = new MaDate().add(100, 'year');
                 }
 
-                picker.setMaxDate(maxDate.toDate());
+                picker.setMaxDate(maxDate.copy().toDate());
             };
 
             var setMinDate = function () {
@@ -266,7 +273,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                     minDate = new MaDate().subtract(100, 'year');
                 }
 
-                picker.setMinDate(minDate.toDate());
+                picker.setMinDate(minDate.copy().toDate());
             };
 
             var parseDate = function (date) {
@@ -282,6 +289,10 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
             };
 
             var setDateTime = function (date) {
+                if (!date || date.isEmpty()) {
+                    return;
+                }
+
                 date.hour(hasTime ? Number(hourElement.val()) : 0)
                     .minute(hasTime ? Number(minuteElement.val()) : 0)
                     .second(0);
@@ -828,6 +839,11 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 var date = parseDate(dateElement.val().trim());
                 date.offset(timeZoneOffset);
 
+                if (hasTime) {
+                    setDateTime(date);
+                }
+
+ 
                 if (dateName === 'max') {
                     setMaxDate();
                 } else {
