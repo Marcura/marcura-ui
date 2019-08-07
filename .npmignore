@@ -1,5 +1,6 @@
 node_modules
 npm-debug.log
+debug.log
 app
 marcura-ui
 .gitignore
@@ -9,3 +10,4 @@ tests
 Procfile
 server.js
 .jshintrc
+marcura-ui.code-workspace
