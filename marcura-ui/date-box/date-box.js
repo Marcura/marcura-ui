@@ -125,7 +125,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 maxDate = new MaDate(scope.max),
                 failedValidator = null,
                 changePromise,
-                changeTimeout = Number(scope.changeTimeout) || 100,
+                changeTimeout = Number(scope.changeTimeout) || 1000,
                 dateCaretPosition = 0,
                 hourCaretPosition = 0,
                 minuteCaretPosition = 0,
