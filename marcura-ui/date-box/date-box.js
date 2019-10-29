@@ -121,8 +121,8 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                 initialDateOffset = 0,
                 validators = [],
                 isRequired = scope.isRequired === 'true',
-                minDate = new MaDate(scope.min),
-                maxDate = new MaDate(scope.max),
+                minDate = scope.min ? new MaDate(scope.min) : MaDate.createEmpty(),
+                maxDate = scope.max ? new MaDate(scope.max) : MaDate.createEmpty(),
                 failedValidator = null,
                 changePromise,
                 changeTimeout = Number(scope.changeTimeout) || 1000,
@@ -251,7 +251,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                     return;
                 }
 
-                maxDate = new MaDate(scope.max);
+                maxDate = scope.max ? new MaDate(scope.max) : MaDate.createEmpty();
 
                 // Pikaday does no support clearing maxDate by providing null value.
                 // So we just set maxDate to 100 years ahead.
@@ -267,7 +267,7 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                     return;
                 }
 
-                minDate = new MaDate(scope.min);
+                minDate = scope.min ? new MaDate(scope.min) : MaDate.createEmpty();
 
                 // Pikaday does no support clearing minDate by providing null value.
                 // So we just set minDate to 100 years before.
@@ -845,7 +845,6 @@ angular.module('marcuraUI.components').directive('maDateBox', ['$timeout', 'MaDa
                     setDateTime(date);
                 }
 
- 
                 if (dateName === 'max') {
                     setMaxDate();
                 } else {
