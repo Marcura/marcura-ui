@@ -5211,8 +5211,6 @@ if (!String.prototype.endsWith) {
                 initialDateOffset = 0,
                 validators = [],
                 isRequired = scope.isRequired === 'true',
-                minDate = scope.min ? new MaDate(scope.min) : MaDate.createEmpty(),
-                maxDate = scope.max ? new MaDate(scope.max) : MaDate.createEmpty(),
                 failedValidator = null,
                 changePromise,
                 changeTimeout = Number(scope.changeTimeout) || 1000,
@@ -5227,6 +5225,14 @@ if (!String.prototype.endsWith) {
                 _modifier,
                 _min,
                 _max;
+
+            function getMinDate() {
+                return scope.min ? new MaDate(scope.min) : MaDate.createEmpty();
+            }
+
+            function getMaxDate() {
+                return scope.max ? new MaDate(scope.max) : MaDate.createEmpty();
+            }
 
             var hasDateChanged = function (date) {
                 if (previousDate.isEqual(date)) {
@@ -5336,12 +5342,12 @@ if (!String.prototype.endsWith) {
                 }
             };
 
-            var setMaxDate = function () {
+            var setPickerMaxDate = function () {
                 if (!picker) {
                     return;
                 }
 
-                maxDate = scope.max ? new MaDate(scope.max) : MaDate.createEmpty();
+                var maxDate = getMaxDate();
 
                 // Pikaday does no support clearing maxDate by providing null value.
                 // So we just set maxDate to 100 years ahead.
@@ -5352,12 +5358,12 @@ if (!String.prototype.endsWith) {
                 picker.setMaxDate(maxDate.copy().toDate());
             };
 
-            var setMinDate = function () {
+            var setPickerMinDate = function () {
                 if (!picker) {
                     return;
                 }
 
-                minDate = scope.min ? new MaDate(scope.min) : MaDate.createEmpty();
+                var minDate = getMinDate();
 
                 // Pikaday does no support clearing minDate by providing null value.
                 // So we just set minDate to 100 years before.
@@ -5467,8 +5473,8 @@ if (!String.prototype.endsWith) {
                 });
 
                 setDisplayDate(previousDate);
-                setMaxDate();
-                setMinDate();
+                setPickerMaxDate();
+                setPickerMinDate();
             };
 
             var destroyPikaday = function () {
@@ -5500,6 +5506,8 @@ if (!String.prototype.endsWith) {
 
             var setValidators = function () {
                 var hasIsNotEmptyValidator = false;
+                var minDate = getMinDate();
+                var maxDate = getMaxDate();
                 validators = scope.validators ? angular.copy(scope.validators) : [];
 
                 for (var i = 0; i < validators.length; i++) {
@@ -5936,9 +5944,9 @@ if (!String.prototype.endsWith) {
                 }
 
                 if (dateName === 'max') {
-                    setMaxDate();
+                    setPickerMaxDate();
                 } else {
-                    setMinDate();
+                    setPickerMinDate();
                 }
 
                 setValidators();
