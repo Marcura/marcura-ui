@@ -15,7 +15,7 @@ function tabsPageController($scope) {
     $scope.items2 = [{
         text: 'Appointment Letter',
         state: {
-            name: 'tabs.appointment-letter',
+            name: 'tabs.appointmentLetter',
             parameters: {
                 id: 1
             }

@@ -1,63 +1,63 @@
 {
-    "version": "4.1.8",
-    "name": "marcura-ui",
-    "description": "Marcura UI",
-    "author": "Marcura",
-    "license": "(MIT OR Apache-2.0)",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Marcura/marcura-ui"
-    },
-    "peerDependencies": {
-        "jquery": ">=2.2.0",
-        "angular": ">=1.3.8",
-        "angular-sanitize": ">=1.3.8",
-        "pikaday": ">=1.7.0",
-        "font-awesome": ">=5.8.1"
-    },
-    "devDependencies": {
-        "angular": "1.3.8",
-        "angular-mocks": "1.3.8",
-        "angular-sanitize": "1.3.8",
-        "angular-ui-router": "0.2.14",
-        "browser-sync": "2.12.7",
-        "del": "2.2.1",
-        "express": "4.13.3",
-        "flexboxgrid": "6.3.1",
-        "gulp": "3.9.1",
-        "gulp-clean-css": "2.3.2",
-        "gulp-concat": "2.6.0",
-        "gulp-jshint": "^2.0.4",
-        "gulp-less": "3.0.1",
-        "gulp-uglify": "1.5.4",
-        "gulp-wrap": "0.13.0",
-        "html5-boilerplate": "6.1.0",
-        "jasmine-core": "^2.4.1",
-        "jquery": "2.2.0",
-        "jshint": "^2.9.4",
-        "karma": "1.1.1",
-        "karma-chrome-launcher": "1.0.1",
-        "karma-jasmine": "1.0.2",
-        "karma-junit-reporter": "1.1.0",
-        "pikaday": "1.7.0",
-        "run-sequence": "1.2.2",
-        "underscore": "1.8.3",
-        "@fortawesome/fontawesome-free": "5.8.1"
-    },
-    "main": "server.js",
-    "scripts": {
-        "start": "node server.js"
-    },
-    "keywords": [
-        "angular",
-        "angularjs",
-        "ui",
-        "components",
-        "select",
-        "combobox",
-        "date picker",
-        "checkbox",
-        "radiobox",
-        "button"
-    ]
+  "version": "4.2.0",
+  "name": "marcura-ui",
+  "description": "Marcura UI",
+  "author": "Marcura",
+  "license": "(MIT OR Apache-2.0)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Marcura/marcura-ui"
+  },
+  "peerDependencies": {
+    "jquery": ">=2.2.0",
+    "angular": ">=1.7.9",
+    "angular-sanitize": ">=1.7.9",
+    "pikaday": ">=1.7.0",
+    "@fortawesome/fontawesome-free": ">=5.8.1"
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "5.8.1",
+    "@uirouter/angularjs": "1.0.23",
+    "angular": ">=1.7.9",
+    "angular-mocks": ">=1.7.9",
+    "angular-sanitize": ">=1.7.9",
+    "browser-sync": "2.12.7",
+    "del": "2.2.1",
+    "express": "4.13.3",
+    "flexboxgrid": "6.3.1",
+    "gulp": "3.9.1",
+    "gulp-clean-css": "2.3.2",
+    "gulp-concat": "2.6.0",
+    "gulp-jshint": "^2.0.4",
+    "gulp-less": "3.0.1",
+    "gulp-uglify": "1.5.4",
+    "gulp-wrap": "0.13.0",
+    "html5-boilerplate": "6.1.0",
+    "jasmine-core": "^2.4.1",
+    "jquery": "2.2.0",
+    "jshint": "^2.9.4",
+    "karma": "1.1.1",
+    "karma-chrome-launcher": "1.0.1",
+    "karma-jasmine": "1.0.2",
+    "karma-junit-reporter": "1.1.0",
+    "pikaday": "1.7.0",
+    "run-sequence": "1.2.2",
+    "underscore": "1.8.3"
+  },
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "angular",
+    "angularjs",
+    "ui",
+    "components",
+    "select",
+    "combobox",
+    "date picker",
+    "checkbox",
+    "radiobox",
+    "button"
+  ]
 }
